@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Stage 06 — Lead protection & Unite-first routing (2026-11-06)
+- Protected lead registration with sealed evidence, consent checks, evidence-based duplicate review, 90-day protection, Unite-first review with business-hours SLA (pause/escalate/auto-release policy), consent-gated release to the partner exchange, verifiable certificates and ownership disputes with appeal; screens 026, 043–051, 132–134, 151–153 (web/admin) and native 026/043/048/050/051/151.
+
 ### Stage 05 — Opportunity marketplace (2026-11-06)
 - Marketplace with audience-specific visibility, search, categories, map, eligibility, idempotent applications, saved searches with alerts, explainable recommendations, dashboard KPIs, public RFQs and Unite route-A publishing; screens 006, 009, 023–025, 031–038, 040–042 (web) and 023/031/036/042 (native).
 

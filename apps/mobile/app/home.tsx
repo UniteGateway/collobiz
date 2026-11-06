@@ -44,6 +44,8 @@ export default function Home() {
             </View>
           )}
           <Button title="Browse opportunities" onPress={() => router.push('/marketplace')} testID="home-marketplace" />
+          <Button title="My leads" variant="secondary" onPress={() => router.push('/leads')} />
+          <Row title="Lead protection" subtitle="Screen 151" onPress={() => router.push('/lead-protection')} />
           <Card title={org.name}><Badge status={org.verificationStatus} /><Text style={[s.hint, { marginTop: 6 }]}>Role: {me.orgRoles.join(', ').replace(/org_/g, '')}</Text></Card>
           <Card title="Recent activity">
             {activity.length === 0 ? <Text style={s.hint}>No activity yet.</Text> : activity.map((a) => <Row key={a.id} title={a.action.replace(/[._]/g, ' ')} subtitle={`${new Date(a.at).toLocaleString()}${a.actorName ? ' · ' + a.actorName : ''}`} />)}

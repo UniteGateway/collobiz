@@ -429,3 +429,76 @@ suites.push({
   },
   only: 'desktop',
 });
+
+// ---------------- Stage 06 ----------------
+suites.push({
+  name: 'Stage 06 · 043–052 lead wizard → certificate → 132 admin releases → public verify → 153 dispute',
+  run: async ({ page, WEB, ADMIN, label, expect, shot }) => {
+    const uniq = `${label}${Date.now()}`;
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/leads/new');
+    await page.getByLabel('Date consent obtained').fill(new Date(Date.now() - 3600_000).toISOString().slice(0, 16));
+    await page.getByLabel('Evidence of introduction').fill('Email from the CFO requesting a rooftop proposal.');
+    await page.getByRole('button', { name: 'Continue to customer details' }).click();
+    await page.getByLabel('Customer legal name').fill(`Apex Castings ${uniq} Pvt Ltd`);
+    await page.getByLabel('Contact person').fill('N. Bhat');
+    await page.getByLabel('City').fill('Kolhapur');
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByLabel('Product, service or project').fill('600 kW rooftop solar');
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByLabel('Estimated value ₹').fill('27000000');
+    await page.getByLabel('Buyer requirements').fill('Foundry roof, 600 kW, net metering with MSEDCL, CAPEX model.');
+    await shot('046-review');
+    await page.getByRole('button', { name: 'Register protected lead' }).click();
+    await page.waitForURL(/\/leads\/.+\/confirmation/);
+    await page.getByText('Registered and protected.').waitFor();
+    const code = (await page.locator('dd .cz-mono').first().textContent()).trim();
+    const cert = (await page.locator('dd .cz-mono').nth(1).textContent()).trim();
+    await shot('049-confirmation');
+    await page.getByRole('link', { name: 'Unite review' }).click();
+    await page.getByText('Time remaining').waitFor();
+    await shot('050-review');
+    await page.getByRole('link', { name: 'Registration certificate' }).click();
+    await page.getByRole('img', { name: /QR code/ }).waitFor();
+    // Admin releases
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/routing');
+    const row = page.getByRole('row', { name: new RegExp(code) });
+    await row.getByRole('button', { name: 'Review' }).click();
+    await page.getByLabel('Decision').selectOption('release');
+    await page.getByLabel(/Reason/).fill('Outside Unite Solar capacity this quarter');
+    await page.getByRole('button', { name: 'Record' }).click();
+    await row.waitFor({ state: 'detached' });
+    await shot('132-routing');
+    await page.goto(ADMIN + '/sla');
+    await page.getByRole('button', { name: /Preview/ }).click();
+    await page.getByText('Due', { exact: true }).waitFor();
+    // Public verification
+    await page.context().clearCookies();
+    await page.goto(`${WEB}/verify-certificate?code=${cert}`);
+    await page.getByRole('button', { name: 'Verify' }).click();
+    await page.getByText('This certificate is valid and in force.').waitFor();
+    expect((await page.content()).indexOf('Apex Castings') === -1, 'customer leaked in public verification');
+    // Dispute by another partner
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/lead-disputes');
+    await page.getByLabel('Certificate number').fill(cert);
+    await page.getByLabel('Your statement and evidence').fill('Sunrise met Apex Castings at the Kolhapur foundry expo first; visitor log attached.');
+    await page.getByRole('button', { name: 'Open dispute' }).click();
+    await page.getByText(/vs Volt EPC/).waitFor();
+    await shot('153-dispute');
+  },
+});
+suites.push({
+  name: 'Stage 06 · 026/151 lists and 134 conflict centre render',
+  run: async ({ page, WEB, ADMIN }) => {
+    await webLogin(page, WEB, 'meera@consult.example');
+    await page.goto(WEB + '/my/leads');
+    await page.getByText('OPP-2026-00006').waitFor();
+    await page.goto(WEB + '/lead-protection');
+    await page.getByText('Protected', { exact: true }).waitFor();
+    await adminLogin(page, ADMIN, 'compliance@collabiz.local');
+    await page.goto(ADMIN + '/lead-conflicts');
+    await page.getByRole('heading', { name: 'Ownership disputes' }).waitFor();
+  },
+});

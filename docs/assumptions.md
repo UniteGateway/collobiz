@@ -33,6 +33,7 @@ Running log of engineering decisions and assumptions made without asking (per in
 | A-03 | Two-person approval threshold defaults to ₹5,00,000 (`DUAL_APPROVAL_THRESHOLD`), configurable. |
 | A-04 | KYB document types follow Indian practice (PAN, GSTIN, incorporation certificate, address/identity proof, bank proof, MSME). International equivalents handled as `other` until Stage 15. |
 | A-05 | Mock/illustrative values in the UI atlas (e.g. "₹ 3.8 Cr", "68%") are not used as real data; dashboards compute from the database. |
+| A-07 | Lead protection period defaults to 90 days from verification (`PROTECTION_DAYS`); appeal window 14 days; urgent leads get a review window of min(policy, 60 business minutes). Final values belong in the Lead Registration Agreement (B-08). |
 | A-06 | Group company names in seed data (e.g. "Unite Solar", "Powertek") come from the master book's integration list and atlas samples and are clearly marked demo data; legal entity codes are placeholders until confirmed (App. E). |
 
 ## Blockers requiring human action

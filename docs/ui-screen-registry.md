@@ -4,7 +4,7 @@
 
 Source: Master Book Section 05 (functional specification) and the 165-screen UI Design Atlas (U01–U10). Screen IDs and titles are preserved verbatim.
 
-**Status:** verified 47 · implemented 0 · scaffolded 0 · planned 118
+**Status:** verified 63 · implemented 0 · scaffolded 0 · planned 102
 
 Status meaning: *planned* (not started) → *scaffolded* (route + shell) → *implemented* (wired to real API) → *verified* (automated test passed).
 
@@ -60,7 +60,7 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 023 | Partner Home Dashboard | 05 | web `/dashboard` | partner | analytics | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
 | 024 | My Opportunities Overview | 05 | web `/my/opportunities` | partner | opportunities | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
 | 025 | Recommended Business Feed | 05 | web `/feed` | partner | partner-matching | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
-| 026 | My Leads & Pipeline | 06 | web `/my/leads` | partner | lead-protection | desktop | native | planned |  |
+| 026 | My Leads & Pipeline | 06 | web `/my/leads` | partner | lead-protection | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
 | 027 | Earnings & Settlement Summary | 12 | web `/earnings/summary` | partner | commissions | desktop | responsive | planned |  |
 | 028 | Tasks & Follow-up Calendar | 07 | web `/tasks` | partner | customers | desktop | responsive | planned |  |
 | 029 | Partner Performance Scorecard | 14 | web `/performance` | partner | reputation | desktop | responsive | planned |  |
@@ -87,15 +87,15 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
-| 043 | Register New Business Lead | 06 | web `/leads/new` | verified-partner | lead-protection | desktop | native | planned |  |
-| 044 | Customer / Company Details | 06 | web `/leads/new/customer` | verified-partner | customers | desktop | responsive | planned |  |
-| 045 | Select Products or Project Type | 06 | web `/leads/new/scope` | verified-partner | lead-protection | desktop | responsive | planned |  |
-| 046 | Opportunity Value & Requirements | 06 | web `/leads/new/value` | verified-partner | lead-protection | desktop | responsive | planned |  |
-| 047 | Upload Lead Supporting Documents | 06 | web `/leads/[id]/documents` | lead-owner | lead-protection | desktop | responsive | planned |  |
-| 048 | Duplicate Lead Detection | 06 | web `/leads/[id]/duplicates` | lead-owner | lead-protection | mobile-first | native | planned |  |
-| 049 | Lead Registration Confirmation | 06 | web `/leads/[id]/confirmation` | lead-owner | lead-protection | desktop | responsive | planned |  |
-| 050 | Unite First-Review Status | 06 | web `/leads/[id]/review-status` | lead-owner | routing | mobile-first | native | planned |  |
-| 051 | Protected Lead Ownership Certificate | 06 | web `/leads/[id]/certificate` | lead-owner | lead-protection | desktop | native | planned |  |
+| 043 | Register New Business Lead | 06 | web `/leads/new` | verified-partner | lead-protection | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
+| 044 | Customer / Company Details | 06 | web `/leads/new/customer` | verified-partner | customers | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
+| 045 | Select Products or Project Type | 06 | web `/leads/new/scope` | verified-partner | lead-protection | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
+| 046 | Opportunity Value & Requirements | 06 | web `/leads/new/value` | verified-partner | lead-protection | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
+| 047 | Upload Lead Supporting Documents | 06 | web `/leads/[id]/documents` | lead-owner | lead-protection | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
+| 048 | Duplicate Lead Detection | 06 | web `/leads/[id]/duplicates` | lead-owner | lead-protection | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
+| 049 | Lead Registration Confirmation | 06 | web `/leads/[id]/confirmation` | lead-owner | lead-protection | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
+| 050 | Unite First-Review Status | 06 | web `/leads/[id]/review-status` | lead-owner | routing | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
+| 051 | Protected Lead Ownership Certificate | 06 | web `/leads/[id]/certificate` | lead-owner | lead-protection | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
 | 052 | Customer CRM Profile | 07 | web `/crm/customers/[id]` | partner | customers | desktop | responsive | planned |  |
 | 053 | Sales Pipeline Kanban | 07 | web `/crm/pipeline` | partner | customers | desktop | native | planned |  |
 | 054 | Lead Follow-up & Conversion Timeline | 07 | web `/leads/[id]/timeline` | lead-owner | customers | desktop | responsive | planned |  |
@@ -221,9 +221,9 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 129 | Admin Users & Permissions | 02 | admin `/users` | super-admin | identity | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
 | 130 | Partner Verification Queue | 03 | admin `/verification` | compliance | partner-compliance | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
 | 131 | Partner Risk & Compliance Review | 03 | admin `/risk` | compliance | partner-compliance | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
-| 132 | Opportunity Approval & Routing | 06 | admin `/routing` | unite-admin | routing | desktop | desktop-admin | planned |  |
-| 133 | Priority Review SLA Configuration | 06 | admin `/sla` | super-admin | routing | desktop | desktop-admin | planned |  |
-| 134 | Lead Ownership & Conflict Resolution | 06 | admin `/lead-conflicts` | compliance | lead-protection | desktop | desktop-admin | planned |  |
+| 132 | Opportunity Approval & Routing | 06 | admin `/routing` | unite-admin | routing | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
+| 133 | Priority Review SLA Configuration | 06 | admin `/sla` | super-admin | routing | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
+| 134 | Lead Ownership & Conflict Resolution | 06 | admin `/lead-conflicts` | compliance | lead-protection | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
 | 135 | Commission Policy Configuration | 12 | admin `/commission-policy` | super-admin | commissions | desktop | desktop-admin | planned |  |
 | 136 | Product & Catalogue Management | 04 | admin `/catalogue` | unite-admin | catalog | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
 | 137 | Project / Tender Administration | 09 | admin `/tenders` | unite-admin | tenders | desktop | desktop-admin | planned |  |
@@ -250,9 +250,9 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
-| 151 | Lead Protection Dashboard | 06 | web `/lead-protection` | partner | lead-protection | desktop | native | planned |  |
-| 152 | Digital Lead Registration Certificate | 06 | web `/leads/[id]/registration-certificate` | lead-owner | lead-protection | desktop | responsive | planned |  |
-| 153 | Lead Ownership Dispute Center | 06 | web `/lead-disputes` | partner | lead-protection | desktop | responsive | planned |  |
+| 151 | Lead Protection Dashboard | 06 | web `/lead-protection` | partner | lead-protection | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
+| 152 | Digital Lead Registration Certificate | 06 | web `/leads/[id]/registration-certificate` | lead-owner | lead-protection | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
+| 153 | Lead Ownership Dispute Center | 06 | web `/lead-disputes` | partner | lead-protection | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
 | 154 | Collaboration Team Creation | 08 | web `/teams/new` | verified-partner | team-collaboration | desktop | responsive | planned |  |
 | 155 | Consortium Member Roles & Sharing | 08 | web `/teams/[id]/members` | team-member | team-collaboration | desktop | responsive | planned |  |
 | 156 | Joint Proposal & Team Workspace | 08 | web `/teams/[id]/workspace` | team-member | team-collaboration | desktop | responsive | planned |  |

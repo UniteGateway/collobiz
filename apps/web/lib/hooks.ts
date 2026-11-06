@@ -39,12 +39,15 @@ export function useMutation<TArgs extends unknown[], TRes>(fn: (...a: TArgs) => 
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [data, setData] = useState<TRes>();
   const run = useCallback(async (...a: TArgs): Promise<TRes | undefined> => {
     setPending(true);
     setError(null);
     setFieldErrors({});
     try {
-      return await fn(...a);
+      const r = await fn(...a);
+      setData(r);
+      return r;
     } catch (e) {
       if (e instanceof ApiError) {
         setError(e.message);
@@ -55,7 +58,7 @@ export function useMutation<TArgs extends unknown[], TRes>(fn: (...a: TArgs) => 
       setPending(false);
     }
   }, [fn]);
-  return { run, pending, error, fieldErrors, setError };
+  return { run, pending, error, fieldErrors, setError, data };
 }
 
 export const isForbidden = (e: unknown) => e instanceof ApiError && e.status === 403;

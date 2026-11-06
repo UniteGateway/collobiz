@@ -102,8 +102,33 @@ async function stage05(db: Db, refs: SeedRefs) {
   await db.execute(sql`select setval('opportunity_code_seq', 1005)`);
 }
 
+async function stage06(db: Db, refs: SeedRefs) {
+  const have = await db.select({ id: s.leadClaims.id }).from(s.leadClaims).limit(1);
+  if (have.length) return;
+  const mk = async (orgKey: string, userKey: string, oppCode: string, customer: { legalName: string; taxId: string; city: string; contactName: string }, status: string, consentScope: string) => {
+    const [o] = await db.select().from(s.opportunities).where(eq(s.opportunities.code, oppCode)).limit(1);
+    const [c] = await db.insert(s.customers).values({ organizationId: refs.orgs[orgKey], ...customer, consentProvenance: { method: 'written_email', obtainedAt: new Date().toISOString(), disclosureScope: consentScope } }).returning();
+    const snapshot = { code: oppCode, customer, sector: o.sector, consent: { method: 'written_email', disclosureScope: consentScope }, seeded: true };
+    const now = new Date();
+    await db.insert(s.leadClaims).values({ opportunityId: o.id, introducerOrgId: refs.orgs[orgKey], introducerUserId: refs.users[userKey], customerId: c.id, evidenceSummary: 'Buyer requested introduction by email (demo seed).', evidenceSnapshot: snapshot, evidenceHash: sha256(JSON.stringify(snapshot)), consent: snapshot.consent, status, protectedFrom: now, protectedUntil: new Date(now.getTime() + 90 * 86400_000), certificateCode: `CZL-2026-${String(10000000 + Math.floor(Math.random() * 89999999))}` });
+    return o;
+  };
+  await mk('meera', 'meera', 'OPP-2026-00005', { legalName: 'Karnataka Textile Cluster Association', taxId: '29AAATK1111A1Z1', city: 'Bengaluru', contactName: 'R. Shetty' }, 'protected', 'unite_and_approved_partners');
+  // A fresh partner lead currently inside its Unite first-review window.
+  const [gc] = await db.select().from(s.groupCompanies).where(eq(s.groupCompanies.organizationId, refs.orgs.uniteSolar)).limit(1);
+  const now = new Date();
+  const [o] = await db.insert(s.opportunities).values({ code: 'OPP-2026-00006', title: 'Rooftop solar 800 kW — Sri Ganesh Textiles, Coimbatore', summary: 'Spinning mill wants 800 kW rooftop solar under CAPEX model; roof survey done.', sector: 'solar', kind: 'project', route: 'partner_originated', source: 'partner_lead', city: 'Coimbatore', region: 'IN-TN', estimatedValue: 3_20_00_000_00, visibility: 'private', ownerOrgId: refs.orgs.meera, groupCompanyOrgId: refs.orgs.uniteSolar, buyerConfidential: true, status: 'unite_priority_review', version: 6, createdBy: refs.users.meera }).returning();
+  const evs = ['draft', 'submitted', 'consent_check', 'duplicate_review', 'verified', 'unite_priority_review'];
+  await db.insert(s.opportunityEvents).values(evs.map((st, i) => ({ opportunityId: o.id, version: i + 1, fromStatus: i ? evs[i - 1] : null, toStatus: st, reason: 'Seeded (demo)', actorUserId: refs.users.meera })));
+  const [c] = await db.insert(s.customers).values({ organizationId: refs.orgs.meera, legalName: 'Sri Ganesh Textiles Pvt Ltd', taxId: '33AABCS2222B1Z2', city: 'Coimbatore', contactName: 'K. Ganesan', contactEmail: 'md@sriganesh.example', consentProvenance: { method: 'signed_letter', obtainedAt: now.toISOString(), disclosureScope: 'unite_only' } }).returning();
+  const snap = { code: o.code, customer: { legalName: c.legalName, taxId: c.taxId, city: c.city }, sector: 'solar', seeded: true };
+  await db.insert(s.leadClaims).values({ opportunityId: o.id, introducerOrgId: refs.orgs.meera, introducerUserId: refs.users.meera, customerId: c.id, evidenceSummary: 'Signed letter of authority from the managing director.', evidenceSnapshot: snap, evidenceHash: sha256(JSON.stringify(snap)), consent: { method: 'signed_letter', obtainedAt: now.toISOString(), disclosureScope: 'unite_only' }, status: 'protected', protectedFrom: now, protectedUntil: new Date(now.getTime() + 90 * 86400_000), certificateCode: 'CZL-2026-00000006' });
+  await db.insert(s.routingEvents).values({ opportunityId: o.id, groupCompanyOrgId: refs.orgs.uniteSolar, startAt: now, dueAt: new Date(now.getTime() + 24 * 3600_000), slaMinutes: gc.slaMinutes, calendar: gc.calendar });
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
   await stage05(db, refs);
+  await stage06(db, refs);
 }

@@ -149,3 +149,16 @@ Commands: 131 unit/integration tests pass · 28/28 browser journeys · `node scr
 - Fixed: arrays interpolated into raw SQL caused 500s on two endpoints.
 - Results: API 80/80 · browser 39/39 · mobile 10/10 · lint/typecheck clean.
 - Remaining: map uses a lightweight plot (no basemap tiles — a map provider would need a key); RFQ triage happens in Stage 06 routing queue.
+
+---
+
+## Stage 06 — Lead protection and Unite-first routing ✅
+
+**Acceptance gate:** priority review and protection tests pass — **met** (`apps/api/test/stage06.e2e.ts`, 19 tests: registration → consent check → duplicate review → verification/protection → Unite first review with business-hours SLA → accept / release / reject / pause / resume / escalate; SLA breach escalation and policy-gated auto-release; duplicate rulings; disputes with appeal; certificates).
+
+- Migration `0004_stage06_leads.sql`: customers (consent provenance), lead claims (sealed evidence snapshot + SHA-256, protection window, certificate code, optimistic version), lead documents, duplicate candidates, routing events (calendar, pauses, escalation), disputes + entries.
+- Rules enforced: verified partners only; consent mandatory and not future-dated; duplicates ruled by independent compliance on evidence (other party never disclosed to partners); reviewers cannot route their own organization's lead; release lists on the partner exchange only with buyer consent; SLA breach escalates first, auto-release only if policy allows; dispute panel independent of both parties; appeals within 14 days to a different panelist; public certificate verification never reveals the customer.
+- Web: 026, 043–051, 151–153 + public verify page; admin 132–134. Mobile (native): 026, 043 (single form), 048, 050, 051, 151.
+- Fixed during verification: SLA times displayed in the viewer's browser zone instead of the calendar zone.
+- Results: API 99/99 · browser 43/43 · WCAG scan 0 violations · mobile 10/10 · lint/typecheck clean.
+- Remaining: the SLA sweep must be scheduled (cron / job runner) in deployment — endpoint `POST /v1/admin/routing/sweep`; lead timeline (054) arrives with CRM in Stage 07.
