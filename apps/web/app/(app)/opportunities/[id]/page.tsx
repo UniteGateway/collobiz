@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { sectorName, newIdempotencyKey } from '@collabiz/types';
-import { Alert, Button, ButtonLink, Card, DataTable, DescriptionList, LoadingState, Money, StatusBadge, TextArea, Timeline } from '@collabiz/ui';
+import { Alert, Button, ButtonLink, Card, DataTable, DescriptionList, LoadingState, Money, StatusBadge, Timeline } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { ROUTE_LABEL } from '@/components/Opportunities';
 import { api } from '@/lib/api';
