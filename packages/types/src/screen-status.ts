@@ -39,4 +39,11 @@ export const SCREEN_STATUS: Record<string, ScreenProgress> = {
   '131': v([E2E, 'apps/api/test/stage03.e2e.ts'], 'Automatic duplicate-GSTIN + screened-country flags; four-eyes clearing; data-rights queue'),
   '143': v([E2E, 'apps/api/test/stage03.e2e.ts'], 'Web + native'),
   '149': v([E2E, 'apps/api/test/stage03.e2e.ts'], 'Consent ledger, export download, 30-day data requests'),
+  // ---- Stage 04 ----
+  '004': v([E2E, 'apps/api/test/stage04.e2e.ts'], 'Brand vs legal entity shown separately'),
+  '005': v([E2E, 'apps/api/test/stage04.e2e.ts'], 'Visibility + price-disclosure by verification/membership level'),
+  '008': v([E2E, 'apps/api/test/stage04.e2e.ts'], 'Published only with partner consent'),
+  '039': v([E2E, 'apps/api/test/stage04.e2e.ts'], '404 for non-visible items; price request'),
+  '128': v([E2E, 'apps/api/test/stage04.e2e.ts'], 'Group companies, legal entity codes, business units'),
+  '136': v([E2E, 'apps/api/test/stage04.e2e.ts'], 'Own-company scoping, draft/publish/archive, audited'),
 };

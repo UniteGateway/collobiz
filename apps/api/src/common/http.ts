@@ -48,7 +48,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const message = st === 413 ? 'Request is too large' : type === 'entity.parse.failed' ? 'Malformed JSON body' : 'Bad request';
       return res.status(st).json({ statusCode: st, error: st === 413 ? 'PayloadTooLarge' : 'BadRequest', message });
     }
-    const pgCode = (err as { code?: string })?.code;
+    // Drizzle wraps driver errors; the PostgreSQL SQLSTATE may sit on `cause`.
+    const e2 = err as { code?: string; cause?: { code?: string } };
+    const pgCode = e2?.code ?? e2?.cause?.code;
     if (pgCode === '23505') return res.status(409).json({ statusCode: 409, error: 'Conflict', message: 'A record with these details already exists' });
     if (pgCode === '22P02') return res.status(400).json({ statusCode: 400, error: 'BadRequest', message: 'Malformed identifier' });
     this.log.error(err instanceof Error ? err.stack : String(err));

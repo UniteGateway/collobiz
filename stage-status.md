@@ -123,3 +123,16 @@ Stage 04 uses group-company organizations (seeded) and verification/membership l
 Full report: [`docs/launch-readiness-report.md`](docs/launch-readiness-report.md). Summary: 25/165 screens verified; the five trust capabilities, routing, tenders, projects and commissions are not built (stages 04–16 outstanding). Audit fixes: multer high-severity advisory, runtime web→API proxy (container defect), WCAG AA contrast/ARIA, 413 handling, web CSP/HSTS, Swagger disabled in production, demo-seed production guard, backup file permissions, Docker CA support. Added backup/restore scripts (drill passed), deployment guide, production env template, EAS config, accessibility scanner.
 
 Commands: 131 unit/integration tests pass · 28/28 browser journeys · `node scripts/a11y-scan.mjs` 0 violations on 12 pages · API + web Docker images built and run in production mode · Android/iOS bundles + `expo prebuild` OK · `pnpm audit --prod`: 0 high/critical.
+
+---
+
+## Stage 04 — Unite company catalogue and products ✅
+
+**Acceptance gate:** controlled public/private catalogs — **met** (`apps/api/test/stage04.e2e.ts`: anonymous / unverified / verified / certified views, 404 on hidden items, own-company admin scoping).
+
+- Migration `0002_stage04_catalog.sql`: `group_companies` (legal entity code separate from brand; SLA calendar fields for Stage 06), `business_units`, `catalog_items` (visibility public/partners/private, price visibility public/verified/certified/on-request, full-text index), `success_stories` (consent-gated).
+- API: public group companies (004), catalogue search with FTS (005), item detail + price request (039), consented case studies (008); admin group companies & units (128, super admin), catalogue management scoped to the admin's own group company (136).
+- Web 004/005/008/039; admin 128/136.
+- Fixed latent bug: duplicate-key conflicts inside transactions returned 500 (wrapped driver error) — now 409 everywhere.
+- Results: API 70/70 · browser 32/32 · lint/typecheck clean.
+- Remaining: catalogue images/attachments (needs S3, B-03); enquiry desk lifecycle arrives with 088 (Stage 11).

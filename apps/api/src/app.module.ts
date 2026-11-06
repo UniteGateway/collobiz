@@ -11,9 +11,10 @@ import { SystemModule } from './modules/system/system.controller';
 import { PublicEnquiryController } from './modules/support/public-enquiry.controller';
 import { IdentityModule } from './modules/identity/identity.module';
 import { OnboardingModule } from './modules/onboarding/onboarding.module';
+import { CatalogModule } from './modules/catalog/catalog.controller';
 import { config } from './config';
 
-export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule];
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule];
 
 @Module({
   imports: [

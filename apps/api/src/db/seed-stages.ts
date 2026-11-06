@@ -52,6 +52,36 @@ async function stage03(db: Db, refs: SeedRefs) {
   }
 }
 
+async function stage04(db: Db, refs: SeedRefs) {
+  const gcs: [string, string, string, string[], string][] = [
+    ['uniteSolar', 'UG-SOLAR-PLACEHOLDER', 'Unite Solar', ['solar', 'construction_epc'], 'Rooftop and utility-scale solar EPC, solar products and O&M.'],
+    ['powertek', 'UG-POWERTEK-PLACEHOLDER', 'Powertek', ['power_equipment', 'manufacturing'], 'Transformers, switchgear and power equipment with installation and service.'],
+    ['uniteExim', 'UG-EXIM-PLACEHOLDER', 'Unite Exim', ['trading', 'logistics'], 'Import-export trading desk and international logistics coordination.'],
+  ];
+  for (const [k, code, brand, sectors, description] of gcs) {
+    await db.insert(s.groupCompanies).values({ organizationId: refs.orgs[k], legalEntityCode: code, brandName: brand, sectors, description }).onConflictDoNothing();
+  }
+  const have = await db.select({ id: s.catalogItems.id }).from(s.catalogItems).limit(1);
+  if (have.length) return;
+  const P = (rupees: number) => rupees * 100;
+  const items: (typeof s.catalogItems.$inferInsert)[] = [
+    { ownerOrgId: refs.orgs.uniteSolar, kind: 'product', name: 'Mono PERC Solar Module 545 Wp', sector: 'solar', description: 'Tier-1 bifacial mono PERC module, 25-year linear performance warranty, IEC 61215/61730 certified.', sku: 'US-MOD-545', unit: 'module', listPrice: P(13500), priceVisibility: 'verified_partners', visibility: 'public', status: 'published', specs: { 'Power': '545 Wp', 'Efficiency': '21.1%', 'Warranty': '25 years' } },
+    { ownerOrgId: refs.orgs.uniteSolar, kind: 'service', name: 'Rooftop Solar EPC (C&I, 100 kW–2 MW)', sector: 'solar', description: 'Design, engineering, procurement, installation and commissioning of commercial rooftop solar plants with net-metering liaison.', unit: 'kWp', listPrice: P(42000), priceVisibility: 'public', visibility: 'public', status: 'published', specs: { 'Capacity range': '100 kW – 2 MW', 'Timeline': '8–14 weeks' } },
+    { ownerOrgId: refs.orgs.uniteSolar, kind: 'service', name: 'Solar O&M Annual Maintenance Contract', sector: 'solar', description: 'Preventive maintenance, cleaning schedules, inverter monitoring and performance reporting for operating plants.', unit: 'kWp / year', listPrice: P(600), priceVisibility: 'certified_partners', visibility: 'partners', status: 'published', specs: { 'Response SLA': '48 hours' } },
+    { ownerOrgId: refs.orgs.powertek, kind: 'product', name: 'Distribution Transformer 1000 kVA', sector: 'power_equipment', description: 'Oil-immersed 11 kV / 433 V distribution transformer, BIS certified, energy-efficiency level 2.', sku: 'PT-DT-1000', unit: 'unit', listPrice: P(1150000), priceVisibility: 'verified_partners', visibility: 'public', status: 'published', specs: { 'Rating': '1000 kVA', 'Cooling': 'ONAN' } },
+    { ownerOrgId: refs.orgs.powertek, kind: 'product', name: 'LT Switchgear Panel (PCC)', sector: 'power_equipment', description: 'Power control centre panels built to IEC 61439 with ACB incomers and metering.', unit: 'panel', priceVisibility: 'on_request', visibility: 'public', status: 'published', specs: { 'Standard': 'IEC 61439' } },
+    { ownerOrgId: refs.orgs.powertek, kind: 'service', name: 'Substation Commissioning & Testing', sector: 'power_equipment', description: 'Pre-commissioning tests, relay settings and energisation support for HT substations up to 66 kV.', unit: 'project', priceVisibility: 'on_request', visibility: 'partners', status: 'published', specs: {} },
+    { ownerOrgId: refs.orgs.uniteExim, kind: 'service', name: 'Import Sourcing & Customs Coordination', sector: 'trading', description: 'Supplier sourcing, inspection, freight booking and customs documentation for equipment imports.', unit: 'shipment', listPrice: P(35000), priceVisibility: 'verified_partners', visibility: 'public', status: 'published', specs: { 'Ports': 'Nhava Sheva, Mundra, Chennai' } },
+    { ownerOrgId: refs.orgs.uniteExim, kind: 'product', name: 'Internal pricing sheet — FY27 (confidential)', sector: 'trading', description: 'Internal draft price list not visible to partners or the public.', unit: 'sheet', listPrice: P(1), priceVisibility: 'on_request', visibility: 'private', status: 'draft', specs: {} },
+  ];
+  await db.insert(s.catalogItems).values(items);
+  await db.insert(s.successStories).values([
+    { title: '1.2 MW rooftop solar for a Pune auto-components plant', sector: 'solar', summary: 'A consultant-registered lead, accepted by Unite Solar in first review and executed with Volt EPC as installation partner.', body: 'Meera Iyer registered the lead with buyer consent. Unite Solar accepted it within the four-business-hour review window, formed a team with Volt EPC for installation, and commissioned the plant in eleven weeks. Commission was settled after the customer payment milestone.', metrics: [{ label: 'Capacity', value: '1.2 MW' }, { label: 'Delivery', value: '11 weeks' }, { label: 'Partners', value: '3' }], partnerOrgIds: [refs.orgs.volt, refs.orgs.meera], partnerConsent: true, status: 'published', publishedAt: new Date() },
+    { title: 'Transformer supply for an industrial park in Gujarat', sector: 'power_equipment', summary: 'Sunrise Traders sourced Powertek transformers for a developer, with transparent distributor margin tracking.', body: 'Sunrise Traders submitted a buyer requirement, Powertek quoted through the platform, and the order was delivered in six weeks with milestone-based payment.', metrics: [{ label: 'Units', value: '6 transformers' }, { label: 'Lead time', value: '6 weeks' }], partnerOrgIds: [refs.orgs.sunrise], partnerConsent: true, status: 'published', publishedAt: new Date() },
+  ]);
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
+  await stage04(db, refs);
 }

@@ -296,3 +296,51 @@ suites.push({
     if (r.status() !== 403) throw new Error(`expected 403, got ${r.status()}`);
   },
 });
+
+// ---------------- Stage 04 ----------------
+suites.push({
+  name: 'Stage 04 · 004/005/008/039 public vs partner catalogue pricing',
+  run: async ({ page, WEB, expect, shot }) => {
+    await page.context().clearCookies();
+    await page.goto(WEB + '/group-companies');
+    await page.getByRole('heading', { name: 'Unite Solar' }).waitFor();
+    await page.goto(WEB + '/catalogue');
+    const card = page.locator('a.cz-card', { hasText: 'Mono PERC' });
+    await card.getByText('Visible to verified partners').waitFor();
+    await shot('005-catalogue-public');
+    await page.goto(WEB + '/success-stories');
+    await page.getByText('1.2 MW rooftop solar').waitFor();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/catalogue');
+    await page.locator('a.cz-card', { hasText: 'Mono PERC' }).getByText('₹13,500').waitFor();
+    await page.locator('a.cz-card', { hasText: 'LT Switchgear' }).click();
+    await page.getByLabel('Quantity / capacity').fill('2 panels');
+    await page.getByRole('button', { name: 'Request price / quotation' }).click();
+    const ref = await page.locator('.cz-alert-success .cz-mono').textContent();
+    expect(/^PRQ-\d{8}$/.test(ref ?? ''), 'no price request reference');
+    await shot('039-detail');
+  },
+});
+suites.push({
+  name: 'Stage 04 · 136 unite admin creates and publishes an item; 128 lists companies',
+  run: async ({ page, ADMIN, WEB, label, shot }) => {
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/catalogue');
+    await page.getByRole('button', { name: 'New item' }).click();
+    const name = `Hybrid Inverter ${label} ${Date.now()}`;
+    await page.getByLabel('Name').fill(name);
+    await page.getByLabel('Description').fill('Hybrid inverter with battery interface for C&I sites.');
+    await page.getByLabel('List price ₹').fill('180000');
+    await page.getByRole('button', { name: 'Save as draft' }).click();
+    const row = page.getByRole('row', { name: new RegExp(name) });
+    await row.getByRole('button', { name: 'Publish' }).click();
+    await row.getByText('Published').waitFor();
+    await shot('136-catalogue');
+    await page.goto(ADMIN + '/group-companies');
+    await page.getByText('UG-SOLAR-PLACEHOLDER').waitFor();
+    await page.context().clearCookies();
+    await page.goto(WEB + '/catalogue');
+    await page.getByLabel('Search').fill(name.split(' ').slice(0, 3).join(' '));
+    await page.getByText(name).first().waitFor();
+  },
+});

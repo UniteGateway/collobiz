@@ -4,7 +4,7 @@
 
 Source: Master Book Section 05 (functional specification) and the 165-screen UI Design Atlas (U01–U10). Screen IDs and titles are preserved verbatim.
 
-**Status:** verified 25 · implemented 0 · scaffolded 1 · planned 139
+**Status:** verified 31 · implemented 0 · scaffolded 1 · planned 133
 
 Status meaning: *planned* (not started) → *scaffolded* (route + shell) → *implemented* (wired to real API) → *verified* (automated test passed).
 
@@ -28,11 +28,11 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 001 | Website homepage | 01 | web `/` | public | cms | desktop | responsive | verified | scripts/e2e-suites.mjs |
 | 002 | About COLLABIZ | 01 | web `/about` | public | cms | desktop | responsive | verified | scripts/e2e-suites.mjs |
 | 003 | How Collaboration Works | 01 | web `/how-it-works` | public | cms | desktop | responsive | verified | scripts/e2e-suites.mjs |
-| 004 | Unite Group Companies Directory | 04 | web `/group-companies` | public | group-companies | desktop | responsive | planned |  |
-| 005 | Products & Services Catalogue | 04 | web `/catalogue` | public | catalog | desktop | responsive | planned |  |
+| 004 | Unite Group Companies Directory | 04 | web `/group-companies` | public | group-companies | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
+| 005 | Products & Services Catalogue | 04 | web `/catalogue` | public | catalog | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
 | 006 | Public Business Opportunities | 05 | web `/opportunities/public` | public | opportunities | desktop | responsive | planned |  |
 | 007 | Partner Benefits & Membership | 01 | web `/membership` | public | cms | desktop | responsive | verified | scripts/e2e-suites.mjs |
-| 008 | Success Stories & Case Studies | 04 | web `/success-stories` | public | cms | desktop | responsive | planned |  |
+| 008 | Success Stories & Case Studies | 04 | web `/success-stories` | public | cms | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
 | 009 | Global Partner Locations | 05 | web `/locations` | public | organizations | desktop | responsive | planned |  |
 | 010 | Contact, FAQs & Support | 01 | web `/support/contact` | public | support | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage01.e2e.ts |
 
@@ -78,7 +78,7 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 036 | Opportunity Detail Page | 05 | web `/opportunities/[id]` | partner | opportunities | desktop | native | planned |  |
 | 037 | Saved Opportunities & Alerts | 05 | web `/marketplace/saved` | partner | opportunities | desktop | responsive | planned |  |
 | 038 | Location-Based Opportunities Map | 05 | web `/marketplace/map` | partner | opportunities | desktop | responsive | planned |  |
-| 039 | Product & Service Detail | 04 | web `/catalogue/[id]` | public | catalog | desktop | responsive | planned |  |
+| 039 | Product & Service Detail | 04 | web `/catalogue/[id]` | public | catalog | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
 | 040 | Submit Requirement / RFQ | 05 | web `/rfq/new` | authenticated | opportunities | desktop | responsive | planned |  |
 | 041 | Opportunity Eligibility Checker | 05 | web `/opportunities/[id]/eligibility` | partner | opportunities | desktop | responsive | planned |  |
 | 042 | Apply / Express Interest | 05 | web `/opportunities/[id]/apply` | verified-partner | opportunities | mobile-first | native | planned |  |
@@ -217,7 +217,7 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
 | 127 | Group Admin Executive Dashboard | 16 | admin `/` | admin | analytics | desktop | desktop-admin | planned |  |
-| 128 | Group Companies & Business Units | 04 | admin `/group-companies` | super-admin | group-companies | desktop | desktop-admin | planned |  |
+| 128 | Group Companies & Business Units | 04 | admin `/group-companies` | super-admin | group-companies | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
 | 129 | Admin Users & Permissions | 02 | admin `/users` | super-admin | identity | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
 | 130 | Partner Verification Queue | 03 | admin `/verification` | compliance | partner-compliance | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
 | 131 | Partner Risk & Compliance Review | 03 | admin `/risk` | compliance | partner-compliance | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
@@ -225,7 +225,7 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 133 | Priority Review SLA Configuration | 06 | admin `/sla` | super-admin | routing | desktop | desktop-admin | planned |  |
 | 134 | Lead Ownership & Conflict Resolution | 06 | admin `/lead-conflicts` | compliance | lead-protection | desktop | desktop-admin | planned |  |
 | 135 | Commission Policy Configuration | 12 | admin `/commission-policy` | super-admin | commissions | desktop | desktop-admin | planned |  |
-| 136 | Product & Catalogue Management | 04 | admin `/catalogue` | unite-admin | catalog | desktop | desktop-admin | planned |  |
+| 136 | Product & Catalogue Management | 04 | admin `/catalogue` | unite-admin | catalog | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
 | 137 | Project / Tender Administration | 09 | admin `/tenders` | unite-admin | tenders | desktop | desktop-admin | planned |  |
 | 138 | Finance & Settlement Controls | 12 | admin `/finance` | finance | invoicing | desktop | desktop-admin | planned |  |
 | 139 | Performance Analytics & BI | 16 | admin `/analytics` | admin | analytics | desktop | desktop-admin | planned |  |

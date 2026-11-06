@@ -4,6 +4,10 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Stage 04 — Catalogue (2026-11-06)
+- Group companies with legal entities, business units, catalogue with visibility and price-disclosure rules, success stories; screens 004, 005, 008, 039, 128, 136.
+- Fixed: unique-constraint conflicts in transactions returned 500 instead of 409.
+
 ### Launch-readiness audit (2026-11-06)
 #### Added
 - `docs/launch-readiness-report.md` (verdict NO-GO), `docs/deployment.md`, `docs/runbooks/backup-restore.md`, `.env.production.example`, `apps/mobile/eas.json`, `infra/backup/{backup,restore}.sh`, `scripts/a11y-scan.mjs`.
