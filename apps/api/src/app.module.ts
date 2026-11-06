@@ -12,9 +12,10 @@ import { PublicEnquiryController } from './modules/support/public-enquiry.contro
 import { IdentityModule } from './modules/identity/identity.module';
 import { OnboardingModule } from './modules/onboarding/onboarding.module';
 import { CatalogModule } from './modules/catalog/catalog.controller';
+import { OpportunitiesModule } from './modules/opportunities/opportunities.controller';
 import { config } from './config';
 
-export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule];
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule];
 
 @Module({
   imports: [

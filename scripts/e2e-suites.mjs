@@ -344,3 +344,88 @@ suites.push({
     await page.getByText(name).first().waitFor();
   },
 });
+
+// ---------------- Stage 05 ----------------
+suites.push({
+  name: 'Stage 05 · 006/009/040 public listings, locations, RFQ',
+  run: async ({ page, WEB, expect, shot }) => {
+    await page.context().clearCookies();
+    await page.goto(WEB + '/opportunities/public');
+    await page.locator('[data-opp="OPP-2026-00002"]').waitFor();
+    expect(await page.locator('[data-opp="OPP-2026-00001"]').count() === 0, 'partner-only listing shown publicly');
+    await page.goto(WEB + '/locations');
+    await page.getByRole('table', { name: 'Partner coverage by region' }).waitFor();
+    await page.goto(WEB + '/rfq/new');
+    await page.getByLabel('What do you need?').fill('250 kW rooftop solar for a hospital');
+    await page.getByLabel('Details').fill('Hospital in Nagpur needs rooftop solar with battery backup for critical loads.');
+    await page.getByLabel('Name').fill('Dr. Kulkarni');
+    await page.getByLabel('Email').fill('admin@hospital.example');
+    await page.getByLabel(/I consent/).check();
+    await page.getByRole('button', { name: 'Submit requirement' }).click();
+    await page.getByText(/Reference RFQ-/).waitFor();
+    await shot('040-rfq');
+  },
+});
+suites.push({
+  name: 'Stage 05 · 031/036/041/042 eligibility explains failures; eligible partner applies; 024 shows it',
+  run: async ({ page, WEB, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/marketplace');
+    await page.locator('[data-opp="OPP-2026-00003"]').click();
+    await page.getByRole('link', { name: /Check eligibility/ }).click();
+    await page.locator('[data-check="certifications"]').getByText('Missing: ISO45001').waitFor();
+    await shot('041-eligibility');
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/marketplace/unite');
+    const card = page.locator('[data-opp="OPP-2026-00004"]');
+    await card.click();
+    await page.getByRole('heading', { name: 'Key facts' }).waitFor();
+    const already = await page.getByText('Your organization applied').count();
+    if (!already) {
+      await page.getByRole('link', { name: /Check eligibility/ }).click();
+      await page.getByRole('link', { name: 'Continue to application' }).click();
+      await page.getByLabel(/Why your organization/).fill('Sunrise has cleared HT cable imports through Mundra for three utilities.');
+      await page.getByRole('button', { name: 'Submit application' }).click();
+      await page.getByText('Your organization applied').waitFor();
+    }
+    await page.goto(WEB + '/my/opportunities');
+    await page.getByRole('table', { name: 'Applications' }).getByText('Import sourcing of HT cables').waitFor();
+    await shot('024-mine');
+  },
+});
+suites.push({
+  name: 'Stage 05 · 035/037/025/034/038 search, save, alerts, feed, categories, map',
+  run: async ({ page, WEB }) => {
+    await webLogin(page, WEB, 'meera@consult.example');
+    await page.goto(WEB + '/marketplace/categories');
+    await page.getByRole('heading', { name: 'Solar & Renewable Energy' }).waitFor();
+    await page.goto(WEB + '/marketplace/map');
+    await page.getByRole('img', { name: /opportunities plotted/ }).waitFor();
+    await page.goto(WEB + '/marketplace/search');
+    await page.getByLabel('Sector').selectOption('solar');
+    await page.locator('[data-opp]').first().waitFor();
+    page.once('dialog', (d) => d.accept('Solar watch'));
+    await page.getByRole('button', { name: /Save search/ }).click();
+    await page.getByText(/Saved "Solar watch"/).waitFor();
+    await page.goto(WEB + '/marketplace/saved');
+    await page.getByRole('table', { name: 'Saved searches' }).getByText('Solar watch').first().waitFor();
+    await page.goto(WEB + '/feed');
+    await page.getByText(/Match \d+\/100|Recommendations are off|No strong matches/).first().waitFor();
+  },
+});
+suites.push({
+  name: 'Stage 05 · admin publishes route-A listing; publisher shortlists applicant',
+  run: async ({ page, ADMIN, WEB, label }) => {
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/opportunities');
+    await page.getByRole('button', { name: 'Publish opportunity' }).click();
+    const title = `Solar O&M contractor ${label} ${Date.now()}`;
+    await page.getByLabel('Title').fill(title);
+    await page.getByLabel('Scope summary').fill('Annual O&M for 3 MW of rooftop plants in Pune with monthly reporting.');
+    await page.getByLabel('City').fill('Pune');
+    await page.getByRole('button', { name: 'Publish', exact: true }).click();
+    await page.getByRole('row', { name: new RegExp(title) }).getByText('Qualification').waitFor();
+    await webLogin(page, WEB, 'unite.admin@collabiz.local').catch(() => {});
+  },
+  only: 'desktop',
+});

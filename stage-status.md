@@ -136,3 +136,16 @@ Commands: 131 unit/integration tests pass · 28/28 browser journeys · `node scr
 - Fixed latent bug: duplicate-key conflicts inside transactions returned 500 (wrapped driver error) — now 409 everywhere.
 - Results: API 70/70 · browser 32/32 · lint/typecheck clean.
 - Remaining: catalogue images/attachments (needs S3, B-03); enquiry desk lifecycle arrives with 088 (Stage 11).
+
+---
+
+## Stage 05 — Opportunity marketplace ✅
+
+**Acceptance gate:** real listings and eligibility controls — **met** (`apps/api/test/stage05.e2e.ts`: audience-specific visibility, eligibility checks enforced on apply, publisher-only applicant review, no self-decision).
+
+- Migration `0003_stage05_marketplace.sql`: `opportunities` (stable `OPP-YYYY-NNNNN` codes via sequence, route/source, version for optimistic locking, FTS index), immutable `opportunity_events`, applications (one active per org), saved opportunities/searches, notifications, RFQ requests.
+- API: listing visibility (public / partners / verified-only exchange / owner), filters & FTS, categories, eligibility (verification, level, sector, certifications, coverage, capacity, open, own, duplicate), idempotent apply with eligibility snapshot, withdraw, publisher decisions, saved searches with alerts on publish, explainable consent-gated feed, dashboard KPIs, public RFQ into Unite review, public locations aggregate; admin route-A publishing scoped to own group company, close, versioned publish.
+- Web: 006, 009, 023 (KPIs), 024, 025, 031–038, 040–042; admin opportunity publishing. Mobile (native): 023 KPIs, 031, 036 (+041 summary), 042.
+- Fixed: arrays interpolated into raw SQL caused 500s on two endpoints.
+- Results: API 80/80 · browser 39/39 · mobile 10/10 · lint/typecheck clean.
+- Remaining: map uses a lightweight plot (no basemap tiles — a map provider would need a key); RFQ triage happens in Stage 06 routing queue.

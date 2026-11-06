@@ -1,5 +1,5 @@
 /** Stage-specific demo data, appended as stages are delivered. Must stay idempotent. */
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -81,7 +81,29 @@ async function stage04(db: Db, refs: SeedRefs) {
   ]);
 }
 
+async function stage05(db: Db, refs: SeedRefs) {
+  const have = await db.select({ id: s.opportunities.id }).from(s.opportunities).limit(1);
+  if (have.length) return;
+  const P = (lakh: number) => lakh * 1_00_000 * 100;
+  const in30 = new Date(Date.now() + 30 * 86400_000);
+  const list: (typeof s.opportunities.$inferInsert & { _ev?: string })[] = [
+    { code: 'OPP-2026-00001', title: '2 MW rooftop solar EPC — auto-components plant, Chakan', summary: 'Unite Solar seeks an EPC installation partner for a 2 MW rooftop plant across three sheds. Civil, structure and electrical scope; Unite supplies modules and inverters.', sector: 'solar', kind: 'project', route: 'unite_owned', source: 'unite_listing', city: 'Pune', region: 'IN-MH', lat: 18.76, lng: 73.86, estimatedValue: P(80), deadline: in30, visibility: 'verified_partners', minLevel: 'verified', requiredCertifications: [], ownerOrgId: refs.orgs.uniteSolar, groupCompanyOrgId: refs.orgs.uniteSolar },
+    { code: 'OPP-2026-00002', title: 'Distributor for transformers — Rajasthan territory', summary: 'Powertek is appointing an authorised distributor for distribution transformers in Rajasthan with stocking and service capability.', sector: 'power_equipment', kind: 'distributorship', route: 'unite_owned', source: 'unite_listing', city: 'Jaipur', region: 'IN-RJ', lat: 26.91, lng: 75.79, estimatedValue: P(150), deadline: in30, visibility: 'public', minLevel: 'certified', requiredCertifications: ['BIS'], ownerOrgId: refs.orgs.powertek, groupCompanyOrgId: refs.orgs.powertek },
+    { code: 'OPP-2026-00003', title: 'Civil foundations for 5 MW ground-mount plant — Tamil Nadu', summary: 'Pile foundations and module mounting structure civil works for a ground-mount plant near Tirunelveli.', sector: 'construction_epc', kind: 'project', route: 'unite_owned', source: 'unite_listing', city: 'Tirunelveli', region: 'IN-TN', lat: 8.71, lng: 77.76, estimatedValue: P(120), deadline: in30, visibility: 'public', minLevel: 'verified', requiredCertifications: ['ISO45001'], ownerOrgId: refs.orgs.uniteSolar, groupCompanyOrgId: refs.orgs.uniteSolar },
+    { code: 'OPP-2026-00004', title: 'Import sourcing of HT cables — Gujarat port project', summary: 'Unite Exim needs a trading partner to source and clear 33 kV HT cables for a port expansion.', sector: 'trading', kind: 'product_supply', route: 'unite_owned', source: 'unite_listing', city: 'Mundra', region: 'IN-GJ', lat: 22.84, lng: 69.72, estimatedValue: P(45), deadline: in30, visibility: 'verified_partners', minLevel: 'verified', requiredCertifications: [], ownerOrgId: refs.orgs.uniteExim, groupCompanyOrgId: refs.orgs.uniteExim },
+    { code: 'OPP-2026-00005', title: 'Energy audit consultant — textile cluster, Karnataka', summary: 'Partner-originated requirement released by Unite Solar for partner exchange: energy audits for 12 textile units before solar adoption.', sector: 'consulting', kind: 'service', route: 'partner_exchange', source: 'partner_lead', city: 'Bengaluru', region: 'IN-KA', lat: 12.97, lng: 77.59, estimatedValue: P(6), deadline: in30, visibility: 'verified_partners', minLevel: 'verified', requiredCertifications: [], ownerOrgId: refs.orgs.meera, groupCompanyOrgId: refs.orgs.uniteSolar, buyerConfidential: true, _ev: 'released' },
+  ];
+  for (const { _ev, ...o } of list) {
+    const status = _ev ?? 'qualification';
+    const [row] = await db.insert(s.opportunities).values({ ...o, status, listed: true, publishedAt: new Date(), createdBy: refs.users.uniteAdmin, version: 2 }).returning();
+    await db.insert(s.opportunityEvents).values([{ opportunityId: row.id, version: 1, toStatus: 'draft', reason: 'Seeded', actorUserId: refs.users.uniteAdmin }, { opportunityId: row.id, version: 2, fromStatus: 'draft', toStatus: status, reason: 'Seeded (demo)', actorUserId: refs.users.uniteAdmin }]);
+    if (o.code === 'OPP-2026-00001') await db.insert(s.opportunityApplications).values({ opportunityId: row.id, organizationId: refs.orgs.volt, applicantUserId: refs.users.asha, message: 'Volt EPC has commissioned 40 MW of C&I rooftop plants in Maharashtra and can mobilise within two weeks.', proposedValue: P(76) });
+  }
+  await db.execute(sql`select setval('opportunity_code_seq', 1005)`);
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
+  await stage05(db, refs);
 }

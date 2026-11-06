@@ -4,7 +4,7 @@
 
 Source: Master Book Section 05 (functional specification) and the 165-screen UI Design Atlas (U01–U10). Screen IDs and titles are preserved verbatim.
 
-**Status:** verified 31 · implemented 0 · scaffolded 1 · planned 133
+**Status:** verified 47 · implemented 0 · scaffolded 0 · planned 118
 
 Status meaning: *planned* (not started) → *scaffolded* (route + shell) → *implemented* (wired to real API) → *verified* (automated test passed).
 
@@ -30,10 +30,10 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 003 | How Collaboration Works | 01 | web `/how-it-works` | public | cms | desktop | responsive | verified | scripts/e2e-suites.mjs |
 | 004 | Unite Group Companies Directory | 04 | web `/group-companies` | public | group-companies | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
 | 005 | Products & Services Catalogue | 04 | web `/catalogue` | public | catalog | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
-| 006 | Public Business Opportunities | 05 | web `/opportunities/public` | public | opportunities | desktop | responsive | planned |  |
+| 006 | Public Business Opportunities | 05 | web `/opportunities/public` | public | opportunities | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
 | 007 | Partner Benefits & Membership | 01 | web `/membership` | public | cms | desktop | responsive | verified | scripts/e2e-suites.mjs |
 | 008 | Success Stories & Case Studies | 04 | web `/success-stories` | public | cms | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
-| 009 | Global Partner Locations | 05 | web `/locations` | public | organizations | desktop | responsive | planned |  |
+| 009 | Global Partner Locations | 05 | web `/locations` | public | organizations | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
 | 010 | Contact, FAQs & Support | 01 | web `/support/contact` | public | support | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage01.e2e.ts |
 
 ## 02 · Registration & Verification
@@ -57,9 +57,9 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
-| 023 | Partner Home Dashboard | 05 | web `/dashboard` | partner | analytics | desktop | native | scaffolded | scripts/e2e-suites.mjs |
-| 024 | My Opportunities Overview | 05 | web `/my/opportunities` | partner | opportunities | desktop | responsive | planned |  |
-| 025 | Recommended Business Feed | 05 | web `/feed` | partner | partner-matching | desktop | responsive | planned |  |
+| 023 | Partner Home Dashboard | 05 | web `/dashboard` | partner | analytics | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
+| 024 | My Opportunities Overview | 05 | web `/my/opportunities` | partner | opportunities | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
+| 025 | Recommended Business Feed | 05 | web `/feed` | partner | partner-matching | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
 | 026 | My Leads & Pipeline | 06 | web `/my/leads` | partner | lead-protection | desktop | native | planned |  |
 | 027 | Earnings & Settlement Summary | 12 | web `/earnings/summary` | partner | commissions | desktop | responsive | planned |  |
 | 028 | Tasks & Follow-up Calendar | 07 | web `/tasks` | partner | customers | desktop | responsive | planned |  |
@@ -70,18 +70,18 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
-| 031 | All Opportunities Marketplace | 05 | web `/marketplace` | partner | opportunities | desktop | native | planned |  |
-| 032 | Unite Group Opportunities | 05 | web `/marketplace/unite` | partner | opportunities | desktop | responsive | planned |  |
-| 033 | Approved Partner Exchange | 05 | web `/marketplace/exchange` | verified-partner | opportunities | desktop | responsive | planned |  |
-| 034 | Opportunity Category Browser | 05 | web `/marketplace/categories` | partner | opportunities | desktop | responsive | planned |  |
-| 035 | Advanced Search & Filter | 05 | web `/marketplace/search` | partner | opportunities | desktop | responsive | planned |  |
-| 036 | Opportunity Detail Page | 05 | web `/opportunities/[id]` | partner | opportunities | desktop | native | planned |  |
-| 037 | Saved Opportunities & Alerts | 05 | web `/marketplace/saved` | partner | opportunities | desktop | responsive | planned |  |
-| 038 | Location-Based Opportunities Map | 05 | web `/marketplace/map` | partner | opportunities | desktop | responsive | planned |  |
+| 031 | All Opportunities Marketplace | 05 | web `/marketplace` | partner | opportunities | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
+| 032 | Unite Group Opportunities | 05 | web `/marketplace/unite` | partner | opportunities | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
+| 033 | Approved Partner Exchange | 05 | web `/marketplace/exchange` | verified-partner | opportunities | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
+| 034 | Opportunity Category Browser | 05 | web `/marketplace/categories` | partner | opportunities | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
+| 035 | Advanced Search & Filter | 05 | web `/marketplace/search` | partner | opportunities | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
+| 036 | Opportunity Detail Page | 05 | web `/opportunities/[id]` | partner | opportunities | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
+| 037 | Saved Opportunities & Alerts | 05 | web `/marketplace/saved` | partner | opportunities | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
+| 038 | Location-Based Opportunities Map | 05 | web `/marketplace/map` | partner | opportunities | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
 | 039 | Product & Service Detail | 04 | web `/catalogue/[id]` | public | catalog | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
-| 040 | Submit Requirement / RFQ | 05 | web `/rfq/new` | authenticated | opportunities | desktop | responsive | planned |  |
-| 041 | Opportunity Eligibility Checker | 05 | web `/opportunities/[id]/eligibility` | partner | opportunities | desktop | responsive | planned |  |
-| 042 | Apply / Express Interest | 05 | web `/opportunities/[id]/apply` | verified-partner | opportunities | mobile-first | native | planned |  |
+| 040 | Submit Requirement / RFQ | 05 | web `/rfq/new` | authenticated | opportunities | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
+| 041 | Opportunity Eligibility Checker | 05 | web `/opportunities/[id]/eligibility` | partner | opportunities | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
+| 042 | Apply / Express Interest | 05 | web `/opportunities/[id]/apply` | verified-partner | opportunities | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
 
 ## 05 · Lead Registration & Client CRM
 

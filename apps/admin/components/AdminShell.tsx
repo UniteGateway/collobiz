@@ -31,7 +31,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const initials = me.fullName.split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
   return (
     <AppShell brandLabel="collabiz admin" topNav={[{ href: '/', label: 'Dashboard' }, { href: '/verification', label: 'Verification' }, { href: '/routing', label: 'Routing' }, { href: '/finance', label: 'Finance' }]}
-      sections={[{ items: [{ href: '/', label: 'Executive dashboard' }] }, ...sections]} currentPath={path} userInitials={initials}
+      sections={[{ items: [{ href: '/', label: 'Executive dashboard' }, { href: '/opportunities', label: 'Opportunity publishing' }] }, ...sections]} currentPath={path} userInitials={initials}
       userMenu={<Button variant="ghost" size="sm" style={{ color: '#fff' }} onClick={logout}>Sign out</Button>}>
       {me.platformRoles.length === 0 ? (
         <PermissionDenied reason="The administration portal is restricted to Unite Group administrators." />

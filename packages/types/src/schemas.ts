@@ -232,3 +232,7 @@ export const PIPELINE_STAGES = ['new', 'contacted', 'qualified', 'proposal', 'ne
 export const CrmMoveSchema = z.object({ stage: z.enum(PIPELINE_STAGES), note: z.string().max(2000).optional() });
 export const CrmActivitySchema = z.object({ kind: z.enum(['note', 'call', 'email', 'meeting']), body: z.string().trim().min(2).max(4000) });
 export const TaskSchema = z.object({ title: z.string().trim().min(2).max(200), dueAt: z.string().datetime(), leadId: id.optional(), customerId: id.optional() });
+
+export const APPLICATION_STATUSES = ['submitted', 'shortlisted', 'accepted', 'rejected', 'withdrawn'] as const;
+export const ApplicationDecisionSchema = z.object({ status: z.enum(['shortlisted', 'accepted', 'rejected']), reason: z.string().trim().min(5).max(2000) });
+export const OPEN_OPPORTUNITY_STATES = ['accepted', 'released', 'qualification', 'proposal'] as const;

@@ -4,10 +4,10 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 003,How Collaboration Works,Public Website & Discovery,01,web,/how-it-works,public,cms,desktop,responsive,identity-collaboration,verified,scripts/e2e-suites.mjs,
 004,Unite Group Companies Directory,Public Website & Discovery,04,web,/group-companies,public,group-companies,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage04.e2e.ts,Brand vs legal entity shown separately
 005,Products & Services Catalogue,Public Website & Discovery,04,web,/catalogue,public,catalog,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage04.e2e.ts,Visibility + price-disclosure by verification/membership level
-006,Public Business Opportunities,Public Website & Discovery,05,web,/opportunities/public,public,opportunities,desktop,responsive,content,planned,,
+006,Public Business Opportunities,Public Website & Discovery,05,web,/opportunities/public,public,opportunities,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,Public listings only
 007,Partner Benefits & Membership,Public Website & Discovery,01,web,/membership,public,cms,desktop,responsive,identity-collaboration,verified,scripts/e2e-suites.mjs,
 008,Success Stories & Case Studies,Public Website & Discovery,04,web,/success-stories,public,cms,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage04.e2e.ts,Published only with partner consent
-009,Global Partner Locations,Public Website & Discovery,05,web,/locations,public,organizations,desktop,responsive,identity-collaboration,planned,,
+009,Global Partner Locations,Public Website & Discovery,05,web,/locations,public,organizations,desktop,responsive,identity-collaboration,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,Aggregated verified-partner coverage; no identities
 010,"Contact, FAQs & Support",Public Website & Discovery,01,web,/support/contact,public,support,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage01.e2e.ts,Public enquiry API with rate limit and outbox acknowledgement
 011,Login / Create Account,Registration & Verification,02,web,/login,public,identity,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts apps/mobile/test/login.test.tsx,"Web + native; lockout, rate limit, MFA challenge"
 012,OTP & Email Verification,Registration & Verification,02,web,/verify,authenticated,identity,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts,Email/SMS OTP via outbox adapter (B-04); web + native
@@ -21,26 +21,26 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 020,Bank & Tax Profile,Registration & Verification,03,web,/onboarding/bank-tax,partner,partner-compliance,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,AES-256-GCM encrypted account/PAN; masked everywhere
 021,Agreement Acceptance & e-Sign,Registration & Verification,03,web,/onboarding/agreements,partner,contracts,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,"Click-to-accept evidence (typed name, IP, UA, SHA-256); templates pending legal review (B-08)"
 022,Verification Status & Approval,Registration & Verification,03,web,/onboarding/status,partner,partner-compliance,mobile-first,native,admin-control,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts apps/mobile/test/kyb-status.test.tsx,Verified / rejected / re-upload states; idempotent submission
-023,Partner Home Dashboard,Partner Home & Dashboard,05,web,/dashboard,partner,analytics,desktop,native,identity-collaboration,scaffolded,scripts/e2e-suites.mjs,"Stage 02 baseline (identity, verification, activity); business KPIs in Stage 05"
-024,My Opportunities Overview,Partner Home & Dashboard,05,web,/my/opportunities,partner,opportunities,desktop,responsive,content,planned,,
-025,Recommended Business Feed,Partner Home & Dashboard,05,web,/feed,partner,partner-matching,desktop,responsive,content,planned,,
+023,Partner Home Dashboard,Partner Home & Dashboard,05,web,/dashboard,partner,analytics,desktop,native,identity-collaboration,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,"Real KPIs, recommendations, activity; web + native"
+024,My Opportunities Overview,Partner Home & Dashboard,05,web,/my/opportunities,partner,opportunities,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,"Applications + originated opportunities, withdraw"
+025,Recommended Business Feed,Partner Home & Dashboard,05,web,/feed,partner,partner-matching,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,"Explainable, consent-gated rules engine"
 026,My Leads & Pipeline,Partner Home & Dashboard,06,web,/my/leads,partner,lead-protection,desktop,native,commercial-record,planned,,
 027,Earnings & Settlement Summary,Partner Home & Dashboard,12,web,/earnings/summary,partner,commissions,desktop,responsive,commercial-record,planned,,
 028,Tasks & Follow-up Calendar,Partner Home & Dashboard,07,web,/tasks,partner,customers,desktop,responsive,content,planned,,
 029,Partner Performance Scorecard,Partner Home & Dashboard,14,web,/performance,partner,reputation,desktop,responsive,identity-collaboration,planned,,
 030,Quick Actions & Activity Center,Partner Home & Dashboard,07,web,/activity,partner,audit,mobile-first,native,content,planned,,
-031,All Opportunities Marketplace,Marketplace & Opportunity Discovery,05,web,/marketplace,partner,opportunities,desktop,native,content,planned,,
-032,Unite Group Opportunities,Marketplace & Opportunity Discovery,05,web,/marketplace/unite,partner,opportunities,desktop,responsive,content,planned,,
-033,Approved Partner Exchange,Marketplace & Opportunity Discovery,05,web,/marketplace/exchange,verified-partner,opportunities,desktop,responsive,identity-collaboration,planned,,
-034,Opportunity Category Browser,Marketplace & Opportunity Discovery,05,web,/marketplace/categories,partner,opportunities,desktop,responsive,content,planned,,
-035,Advanced Search & Filter,Marketplace & Opportunity Discovery,05,web,/marketplace/search,partner,opportunities,desktop,responsive,content,planned,,
-036,Opportunity Detail Page,Marketplace & Opportunity Discovery,05,web,/opportunities/[id],partner,opportunities,desktop,native,content,planned,,
-037,Saved Opportunities & Alerts,Marketplace & Opportunity Discovery,05,web,/marketplace/saved,partner,opportunities,desktop,responsive,content,planned,,
-038,Location-Based Opportunities Map,Marketplace & Opportunity Discovery,05,web,/marketplace/map,partner,opportunities,desktop,responsive,content,planned,,
+031,All Opportunities Marketplace,Marketplace & Opportunity Discovery,05,web,/marketplace,partner,opportunities,desktop,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,Web + native
+032,Unite Group Opportunities,Marketplace & Opportunity Discovery,05,web,/marketplace/unite,partner,opportunities,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,
+033,Approved Partner Exchange,Marketplace & Opportunity Discovery,05,web,/marketplace/exchange,verified-partner,opportunities,desktop,responsive,identity-collaboration,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,Verified partners only; originator withheld
+034,Opportunity Category Browser,Marketplace & Opportunity Discovery,05,web,/marketplace/categories,partner,opportunities,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,
+035,Advanced Search & Filter,Marketplace & Opportunity Discovery,05,web,/marketplace/search,partner,opportunities,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,Saved search + alerts
+036,Opportunity Detail Page,Marketplace & Opportunity Discovery,05,web,/opportunities/[id],partner,opportunities,desktop,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,Publisher applicant review; immutable history; web + native
+037,Saved Opportunities & Alerts,Marketplace & Opportunity Discovery,05,web,/marketplace/saved,partner,opportunities,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,
+038,Location-Based Opportunities Map,Marketplace & Opportunity Discovery,05,web,/marketplace/map,partner,opportunities,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,Dependency-free plot + accessible list
 039,Product & Service Detail,Marketplace & Opportunity Discovery,04,web,/catalogue/[id],public,catalog,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage04.e2e.ts,404 for non-visible items; price request
-040,Submit Requirement / RFQ,Marketplace & Opportunity Discovery,05,web,/rfq/new,authenticated,opportunities,desktop,responsive,content,planned,,
-041,Opportunity Eligibility Checker,Marketplace & Opportunity Discovery,05,web,/opportunities/[id]/eligibility,partner,opportunities,desktop,responsive,content,planned,,
-042,Apply / Express Interest,Marketplace & Opportunity Discovery,05,web,/opportunities/[id]/apply,verified-partner,opportunities,mobile-first,native,content,planned,,
+040,Submit Requirement / RFQ,Marketplace & Opportunity Discovery,05,web,/rfq/new,authenticated,opportunities,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,"Anonymous buyers; enters Unite review, never public"
+041,Opportunity Eligibility Checker,Marketplace & Opportunity Discovery,05,web,/opportunities/[id]/eligibility,partner,opportunities,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,Same checks enforced server-side on apply
+042,Apply / Express Interest,Marketplace & Opportunity Discovery,05,web,/opportunities/[id]/apply,verified-partner,opportunities,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,Idempotent; eligibility snapshot; web + native
 043,Register New Business Lead,Lead Registration & Client CRM,06,web,/leads/new,verified-partner,lead-protection,desktop,native,commercial-record,planned,,
 044,Customer / Company Details,Lead Registration & Client CRM,06,web,/leads/new/customer,verified-partner,customers,desktop,responsive,content,planned,,
 045,Select Products or Project Type,Lead Registration & Client CRM,06,web,/leads/new/scope,verified-partner,lead-protection,desktop,responsive,project-scope,planned,,

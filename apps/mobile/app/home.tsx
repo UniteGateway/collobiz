@@ -12,10 +12,12 @@ export default function Home() {
   const { me, loading, signOut, refresh } = useSession();
   const router = useRouter();
   const [activity, setActivity] = useState<Activity[]>([]);
+  const [dash, setDash] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const load = async () => {
     if (!me?.activeOrg) return;
     setActivity(await api.get<Activity[]>('/orgs/current/activity', { limit: 10 }).catch(() => []));
+    setDash(await api.get('/me/dashboard').catch(() => null));
   };
   useEffect(() => { load(); }, [me?.activeOrg?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   if (loading) return <Loading />;
@@ -34,6 +36,14 @@ export default function Home() {
             <Kpi label="Verification" value={org.verificationStatus.replace('_', ' ')} />
             <Kpi label="Level" value={org.membershipLevel} accent />
           </View>
+          {dash && (
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: theme.space.md }}>
+              <Kpi label="Applications" value={dash.applications.total} />
+              <Kpi label="Recommended" value={dash.recommended} />
+              <Kpi label="Alerts" value={dash.unreadNotifications} />
+            </View>
+          )}
+          <Button title="Browse opportunities" onPress={() => router.push('/marketplace')} testID="home-marketplace" />
           <Card title={org.name}><Badge status={org.verificationStatus} /><Text style={[s.hint, { marginTop: 6 }]}>Role: {me.orgRoles.join(', ').replace(/org_/g, '')}</Text></Card>
           <Card title="Recent activity">
             {activity.length === 0 ? <Text style={s.hint}>No activity yet.</Text> : activity.map((a) => <Row key={a.id} title={a.action.replace(/[._]/g, ' ')} subtitle={`${new Date(a.at).toLocaleString()}${a.actorName ? ' · ' + a.actorName : ''}`} />)}

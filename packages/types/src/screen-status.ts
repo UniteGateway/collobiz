@@ -23,7 +23,8 @@ export const SCREEN_STATUS: Record<string, ScreenProgress> = {
   '141': v([E2E, 'apps/api/test/stage02.e2e.ts'], 'Hash-chained audit with chain verification, filters, security summary'),
   '144': v([E2E, 'apps/api/test/stage02.e2e.ts'], 'Invite, accept, role change, last-owner protection, tenant-scoped'),
   '145': v([E2E, 'apps/api/test/stage02.e2e.ts'], 'TOTP enrol/disable, password change revokes sessions, session list; web + native'),
-  '023': { status: 'scaffolded', tests: [E2E], notes: 'Stage 02 baseline (identity, verification, activity); business KPIs in Stage 05' },
+  // '023' superseded below
+  '_023': { status: 'scaffolded', tests: [E2E], notes: 'Stage 02 baseline (identity, verification, activity); business KPIs in Stage 05' },
   // ---- Stage 03 ----
   '013': v([E2E, 'apps/api/test/stage03.e2e.ts'], 'Creates partner org + owner membership; requires verified email; web + native'),
   '014': v(['apps/api/test/stage03.e2e.ts'], 'Individual details; PAN encrypted; web + native (shared details screen)'),
@@ -46,4 +47,21 @@ export const SCREEN_STATUS: Record<string, ScreenProgress> = {
   '039': v([E2E, 'apps/api/test/stage04.e2e.ts'], '404 for non-visible items; price request'),
   '128': v([E2E, 'apps/api/test/stage04.e2e.ts'], 'Group companies, legal entity codes, business units'),
   '136': v([E2E, 'apps/api/test/stage04.e2e.ts'], 'Own-company scoping, draft/publish/archive, audited'),
+  // ---- Stage 05 ----
+  '006': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Public listings only'),
+  '009': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Aggregated verified-partner coverage; no identities'),
+  '023': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Real KPIs, recommendations, activity; web + native'),
+  '024': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Applications + originated opportunities, withdraw'),
+  '025': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Explainable, consent-gated rules engine'),
+  '031': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Web + native'),
+  '032': v([E2E, 'apps/api/test/stage05.e2e.ts']),
+  '033': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Verified partners only; originator withheld'),
+  '034': v([E2E, 'apps/api/test/stage05.e2e.ts']),
+  '035': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Saved search + alerts'),
+  '036': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Publisher applicant review; immutable history; web + native'),
+  '037': v([E2E, 'apps/api/test/stage05.e2e.ts']),
+  '038': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Dependency-free plot + accessible list'),
+  '040': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Anonymous buyers; enters Unite review, never public'),
+  '041': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Same checks enforced server-side on apply'),
+  '042': v([E2E, 'apps/api/test/stage05.e2e.ts'], 'Idempotent; eligibility snapshot; web + native'),
 };

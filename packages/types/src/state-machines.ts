@@ -30,7 +30,8 @@ export const OPPORTUNITY_STATES = [
 ] as const;
 export type OpportunityState = (typeof OPPORTUNITY_STATES)[number];
 export const OpportunityMachine = machine<OpportunityState>('opportunity', OPPORTUNITY_STATES, 'draft', {
-  draft: ['submitted'],
+  // Route A (§2.1): Unite-owned listings are published directly into qualification; all other routes are reviewed.
+  draft: ['submitted', 'qualification'],
   submitted: ['consent_check', 'rejected'],
   consent_check: ['duplicate_review', 'rejected'],
   duplicate_review: ['verified', 'rejected'],

@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Stage 05 — Opportunity marketplace (2026-11-06)
+- Marketplace with audience-specific visibility, search, categories, map, eligibility, idempotent applications, saved searches with alerts, explainable recommendations, dashboard KPIs, public RFQs and Unite route-A publishing; screens 006, 009, 023–025, 031–038, 040–042 (web) and 023/031/036/042 (native).
+
 ### Stage 04 — Catalogue (2026-11-06)
 - Group companies with legal entities, business units, catalogue with visibility and price-disclosure rules, success stories; screens 004, 005, 008, 039, 128, 136.
 - Fixed: unique-constraint conflicts in transactions returned 500 instead of 409.
