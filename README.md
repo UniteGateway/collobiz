@@ -36,7 +36,7 @@ Full containerized stack: `docker compose --profile app up --build`.
 ## Quality gates
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm test     # all workspaces (API tests need TEST_DATABASE_URL)
+pnpm -r --no-bail lint && pnpm -r --no-bail typecheck && pnpm test   # all workspaces (API tests need TEST_DATABASE_URL)
 pnpm --filter @collabiz/web build && pnpm --filter @collabiz/admin build
 node scripts/e2e-smoke.mjs --shots ./shots   # Playwright UI smoke (servers must be running)
 node scripts/a11y-scan.mjs                   # WCAG 2.2 AA scan (axe-core)

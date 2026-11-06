@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { ApplicationDecisionSchema, ApplySchema, OpportunityCreateSchema, OPEN_OPPORTUNITY_STATES, RfqCreateSchema, SavedSearchSchema } from '@collabiz/types';
+import { ApplicationDecisionSchema, ApplySchema, OpportunityCreateSchema, RfqCreateSchema, SavedSearchSchema } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import { groupCompanies, notifications, opportunities, opportunityApplications, opportunityEvents, organizations, rfqRequests, savedOpportunities, savedSearches } from '../../db/schema';
 import { body } from '../../common/http';
