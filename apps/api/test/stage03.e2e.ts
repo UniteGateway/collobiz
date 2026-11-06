@@ -38,7 +38,7 @@ describe('Stage 03 — onboarding and KYB', () => {
     t = await loginAll(app);
     pool = new Pool({ connectionString: process.env.DATABASE_URL });
   });
-  afterAll(async () => { await pool.end(); await app.close(); });
+  afterAll(async () => { await pool?.end(); await app?.close(); });
 
   describe('partner onboarding flow (013–021)', () => {
     let tok: string;

@@ -41,6 +41,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const r = err.getResponse();
       return res.status(err.getStatus()).json(typeof r === 'string' ? { statusCode: err.getStatus(), message: r } : r);
     }
+    // Express/body-parser errors (payload too large, malformed JSON) carry a 4xx `status` and are client errors.
+    const st = (err as { status?: number; type?: string })?.status;
+    if (typeof st === 'number' && st >= 400 && st < 500) {
+      const type = (err as { type?: string }).type;
+      const message = st === 413 ? 'Request is too large' : type === 'entity.parse.failed' ? 'Malformed JSON body' : 'Bad request';
+      return res.status(st).json({ statusCode: st, error: st === 413 ? 'PayloadTooLarge' : 'BadRequest', message });
+    }
     const pgCode = (err as { code?: string })?.code;
     if (pgCode === '23505') return res.status(409).json({ statusCode: 409, error: 'Conflict', message: 'A record with these details already exists' });
     if (pgCode === '22P02') return res.status(400).json({ statusCode: 400, error: 'BadRequest', message: 'Malformed identifier' });

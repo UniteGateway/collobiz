@@ -1,9 +1,14 @@
 # syntax=docker/dockerfile:1
 FROM node:22-bookworm-slim AS build
 WORKDIR /repo
-RUN corepack enable
 COPY . .
-RUN pnpm install --frozen-lockfile && pnpm --filter @collabiz/types build && pnpm --filter @collabiz/api build \
+RUN --mount=type=secret,id=ca,required=false \
+    if [ -f /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi; \
+    corepack enable && corepack prepare pnpm@10.28.0 --activate
+# Optional corporate/proxy CA: docker build --secret id=ca,src=/path/ca.crt (ignored when absent)
+RUN --mount=type=secret,id=ca,required=false \
+    if [ -f /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi; \
+    pnpm install --frozen-lockfile && pnpm --filter @collabiz/types build && pnpm --filter @collabiz/api build \
  && pnpm --filter @collabiz/api deploy --prod --legacy /out
 
 FROM node:22-bookworm-slim

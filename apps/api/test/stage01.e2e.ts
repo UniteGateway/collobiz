@@ -7,7 +7,7 @@ describe('Stage 01 — foundation', () => {
     await resetDatabase();
     app = await bootApp();
   });
-  afterAll(() => app.close());
+  afterAll(() => app?.close());
 
   it('GET /v1/health reports database ok', async () => {
     const r = await api(app).get('/v1/health').expect(200);
@@ -38,6 +38,12 @@ describe('Stage 01 — foundation', () => {
     await api(app).get('/v1/files/download?key=x&expires=9999999999&sig=bad').expect(400);
   });
 
+  it('oversized and malformed bodies are client errors, not 500s', async () => {
+    await api(app).post('/v1/public/enquiries').set('Content-Type', 'application/json').send(JSON.stringify({ x: 'a'.repeat(2_000_000) })).expect(413);
+    const r = await api(app).post('/v1/public/enquiries').set('Content-Type', 'application/json').send('{"name": ').expect(400);
+    expect(JSON.stringify(r.body)).not.toMatch(/ at \w|node_modules/);
+  });
+
   it('sets security headers', async () => {
     const r = await api(app).get('/v1/health');
     expect(r.headers['x-content-type-options']).toBe('nosniff');
@@ -47,7 +53,7 @@ describe('Stage 01 — foundation', () => {
 describe('Stage 01 — contact enquiries (screen 010)', () => {
   let app: INestApplication;
   beforeAll(async () => { app = await bootApp(); });
-  afterAll(() => app.close());
+  afterAll(() => app?.close());
 
   it('creates an enquiry with a reference', async () => {
     const r = await api(app).post('/v1/public/enquiries').send({ name: 'Asha Rao', email: 'asha@example.com', topic: 'partnership', message: 'We are a solar EPC firm interested in joining.', consent: true }).expect(201);

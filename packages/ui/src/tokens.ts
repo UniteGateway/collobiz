@@ -9,10 +9,13 @@ export const colors = {
   navy100: '#E6EDF6',
   navy50: '#F3F6FB',
   green600: '#3F8A31',
+  green700: '#2E7D32', // accessible action green: 5.1:1 with white (WCAG AA)
+  green800: '#2F6F25', // success text on green100: 5.4:1
   green500: '#55A444', // mark (green stroke) / leaf
   green100: '#E7F4E3',
   grey700: '#3D4451',
-  grey500: '#7A7A7B', // tagline
+  grey600: '#5E6573', // muted body text: 5.9:1 on white (WCAG AA)
+  grey500: '#7A7A7B', // tagline (brand/decorative only — fails AA for body text)
   grey300: '#CBD2DC',
   grey100: '#EEF1F5',
   white: '#FFFFFF',
@@ -28,7 +31,7 @@ export const semantic = {
   bg: colors.navy50,
   surface: colors.white,
   text: colors.navy900,
-  textMuted: colors.grey500,
+  textMuted: colors.grey600,
   primary: colors.navy700,
   primaryText: colors.white,
   accent: colors.green500,
@@ -50,7 +53,7 @@ export type Tone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'bran
 export const toneColors: Record<Tone, { fg: string; bg: string }> = {
   neutral: { fg: colors.grey700, bg: colors.grey100 },
   info: { fg: colors.info, bg: colors.infoBg },
-  success: { fg: colors.green600, bg: colors.green100 },
+  success: { fg: colors.green800, bg: colors.green100 },
   warning: { fg: colors.warning, bg: colors.warningBg },
   danger: { fg: colors.danger, bg: colors.dangerBg },
   brand: { fg: colors.navy700, bg: colors.navy100 },

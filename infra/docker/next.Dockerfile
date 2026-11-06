@@ -3,10 +3,15 @@ ARG APP=web
 FROM node:22-bookworm-slim AS build
 ARG APP
 WORKDIR /repo
-RUN corepack enable
 COPY . .
+RUN --mount=type=secret,id=ca,required=false \
+    if [ -f /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi; \
+    corepack enable && corepack prepare pnpm@10.28.0 --activate
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm install --frozen-lockfile && pnpm --filter @collabiz/types build && pnpm --filter @collabiz/${APP} build
+# Optional corporate/proxy CA: docker build --secret id=ca,src=/path/ca.crt (ignored when absent)
+RUN --mount=type=secret,id=ca,required=false \
+    if [ -f /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi; \
+    pnpm install --frozen-lockfile && pnpm --filter @collabiz/types build && pnpm --filter @collabiz/${APP} build
 
 FROM node:22-bookworm-slim
 ARG APP

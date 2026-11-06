@@ -15,7 +15,7 @@ describe('Stage 02 — identity, tenant permissions and security', () => {
     app = await bootApp();
     t = await loginAll(app);
   });
-  afterAll(() => app.close());
+  afterAll(() => app?.close());
 
   describe('registration & OTP (screens 011, 012)', () => {
     let token: string;

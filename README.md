@@ -39,11 +39,13 @@ Full containerized stack: `docker compose --profile app up --build`.
 pnpm lint && pnpm typecheck && pnpm test     # all workspaces (API tests need TEST_DATABASE_URL)
 pnpm --filter @collabiz/web build && pnpm --filter @collabiz/admin build
 node scripts/e2e-smoke.mjs --shots ./shots   # Playwright UI smoke (servers must be running)
+node scripts/a11y-scan.mjs                   # WCAG 2.2 AA scan (axe-core)
 pnpm registry                                 # regenerate screen-registry.csv + docs/ui-screen-registry.md
 ```
 
 ## Documentation
 
+- **[Launch-readiness audit](docs/launch-readiness-report.md)** · [Deployment guide](docs/deployment.md) · [Backup & restore runbook](docs/runbooks/backup-restore.md)
 - [Requirements index](docs/requirements-index.md) — everything extracted from the Master Book and UI atlas
 - [UI screen registry](docs/ui-screen-registry.md) / [`screen-registry.csv`](screen-registry.csv) — 165 screens with route, access, stage, status, tests
 - [Architecture](docs/architecture.md)

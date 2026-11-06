@@ -115,3 +115,11 @@ Stage 03 builds org creation (013–015) on these identity primitives and uses t
 
 ### Next-stage dependencies
 Stage 04 uses group-company organizations (seeded) and verification/membership levels for price visibility.
+
+---
+
+## Launch-readiness audit (2026-11-06) — verdict: NO-GO (production and pilot)
+
+Full report: [`docs/launch-readiness-report.md`](docs/launch-readiness-report.md). Summary: 25/165 screens verified; the five trust capabilities, routing, tenders, projects and commissions are not built (stages 04–16 outstanding). Audit fixes: multer high-severity advisory, runtime web→API proxy (container defect), WCAG AA contrast/ARIA, 413 handling, web CSP/HSTS, Swagger disabled in production, demo-seed production guard, backup file permissions, Docker CA support. Added backup/restore scripts (drill passed), deployment guide, production env template, EAS config, accessibility scanner.
+
+Commands: 131 unit/integration tests pass · 28/28 browser journeys · `node scripts/a11y-scan.mjs` 0 violations on 12 pages · API + web Docker images built and run in production mode · Android/iOS bundles + `expo prebuild` OK · `pnpm audit --prod`: 0 high/critical.

@@ -18,13 +18,18 @@
     "db:migrate": "pnpm --filter @collabiz/api db:migrate",
     "db:seed": "pnpm --filter @collabiz/api db:seed",
     "registry": "node scripts/generate-registry.mjs",
-    "e2e": "node scripts/e2e-smoke.mjs"
+    "e2e": "node scripts/e2e-smoke.mjs",
+    "a11y": "node scripts/a11y-scan.mjs"
   },
   "pnpm": {
     "overrides": {
       "react": "19.3.0",
       "react-dom": "19.3.0",
-      "@types/react": "~19.2.0"
+      "@types/react": "~19.2.0",
+      "multer": "^2.5.0"
     }
+  },
+  "devDependencies": {
+    "axe-core": "4.10.3"
   }
 }

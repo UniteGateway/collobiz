@@ -83,6 +83,11 @@ export async function seedAll(db: Db) {
 }
 
 if (require.main === module) {
+  // Demo accounts use a published password and TOTP secret — never allow them into production.
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_DEMO_SEED !== 'true') {
+    console.error('Refusing to load demo seed data with NODE_ENV=production (set ALLOW_DEMO_SEED=true only for an isolated demo environment).');
+    process.exit(1);
+  }
   const pool = createPool();
   seedAll(drizzle(pool, { schema }))
     .then((r) => console.info(`Seeded ${Object.keys(r.orgs).length} organizations, ${Object.keys(r.users).length} users. Demo password: ${DEMO_PASSWORD}`))

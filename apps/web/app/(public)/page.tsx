@@ -7,7 +7,7 @@ export default function HomePage() {
     <div data-screen="001">
       <section className="cz-hero">
         <div className="cz-container">
-          <p style={{ letterSpacing: '.18em', fontSize: 13, textTransform: 'uppercase', color: '#9fd391' }}>Connect. Collaborate. Grow.</p>
+          <p style={{ letterSpacing: '.18em', fontSize: 13, textTransform: 'uppercase', color: '#A8D99B' }}>Connect. Collaborate. Grow.</p>
           <h1>Bring business, find capability, execute professionally and track the commercial outcome.</h1>
           <p>
             COLLABIZ is the Unite-first hybrid B2B collaboration network for consultants, EPC contractors, traders, manufacturers,
@@ -58,7 +58,7 @@ export default function HomePage() {
         <div className="cz-container">
           <h2>Priority sectors</h2>
           <div className="cz-chips" style={{ marginTop: 12 }}>
-            {SECTORS.map((s) => <span key={s.code} className="cz-chip" aria-pressed={s.priority}>{s.name}</span>)}
+            {SECTORS.map((s) => <span key={s.code} className="cz-chip" data-on={s.priority}>{s.name}</span>)}
           </div>
         </div>
       </section>

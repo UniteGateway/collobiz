@@ -4,6 +4,15 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Launch-readiness audit (2026-11-06)
+#### Added
+- `docs/launch-readiness-report.md` (verdict NO-GO), `docs/deployment.md`, `docs/runbooks/backup-restore.md`, `.env.production.example`, `apps/mobile/eas.json`, `infra/backup/{backup,restore}.sh`, `scripts/a11y-scan.mjs`.
+#### Fixed / Security
+- `multer` upgraded to 2.5.0 (high-severity DoS advisory).
+- Web/admin `/api/v1` proxy now resolved at runtime (container images failed with 500).
+- WCAG 2.2 AA: accessible muted-text and action-green tokens; invalid ARIA on homepage chips.
+- Oversized bodies return 413; CSP + HSTS on web/admin; Swagger UI off in production; demo seed refuses production; backups written with mode 600; Docker builds accept a corporate CA.
+
 ### Stage 03 — Onboarding and KYB (2026-11-06)
 #### Added
 - Partner onboarding 013–022 (web + native), KYC/KYB private document upload with validation, scanning and signed links, encrypted bank & tax profile, agreement e-acceptance with evidence, idempotent submission.

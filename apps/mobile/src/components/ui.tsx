@@ -25,7 +25,7 @@ export function ScreenView({ id, title, children, scroll = true, footer }: { id?
 }
 
 export function Button({ title, onPress, variant = 'primary', disabled, loading, testID }: { title: string; onPress?: () => void; variant?: 'primary' | 'accent' | 'secondary' | 'danger'; disabled?: boolean; loading?: boolean; testID?: string }) {
-  const bg = { primary: colors.navy700, accent: colors.green500, secondary: colors.white, danger: colors.danger }[variant];
+  const bg = { primary: colors.navy700, accent: colors.green700, secondary: colors.white, danger: colors.danger }[variant];
   const fg = variant === 'secondary' ? colors.navy700 : colors.white;
   return (
     <Pressable testID={testID} accessibilityRole="button" accessibilityState={{ disabled: !!(disabled || loading), busy: !!loading }} disabled={disabled || loading} onPress={onPress}
@@ -51,7 +51,7 @@ export function Card({ title, children, style }: { title?: string; children?: Re
 }
 
 export function Kpi({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
-  return <View style={s.kpi}><Text style={[s.kpiValue, accent && { color: colors.green500 }]}>{value}</Text><Text style={s.hint}>{label}</Text></View>;
+  return <View style={s.kpi}><Text style={[s.kpiValue, accent && { color: colors.green700 }]}>{value}</Text><Text style={s.hint}>{label}</Text></View>;
 }
 
 export function Badge({ status, tone, label }: { status: string; tone?: Tone; label?: string }) {
@@ -102,12 +102,12 @@ export const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.navy50 },
   body: { padding: space.lg, paddingBottom: space.xxxl },
   header: { marginBottom: space.lg },
-  crumb: { color: colors.grey500, fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 4 },
+  crumb: { color: colors.grey600, fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 4 },
   h1: { fontSize: 24, fontWeight: '700', color: colors.navy900 },
   h2: { fontSize: 17, fontWeight: '600', color: colors.navy900, marginBottom: space.sm },
   p: { color: colors.navy900, fontSize: 15, lineHeight: 22, marginBottom: space.sm },
   label: { fontWeight: '600', color: colors.navy900, marginBottom: 6 },
-  hint: { color: colors.grey500, fontSize: 13, marginTop: 2 },
+  hint: { color: colors.grey600, fontSize: 13, marginTop: 2 },
   error: { color: colors.danger, fontSize: 13, marginTop: 4 },
   input: { borderWidth: 1, borderColor: colors.grey300, borderRadius: radius.sm, backgroundColor: colors.white, paddingHorizontal: 12, minHeight: 46, fontSize: 16, color: colors.navy900 },
   btn: { minHeight: 48, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.lg, borderWidth: 1, marginVertical: 6 },

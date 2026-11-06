@@ -28,6 +28,8 @@ const Env = z.object({
   DUAL_APPROVAL_THRESHOLD: z.coerce.number().default(5_00_000_00),
   /** Expose OTP codes in API responses for local development / automated tests only. */
   DEV_EXPOSE_OTP: bool.default(false),
+  /** Serve interactive OpenAPI UI at /docs. Defaults off in production. */
+  EXPOSE_API_DOCS: bool.optional(),
   /** Login/registration attempts per minute per client (§7.1 rate limiting). */
   AUTH_RATE_LIMIT: z.coerce.number().int().positive().default(20),
 });
