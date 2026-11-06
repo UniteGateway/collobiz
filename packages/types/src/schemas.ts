@@ -358,3 +358,23 @@ export const TerritorySchema = z.object({ distributorOrgId: id, region: z.string
 export const ClaimSchema = z.object({ poId: id, kind: z.enum(['return', 'warranty', 'damage', 'shortage']), description: z.string().trim().min(10).max(4000), lines: z.array(z.object({ item: z.string().min(1), quantity: z.number().positive() })).min(1), amountClaimed: money.optional() });
 export const ClaimResponseSchema = z.object({ decision: z.enum(['accept', 'reject']), resolution: z.enum(['refund', 'replacement', 'credit_note', 'repair']).optional(), note: z.string().trim().min(5).max(2000) })
   .refine((v) => v.decision === 'reject' || !!v.resolution, { message: 'Choose how you will resolve the claim', path: ['resolution'] });
+
+// ---------- Commissions & finance (Stage 12 — 027, 095–104, 135, 138, 157–159) ----------
+const bps = z.number().int().min(0).max(10000);
+export const CommissionPolicySchema = z.object({
+  code: z.string().trim().regex(/^[A-Z0-9_-]{3,40}$/, 'Use 3–40 capital letters, digits, - or _'), name: z.string().trim().min(3).max(120), sector: z.enum(SECTOR_CODES).optional(),
+  basis: z.enum(['percent', 'flat', 'tiered']), rateBps: bps.optional(), flatAmount: money.optional(), tiers: z.array(z.object({ upTo: money.nullable(), rateBps: bps })).max(10).optional(),
+  tdsBps: bps.default(500), clawbackDays: z.number().int().min(0).max(730).default(90),
+}).refine((v) => (v.basis === 'percent' ? v.rateBps != null : v.basis === 'flat' ? v.flatAmount != null : !!v.tiers?.length), { message: 'Give the rate, flat amount or tiers for this basis', path: ['basis'] });
+export const CommissionAgreementSchema = z.object({ projectId: id, beneficiaryOrgId: id, policyId: id, shareBps: bps.default(10000), leadClaimId: id.optional() });
+export const CommissionCalcSchema = z.object({ dealValue: money, policyId: id.optional(), basis: z.enum(['percent', 'flat', 'tiered']).optional(), rateBps: bps.optional(), flatAmount: money.optional(), tiers: z.array(z.object({ upTo: money.nullable(), rateBps: bps })).optional(), shareBps: bps.default(10000), gstRegistered: z.boolean().default(false), tdsBps: bps.optional() });
+export const ApprovalNoteSchema = z.object({ note: z.string().trim().max(1000).optional() });
+export const HoldSchema = z.object({ reason: z.string().trim().min(5).max(1000) });
+export const PayoutRequestSchema = z.object({ entryIds: z.array(id).min(1).max(200), partnerInvoiceNo: z.string().trim().min(3).max(40) });
+export const SettlementSchema = z.object({ bankReference: z.string().trim().regex(/^[A-Z0-9-]{8,30}$/i, 'Enter the bank UTR / reference'), method: z.enum(['neft', 'rtgs', 'imps', 'upi']).default('neft'), paidAt: z.string().datetime().optional() });
+export const FinanceDisputeSchema = z.object({ kind: z.enum(['commission', 'payment']), entryId: id.optional(), payoutId: id.optional(), reason: z.string().trim().min(10).max(4000), expectedAmount: money.optional() })
+  .refine((v) => (v.kind === 'commission' ? !!v.entryId : !!v.payoutId), { message: 'Choose the commission line or payout you are disputing', path: ['entryId'] });
+export const DisputeMessageSchema = z.object({ body: z.string().trim().min(2).max(4000) });
+export const FinanceDisputeRulingSchema = z.object({ outcome: z.enum(['upheld', 'rejected', 'adjusted']), resolution: z.string().trim().min(10).max(4000), adjustedAmount: money.optional() })
+  .refine((v) => v.outcome !== 'adjusted' || v.adjustedAmount != null, { message: 'Give the adjusted payable amount', path: ['adjustedAmount'] });
+export const FinanceEnquirySchema = z.object({ projectId: id.optional(), purpose: z.string().trim().min(10).max(2000), amount: money.refine((v) => v > 0, 'Enter an amount'), tenorMonths: z.number().int().min(1).max(360).optional(), consentToShare: z.literal(true, { message: 'Consent is required to share your details with a finance partner' }) });

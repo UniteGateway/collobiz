@@ -25,7 +25,7 @@ import { auditEvents, bidScores, bids, memberships, negotiationMessages, notific
 import { body } from '../../common/http';
 import { Ctx, RequireCaps, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
-import { decryptField, encryptField, randomDigits, sha256 } from '../../common/crypto';
+import { canonicalJson, decryptField, encryptField, randomDigits, sha256 } from '../../common/crypto';
 import { Idempotent } from '../../common/idempotency';
 import { MAX_UPLOAD_BYTES, StorageService } from '../../common/adapters';
 
@@ -40,7 +40,7 @@ const EVALUATED: TenderState[] = ['technical_evaluation', 'commercial_evaluation
 const COMMERCIAL_OPEN: TenderState[] = ['commercial_evaluation', 'negotiation', 'awarded'];
 const QUALIFIED: BidState[] = ['technically_qualified', 'shortlisted', 'awarded', 'not_awarded'];
 const levelIdx = (l: string | null | undefined) => (l ? MEMBERSHIP_LEVELS.indexOf(l as (typeof MEMBERSHIP_LEVELS)[number]) : -1);
-const seal = (tenderId: string, orgId: string, technical: unknown, commercial: unknown) => sha256(JSON.stringify({ tenderId, orgId, technical, commercial }));
+const seal = (tenderId: string, orgId: string, technical: unknown, commercial: unknown) => sha256(canonicalJson({ tenderId, orgId, technical, commercial }));
 const avg = (xs: number[]) => (xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10 : null);
 
 @Injectable()

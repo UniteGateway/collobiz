@@ -1,10 +1,11 @@
 'use client';
 import { useState } from 'react';
-import { Alert, Button, Card, DataTable, DescriptionList, Grid, Kpi, LoadingState, ProgressBar, StatusBadge, TextInput } from '@collabiz/ui';
+import Link from 'next/link';
+import { Alert, Button, Card, DataTable, DescriptionList, Grid, Kpi, LoadingState, ProgressBar, Select, StatusBadge, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { CHANGE_LABELS, changeValue, fmtDate, fmtTime, ProjectTabs, rupees, useProject } from '@/components/Projects';
 import { api } from '@/lib/api';
-import { useMutation } from '@/lib/hooks';
+import { useMutation, useQuery } from '@/lib/hooks';
 
 /** Screen 076 — Project Overview Dashboard. */
 export default function ProjectOverview() {
@@ -12,6 +13,11 @@ export default function ProjectOverview() {
   const d = p.data;
   const [reason, setReason] = useState('');
   const activate = useMutation(async () => { await api.post(`/projects/${p.id}/activate`); p.reload(); return true; });
+  const ags = useQuery<any[]>(p.data?.role === 'owner' ? '/commissions/agreements' : null);
+  const pols = useQuery<any[]>(p.data?.role === 'owner' ? '/commissions/policies' : null);
+  const partners = useQuery<any[]>(p.data?.role === 'owner' ? '/partners' : null);
+  const [ca, setCa] = useState({ beneficiaryOrgId: '', policyId: '', share: '100' });
+  const createAg = useMutation(async () => { const a = await api.post<any>('/commissions/agreements', { projectId: p.id, beneficiaryOrgId: ca.beneficiaryOrgId, policyId: ca.policyId, shareBps: Math.round(Number(ca.share) * 100) }); ags.reload(); return a; });
   const hold = useMutation(async (status: string) => { await api.post(`/projects/${p.id}/status`, { status, reason }); setReason(''); p.reload(); return true; });
   if (p.loading) return <Screen id="076"><LoadingState /></Screen>;
   if (p.error) return <Screen id="076"><ApiErrorView error={p.error} onRetry={p.reload} /></Screen>;
@@ -59,6 +65,22 @@ export default function ProjectOverview() {
           {d.recentChanges.map((c: any) => <p key={c.id} style={{ margin: '0 0 8px', fontSize: 14 }}><strong>{CHANGE_LABELS[c.field] ?? c.field}</strong> {c.entity !== 'project' ? `(${c.entity})` : ''}: {changeValue(c.field, c.before)} → {changeValue(c.field, c.after)}<br /><span className="cz-muted">{c.who} · {fmtTime(c.createdAt)}{c.reason ? ` · “${c.reason}”` : ''}</span></p>)}
         </Card>
       </Grid>
+      {d.role === 'owner' && (
+        <Card title="Introducer commission">
+          {createAg.error && <Alert tone="danger">{createAg.error}</Alert>}
+          <DataTable caption="Commission agreements" rows={(ags.data ?? []).filter((a) => a.projectId === p.id)} empty={<p className="cz-muted">No introducer commission on this project.</p>} columns={[
+            { key: 'code', header: 'Agreement', render: (a: any) => <Link href={`/commissions/agreements/${a.id}`} className="cz-mono">{a.code}</Link> },
+            { key: 'terms', header: 'Terms', render: (a: any) => `${a.terms.policy.name} · share ${a.shareBps / 100}%` },
+          ]} />
+          <div className="cz-row" style={{ alignItems: 'flex-end' }}>
+            <Select label="Introducer (beneficiary)" value={ca.beneficiaryOrgId} onChange={(e) => setCa({ ...ca, beneficiaryOrgId: e.target.value })} placeholder="Choose a verified partner" options={(partners.data ?? []).map((x: any) => ({ value: x.id, label: x.name }))} error={createAg.fieldErrors.beneficiaryOrgId} />
+            <Select label="Commission policy" value={ca.policyId} onChange={(e) => setCa({ ...ca, policyId: e.target.value })} placeholder="Choose an active policy" options={(pols.data ?? []).filter((x) => x.status === 'active').map((x) => ({ value: x.id, label: `${x.name} (v${x.version})` }))} />
+            <TextInput label="Share (%)" inputMode="decimal" value={ca.share} onChange={(e) => setCa({ ...ca, share: e.target.value })} />
+            <Button onClick={() => createAg.run()} disabled={!ca.beneficiaryOrgId || !ca.policyId} loading={createAg.pending}>Create agreement</Button>
+          </div>
+          <p className="cz-muted" style={{ fontSize: 13 }}>Commission is earned only when you record the customer payment for each certified milestone.</p>
+        </Card>
+      )}
       {d.role === 'owner' && ['active', 'on_hold'].includes(d.status) && (
         <Card title={d.status === 'active' ? 'Pause the project' : 'Resume the project'}>
           <div className="cz-row" style={{ alignItems: 'flex-end' }}>

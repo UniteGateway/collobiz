@@ -8,7 +8,7 @@ import { InjectDb, type Db } from '../../db/client';
 import { crmActivities, crmDeals, customers, disputeEntries, disputes, duplicateCandidates, groupCompanies, leadClaims, memberships, notifications, opportunities, opportunityEvents, organizations, routingEvents, users } from '../../db/schema';
 import { AuditService } from '../../common/audit.service';
 import { MailService } from '../../common/adapters';
-import { randomDigits, sha256 } from '../../common/crypto';
+import { randomDigits, sha256, canonicalJson } from '../../common/crypto';
 import type { RequestContext } from '../../common/context';
 import { OpportunitiesService } from '../opportunities/opportunities.service';
 
@@ -17,7 +17,6 @@ export const APPEAL_DAYS = 14;
 type Claim = typeof leadClaims.$inferSelect;
 type RoutingEvent = typeof routingEvents.$inferSelect;
 
-const stable = (v: unknown) => JSON.stringify(v, Object.keys(v as object).sort());
 
 @Injectable()
 export class LeadsService {
@@ -35,7 +34,7 @@ export class LeadsService {
       customer: b.customer, sector: b.sector, productOrProject: b.productOrProject, quantityOrCapacity: b.quantityOrCapacity ?? null,
       estimatedValue: b.estimatedValue, currency: b.currency, requirements: b.requirements, consent: b.consent, evidenceSummary: b.evidenceSummary,
     };
-    const evidenceHash = sha256(stable(snapshot));
+    const evidenceHash = sha256(canonicalJson(snapshot));
     const claimId = await this.db.transaction(async (txx) => {
       const tx = txx as unknown as Db;
       const [cust] = await tx.insert(customers).values({ organizationId: ctx.orgId!, legalName: b.customer.legalName, taxId: b.customer.taxId, contactName: b.customer.contactName, contactEmail: b.customer.contactEmail, contactPhone: b.customer.contactPhone, city: b.customer.city, country: b.customer.country, consentProvenance: b.consent, restrictedContacts: b.consent.disclosureScope === 'restricted' }).returning();

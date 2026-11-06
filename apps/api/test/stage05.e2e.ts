@@ -122,4 +122,10 @@ describe('Stage 05 — opportunity marketplace (gate: real listings and eligibil
     expect(d.body.applications.total).toBe(1);
     expect(d.body.saved).toBe(1);
   });
+
+  it('038 map query returns only located listings, independent of list size', async () => {
+    const r = await api(app).get('/v1/opportunities?mapped=true&limit=200').set(auth(t.asha)).expect(200);
+    expect(r.body.length).toBeGreaterThan(0);
+    expect(r.body.every((o: any) => o.lat != null && o.lng != null)).toBe(true);
+  });
 });

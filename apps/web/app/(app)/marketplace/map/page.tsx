@@ -14,7 +14,7 @@ const y = (lat: number) => (1 - (lat - B.minLat) / (B.maxLat - B.minLat)) * 100;
 
 /** Screen 038 — Location-Based Opportunities Map (accessible list alongside the plot). */
 export default function MapPage() {
-  const q = useQuery<Opp[]>('/opportunities');
+  const q = useQuery<Opp[]>('/opportunities', { mapped: 'true', limit: '200' }); // only located listings, so new unmapped ones never crowd them out
   const [sel, setSel] = useState<string | null>(null);
   const pts = (q.data ?? []).filter((o) => o.lat != null && o.lng != null);
   return (

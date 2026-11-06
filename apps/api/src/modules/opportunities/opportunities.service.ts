@@ -12,7 +12,7 @@ const OPEN = [...OPEN_OPPORTUNITY_STATES] as string[];
 /** Constant SQL list (values are compile-time constants, not user input). */
 export const OPEN_LIST = sql.raw(`(${OPEN.map((s) => `'${s}'`).join(',')})`);
 
-export interface ListFilters { q?: string; sector?: string; city?: string; region?: string; route?: string; kind?: string; minValue?: number; maxValue?: number; deadlineBefore?: string; scope?: 'all' | 'unite' | 'exchange' }
+export interface ListFilters { q?: string; sector?: string; city?: string; region?: string; route?: string; kind?: string; minValue?: number; maxValue?: number; deadlineBefore?: string; scope?: 'all' | 'unite' | 'exchange'; mapped?: boolean }
 
 @Injectable()
 export class OpportunitiesService {
@@ -50,6 +50,7 @@ export class OpportunitiesService {
     if (f.minValue != null && !Number.isNaN(f.minValue)) c.push(gte(opportunities.estimatedValue, f.minValue));
     if (f.maxValue != null && !Number.isNaN(f.maxValue)) c.push(lte(opportunities.estimatedValue, f.maxValue));
     if (f.deadlineBefore) c.push(lte(opportunities.deadline, new Date(f.deadlineBefore)));
+    if (f.mapped) c.push(sql`${opportunities.lat} is not null and ${opportunities.lng} is not null`);
     return c;
   }
 

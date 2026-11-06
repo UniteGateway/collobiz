@@ -27,6 +27,11 @@ if (pid) for (const u of ['', '/milestones', '/progress', '/materials', '/docume
 for (const u of ['/trading', '/trading/suppliers', '/trading/requirements/new', '/trading/enquiry', '/trading/quotations', '/trading/po/new', '/trading/orders', '/trading/territories', '/trading/claims']) await scan(WEB + u);
 const oid = await p.evaluate(async () => (await (await fetch('/api/v1/trading/purchase-orders')).json())[0]?.id);
 if (oid) await scan(`${WEB}/trading/orders/${oid}/shipping`);
+await p.goto(WEB + '/login'); await p.context().clearCookies(); await p.goto(WEB + '/login');
+await p.getByLabel('Email').fill('meera@consult.example'); await p.getByLabel('Password').fill('Collabiz#2026'); await p.getByRole('button', { name: 'Sign in' }).last().click(); await p.waitForURL(/dashboard/);
+for (const u of ['/earnings', '/earnings/summary', '/earnings/live', '/commissions/calculator', '/payouts/request', '/payments/history', '/tax-records', '/finance/opportunities', '/finance/enquiry', '/finance/disputes', '/commissions/disputes']) await scan(WEB + u);
+const agid = await p.evaluate(async () => (await (await fetch('/api/v1/commissions/agreements')).json())[0]?.id);
+if (agid) { await scan(`${WEB}/commissions/agreements/${agid}`); await scan(`${WEB}/commissions/agreements/${agid}/milestones`); }
 await scan(ADMIN + '/login');
 await b.close();
 process.exit(total ? 1 : 0);

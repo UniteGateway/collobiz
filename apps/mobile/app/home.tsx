@@ -50,6 +50,7 @@ export default function Home() {
           <Row title="Sales pipeline" subtitle="Screen 053" onPress={() => router.push('/pipeline')} />
           <Row title="Projects & site progress" subtitle="Screens 075, 079" onPress={() => router.push('/projects')} />
           <Row title="Product enquiries & price requests" subtitle="Screen 088" onPress={() => router.push('/trading/enquiry')} />
+          <Row title="Earnings & payments" subtitle="Screens 095, 100, 158" onPress={() => router.push('/earnings')} />
           <Row title="Collaboration requests" subtitle="Screen 059" onPress={() => router.push('/collaboration')} />
           <Card title={org.name}><Badge status={org.verificationStatus} /><Text style={[s.hint, { marginTop: 6 }]}>Role: {me.orgRoles.join(', ').replace(/org_/g, '')}</Text></Card>
           <Card title="Recent activity">

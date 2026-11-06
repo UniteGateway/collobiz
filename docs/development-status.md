@@ -15,7 +15,7 @@ Overview of the 16 stages from Master Book §8. Detailed evidence (files, comman
 | 09 | Tender/RFQ/proposals | Sealed bid boundaries and evaluator controls | ✅ Complete |
 | 10 | Contracts and document workflows | Approved agreement version immutable | ✅ Complete |
 | 11 | Project execution and procurement | Evidence-based certification and change logs | ✅ Complete |
-| 12 | Commission ledger and finance | No unearned payout, idempotent settlement | ☐ |
+| 12 | Commission ledger and finance | No unearned payout, idempotent settlement | ✅ Complete |
 | 13 | Messaging, meetings and support | Message privacy, retention and escalation | ☐ |
 | 14 | Reputation, learning and AI | Explainable recommendations, appeals | ☐ |
 | 15 | International and group integrations | Per-country controls, API contract tests | ☐ |
@@ -23,4 +23,4 @@ Overview of the 16 stages from Master Book §8. Detailed evidence (files, comman
 
 > **Launch-readiness audit 2026-11-06: NO-GO** for production and pilot — see [launch-readiness-report.md](launch-readiness-report.md).
 
-**Screen progress (2026-11-06, after Stage 11):** 113 of 165 screens verified end-to-end (API e2e + browser), 52 planned. API 151/151 · browser 59/59 · WCAG 0 violations · mobile 13/13.
+**Screen progress (2026-11-06, after Stage 12):** 129 of 165 screens verified end-to-end (API e2e + browser), 36 planned. API 160/160 · browser 62/62 · WCAG 0 violations · mobile 15/15.

@@ -1,4 +1,4 @@
-import { hashPassword, verifyPassword, encryptField, decryptField, signJwt, verifyJwt, totp, verifyTotp, base32Encode, base32Decode, signDownload, verifyDownload, newTotpSecret } from './crypto';
+import { hashPassword, verifyPassword, encryptField, decryptField, signJwt, verifyJwt, totp, verifyTotp, base32Encode, base32Decode, signDownload, verifyDownload, newTotpSecret, canonicalJson, sha256 } from './crypto';
 
 describe('crypto utilities', () => {
   it('hashes and verifies passwords', async () => {
@@ -37,5 +37,18 @@ describe('crypto utilities', () => {
     expect(verifyDownload('kyb/abc', expires, sig)).toBe(true);
     expect(verifyDownload('kyb/other', expires, sig)).toBe(false);
     expect(verifyDownload('kyb/abc', Math.floor(Date.now() / 1000) - 1, sig)).toBe(false);
+  });
+});
+
+describe('canonicalJson (hash input)', () => {
+  it('is independent of key order at every depth and covers nested values', () => {
+    const a = { b: 1, a: { y: [2, { q: 1, p: 2 }], x: 'k' } };
+    const b = { a: { x: 'k', y: [2, { p: 2, q: 1 }] }, b: 1 };
+    expect(canonicalJson(a)).toBe(canonicalJson(b));
+    // Regression: nested values must change the output (an array replacer used to drop nested keys)
+    const lead1 = { customer: { legalName: 'Shakti Polymers', taxId: 'X1' }, consent: { method: 'email' } };
+    const lead2 = { customer: { legalName: 'Different Buyer', taxId: 'X2' }, consent: { method: 'email' } };
+    expect(sha256(canonicalJson(lead1))).not.toBe(sha256(canonicalJson(lead2)));
+    expect(JSON.stringify(lead1, Object.keys(lead1).sort())).toBe(JSON.stringify(lead2, Object.keys(lead2).sort())); // the old, broken form
   });
 });

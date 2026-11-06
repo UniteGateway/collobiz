@@ -20,6 +20,13 @@ export async function verifyPassword(pw: string, stored: string): Promise<boolea
 }
 
 export const sha256 = (s: string | Buffer) => createHash('sha256').update(s).digest('hex');
+/**
+ * Canonical JSON: object keys sorted at every depth, arrays kept in order. Use it for every hash over structured data —
+ * PostgreSQL jsonb does not preserve key order, and a JSON.stringify array replacer filters nested keys.
+ */
+export function canonicalJson(v: unknown): string {
+  return JSON.stringify(v ?? null, (_k, val) => (val && typeof val === 'object' && !Array.isArray(val) ? Object.fromEntries(Object.entries(val as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) : val));
+}
 export const randomToken = (bytes = 32) => randomBytes(bytes).toString('base64url');
 export const randomDigits = (n = 6) => Array.from({ length: n }, () => randomInt(0, 10)).join('');
 

@@ -15,6 +15,7 @@ import { CatalogModule } from './modules/catalog/catalog.controller';
 import { OpportunitiesModule } from './modules/opportunities/opportunities.controller';
 import { LeadsModule } from './modules/leads/leads.controller';
 import { CrmModule } from './modules/crm/crm.controller';
+import { CommissionsModule } from './modules/commissions/commissions.controller';
 import { TradingModule } from './modules/trading/trading.controller';
 import { ProjectsModule } from './modules/projects/projects.controller';
 import { ContractsModule } from './modules/contracts/contracts.controller';
@@ -22,7 +23,7 @@ import { TendersModule } from './modules/tenders/tenders.controller';
 import { TeamsModule } from './modules/teams/teams.controller';
 import { config } from './config';
 
-export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule];
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule];
 
 @Module({
   imports: [

@@ -4,7 +4,7 @@
 
 Source: Master Book Section 05 (functional specification) and the 165-screen UI Design Atlas (U01–U10). Screen IDs and titles are preserved verbatim.
 
-**Status:** verified 113 · implemented 0 · scaffolded 0 · planned 52
+**Status:** verified 129 · implemented 0 · scaffolded 0 · planned 36
 
 Status meaning: *planned* (not started) → *scaffolded* (route + shell) → *implemented* (wired to real API) → *verified* (automated test passed).
 
@@ -61,7 +61,7 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 024 | My Opportunities Overview | 05 | web `/my/opportunities` | partner | opportunities | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
 | 025 | Recommended Business Feed | 05 | web `/feed` | partner | partner-matching | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
 | 026 | My Leads & Pipeline | 06 | web `/my/leads` | partner | lead-protection | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
-| 027 | Earnings & Settlement Summary | 12 | web `/earnings/summary` | partner | commissions | desktop | responsive | planned |  |
+| 027 | Earnings & Settlement Summary | 12 | web `/earnings/summary` | partner | commissions | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
 | 028 | Tasks & Follow-up Calendar | 07 | web `/tasks` | partner | customers | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage07.e2e.ts |
 | 029 | Partner Performance Scorecard | 14 | web `/performance` | partner | reputation | desktop | responsive | planned |  |
 | 030 | Quick Actions & Activity Center | 07 | web `/activity` | partner | audit | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage07.e2e.ts |
@@ -164,16 +164,16 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
-| 095 | Partner Earnings Overview | 12 | web `/earnings` | partner | commissions | desktop | native | planned |  |
-| 096 | Commission Agreement Detail | 12 | web `/commissions/agreements/[id]` | partner | commissions | desktop | responsive | planned |  |
-| 097 | Commission Calculator | 12 | web `/commissions/calculator` | partner | commissions | desktop | responsive | planned |  |
-| 098 | Commission Approval Workflow | 12 | web `/commissions/approvals` | finance | commissions | desktop | responsive | planned |  |
-| 099 | Invoice / Payout Request | 12 | web `/payouts/request` | partner | invoicing | desktop | responsive | planned |  |
-| 100 | Payment & Settlement History | 12 | web `/payments/history` | partner | invoicing | mobile-first | native | planned |  |
-| 101 | Tax / TDS / GST Records | 12 | web `/tax-records` | partner | invoicing | desktop | responsive | planned |  |
-| 102 | Finance & Funding Opportunities | 12 | web `/finance/opportunities` | partner | commissions | desktop | responsive | planned |  |
-| 103 | Project Finance Enquiry | 12 | web `/finance/enquiry` | partner | commissions | desktop | responsive | planned |  |
-| 104 | Payment Disputes & Reconciliation | 12 | web `/finance/disputes` | partner | commissions | desktop | responsive | planned |  |
+| 095 | Partner Earnings Overview | 12 | web `/earnings` | partner | commissions | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
+| 096 | Commission Agreement Detail | 12 | web `/commissions/agreements/[id]` | partner | commissions | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
+| 097 | Commission Calculator | 12 | web `/commissions/calculator` | partner | commissions | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
+| 098 | Commission Approval Workflow | 12 | web `/commissions/approvals` | finance | commissions | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
+| 099 | Invoice / Payout Request | 12 | web `/payouts/request` | partner | invoicing | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
+| 100 | Payment & Settlement History | 12 | web `/payments/history` | partner | invoicing | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
+| 101 | Tax / TDS / GST Records | 12 | web `/tax-records` | partner | invoicing | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
+| 102 | Finance & Funding Opportunities | 12 | web `/finance/opportunities` | partner | commissions | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
+| 103 | Project Finance Enquiry | 12 | web `/finance/enquiry` | partner | commissions | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
+| 104 | Payment Disputes & Reconciliation | 12 | web `/finance/disputes` | partner | commissions | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
 
 ## 11 · Communication & Meetings
 
@@ -224,10 +224,10 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 132 | Opportunity Approval & Routing | 06 | admin `/routing` | unite-admin | routing | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
 | 133 | Priority Review SLA Configuration | 06 | admin `/sla` | super-admin | routing | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
 | 134 | Lead Ownership & Conflict Resolution | 06 | admin `/lead-conflicts` | compliance | lead-protection | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
-| 135 | Commission Policy Configuration | 12 | admin `/commission-policy` | super-admin | commissions | desktop | desktop-admin | planned |  |
+| 135 | Commission Policy Configuration | 12 | admin `/commission-policy` | super-admin | commissions | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
 | 136 | Product & Catalogue Management | 04 | admin `/catalogue` | unite-admin | catalog | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
 | 137 | Project / Tender Administration | 09 | admin `/tenders` | unite-admin | tenders | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage09.e2e.ts |
-| 138 | Finance & Settlement Controls | 12 | admin `/finance` | finance | invoicing | desktop | desktop-admin | planned |  |
+| 138 | Finance & Settlement Controls | 12 | admin `/finance` | finance | invoicing | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
 | 139 | Performance Analytics & BI | 16 | admin `/analytics` | admin | analytics | desktop | desktop-admin | planned |  |
 | 140 | AI Monitoring & Recommendation Controls | 14 | admin `/ai` | super-admin | partner-matching | desktop | desktop-admin | planned |  |
 | 141 | Audit Logs & Security Center | 02 | admin `/audit` | super-admin | audit | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
@@ -256,9 +256,9 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 154 | Collaboration Team Creation | 08 | web `/teams/new` | verified-partner | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
 | 155 | Consortium Member Roles & Sharing | 08 | web `/teams/[id]/members` | team-member | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
 | 156 | Joint Proposal & Team Workspace | 08 | web `/teams/[id]/workspace` | team-member | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
-| 157 | Commission Agreement & Milestones | 12 | web `/commissions/agreements/[id]/milestones` | partner | commissions | desktop | responsive | planned |  |
-| 158 | Live Earnings & Settlement Tracker | 12 | web `/earnings/live` | partner | commissions | desktop | native | planned |  |
-| 159 | Commission Dispute Resolution | 12 | web `/commissions/disputes` | partner | commissions | desktop | responsive | planned |  |
+| 157 | Commission Agreement & Milestones | 12 | web `/commissions/agreements/[id]/milestones` | partner | commissions | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
+| 158 | Live Earnings & Settlement Tracker | 12 | web `/earnings/live` | partner | commissions | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
+| 159 | Commission Dispute Resolution | 12 | web `/commissions/disputes` | partner | commissions | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage12.e2e.ts |
 | 160 | AI Opportunity Matching Dashboard | 14 | web `/ai/matching` | verified-partner | partner-matching | desktop | native | planned |  |
 | 161 | AI Recommended Partners | 14 | web `/ai/partners` | verified-partner | partner-matching | desktop | responsive | planned |  |
 | 162 | AI Project Collaboration Builder | 14 | web `/ai/team-builder` | verified-partner | partner-matching | desktop | responsive | planned |  |

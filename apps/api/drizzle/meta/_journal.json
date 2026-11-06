@@ -78,6 +78,13 @@
       "when": 1793975664521,
       "tag": "0010_stage11_trading",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793977381462,
+      "tag": "0011_stage12_finance",
+      "breakpoints": true
     }
   ]
 }

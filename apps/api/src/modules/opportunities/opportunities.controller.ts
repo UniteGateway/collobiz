@@ -17,7 +17,7 @@ import { OpportunitiesService, OPEN_LIST, type ListFilters } from './opportuniti
 
 const num = (v?: string) => (v == null || v === '' ? undefined : Number(v));
 function filtersFrom(q: Record<string, string | undefined>): ListFilters {
-  return { q: q.q, sector: q.sector, city: q.city, region: q.region, route: q.route, kind: q.kind, minValue: num(q.minValue), maxValue: num(q.maxValue), deadlineBefore: q.deadlineBefore, scope: (q.scope as ListFilters['scope']) ?? 'all' };
+  return { q: q.q, sector: q.sector, city: q.city, region: q.region, route: q.route, kind: q.kind, minValue: num(q.minValue), maxValue: num(q.maxValue), deadlineBefore: q.deadlineBefore, scope: (q.scope as ListFilters['scope']) ?? 'all', mapped: q.mapped === 'true' };
 }
 
 /** Screens 006, 009, 024, 025, 031–038, 040–042 and 023 KPIs. */

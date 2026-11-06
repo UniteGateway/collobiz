@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
 import type { Db } from './client';
 import type { SeedRefs } from './seed';
 import * as s from './schema';
-import { encryptField, sha256 } from '../common/crypto';
+import { canonicalJson, encryptField, sha256 } from '../common/crypto';
 import { config } from '../config';
 
 export const AGREEMENTS = [
@@ -110,7 +110,7 @@ async function stage06(db: Db, refs: SeedRefs) {
     const [c] = await db.insert(s.customers).values({ organizationId: refs.orgs[orgKey], ...customer, consentProvenance: { method: 'written_email', obtainedAt: new Date().toISOString(), disclosureScope: consentScope } }).returning();
     const snapshot = { code: oppCode, customer, sector: o.sector, consent: { method: 'written_email', disclosureScope: consentScope }, seeded: true };
     const now = new Date();
-    await db.insert(s.leadClaims).values({ opportunityId: o.id, introducerOrgId: refs.orgs[orgKey], introducerUserId: refs.users[userKey], customerId: c.id, evidenceSummary: 'Buyer requested introduction by email (demo seed).', evidenceSnapshot: snapshot, evidenceHash: sha256(JSON.stringify(snapshot)), consent: snapshot.consent, status, protectedFrom: now, protectedUntil: new Date(now.getTime() + 90 * 86400_000), certificateCode: `CZL-2026-${String(10000000 + Math.floor(Math.random() * 89999999))}` });
+    await db.insert(s.leadClaims).values({ opportunityId: o.id, introducerOrgId: refs.orgs[orgKey], introducerUserId: refs.users[userKey], customerId: c.id, evidenceSummary: 'Buyer requested introduction by email (demo seed).', evidenceSnapshot: snapshot, evidenceHash: sha256(canonicalJson(snapshot)), consent: snapshot.consent, status, protectedFrom: now, protectedUntil: new Date(now.getTime() + 90 * 86400_000), certificateCode: `CZL-2026-${String(10000000 + Math.floor(Math.random() * 89999999))}` });
     return o;
   };
   await mk('meera', 'meera', 'OPP-2026-00005', { legalName: 'Karnataka Textile Cluster Association', taxId: '29AAATK1111A1Z1', city: 'Bengaluru', contactName: 'R. Shetty' }, 'protected', 'unite_and_approved_partners');
@@ -122,7 +122,7 @@ async function stage06(db: Db, refs: SeedRefs) {
   await db.insert(s.opportunityEvents).values(evs.map((st, i) => ({ opportunityId: o.id, version: i + 1, fromStatus: i ? evs[i - 1] : null, toStatus: st, reason: 'Seeded (demo)', actorUserId: refs.users.meera })));
   const [c] = await db.insert(s.customers).values({ organizationId: refs.orgs.meera, legalName: 'Sri Ganesh Textiles Pvt Ltd', taxId: '33AABCS2222B1Z2', city: 'Coimbatore', contactName: 'K. Ganesan', contactEmail: 'md@sriganesh.example', consentProvenance: { method: 'signed_letter', obtainedAt: now.toISOString(), disclosureScope: 'unite_only' } }).returning();
   const snap = { code: o.code, customer: { legalName: c.legalName, taxId: c.taxId, city: c.city }, sector: 'solar', seeded: true };
-  await db.insert(s.leadClaims).values({ opportunityId: o.id, introducerOrgId: refs.orgs.meera, introducerUserId: refs.users.meera, customerId: c.id, evidenceSummary: 'Signed letter of authority from the managing director.', evidenceSnapshot: snap, evidenceHash: sha256(JSON.stringify(snap)), consent: { method: 'signed_letter', obtainedAt: now.toISOString(), disclosureScope: 'unite_only' }, status: 'protected', protectedFrom: now, protectedUntil: new Date(now.getTime() + 90 * 86400_000), certificateCode: 'CZL-2026-00000006' });
+  await db.insert(s.leadClaims).values({ opportunityId: o.id, introducerOrgId: refs.orgs.meera, introducerUserId: refs.users.meera, customerId: c.id, evidenceSummary: 'Signed letter of authority from the managing director.', evidenceSnapshot: snap, evidenceHash: sha256(canonicalJson(snap)), consent: { method: 'signed_letter', obtainedAt: now.toISOString(), disclosureScope: 'unite_only' }, status: 'protected', protectedFrom: now, protectedUntil: new Date(now.getTime() + 90 * 86400_000), certificateCode: 'CZL-2026-00000006' });
   await db.insert(s.routingEvents).values({ opportunityId: o.id, groupCompanyOrgId: refs.orgs.uniteSolar, startAt: now, dueAt: new Date(now.getTime() + 24 * 3600_000), slaMinutes: gc.slaMinutes, calendar: gc.calendar });
 }
 
@@ -218,6 +218,24 @@ async function stage11b(db: Db, refs: SeedRefs) {
   await db.insert(s.tradeRequirements).values({ code: 'REQ-2026-000001', buyerOrgId: refs.orgs.volt, title: 'Cabling for 2 MW Chakan rooftop', sector: 'power_equipment', description: 'Aluminium armoured cable for inverter-to-LT panel runs.', items: [{ item: '4C x 300 sq mm XLPE armoured cable', quantity: 1800, unit: 'm' }, { item: '4C x 95 sq mm XLPE armoured cable', quantity: 600, unit: 'm' }], deliveryLocation: 'Chakan MIDC, Pune', region: 'IN-MH', neededBy: '2026-12-10', closesAt: new Date(Date.now() + 10 * 86400_000), createdBy: refs.users.asha });
 }
 
+async function stage12(db: Db, refs: SeedRefs) {
+  const have = await db.select({ id: s.commissionPolicies.id }).from(s.commissionPolicies).limit(1);
+  if (have.length) return;
+  const [pol] = await db.insert(s.commissionPolicies).values({ code: 'INTRODUCER-STD', name: 'Introducer commission — standard (demo rate)', basis: 'percent', rateBps: 200, tdsBps: 500, clawbackDays: 90, status: 'active', createdBy: refs.users.superadmin, activatedBy: refs.users.finance2, activatedAt: new Date() }).returning();
+  await db.insert(s.commissionPolicies).values({ code: 'EPC-TIERED', name: 'EPC introducer — tiered (draft, pending matrix approval)', sector: 'construction_epc', basis: 'tiered', tiers: [{ upTo: 1_00_00_000_00, rateBps: 250 }, { upTo: null, rateBps: 150 }], tdsBps: 500, status: 'draft', createdBy: refs.users.superadmin });
+  const [p] = await db.select().from(s.projects).where(eq(s.projects.code, 'PRJ-2026-000001')).limit(1);
+  if (!p) return;
+  const ms = await db.select().from(s.milestones).where(eq(s.milestones.projectId, p.id));
+  const terms = { policy: { code: pol.code, version: pol.version, name: pol.name, basis: pol.basis, rateBps: pol.rateBps, flatAmount: null, tiers: null, tdsBps: pol.tdsBps, clawbackDays: pol.clawbackDays, trigger: pol.trigger }, shareBps: 10000, gstRegistered: false, projectValue: p.value };
+  const [a] = await db.insert(s.commissionAgreements).values({ code: 'CA-2026-000001', beneficiaryOrgId: refs.orgs.meera, payerOrgId: p.ownerOrgId, projectId: p.id, policyId: pol.id, terms, termsHash: sha256(canonicalJson(terms)), createdBy: refs.users.uniteAdmin }).returning();
+  for (const m of ms) {
+    const gross = Math.round((m.amount * 200) / 10000);
+    const tds = Math.round((gross * 500) / 10000);
+    const [e] = await db.insert(s.commissionEntries).values({ agreementId: a.id, beneficiaryOrgId: refs.orgs.meera, milestoneId: m.id, description: `Milestone ${m.seq}: ${m.title}`, baseAmount: m.amount, gross, share: gross, taxable: gross, gst: 0, tds, payable: gross - tds }).returning();
+    await db.insert(s.commissionJournal).values({ entryId: e.id, action: 'entry.estimated', toStatus: 'estimated', amount: e.payable, note: 'Projected from the project schedule (demo seed)' });
+  }
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
@@ -228,4 +246,5 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await stage09(db, refs);
   await stage11(db, refs);
   await stage11b(db, refs);
+  await stage12(db, refs);
 }

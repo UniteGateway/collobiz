@@ -89,7 +89,7 @@ export const CommissionMachine = machine<CommissionState>('commission', COMMISSI
   eligible: ['earned', 'on_hold', 'reversed', 'disputed'],
   earned: ['approved', 'on_hold', 'disputed', 'reversed'],
   approved: ['invoiced', 'on_hold', 'disputed'],
-  invoiced: ['settled', 'disputed', 'on_hold'],
+  invoiced: ['settled', 'disputed', 'on_hold', 'approved'], // approved: payout request rejected → entry returns to the approved pool
   settled: ['disputed'],
   on_hold: ['eligible', 'earned', 'approved', 'reversed'],
   disputed: ['earned', 'approved', 'reversed', 'settled'],

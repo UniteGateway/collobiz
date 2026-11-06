@@ -364,3 +364,63 @@ Commands: 131 unit/integration tests pass · 28/28 browser journeys · `node scr
 - Real carrier tracking APIs (B-11-style integration) are not connected; suppliers enter tracking manually.
 - E-way bill and GST e-invoice generation need government API credentials (B-05).
 - Payments for trade orders settle outside the platform until Stage 12 finance and a payment gateway (B-04).
+
+## Stage 12 — Commission ledger and finance ✅
+
+**Acceptance gate:** no unearned payout, idempotent settlement — **met**. Evidence: `apps/api/test/stage12.e2e.ts` (7 tests), 2 browser journeys and native tests.
+
+**No unearned payout**
+- Projects drive the ledger: certifying a milestone makes its line *eligible*, and recording the customer's payment (project invoice paid) is the only event that makes it *earned*. That transition is journaled as a system action.
+- Finance can approve only earned lines. Payout requests accept only approved lines.
+- A DB trigger refuses to attach an un-earned or un-approved line to a payout, or to mark it settled — the tests prove this with direct SQL. The same trigger locks amounts once approved; they change only through a dispute adjustment, which sends the line back for re-approval.
+
+**Idempotent settlement**
+- Settlement requires an Idempotency-Key; a replay returns the original settlement with `Idempotent-Replay`.
+- Unique constraints allow one settlement per payout and one payout per bank reference.
+- Settlements are immutable and the commission journal is append-only (triggers).
+- At or above `DUAL_APPROVAL_THRESHOLD`:
+  - each line needs two different finance approvers;
+  - whoever approved the payout cannot record its settlement.
+
+**Other controls**
+- Payouts require a verified organization, a verified bank account, and a partner invoice number unique per organization.
+- Holds return a line to the furthest legitimate state on release. A rejected payout returns its lines to the approved pool.
+- Agreement terms are frozen and hashed; integrity is shown as "✓ verified".
+- Policies are drafted by a commission admin and activated by a different finance approver. They are never edited: a new version is created instead.
+- Finance introductions (102/103) stay off behind `FEATURE_FINANCE_INTRODUCTIONS` (B-09).
+
+### Delivered
+- Migration `0011_stage12_finance.sql`:
+  - Tables: commission_policies, commission_agreements, commission_entries, commission_journal, commission_approvals, payout_requests, settlements, finance_disputes, finance_enquiries.
+  - Triggers: append-only journal; immutable settlements; entry guard against unearned payout and approved-amount changes.
+- API: `CommissionsModule` (policies, calculator, agreements, earnings, journal, approvals, holds, reversal, payouts, settlement, tax records, disputes, feature-flagged finance), with hooks from `ProjectsModule` for certification and payment.
+- State machine: `invoiced → approved` added for rejected payouts.
+- Seed: active `INTRODUCER-STD` policy (demo 2%), draft tiered policy, agreement `CA-2026-000001` for Meera on the demo project.
+- Web:
+  - Partner screens: 027, 095, 096, 157, 097, 099, 100, 101, 102, 103, 104, 158, 159.
+  - 098 for finance users.
+  - Introducer-commission setup on the project overview (owner).
+- Admin: 135 and 138. Mobile (native): 095, 158, 100.
+
+### Fixed (found by this stage's tests)
+- **Hashing:** hashes over JSON used `JSON.stringify`, which is not canonical once data goes through PostgreSQL `jsonb` (key order changes).
+- **Lead evidence seal (Stage 06):**
+  - It used an array replacer, which silently dropped nested fields (customer name, tax ID, consent details) from the hash.
+  - A shared `canonicalJson()` (keys sorted at every depth) now backs every hash: lead evidence, tender bid seals, agreement terms, completion certificates.
+  - Regression tests were added.
+  - Evidence hashes recorded before this fix covered less data; only demo/test data exists, so the seed was regenerated.
+- **Opportunity map (038):** the map filtered a list capped at 50 on the client, so new listings without coordinates pushed located ones out. It now queries `mapped=true` on the server, with a regression test.
+
+### Commands & results (2026-11-06)
+| Command | Result |
+|---|---|
+| `pnpm --filter @collabiz/api test` | 160/160 passed (14 suites) |
+| `node scripts/e2e-smoke.mjs` | 62/62 passed |
+| `node scripts/a11y-scan.mjs` | 0 violations (13 finance pages added) |
+| mobile · types · lint · typecheck | 15/15 · 24/24 · clean · clean |
+
+### Remaining
+- The commission matrix and platform fee are demo values pending approval (B-10).
+- GST tax invoices are raised by the partner; COLLABIZ records the number. E-invoicing/IRN and Form 16A generation need tax integrations (B-05).
+- Bank payouts are recorded manually against the UTR; a payout API (B-04) would automate settlement while keeping the same idempotency rules.
+- The clawback window is stored, but automated clawback on refunds is not wired (no refund event source yet).

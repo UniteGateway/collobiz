@@ -4,6 +4,10 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Stage 12 — Commission ledger & finance (2026-11-06)
+- Commission policies (two-person activation), agreements with frozen hashed terms, a ledger earned only on customer payment, dual approval, payout requests, idempotent single-use settlements, tax records, holds/reversals, commission and payment disputes, and feature-flagged finance introductions; screens 027, 095–104, 135, 138, 157–159 (web/admin) and 095/100/158 (native).
+- Fixed: lead-evidence seal hash omitted nested fields; all JSON hashes now use canonical JSON (jsonb-safe). Opportunity map now queries located listings server-side.
+
 ### Stage 11b — Trading & procurement (2026-11-06)
 - Supplier products, buyer requirements, threaded enquiries with exclusive-distributor routing, private quotations with buyer-only comparison, purchase orders (locked once issued, append-only history), shipping with line-by-line goods receipt and proof of delivery, distributor territories with overlap checks, and evidence-backed claims with escalation; screens 085–094 (web) and 088 (native).
 - Changed: global API rate limit is configurable (`API_RATE_LIMIT`); deployment requires `X-Forwarded-For` from the load balancer.

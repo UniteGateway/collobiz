@@ -9,3 +9,4 @@ export * from './tenders';
 export * from './contracts';
 export * from './projects';
 export * from './trading';
+export * from './finance';

@@ -371,6 +371,7 @@ suites.push({
   run: async ({ page, WEB, shot }) => {
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.goto(WEB + '/marketplace');
+    await page.getByLabel('Search', { exact: true }).fill('OPP-2026-00003');
     await page.locator('[data-opp="OPP-2026-00003"]').click();
     await page.getByRole('link', { name: /Check eligibility/ }).click();
     await page.locator('[data-check="certifications"]').getByText('Missing: ISO45001').waitFor();
@@ -834,6 +835,7 @@ suites.push({
 });
 
 // ---------------- Stage 11a ----------------
+let lastCommissionProject = null; // handed to the Stage 12 finance journey
 const PNG = Buffer.from('89504e470d0a1a0a0000000d4948445200000001000000010806000000', 'hex');
 suites.push({
   name: 'Stage 11a · 075 portfolio → 076 overview → 077 milestones → 079 photo update → 080/081/082 views',
@@ -889,6 +891,12 @@ suites.push({
     await page.goto(proj);
     await page.getByRole('button', { name: 'Approve baseline and start' }).click();
     await page.getByText('Active').first().waitFor();
+    // Introducer commission for Meera (earned only when the customer pays — Stage 12)
+    await page.getByLabel('Introducer (beneficiary)').selectOption({ label: 'Meera Iyer Consulting' });
+    await page.getByLabel('Commission policy').selectOption({ label: 'Introducer commission — standard (demo rate) (v1)' });
+    await page.getByRole('button', { name: 'Create agreement' }).click();
+    await page.getByRole('table', { name: 'Commission agreements' }).getByText(/CA-\d{4}-\d{6}/).waitFor();
+    lastCommissionProject = proj;
     // Lead starts, reports 100% with a photo, submits
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.goto(proj + '/milestones');
@@ -1073,5 +1081,78 @@ suites.push({
     await page.getByRole('button', { name: 'Send enquiry' }).click();
     await page.getByText(/routed to the supplier’s authorised distributor for your region/).waitFor();
     await shot('088-enquiry');
+  },
+});
+
+// ---------------- Stage 12 ----------------
+suites.push({
+  name: 'Stage 12 · 095/027/158/096/157/097/101/100 earnings views; 102/103 stay disabled',
+  run: async ({ page, WEB, shot }) => {
+    await webLogin(page, WEB, 'meera@consult.example');
+    await page.goto(WEB + '/earnings');
+    await page.getByText(/earned only when the customer pays/).first().waitFor();
+    await page.getByRole('table', { name: 'Agreements' }).getByRole('link', { name: 'CA-2026-000001' }).click();
+    await page.getByText('✓ verified').waitFor();
+    await shot('096-agreement');
+    await page.getByRole('link', { name: /schedule by milestone/ }).click();
+    await page.getByRole('table', { name: 'Commission schedule' }).getByText(/Structure & module mounting/).waitFor();
+    await page.goto(WEB + '/earnings/summary');
+    await page.getByRole('table', { name: 'Earnings by status' }).getByText('Projected from the project schedule').waitFor();
+    await page.goto(WEB + '/earnings/live');
+    await page.getByRole('button', { name: /History of Milestone 1/ }).first().click();
+    await page.getByText(/Projected from the project schedule/).first().waitFor();
+    await shot('158-live');
+    await page.goto(WEB + '/commissions/calculator');
+    await page.getByLabel('Deal value (₹)').fill('1000000');
+    await page.getByLabel('Rate (%)').fill('2');
+    await page.getByRole('button', { name: 'Calculate' }).click();
+    await page.getByText('Net payable to you').waitFor();
+    await page.getByText('₹19,000.00').waitFor(); // 2% of 10 L = 20,000 − 5% TDS
+    await page.goto(WEB + '/tax-records');
+    await page.getByRole('heading', { name: 'By quarter' }).waitFor();
+    await page.goto(WEB + '/payments/history');
+    await page.getByText(/No payouts yet|PAY-\d{4}-\d{6}/).first().waitFor();
+    await page.goto(WEB + '/finance/opportunities');
+    await page.getByText('Not available yet').waitFor();
+    await page.goto(WEB + '/finance/enquiry');
+    await page.getByText('Not available yet').waitFor();
+  },
+});
+
+suites.push({
+  name: 'Stage 12 · customer payment → 098 finance approval → 099 payout request → 138 approve + settle → 100 paid with UTR → 159 dispute',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, expect, shot }) => {
+    expect(!!lastCommissionProject, 'Stage 11a journey did not set up a commission');
+    await webLoginMfa(page, WEB, 'finance@collabiz.local');
+    await page.goto(WEB + '/commissions/approvals');
+    await page.getByRole('button', { name: /^Approve Milestone 1: Transformer yard maintenance/ }).first().click();
+    await page.getByRole('table', { name: 'Approval queue' }).waitFor();
+    await shot('098-approvals');
+    await webLogin(page, WEB, 'meera@consult.example');
+    await page.goto(WEB + '/payouts/request');
+    const boxes = page.getByRole('checkbox', { name: /^Include / });
+    await boxes.first().waitFor();
+    for (let i = 0; i < await boxes.count(); i++) await boxes.nth(i).check();
+    await page.getByLabel('Your invoice number').fill(`MIC/26-27/${Date.now().toString().slice(-6)}`);
+    await page.getByRole('button', { name: 'Request payout' }).click();
+    const code = (await page.getByText(/Payout PAY-\d{4}-\d{6} requested/).textContent()).match(/PAY-\d{4}-\d{6}/)[0];
+    await shot('099-payout');
+    await adminLogin(page, ADMIN, 'finance2@collabiz.local');
+    await page.goto(ADMIN + '/finance');
+    await page.getByRole('button', { name: `Approve ${code}` }).click();
+    await page.getByLabel(`UTR for ${code}`).fill(`HDFCN${Date.now().toString().slice(-11)}`);
+    await page.getByRole('button', { name: `Record settlement for ${code}` }).click();
+    await page.getByRole('row').filter({ hasText: code }).getByText('Settled').waitFor();
+    await shot('138-finance');
+    await webLogin(page, WEB, 'meera@consult.example');
+    await page.goto(WEB + '/payments/history');
+    await page.getByRole('row').filter({ hasText: code }).getByText(/^HDFCN/).waitFor();
+    await page.goto(WEB + '/commissions/disputes');
+    await page.getByLabel('Commission line', { exact: true }).selectOption({ index: 1 });
+    await page.getByLabel('What is wrong?').fill('TDS deducted looks higher than the 5% in my agreement.');
+    await page.getByRole('button', { name: 'Raise dispute' }).click();
+    await page.getByRole('table', { name: 'Commission disputes' }).getByText(/FD-\d{4}-\d{6}/).first().waitFor();
+    await shot('159-dispute');
   },
 });

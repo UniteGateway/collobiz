@@ -28,9 +28,10 @@ import {
 import { body } from '../../common/http';
 import { Ctx, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
-import { randomDigits, sha256 } from '../../common/crypto';
+import { canonicalJson, randomDigits, sha256 } from '../../common/crypto';
 import { Idempotent } from '../../common/idempotency';
 import { MAX_UPLOAD_BYTES, StorageService } from '../../common/adapters';
+import { CommissionsModule, CommissionsService } from '../commissions/commissions.controller';
 
 type Project = typeof projects.$inferSelect;
 type Milestone = typeof milestones.$inferSelect;
@@ -131,7 +132,7 @@ function publicProject(p: Project) {
 @Controller()
 @RequireOrg()
 export class ProjectsController {
-  constructor(@InjectDb() private db: Db, private svc: ProjectsService, private audit: AuditService, private storage: StorageService) {}
+  constructor(@InjectDb() private db: Db, private svc: ProjectsService, private audit: AuditService, private storage: StorageService, private commissions: CommissionsService) {}
 
   /** 075 — portfolio of projects my organization takes part in. */
   @Get('projects')
@@ -595,6 +596,7 @@ export class ProjectsController {
     if (amount > m.amount) throw new BadRequestException({ message: 'Check the highlighted fields', fields: { certifiedAmount: 'Cannot exceed the milestone amount' } });
     if (amount < m.amount && b.note.length < 10) throw new BadRequestException({ message: 'Check the highlighted fields', fields: { note: 'Explain the deduction' } });
     const u = await this.svc.setMilestone(ctx, p, m, 'certified', { certifiedAt: new Date(), certifiedBy: ctx.userId, certifiedAmount: amount, certificationNote: b.note }, b.note);
+    await this.commissions.onMilestoneCertified(u); // introducer commission becomes eligible (earned only on payment)
     await this.audit.record(ctx, { action: 'milestone.certification_evidence', objectType: 'milestone', objectId: mid, after: { evidenceHash: ev.hash, files: ev.docs.map((d) => d.sha256), certifiedAmount: amount } });
     await this.svc.notifyOrg(p.leadOrgId, `Milestone certified: ${m.title}`, `Certified for ${amount / 100}. You can now raise the invoice.`, `/projects/${id}/certification`);
     return u;
@@ -627,6 +629,7 @@ export class ProjectsController {
     if (inv.status === 'paid') throw new ConflictException('This invoice is already marked paid');
     const [u] = await this.db.update(projectInvoices).set({ status: 'paid', paidAt: new Date(), paymentReference: b.paymentReference }).where(and(eq(projectInvoices.id, iid), eq(projectInvoices.status, 'issued'))).returning();
     if (!u) throw new ConflictException('This invoice is already marked paid');
+    await this.commissions.onInvoicePaid(u); // the customer payment is the only event that earns commission
     await this.audit.record(ctx, { action: 'project.invoice_paid', objectType: 'project_invoice', objectId: iid, after: { number: inv.number, amount: inv.amount, projectId: p.id, reference: b.paymentReference } });
     await this.svc.notifyOrg(p.leadOrgId, `Payment recorded: ${inv.number}`, `Reference ${b.paymentReference}.`, `/projects/${id}/certification`);
     return u;
@@ -671,7 +674,7 @@ export class ProjectsController {
       milestones: ms.map((m) => ({ seq: m.seq, title: m.title, amount: m.amount, certifiedAmount: m.certifiedAmount, certifiedAt: m.certifiedAt, evidenceHash: m.evidenceHash })),
       inspections: { total: insp.length, passed: insp.filter((i) => i.result === 'pass').length, nonConformancesClosed: insp.filter((i) => i.result === 'fail').length } };
     const code = `CMP-${year()}-${randomDigits(6)}`;
-    const hash = sha256(JSON.stringify(snapshot));
+    const hash = sha256(canonicalJson(snapshot));
     const u = await this.svc.setProject(ctx, p, 'completed', 'Completion certificate issued', { completedAt: new Date(), completionCode: code, completionHash: hash, completionSnapshot: snapshot });
     await this.svc.notifyOrg(p.leadOrgId, `Completion certificate: ${p.code}`, `Certificate ${code} issued.`, `/projects/${id}/closure`);
     return { ...publicProject(u), certificate: { code, hash, snapshot } };
@@ -689,5 +692,5 @@ export class ProjectsController {
   }
 }
 
-@Module({ controllers: [ProjectsController], providers: [ProjectsService] })
+@Module({ imports: [CommissionsModule], controllers: [ProjectsController], providers: [ProjectsService] })
 export class ProjectsModule {}
