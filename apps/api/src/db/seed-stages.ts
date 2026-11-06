@@ -148,10 +148,23 @@ async function stage07(db: Db, refs: SeedRefs) {
   ]);
 }
 
+async function stage08(db: Db, refs: SeedRefs) {
+  const have = await db.select({ id: s.collaborationTeams.id }).from(s.collaborationTeams).limit(1);
+  if (have.length) return;
+  const [o] = await db.select().from(s.opportunities).where(eq(s.opportunities.code, 'OPP-2026-00001')).limit(1);
+  const text = 'MUTUAL NON-DISCLOSURE UNDERTAKING — DRAFT (demo seed)\nTeam: Chakan Rooftop Consortium\nPurpose: Joint bid for the 2 MW Chakan rooftop EPC.';
+  const [t] = await db.insert(s.collaborationTeams).values({ code: 'TM-000001', name: 'Chakan Rooftop Consortium', purpose: 'Joint bid for the 2 MW Chakan rooftop EPC: Volt EPC executes installation, Sunrise supplies balance-of-system electricals.', kind: 'team', opportunityId: o.id, leadOrgId: refs.orgs.volt, status: 'nda_pending', ndaText: text, ndaHash: sha256(text), createdBy: refs.users.asha }).returning();
+  await db.insert(s.teamMembers).values([
+    { teamId: t.id, organizationId: refs.orgs.volt, role: 'lead', responsibilities: 'Team lead, installation and commissioning', status: 'nda_signed', ndaSignedAt: new Date(), ndaSignedBy: refs.users.asha, ndaTypedName: 'Asha Patil', invitedBy: refs.users.asha },
+    { teamId: t.id, organizationId: refs.orgs.sunrise, role: 'procurement', responsibilities: 'Supply of LT panels, cables and transformers', status: 'invited', invitedBy: refs.users.asha, inviteMessage: 'Would you join our bid as the electrical supply partner?' },
+  ]);
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
   await stage05(db, refs);
   await stage06(db, refs);
   await stage07(db, refs);
+  await stage08(db, refs);
 }

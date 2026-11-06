@@ -239,3 +239,18 @@ export const TaskSchema = z.object({ title: z.string().trim().min(2).max(200), d
 export const APPLICATION_STATUSES = ['submitted', 'shortlisted', 'accepted', 'rejected', 'withdrawn'] as const;
 export const ApplicationDecisionSchema = z.object({ status: z.enum(['shortlisted', 'accepted', 'rejected']), reason: z.string().trim().min(5).max(2000) });
 export const OPEN_OPPORTUNITY_STATES = ['accepted', 'released', 'qualification', 'proposal'] as const;
+
+// ---------- Teams & consortiums (Stage 08 — 055–064, 124, 154–156) ----------
+export const TEAM_ROLES = ['lead', 'origination', 'execution', 'procurement', 'finance', 'management', 'specialist'] as const;
+export const TeamCreateSchema = z.object({ name: z.string().trim().min(3).max(120), purpose: z.string().trim().min(20).max(4000), kind: z.enum(['team', 'consortium']).default('team'), opportunityId: id.optional(), leadRole: z.enum(TEAM_ROLES).default('lead') });
+export const TeamInviteSchema = z.object({ organizationId: id, role: z.enum(TEAM_ROLES), responsibilities: z.string().trim().min(5).max(2000), message: z.string().trim().max(2000).optional(), matchScore: z.number().min(0).max(100).optional() });
+export const TeamRespondSchema = z.object({ decision: z.enum(['accept', 'decline']) });
+export const TeamRoleSchema = z.object({ role: z.enum(TEAM_ROLES), responsibilities: z.string().trim().min(5).max(2000) });
+export const NdaSignSchema = z.object({ typedName: z.string().trim().min(2).max(120) });
+export const SharingProposalSchema = z.object({
+  shares: z.array(z.object({ organizationId: id, sharePct: z.number().min(0).max(100) })).min(2),
+  terms: z.string().trim().min(20).max(8000),
+}).refine((v) => Math.abs(v.shares.reduce((s, x) => s + x.sharePct, 0) - 100) < 0.001, { message: 'Shares must total 100%', path: ['shares'] });
+export const ProposalDecisionSchema = z.object({ decision: z.enum(['approve', 'reject']), comment: z.string().trim().max(2000).optional() }).refine((v) => v.decision === 'approve' || (v.comment?.length ?? 0) >= 5, { message: 'Explain why you reject the proposal', path: ['comment'] });
+export const TeamPostSchema = z.object({ kind: z.enum(['note', 'task', 'proposal_section']), title: z.string().trim().min(2).max(200), body: z.string().trim().min(2).max(10000), assigneeOrgId: id.optional() });
+export const MatchRequestSchema = z.object({ sector: z.enum(SECTOR_CODES), region: z.string().max(40).optional(), value: money.optional(), requiredCertifications: z.array(z.string()).default([]), opportunityId: id.optional() });

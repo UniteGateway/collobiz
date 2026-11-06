@@ -48,6 +48,7 @@ export default function Home() {
           <Row title="Lead protection" subtitle="Screen 151" onPress={() => router.push('/lead-protection')} />
           <Row title="Activity & quick actions" subtitle="Screen 030" onPress={() => router.push('/activity')} />
           <Row title="Sales pipeline" subtitle="Screen 053" onPress={() => router.push('/pipeline')} />
+          <Row title="Collaboration requests" subtitle="Screen 059" onPress={() => router.push('/collaboration')} />
           <Card title={org.name}><Badge status={org.verificationStatus} /><Text style={[s.hint, { marginTop: 6 }]}>Role: {me.orgRoles.join(', ').replace(/org_/g, '')}</Text></Card>
           <Card title="Recent activity">
             {activity.length === 0 ? <Text style={s.hint}>No activity yet.</Text> : activity.map((a) => <Row key={a.id} title={a.action.replace(/[._]/g, ' ')} subtitle={`${new Date(a.at).toLocaleString()}${a.actorName ? ' · ' + a.actorName : ''}`} />)}

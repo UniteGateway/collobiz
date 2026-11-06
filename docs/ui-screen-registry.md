@@ -4,7 +4,7 @@
 
 Source: Master Book Section 05 (functional specification) and the 165-screen UI Design Atlas (U01–U10). Screen IDs and titles are preserved verbatim.
 
-**Status:** verified 68 · implemented 0 · scaffolded 0 · planned 97
+**Status:** verified 82 · implemented 0 · scaffolded 0 · planned 83
 
 Status meaning: *planned* (not started) → *scaffolded* (route + shell) → *implemented* (wired to real API) → *verified* (automated test passed).
 
@@ -104,16 +104,16 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
-| 055 | Find Collaboration Partners | 08 | web `/partners/find` | verified-partner | partner-matching | desktop | responsive | planned |  |
-| 056 | Partner Directory & Profiles | 08 | web `/partners` | partner | organizations | desktop | responsive | planned |  |
-| 057 | AI Partner Match Suggestions | 08 | web `/partners/ai-matches` | verified-partner | partner-matching | desktop | responsive | planned |  |
-| 058 | Invite Partner to Collaborate | 08 | web `/teams/[id]/invite` | team-lead | team-collaboration | desktop | responsive | planned |  |
-| 059 | Incoming Collaboration Requests | 08 | web `/collaboration/requests` | partner | team-collaboration | mobile-first | native | planned |  |
-| 060 | Multi-Partner Project Team Builder | 08 | web `/teams/builder` | verified-partner | team-collaboration | desktop | responsive | planned |  |
-| 061 | Roles & Responsibilities Allocation | 08 | web `/teams/[id]/roles` | team-lead | team-collaboration | desktop | responsive | planned |  |
-| 062 | Confidentiality / NDA Workspace | 08 | web `/teams/[id]/nda` | team-member | team-collaboration | desktop | responsive | planned |  |
-| 063 | Commercial Sharing Proposal | 08 | web `/teams/[id]/sharing` | team-member | team-collaboration | desktop | responsive | planned |  |
-| 064 | Collaboration Approval & Team Activation | 08 | web `/teams/[id]/activation` | team-lead | team-collaboration | desktop | responsive | planned |  |
+| 055 | Find Collaboration Partners | 08 | web `/partners/find` | verified-partner | partner-matching | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
+| 056 | Partner Directory & Profiles | 08 | web `/partners` | partner | organizations | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
+| 057 | AI Partner Match Suggestions | 08 | web `/partners/ai-matches` | verified-partner | partner-matching | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
+| 058 | Invite Partner to Collaborate | 08 | web `/teams/[id]/invite` | team-lead | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
+| 059 | Incoming Collaboration Requests | 08 | web `/collaboration/requests` | partner | team-collaboration | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
+| 060 | Multi-Partner Project Team Builder | 08 | web `/teams/builder` | verified-partner | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
+| 061 | Roles & Responsibilities Allocation | 08 | web `/teams/[id]/roles` | team-lead | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
+| 062 | Confidentiality / NDA Workspace | 08 | web `/teams/[id]/nda` | team-member | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
+| 063 | Commercial Sharing Proposal | 08 | web `/teams/[id]/sharing` | team-member | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
+| 064 | Collaboration Approval & Team Activation | 08 | web `/teams/[id]/activation` | team-lead | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
 
 ## 07 · Tenders, Quotations & Negotiation
 
@@ -208,7 +208,7 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 121 | International Territory Dashboard | 15 | web `/global/territory` | country-partner | international | desktop | responsive | planned |  |
 | 122 | Import / Export Enquiry Desk | 15 | web `/global/import-export` | partner | international | desktop | responsive | planned |  |
 | 123 | JV & Strategic Alliance Proposals | 15 | web `/alliances` | verified-partner | international | desktop | responsive | planned |  |
-| 124 | Consortium Formation | 15 | web `/consortiums` | verified-partner | team-collaboration | desktop | responsive | planned |  |
+| 124 | Consortium Formation | 15 | web `/consortiums` | verified-partner | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
 | 125 | Investor Opportunity Data Room | 15 | web `/data-room` | investor | international | desktop | responsive | planned |  |
 | 126 | Cross-Border Compliance Checklist | 15 | web `/global/compliance` | partner | international | desktop | responsive | planned |  |
 
@@ -253,9 +253,9 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 151 | Lead Protection Dashboard | 06 | web `/lead-protection` | partner | lead-protection | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
 | 152 | Digital Lead Registration Certificate | 06 | web `/leads/[id]/registration-certificate` | lead-owner | lead-protection | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
 | 153 | Lead Ownership Dispute Center | 06 | web `/lead-disputes` | partner | lead-protection | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
-| 154 | Collaboration Team Creation | 08 | web `/teams/new` | verified-partner | team-collaboration | desktop | responsive | planned |  |
-| 155 | Consortium Member Roles & Sharing | 08 | web `/teams/[id]/members` | team-member | team-collaboration | desktop | responsive | planned |  |
-| 156 | Joint Proposal & Team Workspace | 08 | web `/teams/[id]/workspace` | team-member | team-collaboration | desktop | responsive | planned |  |
+| 154 | Collaboration Team Creation | 08 | web `/teams/new` | verified-partner | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
+| 155 | Consortium Member Roles & Sharing | 08 | web `/teams/[id]/members` | team-member | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
+| 156 | Joint Proposal & Team Workspace | 08 | web `/teams/[id]/workspace` | team-member | team-collaboration | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage08.e2e.ts |
 | 157 | Commission Agreement & Milestones | 12 | web `/commissions/agreements/[id]/milestones` | partner | commissions | desktop | responsive | planned |  |
 | 158 | Live Earnings & Settlement Tracker | 12 | web `/earnings/live` | partner | commissions | desktop | native | planned |  |
 | 159 | Commission Dispute Resolution | 12 | web `/commissions/disputes` | partner | commissions | desktop | responsive | planned |  |

@@ -523,13 +523,14 @@ suites.push({
     await shot('053-pipeline');
     await card.getByRole('link').click();
     await page.getByText(/contacted|new → qualified — Budget confirmed by CFO/).first().waitFor();
-    await page.getByLabel('Follow-up', { exact: true }).fill('Share battery sizing note');
+    const taskTitle = `Share battery sizing note ${label} ${Date.now()}`;
+    await page.getByLabel('Follow-up', { exact: true }).fill(taskTitle);
     await page.getByLabel('Due', { exact: true }).fill(new Date(Date.now() + 86400_000).toISOString().slice(0, 16));
     await page.getByRole('button', { name: 'Add', exact: true }).click();
-    await page.getByText(/Share battery sizing note/).waitFor();
+    await page.getByText(taskTitle).first().waitFor();
     await shot('052-customer');
     await page.goto(WEB + '/tasks');
-    await page.getByText('Share battery sizing note').first().waitFor();
+    await page.getByText(taskTitle).first().waitFor();
     await page.goto(WEB + '/activity');
     await page.getByRole('heading', { name: 'Quick actions' }).waitFor();
     await page.goto(WEB + '/my/leads');
@@ -539,5 +540,65 @@ suites.push({
     await page.getByRole('button', { name: 'Add to timeline' }).click();
     await page.getByText('Called the plant head; meeting fixed.').waitFor();
     await shot('054-timeline');
+  },
+});
+
+// ---------------- Stage 08 ----------------
+suites.push({
+  name: 'Stage 08 · 055/057 discovery → 154 team → 058 invite → 059/062 accept+NDA → 156 workspace → 063 sharing → 064 activate',
+  run: async ({ page, WEB, label, expect, shot }) => {
+    const name = `Kolhapur Foundry Team ${label} ${Date.now()}`;
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/partners/find');
+    await page.locator('[data-partner="Sunrise Traders"]').waitFor();
+    await page.goto(WEB + '/partners/ai-matches');
+    await page.getByRole('button', { name: 'Suggest partners' }).click();
+    await page.locator('[data-match]').first().waitFor();
+    await shot('057-ai-matches');
+    await page.goto(WEB + '/teams/new');
+    await page.getByLabel('Team name').fill(name);
+    await page.getByLabel('Purpose and scope').fill('Joint EPC bid for a foundry rooftop with electrical supply partner.');
+    await page.getByRole('button', { name: 'Create and invite partners' }).click();
+    await page.waitForURL(/\/teams\/.+\/invite/);
+    const teamUrl = page.url().replace(/\/invite$/, '');
+    await page.getByLabel('Partner').selectOption({ label: 'Sunrise Traders · certified' });
+    await page.getByLabel('Responsibilities').fill('LT panels and cabling supply');
+    await page.getByRole('button', { name: 'Send invitation' }).click();
+    await page.getByText('Invitation sent.').waitFor();
+    await page.goto(teamUrl + '/workspace');
+    await page.getByLabel('Title').fill('Buyer constraints');
+    await page.getByLabel('Content').fill('Confidential: shutdown window only in December.');
+    await page.getByRole('button', { name: 'Post' }).click();
+    await page.getByText('Confidential: shutdown window only in December.').waitFor();
+    // Invitee
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(teamUrl + '/workspace');
+    await page.getByText(/workspace opens after your organization accepts/).waitFor();
+    expect(await page.getByText('shutdown window').count() === 0, 'confidential post visible before NDA');
+    await page.goto(WEB + '/collaboration/requests');
+    await page.getByRole('region', { name: new RegExp(name) }).getByRole('button', { name: 'Accept' }).click();
+    await page.getByRole('region', { name: new RegExp(name) }).getByRole('link', { name: /sign NDA/ }).click();
+    await page.getByLabel(/Type your full name/).fill('Ravi Patel');
+    await page.getByRole('button', { name: 'Sign NDA' }).click();
+    await page.getByText(/Your organization signed this NDA/).waitFor();
+    await page.goto(teamUrl + '/workspace');
+    await page.getByText('Confidential: shutdown window only in December.').waitFor();
+    // Lead proposes sharing; invitee approves; lead activates
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(teamUrl + '/sharing');
+    await page.getByLabel(/Volt EPC .* share %/).fill('70');
+    await page.getByLabel(/Sunrise Traders .* share %/).fill('30');
+    await page.getByLabel(/Terms/).fill('Shares paid within 15 days of each customer milestone payment.');
+    await page.getByRole('button', { name: 'Submit for approval' }).click();
+    await page.getByText('Proposal v1').waitFor();
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(teamUrl + '/sharing');
+    await page.getByRole('button', { name: 'Approve' }).click();
+    await page.getByRole('heading', { name: 'Proposal v1' }).locator('..').getByText('Approved').first().waitFor();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(teamUrl + '/activation');
+    await page.getByRole('button', { name: 'Activate team' }).click();
+    await page.getByText(/Team active since/).waitFor();
+    await shot('064-activation');
   },
 });

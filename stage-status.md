@@ -173,3 +173,15 @@ Commands: 131 unit/integration tests pass · 28/28 browser journeys · `node scr
 - Every registered lead now opens a CRM deal automatically; the lead timeline (054) merges opportunity status versions, Unite review events, documents, disputes and CRM activity.
 - Web: 028 week calendar, 030 activity centre, 052 customer profile (+ customer list), 053 kanban with accessible move dialog, 054 timeline. Mobile (native): 030, 053.
 - Results: API 106/106 · browser 45/45 · WCAG 0 violations · mobile 10/10 · lint/typecheck clean.
+
+---
+
+## Stage 08 — Partner matching and teams ✅
+
+**Acceptance gate:** no private disclosure without permission — **met** (`apps/api/test/stage08.e2e.ts`, 9 tests + browser journey: invitees see only a teaser and the NDA; workspace, opportunity details and commercial terms unlock only after accept + NDA signature; revocation removes access immediately; outsiders get 404; directory exposes public profile fields only; matching excludes partners without consent).
+
+- Migration `0006_stage08_teams.sql`: collaboration teams/consortiums (NDA text + hash, optimistic version), members (role, responsibilities, NDA evidence, revocation), versioned sharing proposals with per-member approvals, workspace posts.
+- Team lifecycle uses the shared state machines: forming → nda_pending → proposal → approval_pending → active (dissolve at any point); activation requires ≥2 orgs, all NDAs, an approved 100% sharing proposal.
+- Web: 055–064, 124, 154–156 (+ team hub, partner profile). Mobile (native): 059 with NDA signing.
+- Results: API 115/115 · browser 47/47 · WCAG 0 violations · mobile 10/10 · lint/typecheck clean.
+- Remaining: reputation score feeds matching once Stage 14 lands (currently "unrated" factor at neutral weight); team document uploads reuse S3 when configured (B-03).

@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Stage 08 — Partner matching & teams (2026-11-06)
+- Partner directory, find partners, explainable consent-gated match suggestions, collaboration teams and consortiums with invitations, NDA signing, roles, versioned commercial sharing proposals, activation and NDA-gated workspace; screens 055–064, 124, 154–156 and native 059.
+
 ### Stage 07 — CRM & pipeline (2026-11-06)
 - Customers, deals with versioned stage moves and activity audit, follow-up tasks with calendar, activity centre, lead conversion timeline; leads auto-open deals; screens 028, 030, 052–054 (web) and native 030/053.
 
