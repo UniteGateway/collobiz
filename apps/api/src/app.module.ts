@@ -14,9 +14,10 @@ import { OnboardingModule } from './modules/onboarding/onboarding.module';
 import { CatalogModule } from './modules/catalog/catalog.controller';
 import { OpportunitiesModule } from './modules/opportunities/opportunities.controller';
 import { LeadsModule } from './modules/leads/leads.controller';
+import { CrmModule } from './modules/crm/crm.controller';
 import { config } from './config';
 
-export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule];
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule];
 
 @Module({
   imports: [

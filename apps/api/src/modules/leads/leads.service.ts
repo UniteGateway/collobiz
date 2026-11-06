@@ -5,7 +5,7 @@ import {
   type BusinessCalendar, type DisputeState, type LeadClaimState, type LeadCreateInput,
 } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
-import { customers, disputeEntries, disputes, duplicateCandidates, groupCompanies, leadClaims, memberships, notifications, opportunities, opportunityEvents, organizations, routingEvents, users } from '../../db/schema';
+import { crmActivities, crmDeals, customers, disputeEntries, disputes, duplicateCandidates, groupCompanies, leadClaims, memberships, notifications, opportunities, opportunityEvents, organizations, routingEvents, users } from '../../db/schema';
 import { AuditService } from '../../common/audit.service';
 import { MailService } from '../../common/adapters';
 import { randomDigits, sha256 } from '../../common/crypto';
@@ -50,6 +50,12 @@ export class LeadsService {
         consent: b.consent, certificateCode: `CZL-${new Date().getFullYear()}-${randomDigits(8)}`,
       }).returning();
       await this.opps.transition(ctx, o.id, 'submitted', 'Lead submitted with evidence snapshot', tx);
+      // Stage 07: every registered lead opens a CRM deal so follow-ups and conversion are tracked.
+      const [deal] = await tx.insert(crmDeals).values({ organizationId: ctx.orgId!, customerId: cust.id, leadClaimId: c.id, title: b.productOrProject, value: b.estimatedValue, currency: b.currency, ownerUserId: ctx.userId, expectedClose: b.expectedCloseDate ? new Date(b.expectedCloseDate) : null }).returning();
+      await tx.insert(crmActivities).values([
+        { organizationId: ctx.orgId!, subjectType: 'lead', subjectId: c.id, kind: 'system', body: `Lead ${code} registered; evidence sealed (${evidenceHash.slice(0, 12)}…)`, actorUserId: ctx.userId },
+        { organizationId: ctx.orgId!, subjectType: 'deal', subjectId: deal.id, kind: 'system', body: 'Deal opened from protected lead registration', actorUserId: ctx.userId },
+      ]);
       await this.audit.record(ctx, { action: 'lead.registered', objectType: 'lead_claim', objectId: c.id, after: { code, evidenceHash, urgent: b.urgent } }, tx);
       return c.id;
     });

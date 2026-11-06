@@ -162,3 +162,14 @@ Commands: 131 unit/integration tests pass · 28/28 browser journeys · `node scr
 - Fixed during verification: SLA times displayed in the viewer's browser zone instead of the calendar zone.
 - Results: API 99/99 · browser 43/43 · WCAG scan 0 violations · mobile 10/10 · lint/typecheck clean.
 - Remaining: the SLA sweep must be scheduled (cron / job runner) in deployment — endpoint `POST /v1/admin/routing/sweep`; lead timeline (054) arrives with CRM in Stage 07.
+
+---
+
+## Stage 07 — CRM and pipeline ✅ (MVP block 01–07 complete)
+
+**Acceptance gate:** sales stage transitions and activity audit — **met** (`apps/api/test/stage07.e2e.ts`: versioned moves with optimistic locking, stage changes written to the append-only activity history and the hash-chained audit log, lost requires a reason, won/lost terminal, cross-tenant 404s).
+
+- Migration `0005_stage07_crm.sql`: `crm_deals`, append-only `crm_activities`, `crm_tasks`. Customers reuse the Stage 06 consent-scoped table.
+- Every registered lead now opens a CRM deal automatically; the lead timeline (054) merges opportunity status versions, Unite review events, documents, disputes and CRM activity.
+- Web: 028 week calendar, 030 activity centre, 052 customer profile (+ customer list), 053 kanban with accessible move dialog, 054 timeline. Mobile (native): 030, 053.
+- Results: API 106/106 · browser 45/45 · WCAG 0 violations · mobile 10/10 · lint/typecheck clean.

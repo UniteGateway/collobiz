@@ -502,3 +502,42 @@ suites.push({
     await page.getByRole('heading', { name: 'Ownership disputes' }).waitFor();
   },
 });
+
+// ---------------- Stage 07 ----------------
+suites.push({
+  name: 'Stage 07 · 053 move deal with note → 052 history → 028 task → 030 feed → 054 timeline',
+  run: async ({ page, WEB, shot, label }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/crm/pipeline');
+    await page.getByRole('button', { name: 'New deal' }).click();
+    const title = `Battery retrofit ${label} ${Date.now()}`;
+    await page.getByLabel('Deal title').fill(title);
+    await page.getByLabel('Value ₹').fill('1800000');
+    await page.getByRole('button', { name: 'Create' }).click();
+    const card = page.locator(`[data-deal="${title}"]`);
+    await card.getByRole('button', { name: 'Move' }).click();
+    await page.getByLabel('New stage').selectOption('qualified');
+    await page.getByLabel('Note (recorded in history)').fill('Budget confirmed by CFO');
+    await page.getByRole('button', { name: 'Move deal' }).click();
+    await page.getByRole('listitem', { name: /Qualified/ }).locator(`[data-deal="${title}"]`).waitFor();
+    await shot('053-pipeline');
+    await card.getByRole('link').click();
+    await page.getByText(/contacted|new → qualified — Budget confirmed by CFO/).first().waitFor();
+    await page.getByLabel('Follow-up', { exact: true }).fill('Share battery sizing note');
+    await page.getByLabel('Due', { exact: true }).fill(new Date(Date.now() + 86400_000).toISOString().slice(0, 16));
+    await page.getByRole('button', { name: 'Add', exact: true }).click();
+    await page.getByText(/Share battery sizing note/).waitFor();
+    await shot('052-customer');
+    await page.goto(WEB + '/tasks');
+    await page.getByText('Share battery sizing note').first().waitFor();
+    await page.goto(WEB + '/activity');
+    await page.getByRole('heading', { name: 'Quick actions' }).waitFor();
+    await page.goto(WEB + '/my/leads');
+    await page.locator('table a').first().click();
+    await page.getByRole('link', { name: 'Timeline' }).click();
+    await page.getByLabel('What happened?').fill('Called the plant head; meeting fixed.');
+    await page.getByRole('button', { name: 'Add to timeline' }).click();
+    await page.getByText('Called the plant head; meeting fixed.').waitFor();
+    await shot('054-timeline');
+  },
+});

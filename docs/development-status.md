@@ -10,7 +10,7 @@ Overview of the 16 stages from Master Book §8. Detailed evidence (files, comman
 | 04 | Unite company catalogue and products | Controlled public/private catalogs | ✅ Complete |
 | 05 | Opportunity marketplace | Real listings and eligibility controls | ✅ Complete |
 | 06 | Lead protection and Unite-first routing | Priority review and protection tests pass | ✅ Complete |
-| 07 | CRM and pipeline | Sales stage transitions and activity audit | ☐ |
+| 07 | CRM and pipeline | Sales stage transitions and activity audit | ✅ Complete |
 | 08 | Partner matching and teams | No private disclosure without permission | ☐ |
 | 09 | Tender/RFQ/proposals | Sealed bid boundaries and evaluator controls | ☐ |
 | 10 | Contracts and document workflows | Approved agreement version immutable | ☐ |

@@ -126,9 +126,32 @@ async function stage06(db: Db, refs: SeedRefs) {
   await db.insert(s.routingEvents).values({ opportunityId: o.id, groupCompanyOrgId: refs.orgs.uniteSolar, startAt: now, dueAt: new Date(now.getTime() + 24 * 3600_000), slaMinutes: gc.slaMinutes, calendar: gc.calendar });
 }
 
+async function stage07(db: Db, refs: SeedRefs) {
+  const have = await db.select({ id: s.crmDeals.id }).from(s.crmDeals).limit(1);
+  if (have.length) return;
+  const P = (lakh: number) => lakh * 1_00_000 * 100;
+  const mkCustomer = async (legalName: string, city: string, contactName: string) => (await db.insert(s.customers).values({ organizationId: refs.orgs.volt, legalName, city, contactName, consentProvenance: { method: 'crm_entry', obtainedAt: new Date().toISOString(), disclosureScope: 'restricted' }, restrictedContacts: true }).returning())[0];
+  const a = await mkCustomer('Western Auto Components Ltd', 'Pune', 'S. Kale');
+  const b = await mkCustomer('Deccan Cold Storage LLP', 'Nashik', 'A. Pawar');
+  const deals = await db.insert(s.crmDeals).values([
+    { organizationId: refs.orgs.volt, customerId: a.id, title: '1.5 MW rooftop EPC — Plant 2', value: P(62), stage: 'proposal', ownerUserId: refs.users.asha },
+    { organizationId: refs.orgs.volt, customerId: a.id, title: 'O&M renewal FY27', value: P(4), stage: 'negotiation', ownerUserId: refs.users.rohit },
+    { organizationId: refs.orgs.volt, customerId: b.id, title: '400 kW rooftop + battery', value: P(22), stage: 'qualified', ownerUserId: refs.users.asha },
+    { organizationId: refs.orgs.volt, customerId: b.id, title: 'Carport pilot', value: P(3), stage: 'lost', lostReason: 'Customer deferred capex to next year', ownerUserId: refs.users.asha },
+  ]).returning();
+  await db.insert(s.crmActivities).values(deals.map((d) => ({ organizationId: refs.orgs.volt, subjectType: 'deal', subjectId: d.id, kind: 'system', body: `Seeded in "${d.stage}"`, actorUserId: refs.users.asha })));
+  const day = 86400_000;
+  await db.insert(s.crmTasks).values([
+    { organizationId: refs.orgs.volt, title: 'Send revised BOQ to Western Auto', dueAt: new Date(Date.now() + day), assigneeUserId: refs.users.asha, customerId: a.id, dealId: deals[0].id, createdBy: refs.users.asha },
+    { organizationId: refs.orgs.volt, title: 'Site visit — Deccan Cold Storage', dueAt: new Date(Date.now() + 3 * day), assigneeUserId: refs.users.rohit, customerId: b.id, dealId: deals[2].id, createdBy: refs.users.asha },
+    { organizationId: refs.orgs.volt, title: 'Call CFO about O&M terms', dueAt: new Date(Date.now() - day), assigneeUserId: refs.users.rohit, customerId: a.id, dealId: deals[1].id, createdBy: refs.users.asha },
+  ]);
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
   await stage05(db, refs);
   await stage06(db, refs);
+  await stage07(db, refs);
 }

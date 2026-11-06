@@ -36,6 +36,13 @@
       "when": 1793959477042,
       "tag": "0004_stage06_leads",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793960181420,
+      "tag": "0005_stage07_crm",
+      "breakpoints": true
     }
   ]
 }

@@ -26,9 +26,9 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 025,Recommended Business Feed,Partner Home & Dashboard,05,web,/feed,partner,partner-matching,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,"Explainable, consent-gated rules engine"
 026,My Leads & Pipeline,Partner Home & Dashboard,06,web,/my/leads,partner,lead-protection,desktop,native,commercial-record,verified,scripts/e2e-suites.mjs apps/api/test/stage06.e2e.ts,Web + native
 027,Earnings & Settlement Summary,Partner Home & Dashboard,12,web,/earnings/summary,partner,commissions,desktop,responsive,commercial-record,planned,,
-028,Tasks & Follow-up Calendar,Partner Home & Dashboard,07,web,/tasks,partner,customers,desktop,responsive,content,planned,,
+028,Tasks & Follow-up Calendar,Partner Home & Dashboard,07,web,/tasks,partner,customers,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage07.e2e.ts,"Week calendar, overdue list, assign within org"
 029,Partner Performance Scorecard,Partner Home & Dashboard,14,web,/performance,partner,reputation,desktop,responsive,identity-collaboration,planned,,
-030,Quick Actions & Activity Center,Partner Home & Dashboard,07,web,/activity,partner,audit,mobile-first,native,content,planned,,
+030,Quick Actions & Activity Center,Partner Home & Dashboard,07,web,/activity,partner,audit,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage07.e2e.ts,Quick actions + merged CRM/audit/alerts; web + native
 031,All Opportunities Marketplace,Marketplace & Opportunity Discovery,05,web,/marketplace,partner,opportunities,desktop,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,Web + native
 032,Unite Group Opportunities,Marketplace & Opportunity Discovery,05,web,/marketplace/unite,partner,opportunities,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,
 033,Approved Partner Exchange,Marketplace & Opportunity Discovery,05,web,/marketplace/exchange,verified-partner,opportunities,desktop,responsive,identity-collaboration,verified,scripts/e2e-suites.mjs apps/api/test/stage05.e2e.ts,Verified partners only; originator withheld
@@ -50,9 +50,9 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 049,Lead Registration Confirmation,Lead Registration & Client CRM,06,web,/leads/[id]/confirmation,lead-owner,lead-protection,desktop,responsive,commercial-record,verified,scripts/e2e-suites.mjs apps/api/test/stage06.e2e.ts,
 050,Unite First-Review Status,Lead Registration & Client CRM,06,web,/leads/[id]/review-status,lead-owner,routing,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage06.e2e.ts,"Business-hours SLA timer, pauses, escalation; web + native"
 051,Protected Lead Ownership Certificate,Lead Registration & Client CRM,06,web,/leads/[id]/certificate,lead-owner,lead-protection,desktop,native,commercial-record,verified,scripts/e2e-suites.mjs apps/api/test/stage06.e2e.ts,Web + native
-052,Customer CRM Profile,Lead Registration & Client CRM,07,web,/crm/customers/[id],partner,customers,desktop,responsive,content,planned,,
-053,Sales Pipeline Kanban,Lead Registration & Client CRM,07,web,/crm/pipeline,partner,customers,desktop,native,content,planned,,
-054,Lead Follow-up & Conversion Timeline,Lead Registration & Client CRM,07,web,/leads/[id]/timeline,lead-owner,customers,desktop,responsive,commercial-record,planned,,
+052,Customer CRM Profile,Lead Registration & Client CRM,07,web,/crm/customers/[id],partner,customers,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage07.e2e.ts,"Consent-scoped record, deals, leads, follow-ups, history"
+053,Sales Pipeline Kanban,Lead Registration & Client CRM,07,web,/crm/pipeline,partner,customers,desktop,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage07.e2e.ts,Versioned stage moves with activity + audit; accessible move control; web + native
+054,Lead Follow-up & Conversion Timeline,Lead Registration & Client CRM,07,web,/leads/[id]/timeline,lead-owner,customers,desktop,responsive,commercial-record,verified,scripts/e2e-suites.mjs apps/api/test/stage07.e2e.ts,"Merges lifecycle, routing, documents, disputes and CRM"
 055,Find Collaboration Partners,Collaboration & Partner Matching,08,web,/partners/find,verified-partner,partner-matching,desktop,responsive,identity-collaboration,planned,,
 056,Partner Directory & Profiles,Collaboration & Partner Matching,08,web,/partners,partner,organizations,desktop,responsive,identity-collaboration,planned,,
 057,AI Partner Match Suggestions,Collaboration & Partner Matching,08,web,/partners/ai-matches,verified-partner,partner-matching,desktop,responsive,ai-explainable,planned,,

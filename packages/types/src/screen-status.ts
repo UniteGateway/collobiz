@@ -81,4 +81,10 @@ export const SCREEN_STATUS: Record<string, ScreenProgress> = {
   '151': v([E2E, 'apps/api/test/stage06.e2e.ts'], 'Web + native'),
   '152': v([E2E, 'apps/api/test/stage06.e2e.ts'], 'QR + public verification without customer data'),
   '153': v([E2E, 'apps/api/test/stage06.e2e.ts'], 'Evidence trail, 14-day appeal'),
+  // ---- Stage 07 ----
+  '028': v([E2E, 'apps/api/test/stage07.e2e.ts'], 'Week calendar, overdue list, assign within org'),
+  '030': v([E2E, 'apps/api/test/stage07.e2e.ts'], 'Quick actions + merged CRM/audit/alerts; web + native'),
+  '052': v([E2E, 'apps/api/test/stage07.e2e.ts'], 'Consent-scoped record, deals, leads, follow-ups, history'),
+  '053': v([E2E, 'apps/api/test/stage07.e2e.ts'], 'Versioned stage moves with activity + audit; accessible move control; web + native'),
+  '054': v([E2E, 'apps/api/test/stage07.e2e.ts'], 'Merges lifecycle, routing, documents, disputes and CRM'),
 };

@@ -229,9 +229,12 @@ export const DisputeRulingSchema = z.object({ outcome: z.enum(['upheld', 'reject
 
 // ---------- CRM (Stage 07 — 028, 052-054) ----------
 export const PIPELINE_STAGES = ['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'won', 'lost'] as const;
-export const CrmMoveSchema = z.object({ stage: z.enum(PIPELINE_STAGES), note: z.string().max(2000).optional() });
-export const CrmActivitySchema = z.object({ kind: z.enum(['note', 'call', 'email', 'meeting']), body: z.string().trim().min(2).max(4000) });
-export const TaskSchema = z.object({ title: z.string().trim().min(2).max(200), dueAt: z.string().datetime(), leadId: id.optional(), customerId: id.optional() });
+export const CrmMoveSchema = z.object({ stage: z.enum(PIPELINE_STAGES), note: z.string().trim().max(2000).optional(), lostReason: z.string().trim().min(5).max(1000).optional(), expectedVersion: z.number().int().optional() })
+  .refine((v) => v.stage !== 'lost' || !!v.lostReason, { message: 'Record why the deal was lost', path: ['lostReason'] });
+export const CrmCustomerSchema = z.object({ legalName: z.string().trim().min(2).max(200), taxId: z.string().trim().max(30).optional(), contactName: z.string().trim().min(2).max(120).optional(), contactEmail: z.string().email().optional(), contactPhone: z.string().max(20).optional(), city: z.string().trim().max(80).optional(), country: z.string().length(2).toUpperCase().default('IN') });
+export const CrmDealSchema = z.object({ customerId: id, title: z.string().trim().min(3).max(200), value: money.optional(), expectedClose: z.string().datetime().optional() });
+export const CrmActivitySchema = z.object({ subjectType: z.enum(['customer', 'deal', 'lead']), subjectId: id, kind: z.enum(['note', 'call', 'email', 'meeting']), body: z.string().trim().min(2).max(4000) });
+export const TaskSchema = z.object({ title: z.string().trim().min(2).max(200), dueAt: z.string().datetime(), assigneeUserId: id.optional(), leadClaimId: id.optional(), customerId: id.optional(), dealId: id.optional() });
 
 export const APPLICATION_STATUSES = ['submitted', 'shortlisted', 'accepted', 'rejected', 'withdrawn'] as const;
 export const ApplicationDecisionSchema = z.object({ status: z.enum(['shortlisted', 'accepted', 'rejected']), reason: z.string().trim().min(5).max(2000) });

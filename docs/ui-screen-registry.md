@@ -4,7 +4,7 @@
 
 Source: Master Book Section 05 (functional specification) and the 165-screen UI Design Atlas (U01–U10). Screen IDs and titles are preserved verbatim.
 
-**Status:** verified 63 · implemented 0 · scaffolded 0 · planned 102
+**Status:** verified 68 · implemented 0 · scaffolded 0 · planned 97
 
 Status meaning: *planned* (not started) → *scaffolded* (route + shell) → *implemented* (wired to real API) → *verified* (automated test passed).
 
@@ -62,9 +62,9 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 025 | Recommended Business Feed | 05 | web `/feed` | partner | partner-matching | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage05.e2e.ts |
 | 026 | My Leads & Pipeline | 06 | web `/my/leads` | partner | lead-protection | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
 | 027 | Earnings & Settlement Summary | 12 | web `/earnings/summary` | partner | commissions | desktop | responsive | planned |  |
-| 028 | Tasks & Follow-up Calendar | 07 | web `/tasks` | partner | customers | desktop | responsive | planned |  |
+| 028 | Tasks & Follow-up Calendar | 07 | web `/tasks` | partner | customers | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage07.e2e.ts |
 | 029 | Partner Performance Scorecard | 14 | web `/performance` | partner | reputation | desktop | responsive | planned |  |
-| 030 | Quick Actions & Activity Center | 07 | web `/activity` | partner | audit | mobile-first | native | planned |  |
+| 030 | Quick Actions & Activity Center | 07 | web `/activity` | partner | audit | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage07.e2e.ts |
 
 ## 04 · Marketplace & Opportunity Discovery
 
@@ -96,9 +96,9 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 049 | Lead Registration Confirmation | 06 | web `/leads/[id]/confirmation` | lead-owner | lead-protection | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
 | 050 | Unite First-Review Status | 06 | web `/leads/[id]/review-status` | lead-owner | routing | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
 | 051 | Protected Lead Ownership Certificate | 06 | web `/leads/[id]/certificate` | lead-owner | lead-protection | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
-| 052 | Customer CRM Profile | 07 | web `/crm/customers/[id]` | partner | customers | desktop | responsive | planned |  |
-| 053 | Sales Pipeline Kanban | 07 | web `/crm/pipeline` | partner | customers | desktop | native | planned |  |
-| 054 | Lead Follow-up & Conversion Timeline | 07 | web `/leads/[id]/timeline` | lead-owner | customers | desktop | responsive | planned |  |
+| 052 | Customer CRM Profile | 07 | web `/crm/customers/[id]` | partner | customers | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage07.e2e.ts |
+| 053 | Sales Pipeline Kanban | 07 | web `/crm/pipeline` | partner | customers | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage07.e2e.ts |
+| 054 | Lead Follow-up & Conversion Timeline | 07 | web `/leads/[id]/timeline` | lead-owner | customers | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage07.e2e.ts |
 
 ## 06 · Collaboration & Partner Matching
 

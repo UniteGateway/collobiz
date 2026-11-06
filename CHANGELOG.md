@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Stage 07 — CRM & pipeline (2026-11-06)
+- Customers, deals with versioned stage moves and activity audit, follow-up tasks with calendar, activity centre, lead conversion timeline; leads auto-open deals; screens 028, 030, 052–054 (web) and native 030/053.
+
 ### Stage 06 — Lead protection & Unite-first routing (2026-11-06)
 - Protected lead registration with sealed evidence, consent checks, evidence-based duplicate review, 90-day protection, Unite-first review with business-hours SLA (pause/escalate/auto-release policy), consent-gated release to the partner exchange, verifiable certificates and ownership disputes with appeal; screens 026, 043–051, 132–134, 151–153 (web/admin) and native 026/043/048/050/051/151.
 
