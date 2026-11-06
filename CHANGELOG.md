@@ -4,6 +4,10 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Stage 11a — Project execution (2026-11-06)
+- Projects started from executed contracts: baseline approval, milestone planning, subcontractor allocation, site updates with photos (web + native), materials, versioned documents, quality/safety inspections with NCRs, owner-only evidence-based certification, invoicing, payment recording, hashed completion certificate and closure, with an append-only change log; screens 075–084.
+- Fixed: PATCH endpoints (tender, catalogue item, CRM customer, milestone) silently reset omitted fields to schema defaults; new `patchOf()` helper.
+
 ### Stage 10 — Contracts & document vault (2026-11-06)
 - LOI, work order and contract drafted from the tender award; versioned drafts, two-person approval, approved versions locked by a database trigger, hash-bound click-to-sign by both parties, amendments that supersede on execution, termination; documents & agreements vault; screens 074 and 148.
 

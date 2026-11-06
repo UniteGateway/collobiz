@@ -177,6 +177,31 @@ async function stage09(db: Db, refs: SeedRefs) {
   ]);
 }
 
+async function stage11(db: Db, refs: SeedRefs) {
+  const have = await db.select({ id: s.projects.id }).from(s.projects).limit(1);
+  if (have.length) return;
+  const [p] = await db.insert(s.projects).values({
+    code: 'PRJ-2026-000001', title: '2 MW Chakan rooftop EPC', description: 'Design, supply, installation and commissioning of a 2 MW rooftop plant across three sheds.',
+    ownerOrgId: refs.orgs.uniteSolar, leadOrgId: refs.orgs.volt, value: 9_00_00_000_00, site: 'Chakan MIDC, Pune', region: 'IN-MH', startDate: '2026-10-01', endDate: '2027-02-28', status: 'active', createdBy: refs.users.uniteAdmin,
+  }).returning();
+  await db.insert(s.projectMembers).values([
+    { projectId: p.id, organizationId: refs.orgs.uniteSolar, role: 'owner', scope: 'Client: approves baseline, inspects, certifies and pays', addedBy: refs.users.uniteAdmin },
+    { projectId: p.id, organizationId: refs.orgs.volt, role: 'lead', scope: 'EPC execution', allocatedValue: 9_00_00_000_00, addedBy: refs.users.uniteAdmin },
+    { projectId: p.id, organizationId: refs.orgs.sunrise, role: 'subcontractor', scope: 'LT panels, cabling and transformer supply', allocatedValue: 1_80_00_000_00, addedBy: refs.users.asha },
+  ]);
+  const [m1] = await db.insert(s.milestones).values([
+    { projectId: p.id, seq: 1, title: 'Structure & module mounting — Shed A', dueDate: '2026-11-30', amount: 3_60_00_000_00, status: 'in_progress', progressPct: 60, requiresInspection: 'both' },
+    { projectId: p.id, seq: 2, title: 'Electrical BoS & LT panels', dueDate: '2027-01-15', amount: 3_00_00_000_00, assignedOrgId: refs.orgs.sunrise, status: 'planned' },
+    { projectId: p.id, seq: 3, title: 'Commissioning & net-metering', dueDate: '2027-02-20', amount: 2_40_00_000_00, status: 'planned' },
+  ]).returning();
+  await db.insert(s.projectUpdates).values({ projectId: p.id, milestoneId: m1.id, organizationId: refs.orgs.volt, authorUserId: refs.users.asha, note: 'Purlins fixed on Shed A; 60% of modules mounted. Rain stopped work for two days.', progressPct: 60 });
+  await db.insert(s.projectMaterials).values([
+    { projectId: p.id, item: 'Mono PERC 545 Wp modules', quantity: 3670, unit: 'nos', supplier: 'Unite Solar', status: 'delivered', deliveredQty: 3670, neededBy: '2026-10-20' },
+    { projectId: p.id, item: 'String inverters 100 kW', quantity: 20, unit: 'nos', status: 'ordered', neededBy: '2026-12-10' },
+  ]);
+  await db.insert(s.projectChangeLog).values({ projectId: p.id, entity: 'project', entityId: p.id, field: 'status', before: 'planning', after: 'active', reason: 'Baseline schedule approved by the owner (demo seed)', userId: refs.users.uniteAdmin, organizationId: refs.orgs.uniteSolar });
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
@@ -185,4 +210,5 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await stage07(db, refs);
   await stage08(db, refs);
   await stage09(db, refs);
+  await stage11(db, refs);
 }

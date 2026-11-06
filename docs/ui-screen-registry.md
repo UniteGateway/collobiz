@@ -4,7 +4,7 @@
 
 Source: Master Book Section 05 (functional specification) and the 165-screen UI Design Atlas (U01–U10). Screen IDs and titles are preserved verbatim.
 
-**Status:** verified 93 · implemented 0 · scaffolded 0 · planned 72
+**Status:** verified 103 · implemented 0 · scaffolded 0 · planned 62
 
 Status meaning: *planned* (not started) → *scaffolded* (route + shell) → *implemented* (wired to real API) → *verified* (automated test passed).
 
@@ -134,16 +134,16 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
-| 075 | Active Projects Portfolio | 11 | web `/projects` | partner | projects | desktop | native | planned |  |
-| 076 | Project Overview Dashboard | 11 | web `/projects/[id]` | project-member | projects | desktop | responsive | planned |  |
-| 077 | Milestone & Schedule Planner | 11 | web `/projects/[id]/milestones` | project-member | projects | desktop | responsive | planned |  |
-| 078 | Work Allocation & Subcontractors | 11 | web `/projects/[id]/allocation` | project-lead | projects | desktop | responsive | planned |  |
-| 079 | Site Progress & Photo Updates | 11 | web `/projects/[id]/progress` | project-member | projects | desktop | native | planned |  |
-| 080 | Materials & Procurement Tracker | 11 | web `/projects/[id]/materials` | project-member | procurement | desktop | responsive | planned |  |
-| 081 | Project Documents Repository | 11 | web `/projects/[id]/documents` | project-member | projects | desktop | responsive | planned |  |
-| 082 | Quality & Safety Inspection | 11 | web `/projects/[id]/inspections` | project-member | projects | desktop | responsive | planned |  |
-| 083 | Invoice / Milestone Certification | 11 | web `/projects/[id]/certification` | project-lead | projects | desktop | responsive | planned |  |
-| 084 | Project Closure & Completion Certificate | 11 | web `/projects/[id]/closure` | project-lead | projects | desktop | responsive | planned |  |
+| 075 | Active Projects Portfolio | 11 | web `/projects` | partner | projects | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11.e2e.ts |
+| 076 | Project Overview Dashboard | 11 | web `/projects/[id]` | project-member | projects | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11.e2e.ts |
+| 077 | Milestone & Schedule Planner | 11 | web `/projects/[id]/milestones` | project-member | projects | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11.e2e.ts |
+| 078 | Work Allocation & Subcontractors | 11 | web `/projects/[id]/allocation` | project-lead | projects | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11.e2e.ts |
+| 079 | Site Progress & Photo Updates | 11 | web `/projects/[id]/progress` | project-member | projects | desktop | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11.e2e.ts |
+| 080 | Materials & Procurement Tracker | 11 | web `/projects/[id]/materials` | project-member | procurement | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11.e2e.ts |
+| 081 | Project Documents Repository | 11 | web `/projects/[id]/documents` | project-member | projects | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11.e2e.ts |
+| 082 | Quality & Safety Inspection | 11 | web `/projects/[id]/inspections` | project-member | projects | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11.e2e.ts |
+| 083 | Invoice / Milestone Certification | 11 | web `/projects/[id]/certification` | project-lead | projects | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11.e2e.ts |
+| 084 | Project Closure & Completion Certificate | 11 | web `/projects/[id]/closure` | project-lead | projects | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11.e2e.ts |
 
 ## 09 · Trading, Products & Distribution
 

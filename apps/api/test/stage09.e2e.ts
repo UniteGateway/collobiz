@@ -57,6 +57,12 @@ describe('Stage 09 — tenders & sealed bids (gate: sealed-bid boundaries and ev
     expect(url.body.url).toMatch(/sig=/);
   });
 
+  it('PATCH keeps fields that were not sent (no silent reset to defaults)', async () => {
+    const r = await api(app).post('/v1/tenders').set(auth(t.uniteAdmin)).send({ ...draft, title: 'Weighting retention check', techWeight: 55, minTechScore: 45, eligibility: { minLevel: 'certified', sectors: ['solar'], certifications: ['BIS'] } }).expect(201);
+    const u = await api(app).patch(`/v1/tenders/${r.body.id}`).set(auth(t.uniteAdmin)).send({ closesAt: inDays(4) }).expect(200);
+    expect(u.body).toMatchObject({ techWeight: 55, minTechScore: 45, eligibility: { minLevel: 'certified', sectors: ['solar'], certifications: ['BIS'] } });
+  });
+
   it('065 dashboard: partners see open tenders with eligibility; unverified partners cannot see them', async () => {
     const d = await api(app).get('/v1/tenders').set(auth(t.ravi)).expect(200);
     expect(d.body.open.map((x: any) => x.id)).toContain(tender.id);

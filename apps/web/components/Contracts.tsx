@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { newIdempotencyKey } from '@collabiz/types';
 import { Alert, Button, Card, Checkbox, DataTable, DescriptionList, LoadingState, Money, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
@@ -30,6 +32,8 @@ export function ContractPanel({ id, onChanged }: { id: string; onChanged?: () =>
   const [review, setReview] = useState('');
   const [sig, setSig] = useState({ typedName: '', title: '', consent: false });
   const [reason, setReason] = useState('');
+  const router = useRouter();
+  const [proj, setProj] = useState({ startDate: '', endDate: '', site: '' });
   useEffect(() => { if (latest) setDraft({ body: latest.body, value: fromMinor(c.value), note: '' }); }, [latest?.id, c?.version]); // eslint-disable-line react-hooks/exhaustive-deps
   const done = <T,>(r: T) => { q.reload(); onChanged?.(); return r; };
   const save = useMutation(async () => done(await api.put(`/contracts/${id}/draft`, { body: draft.body, terms: { value: toMinor(draft.value) }, changeNote: draft.note || undefined })));
@@ -38,6 +42,7 @@ export function ContractPanel({ id, onChanged }: { id: string; onChanged?: () =>
   const sign = useMutation(async () => done(await api.request('POST', `/contracts/${id}/sign`, { ...sig, title: sig.title || undefined, bodyHash: approved.bodyHash }, { idempotencyKey: newIdempotencyKey() })));
   const amend = useMutation(async () => done(await api.post<any>(`/contracts/${id}/amend`)));
   const terminate = useMutation(async () => done(await api.post(`/contracts/${id}/terminate`, { reason })));
+  const startProject = useMutation(async () => { const pr = await api.post<any>(`/contracts/${id}/project`, { startDate: proj.startDate, endDate: proj.endDate, site: proj.site || undefined }); router.push(`/projects/${pr.id}/milestones`); return pr; });
   const download = async (vid: string, code: string, n: number) => {
     const text = await api.request<string>('GET', `/contracts/${id}/versions/${vid}/text`);
     const url = URL.createObjectURL(new Blob([typeof text === 'string' ? text : JSON.stringify(text)], { type: 'text/plain' }));
@@ -45,7 +50,7 @@ export function ContractPanel({ id, onChanged }: { id: string; onChanged?: () =>
   };
   if (q.loading) return <LoadingState />;
   if (q.error) return <ApiErrorView error={q.error} onRetry={q.reload} />;
-  const err = save.error ?? submit.error ?? decide.error ?? sign.error ?? amend.error ?? terminate.error;
+  const err = save.error ?? submit.error ?? decide.error ?? sign.error ?? amend.error ?? terminate.error ?? startProject.error;
   const p = c.permissions;
   return (
     <Card title={`${c.kindLabel} ${c.code}`} actions={<StatusBadge status={c.status} />}>
@@ -117,6 +122,18 @@ export function ContractPanel({ id, onChanged }: { id: string; onChanged?: () =>
           <TextInput label="Designation (optional)" value={sig.title} onChange={(e) => setSig({ ...sig, title: e.target.value })} />
           <Checkbox label="I am authorised to sign for my organization and agree to this document" checked={sig.consent} onChange={(e) => setSig({ ...sig, consent: e.target.checked })} />
           <Button variant="accent" onClick={() => sign.run()} disabled={!sig.consent || sig.typedName.trim().length < 3} loading={sign.pending}>Sign document</Button>
+        </section>
+      )}
+      {c.project && <Alert tone="info">Project <Link href={`/projects/${c.project.id}`} className="cz-mono">{c.project.code}</Link> runs under this contract.</Alert>}
+      {p.startProject && (
+        <section aria-label="Start project">
+          <h3>Start the project</h3>
+          <div className="cz-row" style={{ alignItems: 'flex-end' }}>
+            <TextInput label="Start date" type="date" value={proj.startDate} onChange={(e) => setProj({ ...proj, startDate: e.target.value })} error={startProject.fieldErrors.startDate} />
+            <TextInput label="End date" type="date" value={proj.endDate} onChange={(e) => setProj({ ...proj, endDate: e.target.value })} error={startProject.fieldErrors.endDate} />
+            <TextInput label="Site (optional)" value={proj.site} onChange={(e) => setProj({ ...proj, site: e.target.value })} />
+            <Button onClick={() => startProject.run()} disabled={!proj.startDate || !proj.endDate} loading={startProject.pending}>Start project</Button>
+          </div>
         </section>
       )}
       {(p.amend || p.terminate) && (

@@ -21,7 +21,7 @@ import {
 } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import {
-  agreementAcceptances, agreementTemplates, bids, collaborationTeams, contracts, contractSignatures, contractVersions, kybDocuments, leadClaims, memberships, negotiationMessages, notifications, opportunities, organizations, teamMembers, tenders, users,
+  agreementAcceptances, agreementTemplates, bids, collaborationTeams, contracts, contractSignatures, contractVersions, kybDocuments, leadClaims, memberships, negotiationMessages, notifications, opportunities, organizations, projects, teamMembers, tenders, users,
 } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, RequireOrg, type RequestContext } from '../../common/context';
@@ -104,6 +104,7 @@ export class ContractsService {
       this.db.select({ s: contractSignatures, name: organizations.displayName }).from(contractSignatures).innerJoin(organizations, eq(organizations.id, contractSignatures.organizationId)).where(eq(contractSignatures.contractId, c.id)).orderBy(asc(contractSignatures.signedAt)),
       this.db.select({ id: organizations.id, name: organizations.displayName }).from(organizations).where(inArray(organizations.id, [c.issuerOrgId, c.counterpartyOrgId])),
     ]);
+    const [proj] = await this.db.select({ id: projects.id, code: projects.code }).from(projects).where(eq(projects.contractId, c.id)).limit(1);
     const authors = vs.length ? await this.db.select({ id: users.id, name: users.fullName }).from(users).where(inArray(users.id, [...new Set(vs.flatMap((v) => [v.authorUserId, v.approvedBy, v.rejectedBy].filter(Boolean) as string[]))])) : [];
     const name = (id?: string | null) => authors.find((a) => a.id === id)?.name ?? null;
     const party = this.party(ctx, c)!;
@@ -116,7 +117,7 @@ export class ContractsService {
       id: c.id, code: c.code, kind: c.kind, kindLabel: KIND_LABEL[c.kind], title: c.title, status: c.status, value: c.value, currency: c.currency, tenderId: c.tenderId,
       issuer: orgs.find((o) => o.id === c.issuerOrgId)?.name, counterparty: orgs.find((o) => o.id === c.counterpartyOrgId)?.name, issuerOrgId: c.issuerOrgId, counterpartyOrgId: c.counterpartyOrgId,
       supersedesId: c.supersedesId, supersededById: c.supersededById, executedAt: c.executedAt, terminatedAt: c.terminatedAt, terminationReason: c.terminationReason, createdAt: c.createdAt,
-      party, version: c.version,
+      party, version: c.version, project: proj ?? null,
       versions: visible.map((v) => ({ id: v.id, versionNo: v.versionNo, body: v.body, terms: v.terms, bodyHash: v.bodyHash, changeNote: v.changeNote, author: name(v.authorUserId), submittedAt: v.submittedAt, approvedAt: v.approvedAt, approvedBy: name(v.approvedBy), rejectedAt: v.rejectedAt, rejectedBy: name(v.rejectedBy), reviewNote: v.reviewNote, locked: !!(v.submittedAt || v.approvedAt) })),
       approvedVersionId: approved?.id ?? null,
       signatures: sigs.map((s) => ({ organization: s.name, organizationId: s.s.organizationId, typedName: s.s.typedName, title: s.s.title, versionId: s.s.versionId, bodyHash: s.s.bodyHash, signedAt: s.s.signedAt })),
@@ -128,6 +129,7 @@ export class ContractsService {
         sign: this.canSignFor(ctx, c) && ['approved', 'partially_signed'].includes(c.status) && !signedByMe,
         amend: this.canManage(ctx, c) && ['approved', 'partially_signed', 'executed'].includes(c.status) && !c.supersededById,
         terminate: this.canManage(ctx, c) && c.status === 'executed',
+        startProject: party === 'issuer' && ctx.orgId === c.issuerOrgId && ctx.caps.has('project.manage') && c.status === 'executed' && !proj,
       },
     };
   }

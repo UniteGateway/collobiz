@@ -26,6 +26,17 @@ z.config({
 });
 
 const id = z.string().uuid();
+
+/**
+ * Partial schema for PATCH endpoints. Zod's `.partial()` keeps `.default()` values, so an omitted field would be
+ * silently reset to its default. This strips top-level defaults first, so omitted fields are left untouched.
+ */
+export function patchOf<S extends z.ZodRawShape>(schema: z.ZodObject<S>) {
+  const shape: Record<string, z.ZodType> = {};
+  for (const [k, v] of Object.entries(schema.shape)) shape[k] = v instanceof z.ZodDefault ? (v.unwrap() as z.ZodType) : (v as z.ZodType);
+  return z.object(shape).partial() as unknown as z.ZodObject<{ [K in keyof S]: z.ZodOptional<S[K]> }>;
+}
+
 const money = z.number().int().nonnegative();
 const password = z
   .string()
@@ -285,3 +296,28 @@ export const ContractDraftSchema = z.object({ body: z.string().trim().min(50).ma
 export const ContractReviewSchema = z.object({ decision: z.enum(['approve', 'reject']), note: z.string().trim().max(2000).optional() }).refine((v) => v.decision === 'approve' || (v.note?.length ?? 0) >= 5, { message: 'Explain why you are rejecting this version', path: ['note'] });
 export const ContractSignSchema = z.object({ typedName: z.string().trim().min(3).max(120), title: z.string().trim().max(120).optional(), consent: z.literal(true, { message: 'Confirm that you are authorised to sign for your organization' }), bodyHash: z.string().regex(/^[0-9a-f]{64}$/) });
 export const ContractTerminateSchema = z.object({ reason: z.string().trim().min(10).max(2000) });
+
+// ---------- Projects (Stage 11a — 075–084) ----------
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use a date (YYYY-MM-DD)');
+export const ProjectFromContractSchema = z.object({ title: z.string().trim().min(5).max(200).optional(), site: z.string().trim().max(300).optional(), region: z.string().max(40).optional(), startDate: isoDate, endDate: isoDate })
+  .refine((v) => v.endDate >= v.startDate, { message: 'End date must be on or after the start date', path: ['endDate'] });
+const milestoneFields = {
+  title: z.string().trim().min(3).max(200), description: z.string().trim().max(2000).optional(), dueDate: isoDate, amount: money,
+  assignedOrgId: id.optional(), requiresInspection: z.enum(['quality', 'safety', 'both', 'none']),
+};
+export const MilestoneSchema = z.object({ ...milestoneFields, requiresInspection: milestoneFields.requiresInspection.default('quality') });
+/** Partial update: deliberately built from the fields WITHOUT defaults, so omitted fields are never reset. */
+export const MilestoneChangeSchema = z.object(milestoneFields).partial().extend({ reason: z.string().trim().min(5).max(1000).optional() });
+export const ProjectMemberSchema = z.object({ organizationId: id, scope: z.string().trim().min(5).max(2000), allocatedValue: money.optional() });
+export const ProgressUpdateSchema = z.object({ note: z.string().trim().min(5).max(4000), progressPct: z.coerce.number().int().min(0).max(100).optional(), milestoneId: id.optional() });
+export const MaterialSchema = z.object({ item: z.string().trim().min(2).max(200), spec: z.string().trim().max(500).optional(), quantity: z.number().int().positive(), unit: z.string().trim().min(1).max(20), supplier: z.string().trim().max(200).optional(), neededBy: isoDate.optional() });
+export const MaterialUpdateSchema = z.object({ status: z.enum(['planned', 'ordered', 'delivered', 'installed']).optional(), deliveredQty: z.number().int().min(0).optional(), supplier: z.string().trim().max(200).optional(), notes: z.string().trim().max(1000).optional() });
+export const InspectionSchema = z.object({
+  milestoneId: id.optional(), kind: z.enum(['quality', 'safety']),
+  checklist: z.array(z.object({ item: z.string().trim().min(2).max(300), result: z.enum(['pass', 'fail', 'na']), note: z.string().trim().max(500).optional() })).min(1).max(100),
+  observations: z.string().trim().max(4000).optional(), correctiveAction: z.string().trim().max(2000).optional(),
+}).refine((v) => !v.checklist.some((c) => c.result === 'fail') || (v.correctiveAction?.length ?? 0) >= 5, { message: 'Describe the corrective action for failed items', path: ['correctiveAction'] });
+export const MilestoneSubmitSchema = z.object({ note: z.string().trim().min(5).max(2000) });
+export const CertifySchema = z.object({ decision: z.enum(['certify', 'reject']), certifiedAmount: money.optional(), note: z.string().trim().min(5).max(2000) });
+export const InvoicePaidSchema = z.object({ paymentReference: z.string().trim().min(3).max(100) });
+export const ProjectHoldSchema = z.object({ status: z.enum(['active', 'on_hold']), reason: z.string().trim().min(5).max(1000) });

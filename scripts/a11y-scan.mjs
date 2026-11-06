@@ -21,6 +21,9 @@ await p.getByRole('button', { name: 'Sign in' }).last().click(); await p.waitFor
 for (const u of ['/dashboard', '/company/team', '/onboarding/kyc', '/settings/privacy', '/profile', '/tenders', '/tenders/new', '/vault']) await scan(WEB + u);
 const tid = await p.evaluate(async () => (await (await fetch('/api/v1/tenders')).json()).open?.[0]?.id);
 if (tid) for (const u of ['documents', 'bid']) await scan(`${WEB}/tenders/${tid}/${u}`);
+await scan(WEB + '/projects');
+const pid = await p.evaluate(async () => (await (await fetch('/api/v1/projects')).json())[0]?.id);
+if (pid) for (const u of ['', '/milestones', '/progress', '/materials', '/documents', '/inspections', '/certification', '/closure', '/allocation']) await scan(`${WEB}/projects/${pid}${u}`);
 await scan(ADMIN + '/login');
 await b.close();
 process.exit(total ? 1 : 0);

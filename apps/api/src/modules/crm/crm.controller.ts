@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, ConflictException, Get, HttpCode
 import { ApiTags } from '@nestjs/swagger';
 import { and, asc, desc, eq, gte, ilike, inArray, lte, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { CrmActivitySchema, CrmCustomerSchema, CrmDealSchema, CrmMoveSchema, PIPELINE_STAGES, TaskSchema } from '@collabiz/types';
+import { CrmActivitySchema, CrmCustomerSchema, patchOf, CrmDealSchema, CrmMoveSchema, PIPELINE_STAGES, TaskSchema } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import { auditEvents, crmActivities, crmDeals, crmTasks, customers, disputes, leadClaims, leadDocuments, memberships, notifications, opportunities, opportunityEvents, routingEvents, users } from '../../db/schema';
 import { body } from '../../common/http';
@@ -76,7 +76,7 @@ export class CrmController {
 
   @Patch('crm/customers/:id')
   @RequireCaps('crm.manage')
-  async updateCustomer(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Body(body(CrmCustomerSchema.partial())) b: Partial<z.infer<typeof CrmCustomerSchema>>) {
+  async updateCustomer(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Body(body(patchOf(CrmCustomerSchema))) b: Partial<z.infer<typeof CrmCustomerSchema>>) {
     const before = await this.ownCustomer(ctx, id);
     const [after] = await this.db.update(customers).set({ ...b, updatedAt: new Date() }).where(eq(customers.id, id)).returning();
     await this.log(ctx, 'customer', id, 'system', `Customer details updated (${Object.keys(b).join(', ')})`);

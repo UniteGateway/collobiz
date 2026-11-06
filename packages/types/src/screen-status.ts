@@ -115,4 +115,15 @@ export const SCREEN_STATUS: Record<string, ScreenProgress> = {
   // ---- Stage 10 ----
   '074': v([E2E, 'apps/api/test/stage10.e2e.ts'], 'Draft from award → second-person approval → hash-bound signatures; amend/terminate'),
   '148': v([E2E, 'apps/api/test/stage10.e2e.ts'], 'Contracts, agreements, KYB docs, NDAs, certificates with hashes'),
+  // ---- Stage 11a ----
+  '075': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Role-shaped portfolio; web + native'),
+  '076': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Progress, certified %, financials (owner/lead only), change log'),
+  '077': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Baseline approval; reasoned, logged re-planning'),
+  '078': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Verified subcontractors; allocation ≤ value; logged'),
+  '079': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Photo evidence per milestone; web + native camera/gallery'),
+  '080': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Materials with delivery tracking; logged'),
+  '081': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Versioned documents (supersede, never overwrite)'),
+  '082': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Quality/safety checklists; NCRs block certification'),
+  '083': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Owner-only certification on sealed evidence; invoice; payment'),
+  '084': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Hashed completion certificate; close after payment'),
 };

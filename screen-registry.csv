@@ -73,16 +73,16 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 072,AI Proposal Draft Builder,"Tenders, Quotations & Negotiation",14,web,/tenders/[id]/ai-proposal,verified-partner,proposals,desktop,responsive,ai-explainable,planned,,
 073,Negotiation & Revision Workspace,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/negotiation,tender-party,proposals,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage09.e2e.ts,"Bidder-only price revisions, versioned"
 074,"Award, LOI & Work Order","Tenders, Quotations & Negotiation",10,web,/tenders/[id]/award,tender-issuer,contracts,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage10.e2e.ts,Draft from award → second-person approval → hash-bound signatures; amend/terminate
-075,Active Projects Portfolio,Project Execution,11,web,/projects,partner,projects,desktop,native,project-scope,planned,,
-076,Project Overview Dashboard,Project Execution,11,web,/projects/[id],project-member,projects,desktop,responsive,project-scope,planned,,
-077,Milestone & Schedule Planner,Project Execution,11,web,/projects/[id]/milestones,project-member,projects,desktop,responsive,content,planned,,
-078,Work Allocation & Subcontractors,Project Execution,11,web,/projects/[id]/allocation,project-lead,projects,desktop,responsive,content,planned,,
-079,Site Progress & Photo Updates,Project Execution,11,web,/projects/[id]/progress,project-member,projects,desktop,native,content,planned,,
-080,Materials & Procurement Tracker,Project Execution,11,web,/projects/[id]/materials,project-member,procurement,desktop,responsive,content,planned,,
-081,Project Documents Repository,Project Execution,11,web,/projects/[id]/documents,project-member,projects,desktop,responsive,project-scope,planned,,
-082,Quality & Safety Inspection,Project Execution,11,web,/projects/[id]/inspections,project-member,projects,desktop,responsive,content,planned,,
-083,Invoice / Milestone Certification,Project Execution,11,web,/projects/[id]/certification,project-lead,projects,desktop,responsive,content,planned,,
-084,Project Closure & Completion Certificate,Project Execution,11,web,/projects/[id]/closure,project-lead,projects,desktop,responsive,project-scope,planned,,
+075,Active Projects Portfolio,Project Execution,11,web,/projects,partner,projects,desktop,native,project-scope,verified,scripts/e2e-suites.mjs apps/api/test/stage11.e2e.ts,Role-shaped portfolio; web + native
+076,Project Overview Dashboard,Project Execution,11,web,/projects/[id],project-member,projects,desktop,responsive,project-scope,verified,scripts/e2e-suites.mjs apps/api/test/stage11.e2e.ts,"Progress, certified %, financials (owner/lead only), change log"
+077,Milestone & Schedule Planner,Project Execution,11,web,/projects/[id]/milestones,project-member,projects,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage11.e2e.ts,"Baseline approval; reasoned, logged re-planning"
+078,Work Allocation & Subcontractors,Project Execution,11,web,/projects/[id]/allocation,project-lead,projects,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage11.e2e.ts,Verified subcontractors; allocation ≤ value; logged
+079,Site Progress & Photo Updates,Project Execution,11,web,/projects/[id]/progress,project-member,projects,desktop,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage11.e2e.ts,Photo evidence per milestone; web + native camera/gallery
+080,Materials & Procurement Tracker,Project Execution,11,web,/projects/[id]/materials,project-member,procurement,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage11.e2e.ts,Materials with delivery tracking; logged
+081,Project Documents Repository,Project Execution,11,web,/projects/[id]/documents,project-member,projects,desktop,responsive,project-scope,verified,scripts/e2e-suites.mjs apps/api/test/stage11.e2e.ts,"Versioned documents (supersede, never overwrite)"
+082,Quality & Safety Inspection,Project Execution,11,web,/projects/[id]/inspections,project-member,projects,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage11.e2e.ts,Quality/safety checklists; NCRs block certification
+083,Invoice / Milestone Certification,Project Execution,11,web,/projects/[id]/certification,project-lead,projects,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage11.e2e.ts,Owner-only certification on sealed evidence; invoice; payment
+084,Project Closure & Completion Certificate,Project Execution,11,web,/projects/[id]/closure,project-lead,projects,desktop,responsive,project-scope,verified,scripts/e2e-suites.mjs apps/api/test/stage11.e2e.ts,Hashed completion certificate; close after payment
 085,Trading Marketplace,"Trading, Products & Distribution",11,web,/trading,partner,procurement,desktop,responsive,content,planned,,
 086,Supplier & Manufacturer Catalogue,"Trading, Products & Distribution",11,web,/trading/suppliers,partner,catalog,desktop,responsive,content,planned,,
 087,Buyer Requirement Posting,"Trading, Products & Distribution",11,web,/trading/requirements/new,partner,procurement,desktop,responsive,content,planned,,

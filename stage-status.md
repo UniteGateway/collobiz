@@ -267,3 +267,52 @@ Commands: 131 unit/integration tests pass · 28/28 browser journeys · `node scr
 - The templates are drafts marked "SUBJECT TO LEGAL REVIEW". Approved legal wording and a qualified e-signature provider (Aadhaar eSign / DSC) are still open (B-08); click-to-sign evidence is the interim mechanism.
 - PDF rendering and S3 storage of executed copies wait on B-03; plain-text downloads with hashes are provided meanwhile.
 - Single-admin partner organizations cannot approve their own contracts: approval always needs a second person. This is recorded as decision D-18.
+
+## Stage 11a — Project execution ✅ (11b trading follows)
+
+**Acceptance gate:** evidence-based certification and change logs — **met for projects**. Evidence: `apps/api/test/stage11.e2e.ts` (7 tests), 2 browser journeys and a native test.
+
+**Evidence-based certification**
+- A milestone can be submitted only at 100% reported progress and with at least one evidence file. Submission seals an evidence hash.
+- Certification is by the owner (client) organization only, and never by the person who submitted the milestone. It requires all of the following:
+  - a passing inspection recorded by the owner's own team, for each inspection kind the milestone requires;
+  - no open non-conformance (NCR) on the milestone;
+  - evidence unchanged since submission (hash re-check). A changed evidence record is refused.
+- Part-certification requires a stated deduction.
+- A certified milestone's amount, evidence and certification are locked by a DB trigger. Its evidence cannot be added to or replaced, and it cannot be re-planned.
+
+**Change logs**
+- Every change to schedule, value, scope, allocation, assignment, materials, documents and status goes to `project_change_log` with before/after, person, organization and time.
+- After the owner approves the baseline, schedule, value, scope and allocation changes require a reason (400 without one).
+- The log is append-only (trigger). Subcontractors see the log with money values redacted.
+
+**Commercial controls**
+- Milestone amounts may not exceed the contract value, and the baseline needs them to add up exactly.
+- Subcontractor allocations may not exceed the contract value.
+- Invoices are raised once per certified milestone (unique) for the certified amount. Payment is recorded once by the owner and audited as `project.invoice_paid`; Stage 12 uses this event as the commission trigger.
+- Completion requires every milestone invoiced, no open NCRs, handover documents, and all materials delivered. It issues a `CMP-` certificate whose hash covers a snapshot of certified amounts and evidence seals. Closing additionally requires every invoice paid.
+
+### Delivered
+- Migration `0009_stage11_projects.sql`:
+  - Tables: projects, project_members, milestones, project_updates, project_documents, project_materials, inspections, project_invoices, project_change_log.
+  - Triggers: append-only change log; certified-milestone lock.
+- API: `ProjectsModule` with 30 endpoints (portfolio, start from an executed contract, overview, baseline, hold/resume, milestones, allocation, multi-photo updates, documents with versions, materials, inspections/NCRs, submit/certify/invoice/payment, closure/completion/close, change log).
+- Seed: demo project `PRJ-2026-000001`.
+- Web: 075–084 plus "Start project" on executed contracts.
+- Mobile (native): 075 portfolio and 079 site progress, with camera/gallery photo upload.
+- Shared: `test/flows.ts` (award → executed contract through the public API).
+- Fixed (found by this stage's tests):
+  - Zod `.partial()` re-applies `.default()` values, so PATCH requests silently reset fields the client never sent. This affected four endpoints: tender PATCH (technical weighting, pass mark, eligibility), catalogue item PATCH (currency), CRM customer PATCH (country), and milestone re-plan (inspection requirement).
+  - The new `patchOf()` helper strips defaults and is used at every PATCH site. Unit and API regression tests were added.
+
+### Commands & results (2026-11-06)
+| Command | Result |
+|---|---|
+| `pnpm --filter @collabiz/api test` | 144/144 passed (12 suites) |
+| `node scripts/e2e-smoke.mjs` | 56/56 passed |
+| `node scripts/a11y-scan.mjs` | 0 violations (10 project pages added) |
+| mobile · types · lint · typecheck | 12/12 · 24/24 · clean · clean |
+
+### Remaining
+- Photo EXIF/geo-tag capture is not recorded; the hash and timestamp are recorded.
+- Retention payments and GST invoices with tax lines are deferred to Stage 12 finance (B-05 tax rules pending).

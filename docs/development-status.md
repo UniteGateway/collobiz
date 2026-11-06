@@ -14,7 +14,7 @@ Overview of the 16 stages from Master Book §8. Detailed evidence (files, comman
 | 08 | Partner matching and teams | No private disclosure without permission | ✅ Complete |
 | 09 | Tender/RFQ/proposals | Sealed bid boundaries and evaluator controls | ✅ Complete |
 | 10 | Contracts and document workflows | Approved agreement version immutable | ✅ Complete |
-| 11 | Project execution and procurement | Evidence-based certification and change logs | ☐ |
+| 11 | Project execution and procurement | Evidence-based certification and change logs | ◐ 11a projects complete; 11b trading in progress |
 | 12 | Commission ledger and finance | No unearned payout, idempotent settlement | ☐ |
 | 13 | Messaging, meetings and support | Message privacy, retention and escalation | ☐ |
 | 14 | Reputation, learning and AI | Explainable recommendations, appeals | ☐ |
@@ -23,4 +23,4 @@ Overview of the 16 stages from Master Book §8. Detailed evidence (files, comman
 
 > **Launch-readiness audit 2026-11-06: NO-GO** for production and pilot — see [launch-readiness-report.md](launch-readiness-report.md).
 
-**Screen progress (2026-11-06, after Stage 10):** 93 of 165 screens verified end-to-end (API e2e + browser), 72 planned. API 136/136 · browser 53/53 · WCAG 0 violations · mobile 10/10.
+**Screen progress (2026-11-06, after Stage 11a):** 103 of 165 screens verified end-to-end (API e2e + browser), 62 planned. API 144/144 · browser 56/56 · WCAG 0 violations · mobile 12/12. Stage 11 is split: 11a projects ✅, 11b trading (085–094) in progress.

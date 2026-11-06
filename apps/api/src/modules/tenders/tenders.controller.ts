@@ -17,7 +17,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { and, asc, desc, eq, inArray, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
-  assertTransition, AwardSchema, BidDraftSchema, BidMachine, EvaluatorSchema, MEMBERSHIP_LEVELS, NegotiationSchema, ScoreSchema, ShortlistSchema, TenderCancelSchema, TenderCreateSchema, TenderMachine,
+  assertTransition, AwardSchema, BidDraftSchema, patchOf, BidMachine, EvaluatorSchema, MEMBERSHIP_LEVELS, NegotiationSchema, ScoreSchema, ShortlistSchema, TenderCancelSchema, TenderCreateSchema, TenderMachine,
   type BidState, type TenderState,
 } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
@@ -177,7 +177,7 @@ export class TendersController {
 
   @Patch(':id')
   @RequireCaps('tender.issue')
-  async update(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Body(body(TenderCreateSchema.partial())) b: Partial<z.infer<typeof TenderCreateSchema>>) {
+  async update(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Body(body(patchOf(TenderCreateSchema))) b: Partial<z.infer<typeof TenderCreateSchema>>) {
     const t = await this.svc.load(id);
     this.svc.assertIssuerAdmin(ctx, t);
     if (t.status !== 'draft') throw new ConflictException('Published tenders cannot be edited. Upload an addendum document instead.');

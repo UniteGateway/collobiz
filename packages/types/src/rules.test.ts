@@ -155,3 +155,18 @@ describe('validation messages', () => {
     expect(m.fullName).toBe('Enter at least 2 characters');
   });
 });
+
+describe('patchOf (PATCH schemas)', () => {
+  it('does not re-apply defaults to fields the client did not send', async () => {
+    const { patchOf, TenderCreateSchema, MilestoneChangeSchema } = await import('./schemas');
+    const p = patchOf(TenderCreateSchema).parse({ title: 'New title here' });
+    expect(p).toEqual({ title: 'New title here' });
+    expect('techWeight' in p).toBe(false);
+    expect('eligibility' in p).toBe(false);
+    expect(MilestoneChangeSchema.parse({ amount: 100 })).toEqual({ amount: 100 });
+  });
+  it('still validates the fields that are sent', async () => {
+    const { patchOf, TenderCreateSchema } = await import('./schemas');
+    expect(() => patchOf(TenderCreateSchema).parse({ techWeight: 140 })).toThrow();
+  });
+});

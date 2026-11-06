@@ -771,6 +771,7 @@ suites.push({
 });
 
 // ---------------- Stage 10 ----------------
+let lastExecutedContract = null; // handed to the Stage 11 project journey
 suites.push({
   name: 'Stage 10 · 148 vault lists agreements, NDAs and certificates',
   run: async ({ page, WEB, shot }) => {
@@ -826,7 +827,120 @@ suites.push({
     await page.getByRole('button', { name: 'Sign document' }).click();
     await page.getByRole('table', { name: 'Signatures' }).getByText('Sanjay Kulkarni').waitFor();
     await page.getByRole('heading', { name: new RegExp(code) }).locator('..').getByText('Executed').waitFor();
+    lastExecutedContract = { base, code };
     expect(await page.getByRole('region', { name: 'Edit draft' }).count() === 0, 'approved contract still editable');
     await shot('074-executed');
+  },
+});
+
+// ---------------- Stage 11a ----------------
+const PNG = Buffer.from('89504e470d0a1a0a0000000d4948445200000001000000010806000000', 'hex');
+suites.push({
+  name: 'Stage 11a · 075 portfolio → 076 overview → 077 milestones → 079 photo update → 080/081/082 views',
+  run: async ({ page, WEB, label, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/projects');
+    await page.getByRole('link', { name: '2 MW Chakan rooftop EPC' }).click();
+    await page.getByText('Your role').waitFor();
+    await shot('076-project-overview');
+    await page.getByRole('link', { name: 'Milestones' }).click();
+    await page.getByRole('table', { name: 'Milestones' }).getByText('Structure & module mounting — Shed A').waitFor();
+    await page.getByRole('link', { name: 'Site progress' }).click();
+    const note = `Inverter plinths cast (${label} ${Date.now()})`;
+    await page.getByLabel('What happened on site?').fill(note);
+    await page.getByLabel('Milestone').selectOption({ index: 1 });
+    await page.getByLabel('Progress %').fill('70');
+    await page.getByLabel('Photos or reports').setInputFiles({ name: 'site.png', mimeType: 'image/png', buffer: PNG });
+    await page.getByRole('button', { name: 'Post update' }).click();
+    await page.getByRole('list', { name: 'Site updates' }).getByText(note).waitFor();
+    await shot('079-site-progress');
+    for (const [tab, marker] of [['Materials', 'Mono PERC 545 Wp modules'], ['Documents', null], ['Inspections', null], ['Allocation', 'Sunrise Traders']]) {
+      await page.getByRole('link', { name: tab, exact: true }).click();
+      if (marker) await page.getByText(marker).first().waitFor(); else await page.getByRole('heading', { level: 1 }).waitFor();
+    }
+  },
+});
+
+suites.push({
+  name: 'Stage 11a · executed LOI → start project → baseline → evidence → owner inspection → 083 certify/invoice/pay → 084 complete/close',
+  only: 'desktop',
+  run: async ({ page, WEB, expect, shot }) => {
+    expect(!!lastExecutedContract, 'Stage 10 journey did not execute a contract');
+    const { base, code } = lastExecutedContract;
+    await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
+    await page.goto(base + '/award');
+    await page.getByRole('button', { name: `Open ${code}` }).click();
+    await page.getByLabel('Start date').fill('2026-12-01');
+    await page.getByLabel('End date').fill('2027-03-31');
+    await page.getByRole('button', { name: 'Start project' }).click();
+    await page.waitForURL(/\/projects\/[0-9a-f-]+\/milestones/);
+    const proj = page.url().replace(/\/milestones$/, '');
+    // Lead plans one milestone for the full value; owner approves the baseline
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(proj + '/milestones');
+    const projectId = proj.split('/').pop();
+    const value = String((await page.evaluate(async (id) => (await (await fetch(`/api/v1/projects/${id}`)).json()).value, projectId)) / 100);
+    await page.getByLabel('Milestone title').fill('Transformer yard maintenance — complete');
+    await page.getByLabel('Due date').fill('2027-02-15');
+    await page.getByLabel('Amount (₹)').fill(value);
+    await page.getByRole('button', { name: 'Add milestone' }).click();
+    await page.getByRole('table', { name: 'Milestones' }).getByText('Transformer yard maintenance — complete').waitFor();
+    await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
+    await page.goto(proj);
+    await page.getByRole('button', { name: 'Approve baseline and start' }).click();
+    await page.getByText('Active').first().waitFor();
+    // Lead starts, reports 100% with a photo, submits
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(proj + '/milestones');
+    await page.getByRole('button', { name: 'Start Transformer yard maintenance — complete' }).click();
+    await page.getByRole('table', { name: 'Milestones' }).getByText('In Progress').waitFor();
+    await page.goto(proj + '/progress');
+    await page.getByLabel('What happened on site?').fill('Oil tested, relays calibrated, both yards handed back.');
+    await page.getByLabel('Milestone').selectOption({ index: 1 });
+    await page.getByLabel('Progress %').fill('100');
+    await page.getByLabel('Photos or reports').setInputFiles({ name: 'yard.png', mimeType: 'image/png', buffer: PNG });
+    await page.getByRole('button', { name: 'Post update' }).click();
+    await page.getByText(/Update posted/).waitFor();
+    await page.goto(proj + '/certification');
+    await page.getByLabel('Submission note').fill('All maintenance done; photos and test sheets attached.');
+    await page.getByRole('button', { name: 'Submit for certification' }).click();
+    await page.getByText('Evidence seal').waitFor();
+    // Owner: certification blocked until the owner's own inspection passes
+    await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
+    await page.goto(proj + '/certification');
+    await page.getByRole('list', { name: 'Certification checks' }).getByText('❌ Passing quality inspection by the owner').waitFor();
+    await page.goto(proj + '/inspections');
+    await page.getByLabel('Milestone').selectOption({ index: 1 });
+    await page.getByRole('button', { name: 'Save inspection' }).click();
+    await page.getByRole('table', { name: 'Inspections' }).getByText('Pass').first().waitFor();
+    await shot('082-inspection');
+    await page.goto(proj + '/certification');
+    await page.getByLabel('Certification note').fill('Inspected on site; accepted in full.');
+    await page.getByRole('button', { name: 'Certify', exact: true }).click();
+    await page.getByText(/^Certified$/).first().waitFor();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(proj + '/certification');
+    await page.getByRole('button', { name: /Raise invoice for/ }).click();
+    await page.getByText(/INV-\d{4}-\d{6}/).waitFor();
+    await page.goto(proj + '/documents');
+    await page.getByLabel('Document title').fill('As-built and test certificates');
+    await page.getByLabel('Category').selectOption('handover');
+    await page.getByLabel('File').setInputFiles({ name: 'handover.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 handover') });
+    await page.getByRole('button', { name: 'Upload document' }).click();
+    await page.getByRole('table', { name: 'Project documents' }).getByText('As-built and test certificates').waitFor();
+    await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
+    await page.goto(proj + '/certification');
+    await page.getByLabel('Payment reference (UTR)').fill('UTR-SMOKE-0001');
+    await page.getByRole('button', { name: 'Record payment' }).click();
+    await page.getByText(/ref UTR-SMOKE-0001/).waitFor();
+    await shot('083-certification');
+    await page.goto(proj + '/closure');
+    await page.getByRole('button', { name: 'Issue completion certificate' }).click();
+    await page.getByRole('heading', { name: /Completion certificate CMP-/ }).waitFor();
+    await page.getByRole('button', { name: 'Close project' }).click();
+    await page.getByText(/Project closed on/).waitFor();
+    await shot('084-closure');
+    await page.goto(proj);
+    await page.getByText('Change log (latest)').waitFor();
   },
 });

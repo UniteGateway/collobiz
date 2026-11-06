@@ -64,6 +64,13 @@
       "when": 1793973721595,
       "tag": "0008_stage10_contracts",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793974404355,
+      "tag": "0009_stage11_projects",
+      "breakpoints": true
     }
   ]
 }

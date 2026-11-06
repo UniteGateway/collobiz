@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, ForbiddenException, Get, HttpCod
 import { ApiTags } from '@nestjs/swagger';
 import { and, desc, eq, ilike, inArray, or, sql, type SQL } from 'drizzle-orm';
 import { z } from 'zod';
-import { CatalogItemSchema, GroupCompanySchema, SECTOR_CODES } from '@collabiz/types';
+import { CatalogItemSchema, GroupCompanySchema, patchOf, SECTOR_CODES } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import { businessUnits, catalogItems, groupCompanies, organizations, successStories } from '../../db/schema';
 import { body } from '../../common/http';
@@ -103,7 +103,7 @@ export class CatalogController {
   }
 }
 
-const ItemPatch = CatalogItemSchema.partial();
+const ItemPatch = patchOf(CatalogItemSchema);
 
 /** Screens 128 (group companies & business units) and 136 (catalogue management). */
 @ApiTags('admin')
