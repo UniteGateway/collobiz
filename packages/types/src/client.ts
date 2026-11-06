@@ -38,11 +38,12 @@ export function newIdempotencyKey(): string {
 export class ApiClient {
   constructor(private opts: ApiClientOptions) {}
 
-  async request<T = unknown>(method: string, path: string, body?: unknown, extra: { query?: Query; idempotent?: boolean; form?: FormData; retry?: boolean } = {}): Promise<T> {
+  async request<T = unknown>(method: string, path: string, body?: unknown, extra: { query?: Query; idempotent?: boolean; idempotencyKey?: string; form?: FormData; retry?: boolean } = {}): Promise<T> {
     const h: Record<string, string> = {};
     for (const [k, v] of Object.entries((await this.opts.headers?.()) ?? {})) if (v) h[k] = v;
     if (body !== undefined && !extra.form) h['Content-Type'] = 'application/json';
-    if (extra.idempotent) h['Idempotency-Key'] = newIdempotencyKey();
+    if (extra.idempotencyKey) h['Idempotency-Key'] = extra.idempotencyKey;
+    else if (extra.idempotent) h['Idempotency-Key'] = newIdempotencyKey();
     const res = await fetch(this.opts.baseUrl + path + toQuery(extra.query), {
       method,
       headers: h,

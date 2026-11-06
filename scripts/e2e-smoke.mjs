@@ -35,10 +35,17 @@ for (const [label, viewport] of [['desktop', { width: 1440, height: 900 }], ['mo
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
+  if (process.env.DEBUG) page.on('framenavigated', (f) => f === page.mainFrame() && console.info('  nav', f.url()));
   for (const s of suites) {
     if (s.only && s.only !== label) continue;
+    if (process.env.SUITE && !s.name.includes(process.env.SUITE)) continue;
     await step(`[${label}] ${s.name}`, async () => {
-      await s.run({ page, ctx, WEB, ADMIN, expect, label, shot: async (n) => SHOTS && page.screenshot({ path: `${SHOTS}/${label}-${n}.png`, fullPage: false }) });
+      try {
+        await s.run({ page, ctx, WEB, ADMIN, expect, label, shot: async (n) => SHOTS && page.screenshot({ path: `${SHOTS}/${label}-${n}.png`, fullPage: false }) });
+      } catch (e) {
+        if (SHOTS) await page.screenshot({ path: `${SHOTS}/FAIL-${label}-${s.name.replace(/[^a-z0-9]+/gi, '_').slice(0, 60)}.png`, fullPage: true }).catch(() => {});
+        throw new Error(`${e.message.split('\n')[0]} (at ${page.url()})`);
+      }
     });
   }
   await step(`[${label}] no uncaught page errors`, async () => expect(errors.length === 0, errors.join(' | ')));

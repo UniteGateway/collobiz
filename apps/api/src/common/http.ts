@@ -34,6 +34,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (err instanceof ZodError) {
       return res.status(400).json({ statusCode: 400, error: 'ValidationError', message: 'Invalid input', issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })) });
     }
+    if (err instanceof HttpException && err.getStatus() === 429) {
+      return res.status(429).json({ statusCode: 429, error: 'TooManyRequests', message: 'Too many attempts. Please wait a minute and try again.' });
+    }
     if (err instanceof HttpException) {
       const r = err.getResponse();
       return res.status(err.getStatus()).json(typeof r === 'string' ? { statusCode: err.getStatus(), message: r } : r);

@@ -4,6 +4,13 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Stage 03 — Onboarding and KYB (2026-11-06)
+#### Added
+- Partner onboarding 013–022 (web + native), KYC/KYB private document upload with validation, scanning and signed links, encrypted bank & tax profile, agreement e-acceptance with evidence, idempotent submission.
+- Admin verification queue and dossier (130), risk & compliance centre with automatic flags and four-eyes clearing (131), privacy & data rights (149), partner profile (143).
+#### Fixed
+- Resubmission possible after a document rejection; prefilled forms overwriting input; unsignable short agreements; raw rate-limit message; 390 px overflow of hashes.
+
 ### Stage 02 — Identity, tenant permissions and security (2026-11-06)
 #### Added
 - Registration, login with lockout and rate limiting, rotating refresh tokens with reuse detection, email/SMS OTP, TOTP MFA (mandatory for admins), password change, session management, team invitations.

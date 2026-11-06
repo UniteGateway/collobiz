@@ -30,6 +30,7 @@ export default function UsersPage() {
       {(doRevoke.error) && <Alert tone="danger">{doRevoke.error}</Alert>}
       <Card>
         <TextInput label="Search users" placeholder="Name or email" value={q} onChange={(e) => setQ(e.target.value)} />
+        {(users.data?.length ?? 0) >= 50 && <p className="cz-muted" style={{ fontSize: 13 }}>Showing the 50 most recent users — refine your search to find others.</p>}
         {users.loading ? <LoadingState /> : users.error ? <ApiErrorView error={users.error} onRetry={users.reload} /> : (
           <DataTable caption="Users" rows={users.data ?? []} columns={[
             { key: 'fullName', header: 'User', render: (u) => <><strong>{u.fullName}</strong><div className="cz-muted" style={{ fontSize: 13 }}>{u.email}</div></> },

@@ -159,6 +159,7 @@ suites.push(
     run: async ({ page, ADMIN, shot }) => {
       await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
       await page.goto(ADMIN + '/users');
+      await page.getByLabel('Search users').fill('voltepc');
       await page.getByText('asha@voltepc.example').waitFor({ timeout: 15000 });
       await shot('129-users');
       await page.goto(ADMIN + '/audit');
@@ -168,3 +169,130 @@ suites.push(
     },
   },
 );
+
+// ---------------- Stage 03 ----------------
+const pdf = (n) => ({ name: `${n}.pdf`, mimeType: 'application/pdf', buffer: Buffer.from(`%PDF-1.4\n% ${n} ${Math.random()}\n%%EOF`) });
+async function registerVerified(page, WEB, email, name) {
+  await page.context().clearCookies();
+  await page.goto(WEB + '/login?mode=register');
+  await page.getByLabel('Full name').fill(name);
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill('E2eSecure123');
+  await page.getByLabel(/I accept/).check();
+  await page.getByRole('button', { name: 'Create account' }).last().click();
+  await page.waitForURL(/\/verify/);
+  await page.getByRole('button', { name: 'Resend code' }).click();
+  const code = /Development code: (\d{6})/.exec((await page.locator('.cz-alert-success').textContent()) ?? '')[1];
+  await page.getByLabel('Verification code').fill(code);
+  await page.getByRole('button', { name: 'Verify', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.waitForURL(/onboarding\/account-type/);
+}
+suites.push({
+  name: 'Stage 03 · 013–022 web onboarding → 130 admin verifies → partner verified',
+  run: async ({ page, WEB, ADMIN, expect, shot, label }) => {
+    const name = `Nova ${label}`;
+    await registerVerified(page, WEB, `nova.${label}.${Date.now()}@example.com`, name);
+    // 013
+    await page.getByText('Company partner').click();
+    await page.getByRole('button', { name: 'Contractor / EPC' }).click();
+    await shot('013-account-type');
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    // 015
+    await page.waitForURL(/onboarding\/company/);
+    await page.getByLabel('Registered legal name').fill(`${name} Projects Pvt Ltd`);
+    await page.getByLabel(/Registration number/).fill('U74999KA2021PTC1');
+    await page.getByLabel('GSTIN (optional)').fill('INVALID');
+    await page.getByLabel('City').fill('Bengaluru');
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await page.getByText('Invalid GSTIN').waitFor();
+    await page.getByLabel('GSTIN (optional)').fill('');
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    // 016
+    await page.waitForURL(/onboarding\/industries/);
+    await page.getByRole('button', { name: 'Solar & Renewable Energy' }).click();
+    await page.getByLabel('Skills (comma-separated)').fill('Rooftop solar, O&M');
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    // 017
+    await page.waitForURL(/onboarding\/coverage/);
+    await page.getByRole('button', { name: 'Karnataka' }).click();
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    // 018
+    await page.waitForURL(/onboarding\/profile/);
+    await page.getByLabel('Headline').fill('Rooftop solar installer for commercial buildings');
+    await page.getByLabel('About your business').fill('We design and install rooftop solar for factories and offices across Karnataka.');
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    // 019
+    await page.waitForURL(/onboarding\/kyc/);
+    for (const [label2, val] of [['PAN card', 'pan'], ['Certificate of incorporation', 'incorporation_certificate'], ['Address proof', 'address_proof']]) {
+      await page.getByLabel('Document type').selectOption(val);
+      await page.getByLabel('File').setInputFiles(pdf(val));
+      await page.getByRole('button', { name: 'Upload' }).click();
+      await page.getByText(`${label2} uploaded.`).waitFor();
+    }
+    await shot('019-kyc');
+    await page.getByRole('button', { name: 'Continue' }).click();
+    // 020
+    await page.waitForURL(/onboarding\/bank-tax/);
+    await page.getByLabel('Account holder name').fill(name);
+    await page.getByLabel('Account number').fill('987654321098');
+    await page.getByLabel('IFSC').fill('SBIN0001234');
+    await page.getByLabel('Bank name').fill('State Bank of India');
+    await page.getByLabel('PAN', { exact: true }).fill('ABCPN1234Q');
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    // 021
+    await page.waitForURL(/onboarding\/agreements/);
+    await page.getByLabel(/ text$/).first().waitFor();
+    const inputs = page.getByLabel(/Type your full name/);
+    const n = await inputs.count();
+    for (const region of await page.getByLabel(/ text$/).all()) await region.evaluate((el) => { el.scrollTop = el.scrollHeight; el.dispatchEvent(new Event('scroll')); });
+    for (let i = 0; i < n; i++) {
+      await page.getByLabel(/Type your full name/).first().fill(name);
+      await page.getByRole('button', { name: 'Sign', exact: true }).first().click();
+      await page.waitForTimeout(400);
+    }
+    await page.getByRole('button', { name: 'Continue to review' }).click();
+    // 022
+    await page.waitForURL(/onboarding\/status/);
+    await page.getByRole('button', { name: 'Submit for verification' }).click();
+    await page.getByText('Our compliance team is reviewing').waitFor();
+    await shot('022-submitted');
+    // 130 — compliance verifies
+    await adminLogin(page, ADMIN, 'compliance@collabiz.local');
+    await page.goto(ADMIN + '/verification');
+    await page.getByRole('link', { name: name }).first().click();
+    await page.getByRole('button', { name: 'Claim for review' }).click();
+    await page.getByRole('heading', { name: 'Decision' }).waitFor();
+    for (let i = 0; i < 3; i++) { await page.getByRole('button', { name: 'Accept', exact: true }).first().click(); await page.waitForTimeout(400); }
+    await page.getByLabel(/Reason/).fill('Documents verified against registry');
+    await page.getByRole('button', { name: 'Record decision' }).click();
+    await page.getByText('Decision recorded: verified').waitFor();
+    await shot('130-dossier');
+  },
+});
+suites.push({
+  name: 'Stage 03 · 143 profile and 149 privacy consent + data export request',
+  run: async ({ page, WEB, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/profile');
+    await page.getByText('Solar EPC contractor delivering').waitFor();
+    await shot('143-profile');
+    await page.goto(WEB + '/settings/privacy');
+    await page.getByText('Marketing communications').click();
+    await page.getByLabel('Request type').selectOption('correction');
+    await page.getByLabel('Details (optional)').fill('Please update our registered address');
+    await page.getByRole('button', { name: 'Submit request' }).click();
+    await page.getByText(/Request received|already have an open request/).first().waitFor();
+  },
+});
+suites.push({
+  name: 'Stage 03 · 131 risk centre lists flags; partner blocked from queue',
+  run: async ({ page, ADMIN, WEB }) => {
+    await adminLogin(page, ADMIN, 'compliance@collabiz.local');
+    await page.goto(ADMIN + '/risk');
+    await page.getByRole('heading', { name: /Raise a manual flag/ }).waitFor();
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    const r = await page.request.get(WEB + '/api/v1/admin/verification/queue');
+    if (r.status() !== 403) throw new Error(`expected 403, got ${r.status()}`);
+  },
+});

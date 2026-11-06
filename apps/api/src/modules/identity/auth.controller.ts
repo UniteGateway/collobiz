@@ -42,7 +42,7 @@ export class AuthController {
 
   /** Screen 011 — create account. */
   @Public()
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle({ default: { limit: Math.max(10, Math.floor(config().AUTH_RATE_LIMIT / 2)), ttl: 60_000 } })
   @Post('register')
   @HttpCode(201)
   async register(@Body(body(RegisterBody)) b: z.infer<typeof RegisterBody>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
@@ -52,7 +52,7 @@ export class AuthController {
 
   /** Screen 011 — sign in (MFA code when enrolled). */
   @Public()
-  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @Throttle({ default: { limit: config().AUTH_RATE_LIMIT, ttl: 60_000 } })
   @Post('login')
   @HttpCode(200)
   async login(@Body(body(LoginBody)) b: z.infer<typeof LoginBody>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {

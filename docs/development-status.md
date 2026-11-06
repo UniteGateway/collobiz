@@ -6,8 +6,8 @@ Overview of the 16 stages from Master Book §8. Detailed evidence (files, comman
 |---|---|---|---|
 | 01 | Repository foundation and design system | Web/mobile/admin boot; lint/types/tests green | ✅ Complete |
 | 02 | Identity, tenant permissions and security | Cross-org access tests pass | ✅ Complete |
-| 03 | Onboarding and KYB | Verified/rejected/reupload states complete | ⏳ In progress |
-| 04 | Unite company catalogue and products | Controlled public/private catalogs | ☐ |
+| 03 | Onboarding and KYB | Verified/rejected/reupload states complete | ✅ Complete |
+| 04 | Unite company catalogue and products | Controlled public/private catalogs | ⏳ Next |
 | 05 | Opportunity marketplace | Real listings and eligibility controls | ☐ |
 | 06 | Lead protection and Unite-first routing | Priority review and protection tests pass | ☐ |
 | 07 | CRM and pipeline | Sales stage transitions and activity audit | ☐ |

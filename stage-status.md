@@ -77,3 +77,41 @@ Stage 02 needs: users/organizations/memberships schema (included in migration 00
 
 ### Next-stage dependencies
 Stage 03 builds org creation (013–015) on these identity primitives and uses the KYB state machine, private storage and audit service.
+
+---
+
+## Stage 03 — Onboarding and KYB ✅
+
+**Acceptance gate:** verified / rejected / re-upload states complete — **met** (`apps/api/test/stage03.e2e.ts › admin verification queue`, plus browser journey 013→022→130).
+
+### Delivered
+- Schema/migration `0001_stage03_onboarding.sql`: partner profiles (capabilities, coverage, consent), KYB documents, review history, reviewer assignments, encrypted bank & tax profiles, versioned agreement templates with body hashes, acceptance evidence, risk flags, consent ledger, data-subject requests.
+- API: onboarding steps 013–021 (profile locked while under review), private document upload with magic-byte/size/type validation and scan hook, signed expiring document URLs with audited access, idempotent submission, KYB state machine; admin queue (130) with claim, per-document review, decision with mandatory reason, no-self-review, blocking on unaccepted documents or open high-severity flags; risk centre (131) with automatic duplicate-GSTIN and screened-country flags and four-eyes clearing; privacy (149) consents, data export, 30-day data requests and admin resolution with legal hold; own profile (143).
+- Web: wizard for 013–022 with progress navigation, 143, 149. Admin: 130 queue + dossier, 131 risk/data-rights. Mobile (native): 013, 014/015, 016–022, 143.
+- Seed: agreement templates, partner profiles, bank details, documents and a submitted dossier (GreenBuild) for the queue.
+
+### Defects found & fixed during verification
+- Rejected KYB document did not re-open the "documents" step (partner could resubmit without re-uploading) — step now derived from live document state.
+- Late-loading profile data overwrote user input on prefilled forms — forms render after data loads.
+- Agreements whose text fits without scrolling could never be signed — read state now set when no scrolling is needed.
+- Raw `ThrottlerException` shown to users — 429 mapped to a plain message; auth rate limit configurable (`AUTH_RATE_LIMIT`).
+- Long hashes overflowed at 390 px — monospace text wraps.
+- Plain-language validation messages shared by API and clients.
+
+### Commands & results (2026-11-06)
+| Command | Result |
+|---|---|
+| `pnpm --filter @collabiz/api test` | 57/57 passed |
+| `pnpm --filter @collabiz/types test` | 22/22 passed |
+| `pnpm --filter @collabiz/mobile test` | 10/10 passed |
+| `node scripts/e2e-smoke.mjs` | 28/28 passed (desktop + 390 px) |
+| lint / typecheck / web + admin builds | clean |
+
+### Limitations / what remains
+- Sanctions screening uses a placeholder country list; a licensed screening provider is needed before launch (§7.3).
+- Bank account verification (penny-drop) requires a payments provider — bank details are marked verified on KYB approval only.
+- Agreement texts are drafts pending legal review (B-08).
+- Mobile document upload is verified by typecheck/bundle export only (device testing needs EAS/devices, B-06).
+
+### Next-stage dependencies
+Stage 04 uses group-company organizations (seeded) and verification/membership levels for price visibility.

@@ -68,6 +68,8 @@ describe('Stage 02 — identity, tenant permissions and security', () => {
       let last = 0;
       for (let i = 0; i < 22; i++) last = (await api(app).post('/v1/auth/login').set('X-Enforce-Throttle', '1').send({ email: 'rl@example.com', password: 'Wrongpass123' })).status;
       expect(last).toBe(429);
+      const r = await api(app).post('/v1/auth/login').set('X-Enforce-Throttle', '1').send({ email: 'rl@example.com', password: 'Wrongpass123' });
+      expect(r.body.message).toMatch(/Too many attempts/);
     });
     it('rotates refresh tokens and revokes the family on reuse', async () => {
       const r1 = await api(app).post('/v1/auth/login').send({ email: ACCOUNTS.ravi, password: DEMO_PASSWORD, client: 'mobile' }).expect(200);

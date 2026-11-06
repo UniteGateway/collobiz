@@ -38,7 +38,7 @@ p { margin: 0 0 12px; }
 .cz-skip { position: absolute; left: -999px; top: 8px; background: var(--cz-white); padding: 8px 12px; z-index: 100; }
 .cz-skip:focus { left: 8px; }
 .cz-muted { color: var(--cz-grey-500); }
-.cz-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+.cz-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; overflow-wrap: anywhere; }
 
 /* ---- Shell ---- */
 .cz-topbar { background: var(--cz-navy-900); color: var(--cz-white); height: 60px; display: flex; align-items: center; gap: 24px; padding: 0 20px; position: sticky; top: 0; z-index: 20; }

@@ -3,7 +3,7 @@ import {
   addBusinessMinutes, businessMinutesBetween, slaStatus, DEFAULT_CALENDAR,
   duplicateScore, calculateCommission, scorePartner, rankPartners, computeReputation,
   CommissionMachine, OpportunityMachine, assertTransition, canTransition, TransitionError,
-  SCREENS, SCREEN_FAMILIES, capabilitiesFor, LeadCreateSchema, BankTaxSchema,
+  SCREENS, SCREEN_FAMILIES, capabilitiesFor, LeadCreateSchema, BankTaxSchema, RegisterSchema as RegisterSchemaForMsg,
 } from './index';
 
 const IST = (s: string) => new Date(`${s}+05:30`);
@@ -144,5 +144,14 @@ describe('schemas', () => {
   it('requires GSTIN when GST registered', () => {
     const r = BankTaxSchema.safeParse({ accountHolder: 'A B', accountNumber: '12345678', ifsc: 'HDFC0001234', bankName: 'HDFC', pan: 'ABCDE1234F', gstRegistered: true });
     expect(r.success).toBe(false);
+  });
+});
+
+describe('validation messages', () => {
+  it('uses plain-language messages', () => {
+    const r = RegisterSchemaForMsg.safeParse({ email: 'x', fullName: 'A', password: 'abcdefghij1', acceptTerms: true });
+    const m = Object.fromEntries((r as any).error.issues.map((i: any) => [i.path.join('.'), i.message]));
+    expect(m.email).toBe('Enter a valid email address');
+    expect(m.fullName).toBe('Enter at least 2 characters');
   });
 });

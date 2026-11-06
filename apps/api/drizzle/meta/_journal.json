@@ -8,6 +8,13 @@
       "when": 1793952385161,
       "tag": "0000_stage01_02_core",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793954155238,
+      "tag": "0001_stage03_onboarding",
+      "breakpoints": true
     }
   ]
 }

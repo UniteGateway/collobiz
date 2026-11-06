@@ -11,16 +11,16 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 010,"Contact, FAQs & Support",Public Website & Discovery,01,web,/support/contact,public,support,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage01.e2e.ts,Public enquiry API with rate limit and outbox acknowledgement
 011,Login / Create Account,Registration & Verification,02,web,/login,public,identity,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts apps/mobile/test/login.test.tsx,"Web + native; lockout, rate limit, MFA challenge"
 012,OTP & Email Verification,Registration & Verification,02,web,/verify,authenticated,identity,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts,Email/SMS OTP via outbox adapter (B-04); web + native
-013,Select Account Type,Registration & Verification,03,web,/onboarding/account-type,authenticated,onboarding,mobile-first,native,content,planned,,
-014,Individual Partner Registration,Registration & Verification,03,web,/onboarding/individual,authenticated,onboarding,mobile-first,native,identity-collaboration,planned,,
-015,Company Partner Registration,Registration & Verification,03,web,/onboarding/company,authenticated,onboarding,mobile-first,native,identity-collaboration,planned,,
-016,Partner Industry & Skills Selection,Registration & Verification,03,web,/onboarding/industries,partner,onboarding,mobile-first,native,identity-collaboration,planned,,
-017,Geographical Coverage Selection,Registration & Verification,03,web,/onboarding/coverage,partner,onboarding,mobile-first,native,content,planned,,
-018,Business Profile Builder,Registration & Verification,03,web,/onboarding/profile,partner,onboarding,mobile-first,native,content,planned,,
-019,KYC / KYB Document Upload,Registration & Verification,03,web,/onboarding/kyc,partner,partner-compliance,mobile-first,native,content,planned,,
-020,Bank & Tax Profile,Registration & Verification,03,web,/onboarding/bank-tax,partner,partner-compliance,mobile-first,native,content,planned,,
-021,Agreement Acceptance & e-Sign,Registration & Verification,03,web,/onboarding/agreements,partner,contracts,mobile-first,native,content,planned,,
-022,Verification Status & Approval,Registration & Verification,03,web,/onboarding/status,partner,partner-compliance,mobile-first,native,admin-control,planned,,
+013,Select Account Type,Registration & Verification,03,web,/onboarding/account-type,authenticated,onboarding,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,Creates partner org + owner membership; requires verified email; web + native
+014,Individual Partner Registration,Registration & Verification,03,web,/onboarding/individual,authenticated,onboarding,mobile-first,native,identity-collaboration,verified,apps/api/test/stage03.e2e.ts,Individual details; PAN encrypted; web + native (shared details screen)
+015,Company Partner Registration,Registration & Verification,03,web,/onboarding/company,authenticated,onboarding,mobile-first,native,identity-collaboration,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,Company identifiers validated (GSTIN/CIN); web + native
+016,Partner Industry & Skills Selection,Registration & Verification,03,web,/onboarding/industries,partner,onboarding,mobile-first,native,identity-collaboration,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,
+017,Geographical Coverage Selection,Registration & Verification,03,web,/onboarding/coverage,partner,onboarding,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,
+018,Business Profile Builder,Registration & Verification,03,web,/onboarding/profile,partner,onboarding,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,Includes AI-matching consent
+019,KYC / KYB Document Upload,Registration & Verification,03,web,/onboarding/kyc,partner,partner-compliance,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,"Magic-byte validation, scan hook, private storage, signed URLs, audited access; native picker"
+020,Bank & Tax Profile,Registration & Verification,03,web,/onboarding/bank-tax,partner,partner-compliance,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,AES-256-GCM encrypted account/PAN; masked everywhere
+021,Agreement Acceptance & e-Sign,Registration & Verification,03,web,/onboarding/agreements,partner,contracts,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,"Click-to-accept evidence (typed name, IP, UA, SHA-256); templates pending legal review (B-08)"
+022,Verification Status & Approval,Registration & Verification,03,web,/onboarding/status,partner,partner-compliance,mobile-first,native,admin-control,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts apps/mobile/test/kyb-status.test.tsx,Verified / rejected / re-upload states; idempotent submission
 023,Partner Home Dashboard,Partner Home & Dashboard,05,web,/dashboard,partner,analytics,desktop,native,identity-collaboration,scaffolded,scripts/e2e-suites.mjs,"Stage 02 baseline (identity, verification, activity); business KPIs in Stage 05"
 024,My Opportunities Overview,Partner Home & Dashboard,05,web,/my/opportunities,partner,opportunities,desktop,responsive,content,planned,,
 025,Recommended Business Feed,Partner Home & Dashboard,05,web,/feed,partner,partner-matching,desktop,responsive,content,planned,,
@@ -128,8 +128,8 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 127,Group Admin Executive Dashboard,Unite Group Administration,16,admin,/,admin,analytics,desktop,desktop-admin,admin-control,planned,,
 128,Group Companies & Business Units,Unite Group Administration,04,admin,/group-companies,super-admin,group-companies,desktop,desktop-admin,content,planned,,
 129,Admin Users & Permissions,Unite Group Administration,02,admin,/users,super-admin,identity,desktop,desktop-admin,admin-control,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts,Grant/revoke platform roles with reason; suspend/reactivate; no self-privilege changes
-130,Partner Verification Queue,Unite Group Administration,03,admin,/verification,compliance,partner-compliance,desktop,desktop-admin,identity-collaboration,planned,,
-131,Partner Risk & Compliance Review,Unite Group Administration,03,admin,/risk,compliance,partner-compliance,desktop,desktop-admin,identity-collaboration,planned,,
+130,Partner Verification Queue,Unite Group Administration,03,admin,/verification,compliance,partner-compliance,desktop,desktop-admin,identity-collaboration,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,"Queue, claim, per-document review, decision with reason; no self-review"
+131,Partner Risk & Compliance Review,Unite Group Administration,03,admin,/risk,compliance,partner-compliance,desktop,desktop-admin,identity-collaboration,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,Automatic duplicate-GSTIN + screened-country flags; four-eyes clearing; data-rights queue
 132,Opportunity Approval & Routing,Unite Group Administration,06,admin,/routing,unite-admin,routing,desktop,desktop-admin,admin-control,planned,,
 133,Priority Review SLA Configuration,Unite Group Administration,06,admin,/sla,super-admin,routing,desktop,desktop-admin,content,planned,,
 134,Lead Ownership & Conflict Resolution,Unite Group Administration,06,admin,/lead-conflicts,compliance,lead-protection,desktop,desktop-admin,commercial-record,planned,,
@@ -141,13 +141,13 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 140,AI Monitoring & Recommendation Controls,Unite Group Administration,14,admin,/ai,super-admin,partner-matching,desktop,desktop-admin,ai-explainable,planned,,
 141,Audit Logs & Security Center,Unite Group Administration,02,admin,/audit,super-admin,audit,desktop,desktop-admin,admin-control,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts,"Hash-chained audit with chain verification, filters, security summary"
 142,Global Content & CMS Management,Unite Group Administration,15,admin,/cms,super-admin,cms,desktop,desktop-admin,content,planned,,
-143,My Partner Profile,"Profile, Settings & Governance",03,web,/profile,partner,organizations,mobile-first,native,identity-collaboration,planned,,
+143,My Partner Profile,"Profile, Settings & Governance",03,web,/profile,partner,organizations,mobile-first,native,identity-collaboration,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,Web + native
 144,Company Team & Sub-Accounts,"Profile, Settings & Governance",02,web,/company/team,org-owner,identity,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts,"Invite, accept, role change, last-owner protection, tenant-scoped"
 145,Account Security & MFA,"Profile, Settings & Governance",02,web,/settings/security,authenticated,identity,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts,"TOTP enrol/disable, password change revokes sessions, session list; web + native"
 146,"Languages, Currencies & Regions","Profile, Settings & Governance",15,web,/settings/regional,authenticated,identity,desktop,responsive,content,planned,,
 147,Notification Preferences,"Profile, Settings & Governance",13,web,/settings/notifications,authenticated,notifications,mobile-first,native,content,planned,,
 148,Documents & Agreements Vault,"Profile, Settings & Governance",10,web,/vault,partner,contracts,desktop,responsive,content,planned,,
-149,"Privacy, Consent & Data Rights","Profile, Settings & Governance",03,web,/settings/privacy,authenticated,identity,desktop,responsive,content,planned,,
+149,"Privacy, Consent & Data Rights","Profile, Settings & Governance",03,web,/settings/privacy,authenticated,identity,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,"Consent ledger, export download, 30-day data requests"
 150,"Help, Feedback & Account Closure","Profile, Settings & Governance",13,web,/help,authenticated,support,mobile-first,native,content,planned,,
 151,Lead Protection Dashboard,Five Trust Feature Extensions,06,web,/lead-protection,partner,lead-protection,desktop,native,commercial-record,planned,,
 152,Digital Lead Registration Certificate,Five Trust Feature Extensions,06,web,/leads/[id]/registration-certificate,lead-owner,lead-protection,desktop,responsive,commercial-record,planned,,

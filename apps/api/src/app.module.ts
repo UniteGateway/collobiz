@@ -10,9 +10,10 @@ import { IdempotencyInterceptor } from './common/idempotency';
 import { SystemModule } from './modules/system/system.controller';
 import { PublicEnquiryController } from './modules/support/public-enquiry.controller';
 import { IdentityModule } from './modules/identity/identity.module';
+import { OnboardingModule } from './modules/onboarding/onboarding.module';
 import { config } from './config';
 
-export const FEATURE_MODULES = [SystemModule, IdentityModule];
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule];
 
 @Module({
   imports: [

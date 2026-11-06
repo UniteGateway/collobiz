@@ -6,6 +6,25 @@ import { z } from 'zod';
 import { PARTNER_TYPES, MEMBERSHIP_ROLES } from './roles';
 import { SECTOR_CODES, CURRENCIES } from './taxonomy';
 
+/** Plain-language validation messages, shared by API responses and client forms. */
+z.config({
+  customError: (iss) => {
+    if (iss.code === 'too_small' && iss.origin === 'string') return Number(iss.minimum) <= 1 ? 'This field is required' : `Enter at least ${iss.minimum} characters`;
+    if (iss.code === 'too_big' && iss.origin === 'string') return `Use at most ${iss.maximum} characters`;
+    if (iss.code === 'too_small' && iss.origin === 'array') return Number(iss.minimum) <= 1 ? 'Select at least one option' : `Select at least ${iss.minimum} options`;
+    if (iss.code === 'too_big' && iss.origin === 'array') return `Select at most ${iss.maximum} options`;
+    if (iss.code === 'too_small' && iss.origin === 'number') return `Must be at least ${iss.minimum}`;
+    if (iss.code === 'too_big' && iss.origin === 'number') return `Must be at most ${iss.maximum}`;
+    if (iss.code === 'invalid_type' && iss.input === undefined) return 'This field is required';
+    if (iss.code === 'invalid_type' && iss.expected === 'number') return 'Enter a number';
+    if (iss.code === 'invalid_format' && iss.format === 'email') return 'Enter a valid email address';
+    if (iss.code === 'invalid_format' && iss.format === 'url') return 'Enter a valid URL starting with https://';
+    if (iss.code === 'invalid_format' && iss.format === 'uuid') return 'Invalid identifier';
+    if (iss.code === 'invalid_value') return 'Choose a valid option';
+    return undefined;
+  },
+});
+
 const id = z.string().uuid();
 const money = z.number().int().nonnegative();
 const password = z

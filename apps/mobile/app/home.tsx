@@ -40,8 +40,10 @@ export default function Home() {
           </Card>
         </>
       ) : (
-        <Card title="Start partner onboarding"><Text style={s.p}>Create your partner profile to access opportunities and register protected leads.</Text></Card>
+        <Card title="Start partner onboarding"><Text style={s.p}>Create your partner profile to access opportunities and register protected leads.</Text><Button title="Choose account type" variant="accent" onPress={() => router.push('/onboarding/account-type')} /></Card>
       )}
+      {org && <Row title="My partner profile" subtitle="Screen 143" onPress={() => router.push('/profile')} />}
+      {org && org.verificationStatus !== 'verified' && <Row title="Verification status" subtitle="Screen 022" onPress={() => router.push('/onboarding/status')} />}
       <Row title="Account security & MFA" subtitle="Screen 145" onPress={() => router.push('/security')} />
     </ScrollView>
   );

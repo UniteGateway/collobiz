@@ -4,7 +4,7 @@
 
 Source: Master Book Section 05 (functional specification) and the 165-screen UI Design Atlas (U01–U10). Screen IDs and titles are preserved verbatim.
 
-**Status:** verified 11 · implemented 0 · scaffolded 1 · planned 153
+**Status:** verified 25 · implemented 0 · scaffolded 1 · planned 139
 
 Status meaning: *planned* (not started) → *scaffolded* (route + shell) → *implemented* (wired to real API) → *verified* (automated test passed).
 
@@ -42,16 +42,16 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 |---|---|---|---|---|---|---|---|---|---|
 | 011 | Login / Create Account | 02 | web `/login` | public | identity | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts<br>apps/mobile/test/login.test.tsx |
 | 012 | OTP & Email Verification | 02 | web `/verify` | authenticated | identity | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
-| 013 | Select Account Type | 03 | web `/onboarding/account-type` | authenticated | onboarding | mobile-first | native | planned |  |
-| 014 | Individual Partner Registration | 03 | web `/onboarding/individual` | authenticated | onboarding | mobile-first | native | planned |  |
-| 015 | Company Partner Registration | 03 | web `/onboarding/company` | authenticated | onboarding | mobile-first | native | planned |  |
-| 016 | Partner Industry & Skills Selection | 03 | web `/onboarding/industries` | partner | onboarding | mobile-first | native | planned |  |
-| 017 | Geographical Coverage Selection | 03 | web `/onboarding/coverage` | partner | onboarding | mobile-first | native | planned |  |
-| 018 | Business Profile Builder | 03 | web `/onboarding/profile` | partner | onboarding | mobile-first | native | planned |  |
-| 019 | KYC / KYB Document Upload | 03 | web `/onboarding/kyc` | partner | partner-compliance | mobile-first | native | planned |  |
-| 020 | Bank & Tax Profile | 03 | web `/onboarding/bank-tax` | partner | partner-compliance | mobile-first | native | planned |  |
-| 021 | Agreement Acceptance & e-Sign | 03 | web `/onboarding/agreements` | partner | contracts | mobile-first | native | planned |  |
-| 022 | Verification Status & Approval | 03 | web `/onboarding/status` | partner | partner-compliance | mobile-first | native | planned |  |
+| 013 | Select Account Type | 03 | web `/onboarding/account-type` | authenticated | onboarding | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
+| 014 | Individual Partner Registration | 03 | web `/onboarding/individual` | authenticated | onboarding | mobile-first | native | verified | apps/api/test/stage03.e2e.ts |
+| 015 | Company Partner Registration | 03 | web `/onboarding/company` | authenticated | onboarding | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
+| 016 | Partner Industry & Skills Selection | 03 | web `/onboarding/industries` | partner | onboarding | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
+| 017 | Geographical Coverage Selection | 03 | web `/onboarding/coverage` | partner | onboarding | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
+| 018 | Business Profile Builder | 03 | web `/onboarding/profile` | partner | onboarding | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
+| 019 | KYC / KYB Document Upload | 03 | web `/onboarding/kyc` | partner | partner-compliance | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
+| 020 | Bank & Tax Profile | 03 | web `/onboarding/bank-tax` | partner | partner-compliance | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
+| 021 | Agreement Acceptance & e-Sign | 03 | web `/onboarding/agreements` | partner | contracts | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
+| 022 | Verification Status & Approval | 03 | web `/onboarding/status` | partner | partner-compliance | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts<br>apps/mobile/test/kyb-status.test.tsx |
 
 ## 03 · Partner Home & Dashboard
 
@@ -219,8 +219,8 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 127 | Group Admin Executive Dashboard | 16 | admin `/` | admin | analytics | desktop | desktop-admin | planned |  |
 | 128 | Group Companies & Business Units | 04 | admin `/group-companies` | super-admin | group-companies | desktop | desktop-admin | planned |  |
 | 129 | Admin Users & Permissions | 02 | admin `/users` | super-admin | identity | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
-| 130 | Partner Verification Queue | 03 | admin `/verification` | compliance | partner-compliance | desktop | desktop-admin | planned |  |
-| 131 | Partner Risk & Compliance Review | 03 | admin `/risk` | compliance | partner-compliance | desktop | desktop-admin | planned |  |
+| 130 | Partner Verification Queue | 03 | admin `/verification` | compliance | partner-compliance | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
+| 131 | Partner Risk & Compliance Review | 03 | admin `/risk` | compliance | partner-compliance | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
 | 132 | Opportunity Approval & Routing | 06 | admin `/routing` | unite-admin | routing | desktop | desktop-admin | planned |  |
 | 133 | Priority Review SLA Configuration | 06 | admin `/sla` | super-admin | routing | desktop | desktop-admin | planned |  |
 | 134 | Lead Ownership & Conflict Resolution | 06 | admin `/lead-conflicts` | compliance | lead-protection | desktop | desktop-admin | planned |  |
@@ -237,13 +237,13 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
-| 143 | My Partner Profile | 03 | web `/profile` | partner | organizations | mobile-first | native | planned |  |
+| 143 | My Partner Profile | 03 | web `/profile` | partner | organizations | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
 | 144 | Company Team & Sub-Accounts | 02 | web `/company/team` | org-owner | identity | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
 | 145 | Account Security & MFA | 02 | web `/settings/security` | authenticated | identity | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
 | 146 | Languages, Currencies & Regions | 15 | web `/settings/regional` | authenticated | identity | desktop | responsive | planned |  |
 | 147 | Notification Preferences | 13 | web `/settings/notifications` | authenticated | notifications | mobile-first | native | planned |  |
 | 148 | Documents & Agreements Vault | 10 | web `/vault` | partner | contracts | desktop | responsive | planned |  |
-| 149 | Privacy, Consent & Data Rights | 03 | web `/settings/privacy` | authenticated | identity | desktop | responsive | planned |  |
+| 149 | Privacy, Consent & Data Rights | 03 | web `/settings/privacy` | authenticated | identity | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
 | 150 | Help, Feedback & Account Closure | 13 | web `/help` | authenticated | support | mobile-first | native | planned |  |
 
 ## 16 · Five Trust Feature Extensions
