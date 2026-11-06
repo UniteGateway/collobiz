@@ -9,16 +9,21 @@ import { AllExceptionsFilter } from './common/http';
 import { IdempotencyInterceptor } from './common/idempotency';
 import { SystemModule } from './modules/system/system.controller';
 import { PublicEnquiryController } from './modules/support/public-enquiry.controller';
+import { IdentityModule } from './modules/identity/identity.module';
 import { config } from './config';
 
-export const FEATURE_MODULES = [SystemModule];
+export const FEATURE_MODULES = [SystemModule, IdentityModule];
 
 @Module({
   imports: [
     DbModule,
     AuditModule,
     AdaptersModule,
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: config().NODE_ENV === 'test' ? 10_000 : 300 }]),
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60_000, limit: 300 }],
+      // Tests opt in to rate limiting per request so suites can log in many personas quickly.
+      skipIf: (ec) => config().NODE_ENV === 'test' && !ec.switchToHttp().getRequest().headers['x-enforce-throttle'],
+    }),
     ...FEATURE_MODULES,
   ],
   controllers: [PublicEnquiryController],

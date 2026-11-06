@@ -5,8 +5,8 @@ Overview of the 16 stages from Master Book §8. Detailed evidence (files, comman
 | Stage | Workstream | Acceptance gate (§8) | Status |
 |---|---|---|---|
 | 01 | Repository foundation and design system | Web/mobile/admin boot; lint/types/tests green | ✅ Complete |
-| 02 | Identity, tenant permissions and security | Cross-org access tests pass | ⏳ In progress |
-| 03 | Onboarding and KYB | Verified/rejected/reupload states complete | ☐ Not started |
+| 02 | Identity, tenant permissions and security | Cross-org access tests pass | ✅ Complete |
+| 03 | Onboarding and KYB | Verified/rejected/reupload states complete | ⏳ In progress |
 | 04 | Unite company catalogue and products | Controlled public/private catalogs | ☐ |
 | 05 | Opportunity marketplace | Real listings and eligibility controls | ☐ |
 | 06 | Lead protection and Unite-first routing | Priority review and protection tests pass | ☐ |

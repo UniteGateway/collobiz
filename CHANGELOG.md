@@ -4,6 +4,14 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Stage 02 — Identity, tenant permissions and security (2026-11-06)
+#### Added
+- Registration, login with lockout and rate limiting, rotating refresh tokens with reuse detection, email/SMS OTP, TOTP MFA (mandatory for admins), password change, session management, team invitations.
+- Tenant context validated against memberships; capability-based authorization; admin capabilities require MFA-verified sessions.
+- Screens 011, 012, 129, 141, 144, 145 (web/admin) and native mobile 011, 012, 145; baseline 023.
+- Admin user/role management with reasons and self-privilege protection; audit browser with hash-chain verification; security summary.
+- Demo seed data; OpenAPI export (`docs/api/openapi.json`).
+
 ### Stage 01 — Repository foundation and design system (2026-11-06)
 #### Added
 - Monorepo (pnpm): API (NestJS 11), web + admin (Next.js 16), mobile (Expo SDK 58), shared `types`, `ui`, `config` packages.

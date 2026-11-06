@@ -1,0 +1,48 @@
+import { useEffect, useState } from 'react';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Redirect, Stack, useRouter } from 'expo-router';
+import { Badge, Button, Card, Kpi, Loading, Notice, Row, s, theme } from '@/components/ui';
+import { api } from '@/api';
+import { useSession } from '@/session';
+
+interface Activity { id: string; at: string; action: string; actorName: string | null }
+
+/** Screen 023 — Partner Home Dashboard (native). Stage 02 baseline; business KPIs added from Stage 05. */
+export default function Home() {
+  const { me, loading, signOut, refresh } = useSession();
+  const router = useRouter();
+  const [activity, setActivity] = useState<Activity[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const load = async () => {
+    if (!me?.activeOrg) return;
+    setActivity(await api.get<Activity[]>('/orgs/current/activity', { limit: 10 }).catch(() => []));
+  };
+  useEffect(() => { load(); }, [me?.activeOrg?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (loading) return <Loading />;
+  if (!me) return <Redirect href="/" />;
+  const org = me.activeOrg;
+  return (
+    <ScrollView style={s.safe} contentContainerStyle={s.body} testID="screen-023" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await refresh(); await load(); setRefreshing(false); }} />}>
+      <Stack.Screen options={{ title: 'COLLABIZ', headerRight: () => <Text onPress={signOut} style={{ color: '#fff', padding: 8 }} accessibilityRole="button">Sign out</Text> }} />
+      <Text style={s.crumb}>Partner Home & Dashboard · SCREEN 023</Text>
+      <Text style={s.h1}>Welcome, {me.fullName.split(' ')[0]}</Text>
+      {!me.emailVerified && <Notice tone="warning">Verify your email to unlock all features.</Notice>}
+      {!me.emailVerified && <Button title="Verify email" variant="secondary" onPress={() => router.push('/verify')} />}
+      {org ? (
+        <>
+          <View style={{ flexDirection: 'row', gap: 8, marginVertical: theme.space.md }}>
+            <Kpi label="Verification" value={org.verificationStatus.replace('_', ' ')} />
+            <Kpi label="Level" value={org.membershipLevel} accent />
+          </View>
+          <Card title={org.name}><Badge status={org.verificationStatus} /><Text style={[s.hint, { marginTop: 6 }]}>Role: {me.orgRoles.join(', ').replace(/org_/g, '')}</Text></Card>
+          <Card title="Recent activity">
+            {activity.length === 0 ? <Text style={s.hint}>No activity yet.</Text> : activity.map((a) => <Row key={a.id} title={a.action.replace(/[._]/g, ' ')} subtitle={`${new Date(a.at).toLocaleString()}${a.actorName ? ' · ' + a.actorName : ''}`} />)}
+          </Card>
+        </>
+      ) : (
+        <Card title="Start partner onboarding"><Text style={s.p}>Create your partner profile to access opportunities and register protected leads.</Text></Card>
+      )}
+      <Row title="Account security & MFA" subtitle="Screen 145" onPress={() => router.push('/security')} />
+    </ScrollView>
+  );
+}

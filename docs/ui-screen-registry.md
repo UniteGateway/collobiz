@@ -4,7 +4,7 @@
 
 Source: Master Book Section 05 (functional specification) and the 165-screen UI Design Atlas (U01–U10). Screen IDs and titles are preserved verbatim.
 
-**Status:** verified 5 · implemented 0 · scaffolded 0 · planned 160
+**Status:** verified 11 · implemented 0 · scaffolded 1 · planned 153
 
 Status meaning: *planned* (not started) → *scaffolded* (route + shell) → *implemented* (wired to real API) → *verified* (automated test passed).
 
@@ -40,8 +40,8 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
-| 011 | Login / Create Account | 02 | web `/login` | public | identity | mobile-first | native | planned |  |
-| 012 | OTP & Email Verification | 02 | web `/verify` | authenticated | identity | mobile-first | native | planned |  |
+| 011 | Login / Create Account | 02 | web `/login` | public | identity | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts<br>apps/mobile/test/login.test.tsx |
+| 012 | OTP & Email Verification | 02 | web `/verify` | authenticated | identity | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
 | 013 | Select Account Type | 03 | web `/onboarding/account-type` | authenticated | onboarding | mobile-first | native | planned |  |
 | 014 | Individual Partner Registration | 03 | web `/onboarding/individual` | authenticated | onboarding | mobile-first | native | planned |  |
 | 015 | Company Partner Registration | 03 | web `/onboarding/company` | authenticated | onboarding | mobile-first | native | planned |  |
@@ -57,7 +57,7 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
-| 023 | Partner Home Dashboard | 05 | web `/dashboard` | partner | analytics | desktop | native | planned |  |
+| 023 | Partner Home Dashboard | 05 | web `/dashboard` | partner | analytics | desktop | native | scaffolded | scripts/e2e-suites.mjs |
 | 024 | My Opportunities Overview | 05 | web `/my/opportunities` | partner | opportunities | desktop | responsive | planned |  |
 | 025 | Recommended Business Feed | 05 | web `/feed` | partner | partner-matching | desktop | responsive | planned |  |
 | 026 | My Leads & Pipeline | 06 | web `/my/leads` | partner | lead-protection | desktop | native | planned |  |
@@ -218,7 +218,7 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 |---|---|---|---|---|---|---|---|---|---|
 | 127 | Group Admin Executive Dashboard | 16 | admin `/` | admin | analytics | desktop | desktop-admin | planned |  |
 | 128 | Group Companies & Business Units | 04 | admin `/group-companies` | super-admin | group-companies | desktop | desktop-admin | planned |  |
-| 129 | Admin Users & Permissions | 02 | admin `/users` | super-admin | identity | desktop | desktop-admin | planned |  |
+| 129 | Admin Users & Permissions | 02 | admin `/users` | super-admin | identity | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
 | 130 | Partner Verification Queue | 03 | admin `/verification` | compliance | partner-compliance | desktop | desktop-admin | planned |  |
 | 131 | Partner Risk & Compliance Review | 03 | admin `/risk` | compliance | partner-compliance | desktop | desktop-admin | planned |  |
 | 132 | Opportunity Approval & Routing | 06 | admin `/routing` | unite-admin | routing | desktop | desktop-admin | planned |  |
@@ -230,7 +230,7 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 138 | Finance & Settlement Controls | 12 | admin `/finance` | finance | invoicing | desktop | desktop-admin | planned |  |
 | 139 | Performance Analytics & BI | 16 | admin `/analytics` | admin | analytics | desktop | desktop-admin | planned |  |
 | 140 | AI Monitoring & Recommendation Controls | 14 | admin `/ai` | super-admin | partner-matching | desktop | desktop-admin | planned |  |
-| 141 | Audit Logs & Security Center | 02 | admin `/audit` | super-admin | audit | desktop | desktop-admin | planned |  |
+| 141 | Audit Logs & Security Center | 02 | admin `/audit` | super-admin | audit | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
 | 142 | Global Content & CMS Management | 15 | admin `/cms` | super-admin | cms | desktop | desktop-admin | planned |  |
 
 ## 15 · Profile, Settings & Governance
@@ -238,8 +238,8 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
 | 143 | My Partner Profile | 03 | web `/profile` | partner | organizations | mobile-first | native | planned |  |
-| 144 | Company Team & Sub-Accounts | 02 | web `/company/team` | org-owner | identity | desktop | responsive | planned |  |
-| 145 | Account Security & MFA | 02 | web `/settings/security` | authenticated | identity | mobile-first | native | planned |  |
+| 144 | Company Team & Sub-Accounts | 02 | web `/company/team` | org-owner | identity | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
+| 145 | Account Security & MFA | 02 | web `/settings/security` | authenticated | identity | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
 | 146 | Languages, Currencies & Regions | 15 | web `/settings/regional` | authenticated | identity | desktop | responsive | planned |  |
 | 147 | Notification Preferences | 13 | web `/settings/notifications` | authenticated | notifications | mobile-first | native | planned |  |
 | 148 | Documents & Agreements Vault | 10 | web `/vault` | partner | contracts | desktop | responsive | planned |  |

@@ -9,8 +9,8 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 008,Success Stories & Case Studies,Public Website & Discovery,04,web,/success-stories,public,cms,desktop,responsive,content,planned,,
 009,Global Partner Locations,Public Website & Discovery,05,web,/locations,public,organizations,desktop,responsive,identity-collaboration,planned,,
 010,"Contact, FAQs & Support",Public Website & Discovery,01,web,/support/contact,public,support,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage01.e2e.ts,Public enquiry API with rate limit and outbox acknowledgement
-011,Login / Create Account,Registration & Verification,02,web,/login,public,identity,mobile-first,native,content,planned,,
-012,OTP & Email Verification,Registration & Verification,02,web,/verify,authenticated,identity,mobile-first,native,content,planned,,
+011,Login / Create Account,Registration & Verification,02,web,/login,public,identity,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts apps/mobile/test/login.test.tsx,"Web + native; lockout, rate limit, MFA challenge"
+012,OTP & Email Verification,Registration & Verification,02,web,/verify,authenticated,identity,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts,Email/SMS OTP via outbox adapter (B-04); web + native
 013,Select Account Type,Registration & Verification,03,web,/onboarding/account-type,authenticated,onboarding,mobile-first,native,content,planned,,
 014,Individual Partner Registration,Registration & Verification,03,web,/onboarding/individual,authenticated,onboarding,mobile-first,native,identity-collaboration,planned,,
 015,Company Partner Registration,Registration & Verification,03,web,/onboarding/company,authenticated,onboarding,mobile-first,native,identity-collaboration,planned,,
@@ -21,7 +21,7 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 020,Bank & Tax Profile,Registration & Verification,03,web,/onboarding/bank-tax,partner,partner-compliance,mobile-first,native,content,planned,,
 021,Agreement Acceptance & e-Sign,Registration & Verification,03,web,/onboarding/agreements,partner,contracts,mobile-first,native,content,planned,,
 022,Verification Status & Approval,Registration & Verification,03,web,/onboarding/status,partner,partner-compliance,mobile-first,native,admin-control,planned,,
-023,Partner Home Dashboard,Partner Home & Dashboard,05,web,/dashboard,partner,analytics,desktop,native,identity-collaboration,planned,,
+023,Partner Home Dashboard,Partner Home & Dashboard,05,web,/dashboard,partner,analytics,desktop,native,identity-collaboration,scaffolded,scripts/e2e-suites.mjs,"Stage 02 baseline (identity, verification, activity); business KPIs in Stage 05"
 024,My Opportunities Overview,Partner Home & Dashboard,05,web,/my/opportunities,partner,opportunities,desktop,responsive,content,planned,,
 025,Recommended Business Feed,Partner Home & Dashboard,05,web,/feed,partner,partner-matching,desktop,responsive,content,planned,,
 026,My Leads & Pipeline,Partner Home & Dashboard,06,web,/my/leads,partner,lead-protection,desktop,native,commercial-record,planned,,
@@ -127,7 +127,7 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 126,Cross-Border Compliance Checklist,International & Strategic Partnerships,15,web,/global/compliance,partner,international,desktop,responsive,content,planned,,
 127,Group Admin Executive Dashboard,Unite Group Administration,16,admin,/,admin,analytics,desktop,desktop-admin,admin-control,planned,,
 128,Group Companies & Business Units,Unite Group Administration,04,admin,/group-companies,super-admin,group-companies,desktop,desktop-admin,content,planned,,
-129,Admin Users & Permissions,Unite Group Administration,02,admin,/users,super-admin,identity,desktop,desktop-admin,admin-control,planned,,
+129,Admin Users & Permissions,Unite Group Administration,02,admin,/users,super-admin,identity,desktop,desktop-admin,admin-control,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts,Grant/revoke platform roles with reason; suspend/reactivate; no self-privilege changes
 130,Partner Verification Queue,Unite Group Administration,03,admin,/verification,compliance,partner-compliance,desktop,desktop-admin,identity-collaboration,planned,,
 131,Partner Risk & Compliance Review,Unite Group Administration,03,admin,/risk,compliance,partner-compliance,desktop,desktop-admin,identity-collaboration,planned,,
 132,Opportunity Approval & Routing,Unite Group Administration,06,admin,/routing,unite-admin,routing,desktop,desktop-admin,admin-control,planned,,
@@ -139,11 +139,11 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 138,Finance & Settlement Controls,Unite Group Administration,12,admin,/finance,finance,invoicing,desktop,desktop-admin,commercial-record,planned,,
 139,Performance Analytics & BI,Unite Group Administration,16,admin,/analytics,admin,analytics,desktop,desktop-admin,content,planned,,
 140,AI Monitoring & Recommendation Controls,Unite Group Administration,14,admin,/ai,super-admin,partner-matching,desktop,desktop-admin,ai-explainable,planned,,
-141,Audit Logs & Security Center,Unite Group Administration,02,admin,/audit,super-admin,audit,desktop,desktop-admin,admin-control,planned,,
+141,Audit Logs & Security Center,Unite Group Administration,02,admin,/audit,super-admin,audit,desktop,desktop-admin,admin-control,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts,"Hash-chained audit with chain verification, filters, security summary"
 142,Global Content & CMS Management,Unite Group Administration,15,admin,/cms,super-admin,cms,desktop,desktop-admin,content,planned,,
 143,My Partner Profile,"Profile, Settings & Governance",03,web,/profile,partner,organizations,mobile-first,native,identity-collaboration,planned,,
-144,Company Team & Sub-Accounts,"Profile, Settings & Governance",02,web,/company/team,org-owner,identity,desktop,responsive,content,planned,,
-145,Account Security & MFA,"Profile, Settings & Governance",02,web,/settings/security,authenticated,identity,mobile-first,native,content,planned,,
+144,Company Team & Sub-Accounts,"Profile, Settings & Governance",02,web,/company/team,org-owner,identity,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts,"Invite, accept, role change, last-owner protection, tenant-scoped"
+145,Account Security & MFA,"Profile, Settings & Governance",02,web,/settings/security,authenticated,identity,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts,"TOTP enrol/disable, password change revokes sessions, session list; web + native"
 146,"Languages, Currencies & Regions","Profile, Settings & Governance",15,web,/settings/regional,authenticated,identity,desktop,responsive,content,planned,,
 147,Notification Preferences,"Profile, Settings & Governance",13,web,/settings/notifications,authenticated,notifications,mobile-first,native,content,planned,,
 148,Documents & Agreements Vault,"Profile, Settings & Governance",10,web,/vault,partner,contracts,desktop,responsive,content,planned,,

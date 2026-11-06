@@ -38,3 +38,42 @@ Each entry lists exact files changed, commands executed, test results, remaining
 
 ### Next-stage dependencies
 Stage 02 needs: users/organizations/memberships schema (included in migration 0000), auth endpoints, login/registration UI for web, admin and mobile.
+
+---
+
+## Stage 02 — Identity, tenant permissions and security ✅
+
+**Acceptance gate:** cross-org access tests pass — **met** (`apps/api/test/stage02.e2e.ts › tenant isolation`, 5 tests).
+
+### Delivered
+- API `identity` module: register, login (generic errors, 5-strike 15-min lockout, per-route rate limits), MFA challenge, rotating refresh tokens with family revocation on reuse, logout, `/auth/me`, email/SMS OTP (hashed, 10-min expiry, attempt limits), TOTP MFA setup/enable/disable (mandatory for admin roles), password change revoking all sessions, session list/revoke, team invitations (7-day token) and acceptance.
+- Tenancy: active org via `X-Org-Id` validated against memberships each request; platform capabilities only with MFA-verified sessions; organization team management with object-level checks (404 across tenants), last-owner protection, no self role change; org-scoped activity feed.
+- Admin: users & permissions (search, grant/revoke platform roles in Unite Group orgs only with reason, suspend/reactivate, no self-privilege changes), audit log browser with filters and before/after payloads, hash-chain verification, security summary.
+- Seed: platform org, 3 Unite Group companies, 4 demo partner orgs, 11 users (admins MFA-enrolled) — `pnpm db:seed`.
+- Web: 011 login/register with MFA step, 012 OTP verification, 145 security (QR enrolment, password, sessions), 144 team, invitation acceptance, 023 baseline dashboard. Admin: TOTP login, MFA enrolment, 129 users, 141 audit, security home. Mobile (native): 011, 012, 145, 023 baseline.
+- `docs/api/openapi.json` (31 paths).
+
+### Commands & results (2026-11-06)
+| Command | Result |
+|---|---|
+| `pnpm --filter @collabiz/api test` | 39/39 passed (stage01 + stage02 + crypto) |
+| `pnpm --filter @collabiz/mobile test` | 8/8 passed (incl. login MFA flow) |
+| `pnpm --filter @collabiz/web test` / `admin test` | 7/7 · 6/6 |
+| `pnpm -r lint`, `pnpm -r typecheck` | clean |
+| `expo export --platform ios` / `android` | Hermes bundles exported (3.3 MB each) |
+| `scripts/dev-restart.sh && node scripts/e2e-smoke.mjs` | 22/22 passed (desktop 1440 + mobile 390) |
+
+### Security review (Stage 02 scope)
+- Tokens: web tokens never exposed to JS (httpOnly); CSRF double-submit enforced for cookie-authenticated mutations; mobile uses SecureStore.
+- JWT alg pinned to HS256; signature compared in constant time; secrets refused in production if defaults.
+- Passwords: scrypt (N=16384); no password/secret values in audit payloads (redaction test).
+- Enumeration: login errors generic; cross-tenant object access returns 404.
+
+### Limitations / what remains
+- OIDC/Keycloak adapter not implemented (B-05); local provider only.
+- OTP delivery via outbox only (B-04). `DEV_EXPOSE_OTP` for local development.
+- No "forgot password" flow yet — planned with real email delivery (backlog).
+- Dashboard 023 is a baseline; KPIs arrive in Stage 05.
+
+### Next-stage dependencies
+Stage 03 builds org creation (013–015) on these identity primitives and uses the KYB state machine, private storage and audit service.
