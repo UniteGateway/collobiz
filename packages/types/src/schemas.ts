@@ -378,3 +378,25 @@ export const DisputeMessageSchema = z.object({ body: z.string().trim().min(2).ma
 export const FinanceDisputeRulingSchema = z.object({ outcome: z.enum(['upheld', 'rejected', 'adjusted']), resolution: z.string().trim().min(10).max(4000), adjustedAmount: money.optional() })
   .refine((v) => v.outcome !== 'adjusted' || v.adjustedAmount != null, { message: 'Give the adjusted payable amount', path: ['adjustedAmount'] });
 export const FinanceEnquirySchema = z.object({ projectId: id.optional(), purpose: z.string().trim().min(10).max(2000), amount: money.refine((v) => v > 0, 'Enter an amount'), tenorMonths: z.number().int().min(1).max(360).optional(), consentToShare: z.literal(true, { message: 'Consent is required to share your details with a finance partner' }) });
+
+// ---------- Messaging, meetings & support (Stage 13 — 105–112, 147, 150) ----------
+export const NOTIFICATION_KINDS = ['message', 'meeting', 'project', 'tender', 'contract', 'commission', 'trade', 'team', 'opportunity', 'lead', 'announcement', 'support', 'security'] as const;
+/** Kinds whose email copy cannot be switched off (legal, financial and security notices). */
+export const MANDATORY_NOTIFICATION_KINDS = ['security', 'contract', 'commission'] as const;
+export const DirectMessageSchema = z.object({ recipientUserId: id, subject: z.string().trim().max(200).optional(), body: z.string().trim().min(1).max(4000) });
+export const ChatMessageSchema = z.object({ body: z.string().trim().min(1).max(4000) });
+export const ReportMessageSchema = z.object({ reason: z.string().trim().min(10).max(2000) });
+export const LegalHoldSchema = z.object({ hold: z.boolean(), reason: z.string().trim().min(10).max(1000) });
+export const MeetingSchema = z.object({
+  title: z.string().trim().min(3).max(200), agenda: z.string().trim().max(4000).optional(), startsAt: z.string().datetime(), endsAt: z.string().datetime(),
+  attendeeUserIds: z.array(id).min(1).max(50), projectId: id.optional(),
+}).refine((v) => v.endsAt > v.startsAt, { message: 'The meeting must end after it starts', path: ['endsAt'] });
+export const RsvpSchema = z.object({ rsvp: z.enum(['accepted', 'declined', 'tentative']) });
+export const MinutesSchema = z.object({ minutes: z.string().trim().min(10).max(20000), actionItems: z.array(z.object({ text: z.string().trim().min(3).max(500), ownerUserId: id.optional(), due: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() })).max(50).default([]) });
+export const AnnouncementSchema = z.object({ title: z.string().trim().min(5).max(200), body: z.string().trim().min(10).max(10000), audience: z.enum(['all', 'partners', 'verified_partners', 'group_companies']).default('all'), sector: z.enum(SECTOR_CODES).optional(), important: z.boolean().default(false), expiresAt: z.string().datetime().optional() });
+export const NotificationPrefsSchema = z.object({ preferences: z.array(z.object({ kind: z.enum(NOTIFICATION_KINDS), email: z.boolean(), sms: z.boolean(), push: z.boolean() })).min(1).max(NOTIFICATION_KINDS.length) });
+export const TicketSchema = z.object({ category: z.enum(['account', 'verification', 'payments', 'technical', 'abuse', 'other']), priority: z.enum(['urgent', 'high', 'normal', 'low']).default('normal'), subject: z.string().trim().min(5).max(200), body: z.string().trim().min(10).max(8000) });
+export const TicketReplySchema = z.object({ body: z.string().trim().min(2).max(8000), internal: z.boolean().default(false) });
+export const TicketStatusSchema = z.object({ status: z.enum(['in_progress', 'resolved', 'closed', 'open']), note: z.string().trim().max(2000).optional() });
+export const FeedbackSchema = z.object({ rating: z.number().int().min(1).max(5), area: z.enum(['overall', 'marketplace', 'leads', 'projects', 'payments', 'mobile', 'support']), comment: z.string().trim().max(4000).optional() });
+export const AccountClosureSchema = z.object({ reason: z.string().trim().min(5).max(2000), confirmEmail: z.string().trim().email(), confirm: z.literal(true, { message: 'Confirm that you understand closure cannot be undone after 30 days' }) });

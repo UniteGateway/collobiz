@@ -85,6 +85,13 @@
       "when": 1793977381462,
       "tag": "0011_stage12_finance",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793979114650,
+      "tag": "0012_stage13_comms",
+      "breakpoints": true
     }
   ]
 }

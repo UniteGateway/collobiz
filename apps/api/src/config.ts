@@ -19,7 +19,9 @@ const Env = z.object({
   IDENTITY_PROVIDER: z.enum(['local', 'oidc']).default('local'),
   AI_PROVIDER: z.enum(['rules', 'anthropic']).default('rules'),
   ESIGN_PROVIDER: z.string().default('local'),
+  /** Video provider for meeting rooms: local/none (scheduling, agenda, minutes only) or jitsi. */
   MEETING_PROVIDER: z.string().default('local'),
+  MEETING_JITSI_BASE_URL: z.string().url().default('https://meet.jit.si'),
   FEATURE_INVESTOR_DATA_ROOM: bool.default(false),
   FEATURE_FINANCE_INTRODUCTIONS: bool.default(false),
   ACCESS_TOKEN_TTL_SEC: z.coerce.number().default(900),
