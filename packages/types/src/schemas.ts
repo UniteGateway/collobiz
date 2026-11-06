@@ -321,3 +321,40 @@ export const MilestoneSubmitSchema = z.object({ note: z.string().trim().min(5).m
 export const CertifySchema = z.object({ decision: z.enum(['certify', 'reject']), certifiedAmount: money.optional(), note: z.string().trim().min(5).max(2000) });
 export const InvoicePaidSchema = z.object({ paymentReference: z.string().trim().min(3).max(100) });
 export const ProjectHoldSchema = z.object({ status: z.enum(['active', 'on_hold']), reason: z.string().trim().min(5).max(1000) });
+
+// ---------- Trading (Stage 11b — 085–094) ----------
+export const SupplierProductSchema = z.object({
+  name: z.string().trim().min(3).max(200), sector: z.enum(SECTOR_CODES), description: z.string().trim().min(10).max(4000), sku: z.string().trim().max(60).optional(),
+  unit: z.string().trim().min(1).max(20), price: money.optional(), moq: z.number().int().positive().default(1), leadTimeDays: z.number().int().min(0).max(365).default(7),
+  stock: z.enum(['in_stock', 'made_to_order', 'out_of_stock']).default('in_stock'),
+});
+const tradeLine = z.object({ item: z.string().trim().min(2).max(200), spec: z.string().trim().max(500).optional(), quantity: z.number().positive(), unit: z.string().trim().min(1).max(20) });
+export const RequirementSchema = z.object({
+  title: z.string().trim().min(5).max(200), sector: z.enum(SECTOR_CODES), description: z.string().trim().max(4000).optional(), items: z.array(tradeLine).min(1).max(50),
+  deliveryLocation: z.string().trim().min(3).max(300), region: z.string().max(40).optional(), neededBy: isoDate.optional(), closesAt: z.string().datetime(),
+  invitedSupplierIds: z.array(id).max(50).default([]), projectId: id.optional(),
+});
+export const EnquirySchema = z.object({ supplierProductId: id.optional(), catalogItemId: id.optional(), supplierOrgId: id.optional(), subject: z.string().trim().min(3).max(200).optional(), quantity: z.string().trim().min(1).max(120), message: z.string().trim().min(5).max(4000) })
+  .refine((v) => !!(v.supplierProductId || v.catalogItemId || v.supplierOrgId), { message: 'Choose a product or supplier', path: ['supplierProductId'] });
+export const EnquiryMessageSchema = z.object({ body: z.string().trim().min(2).max(4000) });
+export const QuotationSchema = z.object({
+  requirementId: id.optional(), enquiryId: id.optional(),
+  lines: z.array(z.object({ item: z.string().trim().min(2).max(200), quantity: z.number().positive(), unit: z.string().trim().min(1).max(20), unitPrice: money })).min(1).max(50),
+  taxPct: z.number().int().min(0).max(28).default(18), deliveryDays: z.number().int().min(0).max(365), validUntil: isoDate, terms: z.string().trim().max(2000).optional(),
+}).refine((v) => !!v.requirementId !== !!v.enquiryId, { message: 'Quote against exactly one requirement or enquiry', path: ['requirementId'] });
+export const PurchaseOrderSchema = z.object({
+  quotationId: id.optional(), supplierOrgId: id.optional(),
+  lines: z.array(z.object({ item: z.string().trim().min(2).max(200), quantity: z.number().positive(), unit: z.string().trim().min(1).max(20), unitPrice: money })).max(50).optional(),
+  taxPct: z.number().int().min(0).max(28).default(18), deliveryAddress: z.string().trim().min(5).max(300), deliveryBy: isoDate, paymentTerms: z.string().trim().min(3).max(500),
+  projectId: id.optional(), projectMaterialId: id.optional(),
+}).refine((v) => !!v.quotationId || (!!v.supplierOrgId && !!v.lines?.length), { message: 'Create the order from a quotation, or choose a supplier and add lines', path: ['quotationId'] });
+export const PoActionSchema = z.object({ note: z.string().trim().max(1000).optional() });
+export const PoCancelSchema = z.object({ reason: z.string().trim().min(5).max(1000) });
+export const ShipmentSchema = z.object({ carrier: z.string().trim().min(2).max(100), trackingNo: z.string().trim().min(3).max(60), eta: isoDate.optional() });
+export const ShipmentEventSchema = z.object({ status: z.string().trim().min(2).max(60), location: z.string().trim().max(120).optional(), note: z.string().trim().max(500).optional() });
+export const GoodsReceiptSchema = z.object({ lines: z.array(z.object({ item: z.string(), received: z.number().min(0), damaged: z.number().min(0).default(0) })).min(1), note: z.string().trim().max(1000).optional() });
+export const TerritorySchema = z.object({ distributorOrgId: id, region: z.string().min(2).max(40), sector: z.enum(SECTOR_CODES), exclusive: z.boolean().default(false), startDate: isoDate, endDate: isoDate, targetValue: money.optional() })
+  .refine((v) => v.endDate >= v.startDate, { message: 'End date must be on or after the start date', path: ['endDate'] });
+export const ClaimSchema = z.object({ poId: id, kind: z.enum(['return', 'warranty', 'damage', 'shortage']), description: z.string().trim().min(10).max(4000), lines: z.array(z.object({ item: z.string().min(1), quantity: z.number().positive() })).min(1), amountClaimed: money.optional() });
+export const ClaimResponseSchema = z.object({ decision: z.enum(['accept', 'reject']), resolution: z.enum(['refund', 'replacement', 'credit_note', 'repair']).optional(), note: z.string().trim().min(5).max(2000) })
+  .refine((v) => v.decision === 'reject' || !!v.resolution, { message: 'Choose how you will resolve the claim', path: ['resolution'] });

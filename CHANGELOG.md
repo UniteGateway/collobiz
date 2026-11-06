@@ -4,6 +4,10 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Stage 11b — Trading & procurement (2026-11-06)
+- Supplier products, buyer requirements, threaded enquiries with exclusive-distributor routing, private quotations with buyer-only comparison, purchase orders (locked once issued, append-only history), shipping with line-by-line goods receipt and proof of delivery, distributor territories with overlap checks, and evidence-backed claims with escalation; screens 085–094 (web) and 088 (native).
+- Changed: global API rate limit is configurable (`API_RATE_LIMIT`); deployment requires `X-Forwarded-For` from the load balancer.
+
 ### Stage 11a — Project execution (2026-11-06)
 - Projects started from executed contracts: baseline approval, milestone planning, subcontractor allocation, site updates with photos (web + native), materials, versioned documents, quality/safety inspections with NCRs, owner-only evidence-based certification, invoicing, payment recording, hashed completion certificate and closure, with an append-only change log; screens 075–084.
 - Fixed: PATCH endpoints (tender, catalogue item, CRM customer, milestone) silently reset omitted fields to schema defaults; new `patchOf()` helper.

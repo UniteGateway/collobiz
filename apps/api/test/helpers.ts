@@ -46,7 +46,7 @@ export async function login(app: INestApplication, email: string, opts: { mfa?: 
 export const ACCOUNTS = {
   superadmin: 'superadmin@collabiz.local', compliance: 'compliance@collabiz.local', finance: 'finance@collabiz.local', finance2: 'finance2@collabiz.local',
   uniteAdmin: 'unite.admin@collabiz.local', routing: 'routing@collabiz.local', evaluator: 'evaluator@collabiz.local',
-  asha: 'asha@voltepc.example', rohit: 'rohit@voltepc.example', ravi: 'ravi@sunrise.example', meera: 'meera@consult.example', vikram: 'vikram@greenbuild.example',
+  asha: 'asha@voltepc.example', rohit: 'rohit@voltepc.example', ravi: 'ravi@sunrise.example', meera: 'meera@consult.example', vikram: 'vikram@greenbuild.example', deepak: 'deepak@deccan.example',
 } as const;
 export const ADMINS = new Set<string>([ACCOUNTS.superadmin, ACCOUNTS.compliance, ACCOUNTS.finance, ACCOUNTS.finance2, ACCOUNTS.uniteAdmin, ACCOUNTS.routing, ACCOUNTS.evaluator]);
 /** Logs in every demo account (admins with MFA). */

@@ -15,13 +15,14 @@ import { CatalogModule } from './modules/catalog/catalog.controller';
 import { OpportunitiesModule } from './modules/opportunities/opportunities.controller';
 import { LeadsModule } from './modules/leads/leads.controller';
 import { CrmModule } from './modules/crm/crm.controller';
+import { TradingModule } from './modules/trading/trading.controller';
 import { ProjectsModule } from './modules/projects/projects.controller';
 import { ContractsModule } from './modules/contracts/contracts.controller';
 import { TendersModule } from './modules/tenders/tenders.controller';
 import { TeamsModule } from './modules/teams/teams.controller';
 import { config } from './config';
 
-export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule];
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule];
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, 
     AuditModule,
     AdaptersModule,
     ThrottlerModule.forRoot({
-      throttlers: [{ ttl: 60_000, limit: 300 }],
+      throttlers: [{ ttl: 60_000, limit: config().API_RATE_LIMIT }],
       // Tests opt in to rate limiting per request so suites can log in many personas quickly.
       skipIf: (ec) => config().NODE_ENV === 'test' && !ec.switchToHttp().getRequest().headers['x-enforce-throttle'],
     }),

@@ -21,7 +21,7 @@ describe('Stage 08 — partner matching & teams (gate: no private disclosure wit
     expect(p.body.about).toMatch(/distributes/);
     await api(app).get(`/v1/partners/${refs.orgs.greenbuild}`).set(auth(t.asha)).expect(404);
     const f = await api(app).get('/v1/partners?sector=power_equipment').set(auth(t.asha)).expect(200);
-    expect(f.body.map((x: any) => x.name)).toEqual(['Sunrise Traders']);
+    expect(f.body.map((x: any) => x.name)).toEqual(['Deccan Distributors', 'Sunrise Traders']); // sector filter: power equipment suppliers only
   });
 
   it('057 AI match suggestions are explainable and exclude partners without matching consent', async () => {

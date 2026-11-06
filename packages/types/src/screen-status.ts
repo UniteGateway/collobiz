@@ -126,4 +126,15 @@ export const SCREEN_STATUS: Record<string, ScreenProgress> = {
   '082': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Quality/safety checklists; NCRs block certification'),
   '083': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Owner-only certification on sealed evidence; invoice; payment'),
   '084': v([E2E, 'apps/api/test/stage11.e2e.ts'], 'Hashed completion certificate; close after payment'),
+  // ---- Stage 11b ----
+  '085': v([E2E, 'apps/api/test/stage11b.e2e.ts'], 'Supplier + Unite catalogue products; open requirements for eligible suppliers'),
+  '086': v([E2E, 'apps/api/test/stage11b.e2e.ts'], 'Verified suppliers with authorised distributors; own product listing'),
+  '087': v([E2E, 'apps/api/test/stage11b.e2e.ts'], 'Sector/invited RFQs, ≥1h to quote'),
+  '088': v([E2E, 'apps/api/test/stage11b.e2e.ts'], 'Threaded enquiries; routed to exclusive distributor; catalogue price requests land here; web + native'),
+  '089': v([E2E, 'apps/api/test/stage11b.e2e.ts'], 'Private quotes; buyer-only comparison with best-line, lowest, fastest'),
+  '090': v([E2E, 'apps/api/test/stage11b.e2e.ts'], 'From quote (others rejected, requirement awarded) or direct; locked once issued'),
+  '091': v([E2E, 'apps/api/test/stage11b.e2e.ts'], 'Machine-driven fulfilment; append-only order history'),
+  '092': v([E2E, 'apps/api/test/stage11b.e2e.ts'], 'Tracking, line-by-line GRN with damage, proof-of-delivery photos; updates project materials'),
+  '093': v([E2E, 'apps/api/test/stage11b.e2e.ts'], 'No overlapping exclusive or duplicate appointments'),
+  '094': v([E2E, 'apps/api/test/stage11b.e2e.ts'], 'Photo evidence, time windows, response deadline, escalation; blocks order closing'),
 };

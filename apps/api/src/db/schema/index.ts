@@ -8,3 +8,4 @@ export * from './teams';
 export * from './tenders';
 export * from './contracts';
 export * from './projects';
+export * from './trading';

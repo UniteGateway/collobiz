@@ -15,6 +15,8 @@
 
 Only Web and Admin are exposed publicly, behind a TLS-terminating load balancer that sets `X-Forwarded-For`. The API stays on the private network.
 
+> **Required:** the load balancer must set `X-Forwarded-For`. The web/admin proxy passes it through, and the API (`trust proxy 1`) uses it as the client IP for rate limiting (`API_RATE_LIMIT`, `AUTH_RATE_LIMIT`). Without it, every user would share the proxy's IP and one rate-limit bucket.
+
 ## 2. Build images (verified 2026-11-06)
 
 ```bash

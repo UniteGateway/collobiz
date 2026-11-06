@@ -4,7 +4,7 @@
 
 Source: Master Book Section 05 (functional specification) and the 165-screen UI Design Atlas (U01–U10). Screen IDs and titles are preserved verbatim.
 
-**Status:** verified 103 · implemented 0 · scaffolded 0 · planned 62
+**Status:** verified 113 · implemented 0 · scaffolded 0 · planned 52
 
 Status meaning: *planned* (not started) → *scaffolded* (route + shell) → *implemented* (wired to real API) → *verified* (automated test passed).
 
@@ -149,16 +149,16 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
-| 085 | Trading Marketplace | 11 | web `/trading` | partner | procurement | desktop | responsive | planned |  |
-| 086 | Supplier & Manufacturer Catalogue | 11 | web `/trading/suppliers` | partner | catalog | desktop | responsive | planned |  |
-| 087 | Buyer Requirement Posting | 11 | web `/trading/requirements/new` | partner | procurement | desktop | responsive | planned |  |
-| 088 | Product Enquiry & Price Request | 11 | web `/trading/enquiry` | partner | procurement | mobile-first | native | planned |  |
-| 089 | Supplier Quotation Comparison | 11 | web `/trading/quotations` | partner | procurement | desktop | responsive | planned |  |
-| 090 | Purchase Order Creation | 11 | web `/trading/po/new` | partner | procurement | desktop | responsive | planned |  |
-| 091 | Order Fulfillment Dashboard | 11 | web `/trading/orders` | partner | procurement | desktop | responsive | planned |  |
-| 092 | Shipping & Logistics Tracking | 11 | web `/trading/orders/[id]/shipping` | partner | procurement | desktop | responsive | planned |  |
-| 093 | Distributor Territory Management | 11 | web `/trading/territories` | partner | procurement | desktop | responsive | planned |  |
-| 094 | Returns, Warranty & Claims | 11 | web `/trading/claims` | partner | procurement | desktop | responsive | planned |  |
+| 085 | Trading Marketplace | 11 | web `/trading` | partner | procurement | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11b.e2e.ts |
+| 086 | Supplier & Manufacturer Catalogue | 11 | web `/trading/suppliers` | partner | catalog | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11b.e2e.ts |
+| 087 | Buyer Requirement Posting | 11 | web `/trading/requirements/new` | partner | procurement | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11b.e2e.ts |
+| 088 | Product Enquiry & Price Request | 11 | web `/trading/enquiry` | partner | procurement | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11b.e2e.ts |
+| 089 | Supplier Quotation Comparison | 11 | web `/trading/quotations` | partner | procurement | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11b.e2e.ts |
+| 090 | Purchase Order Creation | 11 | web `/trading/po/new` | partner | procurement | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11b.e2e.ts |
+| 091 | Order Fulfillment Dashboard | 11 | web `/trading/orders` | partner | procurement | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11b.e2e.ts |
+| 092 | Shipping & Logistics Tracking | 11 | web `/trading/orders/[id]/shipping` | partner | procurement | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11b.e2e.ts |
+| 093 | Distributor Territory Management | 11 | web `/trading/territories` | partner | procurement | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11b.e2e.ts |
+| 094 | Returns, Warranty & Claims | 11 | web `/trading/claims` | partner | procurement | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage11b.e2e.ts |
 
 ## 10 · Commissions, Finance & Settlement
 

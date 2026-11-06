@@ -24,6 +24,9 @@ if (tid) for (const u of ['documents', 'bid']) await scan(`${WEB}/tenders/${tid}
 await scan(WEB + '/projects');
 const pid = await p.evaluate(async () => (await (await fetch('/api/v1/projects')).json())[0]?.id);
 if (pid) for (const u of ['', '/milestones', '/progress', '/materials', '/documents', '/inspections', '/certification', '/closure', '/allocation']) await scan(`${WEB}/projects/${pid}${u}`);
+for (const u of ['/trading', '/trading/suppliers', '/trading/requirements/new', '/trading/enquiry', '/trading/quotations', '/trading/po/new', '/trading/orders', '/trading/territories', '/trading/claims']) await scan(WEB + u);
+const oid = await p.evaluate(async () => (await (await fetch('/api/v1/trading/purchase-orders')).json())[0]?.id);
+if (oid) await scan(`${WEB}/trading/orders/${oid}/shipping`);
 await scan(ADMIN + '/login');
 await b.close();
 process.exit(total ? 1 : 0);

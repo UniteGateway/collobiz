@@ -316,3 +316,51 @@ Commands: 131 unit/integration tests pass · 28/28 browser journeys · `node scr
 ### Remaining
 - Photo EXIF/geo-tag capture is not recorded; the hash and timestamp are recorded.
 - Retention payments and GST invoices with tax lines are deferred to Stage 12 finance (B-05 tax rules pending).
+
+## Stage 11b — Trading and procurement ✅ (Stage 11 complete)
+
+**Acceptance gate, carried into trading:** evidence-based certification and change logs — **met**. Evidence: `apps/api/test/stage11b.e2e.ts` (7 tests), 2 browser journeys and a native test.
+
+**Change logs and locks**
+- Purchase orders follow the shared PO state machine. Every action — create, issue, accept, fulfil, ship, track, deliver, claim events, close — is written to `po_events`, which a trigger keeps append-only.
+- Once an order is issued, its lines, totals and parties are locked by a trigger.
+
+**Evidence**
+- Goods receipt is recorded line by line (received / damaged) with optional proof-of-delivery photos. Exceptions stay on the record.
+- Damage and warranty claims require photo evidence. Claims are time-boxed (30 days; 365 for warranty), and the supplier has a 5-day response deadline.
+- Rejected or overdue claims can be escalated, which notifies compliance. An order cannot close while a claim is open.
+
+**Privacy and fairness**
+- A supplier only ever sees its own quotation. The buyer compares all quotations, with best-line, lowest-total and fastest flags.
+- Choosing a quotation accepts it, rejects the others and marks the requirement awarded.
+- There is one active quotation per supplier per requirement (unique index).
+
+**Territories**
+- Exclusive appointments may not overlap any other appointment. A duplicate overlapping appointment of the same distributor is also refused.
+- Enquiries from a buyer whose region has an exclusive distributor are routed to that distributor. The routing is visible to the buyer and the distributor, and audited.
+
+### Delivered
+- Migration `0010_stage11_trading.sql`:
+  - Tables: supplier_products, trade_requirements, trade_enquiries, enquiry_messages, quotations, purchase_orders, po_events, shipments, territories, trade_claims, trade_documents.
+  - Triggers: append-only order history; issued-order lock.
+- API: `TradingModule` (`/v1/trading/*`). The catalogue price request (039) now also opens an enquiry thread on the 088 desk.
+- When a goods receipt references a project material, it updates the delivered quantity, and the change appears in the project change log.
+- Seed: verified distributor Deccan Distributors (`deepak@deccan.example`), supplier products, and requirement `REQ-2026-000001`.
+- Web: 085–094.
+- Mobile (native): 088 enquiry desk with product search, price request and thread.
+- Fixed in this stage:
+  - The global API throttle was hard-coded at 300 requests/min. It is now `API_RATE_LIMIT`.
+  - Local smoke tests run every persona from one IP, so they were sharing a single bucket. `docs/deployment.md` now states that the load balancer must set `X-Forwarded-For`.
+
+### Commands & results (2026-11-06)
+| Command | Result |
+|---|---|
+| `pnpm --filter @collabiz/api test` | 151/151 passed (13 suites) |
+| `node scripts/e2e-smoke.mjs` | 59/59 passed |
+| `node scripts/a11y-scan.mjs` | 0 violations (10 trading pages added) |
+| mobile · lint · typecheck | 13/13 · clean · clean |
+
+### Remaining
+- Real carrier tracking APIs (B-11-style integration) are not connected; suppliers enter tracking manually.
+- E-way bill and GST e-invoice generation need government API credentials (B-05).
+- Payments for trade orders settle outside the platform until Stage 12 finance and a payment gateway (B-04).

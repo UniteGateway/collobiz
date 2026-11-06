@@ -48,6 +48,7 @@ export async function seedIdentity(db: Db): Promise<SeedRefs> {
   await org(db, 'volt', { legalName: 'Volt EPC Private Limited', displayName: 'Volt EPC', type: 'partner_company', country: 'IN', city: 'Pune', verificationStatus: 'verified', membershipLevel: 'verified', partnerTypes: ['contractor'] }, refs);
   await org(db, 'sunrise', { legalName: 'Sunrise Electricals & Traders LLP', displayName: 'Sunrise Traders', type: 'partner_company', country: 'IN', city: 'Ahmedabad', verificationStatus: 'verified', membershipLevel: 'certified', partnerTypes: ['trader', 'distributor'] }, refs);
   await org(db, 'meera', { legalName: 'Meera Iyer (Individual Consultant)', displayName: 'Meera Iyer Consulting', type: 'partner_individual', country: 'IN', city: 'Bengaluru', verificationStatus: 'verified', membershipLevel: 'verified', partnerTypes: ['consultant'] }, refs);
+  await org(db, 'deccan', { legalName: 'Deccan Electrical Distributors Pvt Ltd', displayName: 'Deccan Distributors', type: 'partner_company', country: 'IN', city: 'Bengaluru', verificationStatus: 'verified', membershipLevel: 'verified', partnerTypes: ['distributor'] }, refs);
   await org(db, 'greenbuild', { legalName: 'GreenBuild Infra Projects Pvt Ltd', displayName: 'GreenBuild Infra', type: 'partner_company', country: 'IN', city: 'Chennai', verificationStatus: 'submitted', membershipLevel: 'registered', partnerTypes: ['contractor', 'developer'] }, refs);
 
   await user(db, 'superadmin', 'superadmin@collabiz.local', 'Arjun Mehta (Super Admin)', refs, { mfa: true });
@@ -61,6 +62,7 @@ export async function seedIdentity(db: Db): Promise<SeedRefs> {
   await user(db, 'rohit', 'rohit@voltepc.example', 'Rohit Deshmukh', refs);
   await user(db, 'ravi', 'ravi@sunrise.example', 'Ravi Patel', refs, { phone: '+91 98250 22222' });
   await user(db, 'meera', 'meera@consult.example', 'Meera Iyer', refs);
+  await user(db, 'deepak', 'deepak@deccan.example', 'Deepak Rao', refs);
   await user(db, 'vikram', 'vikram@greenbuild.example', 'Vikram Raj', refs);
 
   await member(db, 'superadmin', 'platform', 'super_admin', refs);
@@ -75,6 +77,7 @@ export async function seedIdentity(db: Db): Promise<SeedRefs> {
   await member(db, 'ravi', 'sunrise', 'org_owner', refs);
   await member(db, 'meera', 'meera', 'org_owner', refs);
   await member(db, 'vikram', 'greenbuild', 'org_owner', refs);
+  await member(db, 'deepak', 'deccan', 'org_owner', refs);
   return refs;
 }
 

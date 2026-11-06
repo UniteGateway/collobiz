@@ -202,6 +202,22 @@ async function stage11(db: Db, refs: SeedRefs) {
   await db.insert(s.projectChangeLog).values({ projectId: p.id, entity: 'project', entityId: p.id, field: 'status', before: 'planning', after: 'active', reason: 'Baseline schedule approved by the owner (demo seed)', userId: refs.users.uniteAdmin, organizationId: refs.orgs.uniteSolar });
 }
 
+async function stage11b(db: Db, refs: SeedRefs) {
+  const [hasProfile] = await db.select({ id: s.partnerProfiles.organizationId }).from(s.partnerProfiles).where(eq(s.partnerProfiles.organizationId, refs.orgs.deccan)).limit(1);
+  if (!hasProfile) {
+    await db.insert(s.partnerProfiles).values({ organizationId: refs.orgs.deccan, kind: 'company', registrationNumber: 'U31900KA2012PTC000777', sectors: ['power_equipment', 'solar'], skills: ['Switchgear', 'Cables'], certifications: ['ISO9001'], regions: ['IN-KA', 'IN-TN'], headline: 'Authorised electrical distributor for Karnataka and Tamil Nadu', about: 'Stockist of switchgear, cables and transformers with warehouses in Bengaluru and Hosur.', services: ['Distribution'], consentToMatch: true, completedSteps: ['account_type', 'details', 'industries', 'coverage', 'profile', 'documents', 'bank_tax', 'agreements'] } as typeof s.partnerProfiles.$inferInsert);
+  }
+  const have = await db.select({ id: s.supplierProducts.id }).from(s.supplierProducts).limit(1);
+  if (have.length) return;
+  await db.insert(s.supplierProducts).values([
+    { supplierOrgId: refs.orgs.sunrise, name: '630 kVA oil-cooled distribution transformer', sector: 'power_equipment', description: '11/0.433 kV, ONAN, BIS-certified, with OLTC option. Type-tested at CPRI.', sku: 'SR-TX-630', unit: 'nos', price: 9_80_000_00, moq: 1, leadTimeDays: 21, stock: 'made_to_order', createdBy: refs.users.ravi },
+    { supplierOrgId: refs.orgs.sunrise, name: 'LT panel 800 A with ACB incomer', sector: 'power_equipment', description: 'Form 3b LT panel, 800 A ACB incomer, MCCB outgoings, powder-coated CRCA.', sku: 'SR-LT-800', unit: 'nos', price: 4_25_000_00, moq: 1, leadTimeDays: 14, stock: 'made_to_order', createdBy: refs.users.ravi },
+    { supplierOrgId: refs.orgs.sunrise, name: '4C x 300 sq mm XLPE armoured cable', sector: 'power_equipment', description: '1.1 kV aluminium, XLPE insulated, steel-wire armoured, IS 7098.', sku: 'SR-CBL-4C300', unit: 'm', price: 1_450_00, moq: 100, leadTimeDays: 5, stock: 'in_stock', createdBy: refs.users.ravi },
+    { supplierOrgId: refs.orgs.deccan, name: 'MCCB 250 A 4P', sector: 'power_equipment', description: '36 kA breaking capacity, thermal-magnetic release.', sku: 'DD-MCCB-250', unit: 'nos', price: 18_500_00, moq: 5, leadTimeDays: 3, stock: 'in_stock', createdBy: refs.users.deepak },
+  ]);
+  await db.insert(s.tradeRequirements).values({ code: 'REQ-2026-000001', buyerOrgId: refs.orgs.volt, title: 'Cabling for 2 MW Chakan rooftop', sector: 'power_equipment', description: 'Aluminium armoured cable for inverter-to-LT panel runs.', items: [{ item: '4C x 300 sq mm XLPE armoured cable', quantity: 1800, unit: 'm' }, { item: '4C x 95 sq mm XLPE armoured cable', quantity: 600, unit: 'm' }], deliveryLocation: 'Chakan MIDC, Pune', region: 'IN-MH', neededBy: '2026-12-10', closesAt: new Date(Date.now() + 10 * 86400_000), createdBy: refs.users.asha });
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
@@ -211,4 +227,5 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await stage08(db, refs);
   await stage09(db, refs);
   await stage11(db, refs);
+  await stage11b(db, refs);
 }

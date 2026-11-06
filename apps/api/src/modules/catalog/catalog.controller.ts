@@ -4,7 +4,7 @@ import { and, desc, eq, ilike, inArray, or, sql, type SQL } from 'drizzle-orm';
 import { z } from 'zod';
 import { CatalogItemSchema, GroupCompanySchema, patchOf, SECTOR_CODES } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
-import { businessUnits, catalogItems, groupCompanies, organizations, successStories } from '../../db/schema';
+import { businessUnits, catalogItems, groupCompanies, organizations, successStories, enquiryMessages, tradeEnquiries } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, OptionalCtx, Public, RequireCaps, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
@@ -83,6 +83,11 @@ export class CatalogController {
     if (!i) throw new NotFoundException('Item not found');
     if (!v.partner) throw new ForbiddenException('Create a partner account to request prices');
     const reference = `PRQ-${randomDigits(8)}`;
+    // Also open an enquiry thread on the 088 desk so the owning company can reply and quote.
+    if (ctx.orgId && ctx.orgId !== i.ownerOrgId) {
+      const [e] = await this.db.insert(tradeEnquiries).values({ code: `ENQ-${new Date().getUTCFullYear()}-${randomDigits(6)}`, buyerOrgId: ctx.orgId, supplierOrgId: i.ownerOrgId, catalogItemId: i.id, subject: i.name, quantity: b.quantity, createdBy: ctx.userId }).returning();
+      await this.db.insert(enquiryMessages).values({ enquiryId: e.id, authorOrgId: ctx.orgId, authorUserId: ctx.userId, body: b.message?.trim() || `Price request for ${b.quantity}` });
+    }
     await this.mail.send('email', `catalog-owner:${i.ownerOrgId}`, `Price request ${reference}: ${i.name}`, `Quantity: ${b.quantity}\n${b.message ?? ''}`, { itemId: id, fromOrg: ctx.orgId });
     await this.audit.record(ctx, { action: 'catalog.price_requested', objectType: 'catalog_item', objectId: id, after: { reference, quantity: b.quantity } });
     return { reference };

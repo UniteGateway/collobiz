@@ -32,6 +32,8 @@ const Env = z.object({
   EXPOSE_API_DOCS: bool.optional(),
   /** Login/registration attempts per minute per client (§7.1 rate limiting). */
   AUTH_RATE_LIMIT: z.coerce.number().int().positive().default(20),
+  /** Requests per minute per client IP across the whole API. Client IP comes from X-Forwarded-For set by the load balancer. */
+  API_RATE_LIMIT: z.coerce.number().int().positive().default(300),
 });
 export type AppConfig = z.infer<typeof Env>;
 

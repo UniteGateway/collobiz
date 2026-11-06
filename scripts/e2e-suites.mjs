@@ -944,3 +944,134 @@ suites.push({
     await page.getByText('Change log (latest)').waitFor();
   },
 });
+
+// ---------------- Stage 11b ----------------
+suites.push({
+  name: 'Stage 11b · 085 market → 086 suppliers → 093 territories → 094 claims (views)',
+  run: async ({ page, WEB, shot }) => {
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/trading');
+    await page.getByRole('table', { name: 'Open requirements' }).getByText('Cabling for 2 MW Chakan rooftop').waitFor();
+    await page.getByRole('table', { name: 'Products' }).getByText('630 kVA oil-cooled distribution transformer').waitFor();
+    await shot('085-trading');
+    await page.getByRole('link', { name: 'Suppliers', exact: true }).click();
+    await page.getByRole('table', { name: 'Suppliers' }).getByText(/^Deccan Distributors/).first().waitFor();
+    await page.getByRole('table', { name: 'My products' }).waitFor();
+    await page.getByRole('link', { name: 'Territories', exact: true }).click();
+    await page.getByRole('heading', { name: 'Appoint a distributor' }).waitFor();
+    await page.getByRole('link', { name: 'Claims', exact: true }).click();
+    await page.getByRole('heading', { name: 'Raise a claim' }).waitFor();
+  },
+});
+
+suites.push({
+  name: 'Stage 11b · 087 requirement → 089 quotes → 090 PO → 091 accept → 092 dispatch/GRN → 094 claim → close; 093 routing → 088',
+  only: 'desktop',
+  run: async ({ page, WEB, label, expect, shot }) => {
+    const title = `Cable for inverter yard ${label} ${Date.now()}`;
+    // 087 — buyer posts a requirement
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/trading/requirements/new');
+    await page.getByLabel('Title').fill(title);
+    await page.getByLabel('Sector').selectOption('power_equipment');
+    await page.getByLabel('Delivery location').fill('Chakan MIDC Phase II, Pune');
+    await page.getByLabel('Item 1').fill('4C x 120 sq mm XLPE armoured cable');
+    await page.getByLabel('Quantity 1').fill('500');
+    await page.getByLabel('Unit 1').fill('m');
+    await page.getByRole('button', { name: 'Post requirement' }).click();
+    await page.waitForURL(/\/trading\/quotations\?requirement=/);
+    const reqUrl = page.url();
+    // 089 — two suppliers quote privately
+    for (const [email, price, days] of [['ravi@sunrise.example', '640', '6'], ['deepak@deccan.example', '615', '3']]) {
+      await webLogin(page, WEB, email);
+      await page.goto(reqUrl);
+      await page.getByLabel(/Unit price for 4C x 120/).fill(price);
+      await page.getByLabel('Delivery (days)').fill(days);
+      await page.getByRole('button', { name: 'Submit quotation' }).click();
+      await page.getByText(/Your quotation QT-/).waitFor();
+      expect(await page.getByText(price === '640' ? '₹615' : '₹640').count() === 0, 'supplier sees a competitor price');
+    }
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(reqUrl);
+    const table = page.getByRole('table', { name: 'Quotation comparison' });
+    await table.getByText('Lowest').waitFor();
+    await table.getByText('Fastest').waitFor();
+    await shot('089-comparison');
+    await table.getByRole('row').filter({ hasText: 'Sunrise Traders' }).getByRole('link', { name: 'Create PO' }).click();
+    // 090 — PO from quotation, then issue
+    await page.getByLabel('Delivery address').fill('Chakan MIDC Phase II, Pune 410501');
+    await page.getByRole('button', { name: 'Create draft order' }).click();
+    await page.waitForURL(/\/trading\/orders\?id=/);
+    const orderUrl = page.url();
+    await page.getByRole('button', { name: 'Issue order' }).click();
+    await page.getByRole('heading', { name: /^Order PO-/ }).locator('..').getByText('Issued').waitFor();
+    // 091/092 — supplier accepts, starts, dispatches
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(orderUrl);
+    await page.getByRole('button', { name: 'Accept order' }).click();
+    await page.getByRole('button', { name: 'Start fulfilment' }).click();
+    await page.getByRole('link', { name: 'Shipping & receipt →' }).click();
+    await page.getByLabel('Carrier').fill('VRL Logistics');
+    await page.getByLabel('Tracking / LR number').fill(`VRL-${Date.now().toString().slice(-6)}`);
+    await page.getByRole('button', { name: 'Mark dispatched' }).click();
+    await page.getByText('Dispatched').first().waitFor();
+    const shipUrl = page.url();
+    // Buyer receipt with damage + photo
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(shipUrl);
+    await page.getByLabel(/^Damaged: 4C x 120/).fill('20');
+    await page.getByLabel('Receipt note').fill('One drum dented; 20 m unusable');
+    await page.getByLabel('Proof of delivery photos').setInputFiles({ name: 'pod.png', mimeType: 'image/png', buffer: PNG });
+    await page.getByRole('button', { name: 'Confirm receipt' }).click();
+    await page.getByText(/Received with exceptions on/).waitFor();
+    await shot('092-receipt');
+    // 094 — claim with photo, supplier accepts, buyer resolves, order closes
+    await page.goto(WEB + '/trading/claims');
+    const poNumber = (await page.evaluate(async (u) => (await (await fetch(`/api/v1/trading/purchase-orders/${new URL(u).searchParams.get('id')}`)).json()).number, orderUrl));
+    await page.getByLabel('Delivered order').selectOption({ label: `${poNumber} · Sunrise Traders` });
+    await page.getByLabel('Item', { exact: true }).selectOption('4C x 120 sq mm XLPE armoured cable');
+    await page.getByLabel('Quantity affected').fill('20');
+    await page.getByLabel('Claim photos').setInputFiles({ name: 'dent.png', mimeType: 'image/png', buffer: PNG });
+    await page.getByLabel('What went wrong?').fill('Drum dented in transit; outer 20 m sheath damaged.');
+    await page.getByRole('button', { name: 'Raise claim' }).click();
+    await page.getByRole('heading', { name: /CLM-\d{4}-\d{6} — damage/ }).waitFor();
+    const claimCode = (await page.getByRole('heading', { name: /CLM-/ }).textContent()).match(/CLM-\d{4}-\d{6}/)[0];
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/trading/claims');
+    await page.getByRole('button', { name: `Open ${claimCode}` }).click();
+    await page.getByLabel('Response').fill('Replacement 20 m dispatched with the next load');
+    await page.getByRole('button', { name: 'Accept claim' }).click();
+    await page.getByRole('heading', { name: new RegExp(claimCode) }).locator('..').getByText('Accepted').waitFor();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/trading/claims');
+    await page.getByRole('button', { name: `Open ${claimCode}` }).click();
+    await page.getByLabel('Note', { exact: true }).fill('Replacement received in good order');
+    await page.getByRole('button', { name: 'Confirm resolved' }).click();
+    await page.getByRole('heading', { name: new RegExp(claimCode) }).locator('..').getByText('Resolved').waitFor();
+    await shot('094-claim');
+    await page.goto(orderUrl);
+    await page.getByRole('button', { name: 'Close order' }).click();
+    await page.getByRole('heading', { name: /^Order PO-/ }).locator('..').getByText('Closed').waitFor();
+    // 093 — territory → 088 routed enquiry
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/trading/territories');
+    await page.getByRole('table', { name: 'Territories' }).getByRole('row').first().waitFor(); // table loaded
+    if (!(await page.getByRole('table', { name: 'Territories' }).getByRole('row').filter({ hasText: 'Deccan Distributors (your distributor)' }).filter({ hasText: 'Active' }).count())) {
+      await page.getByLabel('Distributor', { exact: true }).selectOption({ label: 'Deccan Distributors' });
+      await page.getByLabel('Region', { exact: true }).selectOption('IN-KA');
+      await page.getByLabel('Sector').selectOption('power_equipment');
+      await page.getByLabel('Exclusive territory').check();
+      await page.getByRole('button', { name: 'Appoint distributor' }).click();
+      await page.getByRole('table', { name: 'Territories' }).getByText('Deccan Distributors (your distributor)').first().waitFor();
+    }
+    await shot('093-territories');
+    await webLogin(page, WEB, 'meera@consult.example');
+    await page.goto(WEB + '/trading');
+    await page.getByRole('link', { name: 'Enquire about 630 kVA oil-cooled distribution transformer' }).click();
+    await page.getByLabel('Quantity').fill('2 nos');
+    await page.getByLabel('Message to the supplier').fill('Two units to Hosur by January, please.');
+    await page.getByRole('button', { name: 'Send enquiry' }).click();
+    await page.getByText(/routed to the supplier’s authorised distributor for your region/).waitFor();
+    await shot('088-enquiry');
+  },
+});

@@ -71,6 +71,13 @@
       "when": 1793974404355,
       "tag": "0009_stage11_projects",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793975664521,
+      "tag": "0010_stage11_trading",
+      "breakpoints": true
     }
   ]
 }
