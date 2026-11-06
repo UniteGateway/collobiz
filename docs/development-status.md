@@ -12,7 +12,7 @@ Overview of the 16 stages from Master Book §8. Detailed evidence (files, comman
 | 06 | Lead protection and Unite-first routing | Priority review and protection tests pass | ✅ Complete |
 | 07 | CRM and pipeline | Sales stage transitions and activity audit | ✅ Complete |
 | 08 | Partner matching and teams | No private disclosure without permission | ✅ Complete |
-| 09 | Tender/RFQ/proposals | Sealed bid boundaries and evaluator controls | ☐ |
+| 09 | Tender/RFQ/proposals | Sealed bid boundaries and evaluator controls | ✅ Complete |
 | 10 | Contracts and document workflows | Approved agreement version immutable | ☐ |
 | 11 | Project execution and procurement | Evidence-based certification and change logs | ☐ |
 | 12 | Commission ledger and finance | No unearned payout, idempotent settlement | ☐ |
@@ -22,3 +22,5 @@ Overview of the 16 stages from Master Book §8. Detailed evidence (files, comman
 | 16 | Production hardening and pilot launch | Signed pilot go/no-go checklist | ☐ |
 
 > **Launch-readiness audit 2026-11-06: NO-GO** for production and pilot — see [launch-readiness-report.md](launch-readiness-report.md).
+
+**Screen progress (2026-11-06, after Stage 09):** 91 of 165 screens verified end-to-end (API e2e + browser), 74 planned. API 128/128 · browser 50/50 · WCAG 0 violations · mobile 10/10.

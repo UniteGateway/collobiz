@@ -27,7 +27,7 @@ const suites = [
       await page.getByText('Please enter your name').waitFor();
       await page.getByLabel('Your name').fill('Meera Shah');
       await page.getByLabel('Work email').fill('meera@sunrise-epc.example');
-      await page.getByLabel('Message').fill('We install 2 MW of rooftop solar a year and want to partner.');
+      await page.getByLabel('Message', { exact: true }).fill('We install 2 MW of rooftop solar a year and want to partner.');
       await page.getByLabel(/I agree/).check();
       await page.getByRole('button', { name: 'Send enquiry' }).click();
       const ref = await page.locator('.cz-alert-success .cz-mono').textContent({ timeout: 10000 });
@@ -401,6 +401,12 @@ suites.push({
     await page.getByRole('heading', { name: 'Solar & Renewable Energy' }).waitFor();
     await page.goto(WEB + '/marketplace/map');
     await page.getByRole('img', { name: /opportunities plotted/ }).waitFor();
+    // Saved searches are capped at 20 per user (business rule); clear earlier smoke runs' searches first.
+    await page.evaluate(async () => {
+      const csrf = document.cookie.match(/cz_csrf=([^;]+)/)?.[1] ?? '';
+      const list = (await (await fetch('/api/v1/me/saved')).json()).searches ?? [];
+      for (const x of list) await fetch(`/api/v1/me/saved-searches/${x.id}`, { method: 'DELETE', headers: { 'X-CZ-CSRF': decodeURIComponent(csrf) } });
+    });
     await page.goto(WEB + '/marketplace/search');
     await page.getByLabel('Sector').selectOption('solar');
     await page.locator('[data-opp]').first().waitFor();
@@ -532,13 +538,13 @@ suites.push({
     await page.goto(WEB + '/tasks');
     await page.getByText(taskTitle).first().waitFor();
     await page.goto(WEB + '/activity');
-    await page.getByRole('heading', { name: 'Quick actions' }).waitFor();
+    await page.getByRole('heading', { name: 'Quick actions', exact: true }).waitFor();
     await page.goto(WEB + '/my/leads');
     await page.locator('table a').first().click();
     await page.getByRole('link', { name: 'Timeline' }).click();
-    await page.getByLabel('What happened?').fill('Called the plant head; meeting fixed.');
+    await page.getByLabel('What happened?').fill(`Called the plant head; meeting fixed (${title}).`);
     await page.getByRole('button', { name: 'Add to timeline' }).click();
-    await page.getByText('Called the plant head; meeting fixed.').waitFor();
+    await page.getByText(`Called the plant head; meeting fixed (${title}).`).waitFor();
     await shot('054-timeline');
   },
 });
@@ -600,5 +606,164 @@ suites.push({
     await page.getByRole('button', { name: 'Activate team' }).click();
     await page.getByText(/Team active since/).waitFor();
     await shot('064-activation');
+  },
+});
+
+// ---------------- Stage 09 ----------------
+import { createRequire as __cr } from 'node:module';
+const __pg = __cr(new URL('../apps/api/package.json', import.meta.url))('pg');
+async function sqlExec(q, params = []) {
+  const pool = new __pg.Pool({ connectionString: process.env.DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/collabiz' });
+  try { return await pool.query(q, params); } finally { await pool.end(); }
+}
+export async function webLoginMfa(page, WEB, email) {
+  await page.context().clearCookies();
+  await page.goto(WEB + '/login');
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill(DEMO.password);
+  await page.getByRole('button', { name: 'Sign in' }).last().click();
+  await page.getByLabel('Authentication code').fill(totp(DEMO.totpSecret));
+  await page.getByRole('button', { name: 'Sign in' }).last().click();
+  await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+}
+
+suites.push({
+  name: 'Stage 09 · 065 dashboard → 067 documents & eligibility → 068 bid form (partner view)',
+  run: async ({ page, WEB, expect, shot }) => {
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/tenders');
+    await page.getByRole('table', { name: 'Open tenders' }).getByText('O&M services for 5 MW Shirur ground-mount plant').waitFor();
+    await shot('065-tender-dashboard');
+    await page.getByRole('table', { name: 'Open tenders' }).getByRole('link', { name: 'O&M services for 5 MW Shirur ground-mount plant' }).click();
+    await page.getByRole('heading', { name: 'Your eligibility' }).waitFor();
+    await page.getByRole('table', { name: 'Documents' }).getByText('Scope of work & technical specification').waitFor();
+    expect(await page.getByRole('heading', { name: 'Evaluation committee' }).count() === 0, 'bidder can see evaluators');
+    expect(await page.getByRole('link', { name: 'Technical evaluation' }).count() === 0, 'bidder sees evaluation tab');
+    await shot('067-tender-documents');
+    await page.getByRole('link', { name: 'My bid' }).click();
+    await page.getByLabel('Technical approach & methodology').waitFor();
+    await page.getByLabel('Total price (₹, excl. taxes)').waitFor();
+    await shot('068-bid-form');
+  },
+});
+
+suites.push({
+  name: 'Stage 09 · full sealed-bid lifecycle: 066 publish → 068 sealed bids → open → 070 → 071 → 069 → 073 → award → 137 admin',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, label, expect, shot }) => {
+    const title = `Transformer yard O&M ${label} ${Date.now()}`;
+    // 066 — issuer drafts and publishes
+    await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
+    await page.goto(WEB + '/tenders/new');
+    await page.getByLabel('Title').fill(title);
+    await page.getByLabel('Scope of work').fill('Annual maintenance of two 11 kV transformer yards including oil testing and relay calibration.');
+    await page.getByRole('button', { name: 'Save draft and add documents' }).click();
+    await page.waitForURL(/\/tenders\/[0-9a-f-]+\/documents/);
+    const base = page.url().replace(/\/documents$/, '');
+    await page.getByRole('button', { name: 'Publish tender' }).click();
+    await page.getByText('Upload at least one tender document').waitFor();
+    await page.getByLabel('Document title').fill('Scope & BoQ');
+    await page.getByLabel('File').setInputFiles({ name: 'boq.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 smoke boq') });
+    await page.getByRole('button', { name: 'Upload document' }).click();
+    await page.getByRole('table', { name: 'Documents' }).getByText('Scope & BoQ').waitFor();
+    await page.getByLabel('Evaluator', { exact: true }).selectOption({ label: 'Lakshmi Rao (Unite Solar Tender Evaluator)' });
+    await page.getByLabel('Evaluates').selectOption('technical');
+    await page.getByRole('button', { name: 'Assign evaluator' }).click();
+    await page.getByRole('table', { name: 'Evaluators' }).getByText('Lakshmi Rao').waitFor();
+    await page.getByLabel('Evaluator', { exact: true }).selectOption({ label: 'Sanjay Kulkarni (Unite Solar Admin)' });
+    await page.getByLabel('Evaluates').selectOption('commercial');
+    await page.getByRole('button', { name: 'Assign evaluator' }).click();
+    await page.getByRole('table', { name: 'Evaluators' }).getByText('Sanjay Kulkarni').waitFor();
+    await page.getByRole('button', { name: 'Publish tender' }).click();
+    await page.getByText(/Tender published/).waitFor();
+    await shot('066-published');
+    // 068 — two partners submit sealed bids
+    for (const [email, approach, price] of [['asha@voltepc.example', 'Condition-based maintenance with DGA oil analysis and IR thermography.', '1850000'], ['ravi@sunrise.example', 'Calendar-based maintenance visits by a two-person crew.', '1500000']]) {
+      await webLogin(page, WEB, email);
+      await page.goto(base + '/bid');
+      await page.getByLabel('Technical approach & methodology').fill(approach);
+      await page.getByLabel('Relevant experience').fill('Maintained 40+ transformer yards for industrial clients.');
+      await page.getByLabel('Delivery timeline (weeks)').fill('4');
+      await page.getByLabel('Total price (₹, excl. taxes)').fill(price);
+      await page.getByLabel('Payment terms').fill('Quarterly in arrears');
+      await page.getByRole('button', { name: 'Submit sealed bid' }).click();
+      await page.getByText('Seal (SHA-256)').waitFor();
+    }
+    await shot('068-sealed');
+    // Issuer cannot read bids before opening
+    await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
+    await page.goto(base + '/commercial');
+    await page.getByText(/Commercial envelopes stay sealed/).waitFor();
+    // Closing time passes (simulated) → close → open
+    await sqlExec("update tenders set closes_at = now() - interval '1 minute' where title = $1", [title]);
+    await page.goto(base + '/documents');
+    await page.getByRole('button', { name: 'Close bidding' }).click();
+    await page.getByRole('button', { name: 'Open bids (verify seals)' }).click();
+    await page.getByText('technical evaluation', { exact: false }).first().waitFor();
+    // 070 — technical evaluator scores
+    await webLoginMfa(page, WEB, 'evaluator@collabiz.local');
+    await page.goto(base + '/technical');
+    await page.getByText('Condition-based maintenance with DGA oil analysis and IR thermography.').waitFor();
+    expect(await page.getByText('18,50,000').count() === 0, 'price visible to technical evaluator');
+    for (const [org, score] of [['Volt EPC', '84'], ['Sunrise Traders', '52']]) {
+      const g = page.getByRole('group', { name: `Score ${org}` });
+      await g.getByLabel('Score (0–100)').fill(score);
+      await g.getByLabel('Justification').fill(`Assessment of ${org} methodology`);
+      await g.getByRole('button', { name: 'Record score' }).click();
+      await g.waitFor({ state: 'detached' });
+    }
+    await shot('070-technical');
+    await page.goto(base + '/comparison');
+    await page.getByText(/never to technical-only evaluators/).waitFor();
+    // Issuer completes technical, 071 commercial score
+    await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
+    await page.goto(base + '/documents');
+    await page.getByRole('button', { name: 'Complete technical evaluation' }).click();
+    await page.getByText(/Technical evaluation complete/).waitFor();
+    await page.goto(base + '/commercial');
+    await page.getByRole('region', { name: 'Commercial envelope — Volt EPC' }).waitFor();
+    expect(await page.getByText('Sunrise Traders').count() === 0, 'disqualified commercial envelope revealed');
+    const g = page.getByRole('group', { name: 'Score Volt EPC' });
+    await g.getByLabel('Score (0–100)').fill('90');
+    await g.getByLabel('Justification').fill('Within budget; standard terms');
+    await g.getByRole('button', { name: 'Record score' }).click();
+    await g.waitFor({ state: 'detached' });
+    await shot('071-commercial');
+    // 069 comparison → shortlist
+    await page.goto(base + '/comparison');
+    await page.getByRole('table', { name: 'Bid comparison' }).getByText('85.8').waitFor();
+    await page.getByLabel('Shortlist Volt EPC').check();
+    await page.getByRole('button', { name: 'Shortlist for negotiation' }).click();
+    await page.getByRole('table', { name: 'Bid comparison' }).getByText('Shortlisted').waitFor();
+    await shot('069-comparison');
+    // 073 negotiation
+    await page.goto(base + '/negotiation');
+    await page.getByLabel('Message', { exact: true }).fill('Please sharpen your price for a two-year term.');
+    await page.getByRole('button', { name: 'Send message' }).click();
+    await page.getByText('Please sharpen your price for a two-year term.').waitFor();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(base + '/negotiation');
+    await page.getByLabel('Message', { exact: true }).fill('Revised for a two-year commitment.');
+    await page.getByLabel('Revised price (₹, optional)').fill('1750000');
+    await page.getByRole('button', { name: 'Send revised offer' }).click();
+    await page.getByText(/Revised price ₹17,50,000/).waitFor();
+    await shot('073-negotiation');
+    // Award
+    await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
+    await page.goto(base + '/comparison');
+    await page.getByLabel('Award to').selectOption({ label: 'Volt EPC' });
+    await page.getByLabel('Award justification').fill('Highest combined score and revised price within budget.');
+    await page.getByRole('button', { name: 'Award tender' }).click();
+    await page.getByText('Tender awarded. All bidders have been notified.').waitFor();
+    // 137 admin oversight
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/tenders');
+    const row = page.getByRole('row').filter({ hasText: title });
+    await row.getByText('Awarded').waitFor();
+    await row.getByRole('button').first().click();
+    await page.getByRole('heading', { name: 'Audit trail' }).waitFor();
+    await page.getByText('tender.awarded').first().waitFor();
+    expect(await page.getByText('Condition-based maintenance').count() === 0, 'admin sees bid content');
+    await shot('137-tender-admin');
   },
 });

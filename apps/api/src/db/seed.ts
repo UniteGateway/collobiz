@@ -56,6 +56,7 @@ export async function seedIdentity(db: Db): Promise<SeedRefs> {
   await user(db, 'finance2', 'finance2@collabiz.local', 'Divya Rao (Finance Approver 2)', refs, { mfa: true });
   await user(db, 'uniteAdmin', 'unite.admin@collabiz.local', 'Sanjay Kulkarni (Unite Solar Admin)', refs, { mfa: true });
   await user(db, 'routing', 'routing@collabiz.local', 'Neha Gupta (Routing Owner)', refs, { mfa: true });
+  await user(db, 'evaluator', 'evaluator@collabiz.local', 'Lakshmi Rao (Unite Solar Tender Evaluator)', refs, { mfa: true });
   await user(db, 'asha', 'asha@voltepc.example', 'Asha Patil', refs, { phone: '+91 98200 11111' });
   await user(db, 'rohit', 'rohit@voltepc.example', 'Rohit Deshmukh', refs);
   await user(db, 'ravi', 'ravi@sunrise.example', 'Ravi Patel', refs, { phone: '+91 98250 22222' });
@@ -68,6 +69,7 @@ export async function seedIdentity(db: Db): Promise<SeedRefs> {
   await member(db, 'finance2', 'platform', 'finance', refs);
   await member(db, 'uniteAdmin', 'uniteSolar', 'unite_admin', refs);
   await member(db, 'routing', 'platform', 'routing_owner', refs);
+  await member(db, 'evaluator', 'uniteSolar', 'unite_admin', refs);
   await member(db, 'asha', 'volt', 'org_owner', refs);
   await member(db, 'rohit', 'volt', 'org_member', refs);
   await member(db, 'ravi', 'sunrise', 'org_owner', refs);

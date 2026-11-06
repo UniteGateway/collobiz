@@ -102,4 +102,14 @@ export const SCREEN_STATUS: Record<string, ScreenProgress> = {
   '154': v([E2E, 'apps/api/test/stage08.e2e.ts']),
   '155': v([E2E, 'apps/api/test/stage08.e2e.ts'], 'Roles, shares, NDA status, revoke'),
   '156': v([E2E, 'apps/api/test/stage08.e2e.ts'], 'NDA-signed members only; revocation removes access'),
+  // ---- Stage 09 ----
+  '065': v([E2E, 'apps/api/test/stage09.e2e.ts'], 'Open/issued/bid/evaluating views'),
+  '066': v([E2E, 'apps/api/test/stage09.e2e.ts'], 'Draft → publish gate (docs + both evaluator kinds + ≥1h)'),
+  '067': v([E2E, 'apps/api/test/stage09.e2e.ts'], 'Docs, addenda, eligibility checklist, evaluator committee'),
+  '068': v([E2E, 'apps/api/test/stage09.e2e.ts'], 'AES-GCM sealed envelopes + SHA-256 seal; withdraw/resubmit'),
+  '069': v([E2E, 'apps/api/test/stage09.e2e.ts'], 'Weighted ranking; prices hidden from technical-only evaluators'),
+  '070': v([E2E, 'apps/api/test/stage09.e2e.ts'], 'Technical envelopes only; one final score per evaluator'),
+  '071': v([E2E, 'apps/api/test/stage09.e2e.ts'], 'Qualified bids only; commercial sealed until technical complete'),
+  '073': v([E2E, 'apps/api/test/stage09.e2e.ts'], 'Bidder-only price revisions, versioned'),
+  '137': v([E2E, 'apps/api/test/stage09.e2e.ts'], 'Metadata, seals and audit trail only — never content'),
 };

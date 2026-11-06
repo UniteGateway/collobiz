@@ -4,7 +4,7 @@
 
 Source: Master Book Section 05 (functional specification) and the 165-screen UI Design Atlas (U01–U10). Screen IDs and titles are preserved verbatim.
 
-**Status:** verified 82 · implemented 0 · scaffolded 0 · planned 83
+**Status:** verified 91 · implemented 0 · scaffolded 0 · planned 74
 
 Status meaning: *planned* (not started) → *scaffolded* (route + shell) → *implemented* (wired to real API) → *verified* (automated test passed).
 
@@ -119,15 +119,15 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 
 | ID | Screen | Stage | App · Route | Access | API module | Atlas | Mobile | Status | Tests |
 |---|---|---|---|---|---|---|---|---|---|
-| 065 | Tender & RFQ Dashboard | 09 | web `/tenders` | partner | tenders | desktop | responsive | planned |  |
-| 066 | Publish Tender / Work Package | 09 | web `/tenders/new` | tender-issuer | tenders | desktop | responsive | planned |  |
-| 067 | Tender Documents & Eligibility | 09 | web `/tenders/[id]/documents` | partner | tenders | desktop | responsive | planned |  |
-| 068 | Partner Bid Submission | 09 | web `/tenders/[id]/bid` | verified-partner | tenders | desktop | responsive | planned |  |
-| 069 | Bid Comparison Table | 09 | web `/tenders/[id]/comparison` | tender-evaluator | tenders | desktop | responsive | planned |  |
-| 070 | Technical Evaluation | 09 | web `/tenders/[id]/technical` | tender-evaluator | tenders | desktop | responsive | planned |  |
-| 071 | Commercial Evaluation | 09 | web `/tenders/[id]/commercial` | tender-evaluator | tenders | desktop | responsive | planned |  |
+| 065 | Tender & RFQ Dashboard | 09 | web `/tenders` | partner | tenders | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage09.e2e.ts |
+| 066 | Publish Tender / Work Package | 09 | web `/tenders/new` | tender-issuer | tenders | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage09.e2e.ts |
+| 067 | Tender Documents & Eligibility | 09 | web `/tenders/[id]/documents` | partner | tenders | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage09.e2e.ts |
+| 068 | Partner Bid Submission | 09 | web `/tenders/[id]/bid` | verified-partner | tenders | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage09.e2e.ts |
+| 069 | Bid Comparison Table | 09 | web `/tenders/[id]/comparison` | tender-evaluator | tenders | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage09.e2e.ts |
+| 070 | Technical Evaluation | 09 | web `/tenders/[id]/technical` | tender-evaluator | tenders | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage09.e2e.ts |
+| 071 | Commercial Evaluation | 09 | web `/tenders/[id]/commercial` | tender-evaluator | tenders | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage09.e2e.ts |
 | 072 | AI Proposal Draft Builder | 14 | web `/tenders/[id]/ai-proposal` | verified-partner | proposals | desktop | responsive | planned |  |
-| 073 | Negotiation & Revision Workspace | 09 | web `/tenders/[id]/negotiation` | tender-party | proposals | desktop | responsive | planned |  |
+| 073 | Negotiation & Revision Workspace | 09 | web `/tenders/[id]/negotiation` | tender-party | proposals | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage09.e2e.ts |
 | 074 | Award, LOI & Work Order | 10 | web `/tenders/[id]/award` | tender-issuer | contracts | desktop | responsive | planned |  |
 
 ## 08 · Project Execution
@@ -226,7 +226,7 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 134 | Lead Ownership & Conflict Resolution | 06 | admin `/lead-conflicts` | compliance | lead-protection | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage06.e2e.ts |
 | 135 | Commission Policy Configuration | 12 | admin `/commission-policy` | super-admin | commissions | desktop | desktop-admin | planned |  |
 | 136 | Product & Catalogue Management | 04 | admin `/catalogue` | unite-admin | catalog | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage04.e2e.ts |
-| 137 | Project / Tender Administration | 09 | admin `/tenders` | unite-admin | tenders | desktop | desktop-admin | planned |  |
+| 137 | Project / Tender Administration | 09 | admin `/tenders` | unite-admin | tenders | desktop | desktop-admin | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage09.e2e.ts |
 | 138 | Finance & Settlement Controls | 12 | admin `/finance` | finance | invoicing | desktop | desktop-admin | planned |  |
 | 139 | Performance Analytics & BI | 16 | admin `/analytics` | admin | analytics | desktop | desktop-admin | planned |  |
 | 140 | AI Monitoring & Recommendation Controls | 14 | admin `/ai` | super-admin | partner-matching | desktop | desktop-admin | planned |  |

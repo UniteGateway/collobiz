@@ -4,6 +4,10 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Stage 09 — Tenders, RFQs & sealed bids (2026-11-06)
+- Tender lifecycle (draft → publish → close → open → technical → commercial → negotiation → award/cancel) with encrypted, hash-sealed two-envelope bids, seal verification at opening, evaluator conflict-of-interest checks, staged envelope disclosure, weighted comparison, negotiation with versioned price revisions, and platform oversight; screens 065–071, 073 (web) and 137 (admin).
+- Fixed: web/admin `useQuery` loading flag was briefly false when a dependent path became available, crashing pages that read the data.
+
 ### Stage 08 — Partner matching & teams (2026-11-06)
 - Partner directory, find partners, explainable consent-gated match suggestions, collaboration teams and consortiums with invitations, NDA signing, roles, versioned commercial sharing proposals, activation and NDA-gated workspace; screens 055–064, 124, 154–156 and native 059.
 

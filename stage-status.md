@@ -185,3 +185,47 @@ Commands: 131 unit/integration tests pass · 28/28 browser journeys · `node scr
 - Web: 055–064, 124, 154–156 (+ team hub, partner profile). Mobile (native): 059 with NDA signing.
 - Results: API 115/115 · browser 47/47 · WCAG 0 violations · mobile 10/10 · lint/typecheck clean.
 - Remaining: reputation score feeds matching once Stage 14 lands (currently "unrated" factor at neutral weight); team document uploads reuse S3 when configured (B-03).
+
+## Stage 09 — Tender, RFQ and proposals ✅
+
+**Acceptance gate:** sealed-bid boundaries and evaluator controls — **met** (`apps/api/test/stage09.e2e.ts`, 13 tests, plus 2 browser journeys).
+- Sealed bids: both envelopes are AES-256-GCM encrypted at rest and committed with a SHA-256 seal at submission. Before opening, nobody can read bid content: not the issuer, not the evaluators, not platform admins. A sealed bid cannot be edited; the bidder must withdraw and resubmit before closing.
+- Time-bound: tenders cannot be closed early. Submissions and withdrawals are refused after the closing time. Unsubmitted drafts lapse at closing. Publishing requires a closing time at least 1 hour away, at least one document, and both evaluator kinds.
+- Opening ceremony: every seal is re-verified. A tampered bid blocks opening and writes a `tender.seal_violation` audit event. An evaluator who belongs to a bidding organization also blocks opening (conflict of interest).
+- Staged disclosure: technical envelopes are revealed first. Commercial envelopes are revealed only after technical evaluation completes, and only for bids at or above the published pass mark. Technical-only evaluators never see prices, even in the comparison.
+- Evaluator controls:
+  - Evaluators must be members of the issuing organization.
+  - Each evaluator scores only the envelope kind they are assigned, and only once.
+  - Evaluator assignments freeze at opening.
+  - Completing a phase requires every evaluator to have scored every bid.
+- Negotiation (073): only the issuer and the shortlisted bidder see a thread. Only the bidder can revise the price; every revision is kept and audited. The award uses the latest price.
+- Admin 137 shows metadata, counts, seal hashes and the audit trail only, never envelope content.
+
+### Delivered
+- Migration `0007_stage09_tenders.sql`: tenders, tender_documents, tender_evaluators, bids (encrypted envelopes, seal hash, partial unique active bid per org), bid_scores (unique per evaluator × kind), negotiation_messages.
+- API: `TendersModule` (`apps/api/src/modules/tenders/tenders.controller.ts`):
+  - Lifecycle: dashboard, draft/edit/publish, documents and addenda (with bidder notifications), evaluator committee, eligibility checks, bid draft/submit (idempotent)/withdraw, close, open.
+  - Evaluation and award: technical and commercial scoring, technical completion, comparison, shortlist, negotiation, award (idempotent), cancel.
+  - Admin endpoint: `/admin/tenders`.
+- Seed: evaluator account `evaluator@collabiz.local` (Unite Solar, MFA) and demo tender `TND-2026-000001`.
+- Web: 065 dashboard, 066 publish, 067 documents & eligibility & tender actions, 068 bid submission, 069 comparison/shortlist/award, 070 technical evaluation, 071 commercial evaluation, 073 negotiation.
+- Admin: 137 tender administration.
+- Mobile: no Stage 09 screen is registered as native; all are responsive web.
+- Fixed in this stage:
+  - `useQuery` (web and admin) reported "not loading" for one render when its path became available. This caused a crash on dependent pages; a settled-key guard now covers every page.
+  - Smoke suites no longer depend on earlier runs' data (unique CRM note; saved-search cleanup for the 20-search cap).
+
+### Commands & results (2026-11-06)
+| Command | Result |
+|---|---|
+| `pnpm --filter @collabiz/api test` | 128/128 passed (10 suites) |
+| `node scripts/e2e-smoke.mjs` | 50/50 passed (desktop 1440 + mobile 390) |
+| `node scripts/a11y-scan.mjs` | 0 violations (now includes /tenders, /tenders/new, documents, bid) |
+| `pnpm --filter @collabiz/mobile test` · types · ui | 10/10 · 22/22 · 28/28 |
+| `pnpm -r --no-bail lint` / `typecheck` | clean |
+
+### Remaining
+- Closing is driven by the issuer clicking Close after the deadline. A scheduled auto-close sweep arrives with the Stage 16 job runner; admin 137 flags tenders that are past closing but not closed.
+- AI proposal drafting (072) is Stage 14.
+- The letter of award / contract follows in Stage 10 (074).
+- Tender documents use local private storage until S3 is configured (B-03).

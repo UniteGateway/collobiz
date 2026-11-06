@@ -12,6 +12,8 @@ export function useQuery<T = any>(path: string | null, query?: Query): QueryStat
   const [loading, setLoading] = useState(!!path);
   const [n, setN] = useState(0);
   const key = path ? path + JSON.stringify(query ?? {}) : null;
+  // The key whose request last settled: a path that just became non-null reports loading on its very first render.
+  const [settled, setSettled] = useState<string | null>(null);
   const qRef = useRef(query);
   qRef.current = query;
   useEffect(() => {
@@ -25,13 +27,17 @@ export function useQuery<T = any>(path: string | null, query?: Query): QueryStat
     api.get<T>(path, qRef.current)
       .then((d) => live && setData(d))
       .catch((e) => live && setError(e))
-      .finally(() => live && setLoading(false));
+      .finally(() => {
+        if (!live) return;
+        setLoading(false);
+        setSettled(key);
+      });
     return () => {
       live = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, n]);
-  return { data, error, loading, reload: useCallback(() => setN((x) => x + 1), []), setData };
+  return { data, error, loading: loading || (!!key && settled !== key), reload: useCallback(() => setN((x) => x + 1), []), setData };
 }
 
 /** Mutation helper with field-level validation errors from the shared Zod schemas. */

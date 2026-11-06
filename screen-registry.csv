@@ -63,15 +63,15 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 062,Confidentiality / NDA Workspace,Collaboration & Partner Matching,08,web,/teams/[id]/nda,team-member,team-collaboration,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage08.e2e.ts,Typed-name signature bound to NDA hash; unlocks workspace
 063,Commercial Sharing Proposal,Collaboration & Partner Matching,08,web,/teams/[id]/sharing,team-member,team-collaboration,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage08.e2e.ts,Versioned; shares total 100%; every member approves
 064,Collaboration Approval & Team Activation,Collaboration & Partner Matching,08,web,/teams/[id]/activation,team-lead,team-collaboration,desktop,responsive,identity-collaboration,verified,scripts/e2e-suites.mjs apps/api/test/stage08.e2e.ts,Requires NDAs + approved proposal
-065,Tender & RFQ Dashboard,"Tenders, Quotations & Negotiation",09,web,/tenders,partner,tenders,desktop,responsive,project-scope,planned,,
-066,Publish Tender / Work Package,"Tenders, Quotations & Negotiation",09,web,/tenders/new,tender-issuer,tenders,desktop,responsive,project-scope,planned,,
-067,Tender Documents & Eligibility,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/documents,partner,tenders,desktop,responsive,project-scope,planned,,
-068,Partner Bid Submission,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/bid,verified-partner,tenders,desktop,responsive,identity-collaboration,planned,,
-069,Bid Comparison Table,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/comparison,tender-evaluator,tenders,desktop,responsive,project-scope,planned,,
-070,Technical Evaluation,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/technical,tender-evaluator,tenders,desktop,responsive,content,planned,,
-071,Commercial Evaluation,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/commercial,tender-evaluator,tenders,desktop,responsive,content,planned,,
+065,Tender & RFQ Dashboard,"Tenders, Quotations & Negotiation",09,web,/tenders,partner,tenders,desktop,responsive,project-scope,verified,scripts/e2e-suites.mjs apps/api/test/stage09.e2e.ts,Open/issued/bid/evaluating views
+066,Publish Tender / Work Package,"Tenders, Quotations & Negotiation",09,web,/tenders/new,tender-issuer,tenders,desktop,responsive,project-scope,verified,scripts/e2e-suites.mjs apps/api/test/stage09.e2e.ts,Draft → publish gate (docs + both evaluator kinds + ≥1h)
+067,Tender Documents & Eligibility,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/documents,partner,tenders,desktop,responsive,project-scope,verified,scripts/e2e-suites.mjs apps/api/test/stage09.e2e.ts,"Docs, addenda, eligibility checklist, evaluator committee"
+068,Partner Bid Submission,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/bid,verified-partner,tenders,desktop,responsive,identity-collaboration,verified,scripts/e2e-suites.mjs apps/api/test/stage09.e2e.ts,AES-GCM sealed envelopes + SHA-256 seal; withdraw/resubmit
+069,Bid Comparison Table,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/comparison,tender-evaluator,tenders,desktop,responsive,project-scope,verified,scripts/e2e-suites.mjs apps/api/test/stage09.e2e.ts,Weighted ranking; prices hidden from technical-only evaluators
+070,Technical Evaluation,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/technical,tender-evaluator,tenders,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage09.e2e.ts,Technical envelopes only; one final score per evaluator
+071,Commercial Evaluation,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/commercial,tender-evaluator,tenders,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage09.e2e.ts,Qualified bids only; commercial sealed until technical complete
 072,AI Proposal Draft Builder,"Tenders, Quotations & Negotiation",14,web,/tenders/[id]/ai-proposal,verified-partner,proposals,desktop,responsive,ai-explainable,planned,,
-073,Negotiation & Revision Workspace,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/negotiation,tender-party,proposals,desktop,responsive,content,planned,,
+073,Negotiation & Revision Workspace,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/negotiation,tender-party,proposals,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage09.e2e.ts,"Bidder-only price revisions, versioned"
 074,"Award, LOI & Work Order","Tenders, Quotations & Negotiation",10,web,/tenders/[id]/award,tender-issuer,contracts,desktop,responsive,content,planned,,
 075,Active Projects Portfolio,Project Execution,11,web,/projects,partner,projects,desktop,native,project-scope,planned,,
 076,Project Overview Dashboard,Project Execution,11,web,/projects/[id],project-member,projects,desktop,responsive,project-scope,planned,,
@@ -135,7 +135,7 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 134,Lead Ownership & Conflict Resolution,Unite Group Administration,06,admin,/lead-conflicts,compliance,lead-protection,desktop,desktop-admin,commercial-record,verified,scripts/e2e-suites.mjs apps/api/test/stage06.e2e.ts,Independent panel; evidence side-by-side; appeal to a different panelist
 135,Commission Policy Configuration,Unite Group Administration,12,admin,/commission-policy,super-admin,commissions,desktop,desktop-admin,commercial-record,planned,,
 136,Product & Catalogue Management,Unite Group Administration,04,admin,/catalogue,unite-admin,catalog,desktop,desktop-admin,content,verified,scripts/e2e-suites.mjs apps/api/test/stage04.e2e.ts,"Own-company scoping, draft/publish/archive, audited"
-137,Project / Tender Administration,Unite Group Administration,09,admin,/tenders,unite-admin,tenders,desktop,desktop-admin,project-scope,planned,,
+137,Project / Tender Administration,Unite Group Administration,09,admin,/tenders,unite-admin,tenders,desktop,desktop-admin,project-scope,verified,scripts/e2e-suites.mjs apps/api/test/stage09.e2e.ts,"Metadata, seals and audit trail only — never content"
 138,Finance & Settlement Controls,Unite Group Administration,12,admin,/finance,finance,invoicing,desktop,desktop-admin,commercial-record,planned,,
 139,Performance Analytics & BI,Unite Group Administration,16,admin,/analytics,admin,analytics,desktop,desktop-admin,content,planned,,
 140,AI Monitoring & Recommendation Controls,Unite Group Administration,14,admin,/ai,super-admin,partner-matching,desktop,desktop-admin,ai-explainable,planned,,

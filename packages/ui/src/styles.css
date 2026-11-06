@@ -188,3 +188,9 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 14px; } fieldset.cz-fi
   .cz-kpi-value { font-size: 22px; }
   .cz-table th, .cz-table td { padding: 8px 10px; }
 }
+
+/* Stage 09 — tender checklists and negotiation threads */
+.cz-checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.cz-thread { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 10px; }
+.cz-thread > li { border: 1px solid var(--cz-grey-200); border-radius: var(--cz-radius-sm); padding: 10px 12px; background: #fff; }
+.cz-thread > li[data-mine="true"] { border-color: var(--cz-green-500); background: #F3FAF1; }

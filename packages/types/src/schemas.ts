@@ -254,3 +254,22 @@ export const SharingProposalSchema = z.object({
 export const ProposalDecisionSchema = z.object({ decision: z.enum(['approve', 'reject']), comment: z.string().trim().max(2000).optional() }).refine((v) => v.decision === 'approve' || (v.comment?.length ?? 0) >= 5, { message: 'Explain why you reject the proposal', path: ['comment'] });
 export const TeamPostSchema = z.object({ kind: z.enum(['note', 'task', 'proposal_section']), title: z.string().trim().min(2).max(200), body: z.string().trim().min(2).max(10000), assigneeOrgId: id.optional() });
 export const MatchRequestSchema = z.object({ sector: z.enum(SECTOR_CODES), region: z.string().max(40).optional(), value: money.optional(), requiredCertifications: z.array(z.string()).default([]), opportunityId: id.optional() });
+
+// ---------- Tenders (Stage 09 — 065–071, 073, 137) ----------
+export const TenderCreateSchema = z.object({
+  title: z.string().trim().min(5).max(200), scope: z.string().trim().min(20).max(10000), sector: z.enum(SECTOR_CODES), workPackage: z.string().trim().max(200).optional(),
+  budget: money.optional(), closesAt: z.string().datetime(), opportunityId: id.optional(),
+  eligibility: z.object({ minLevel: z.enum(['registered', 'verified', 'certified', 'strategic', 'country_partner']).default('verified'), sectors: z.array(z.enum(SECTOR_CODES)).default([]), certifications: z.array(z.string()).default([]) }).default({ minLevel: 'verified', sectors: [], certifications: [] }),
+  techWeight: z.number().int().min(0).max(100).default(70), minTechScore: z.number().int().min(0).max(100).default(60),
+});
+export const BidDraftSchema = z.object({
+  technical: z.object({ approach: z.string().trim().min(20).max(10000), experience: z.string().trim().min(10).max(5000), timelineWeeks: z.number().int().min(1).max(520), team: z.string().trim().max(2000).optional() }),
+  commercial: z.object({ amount: money.refine((v) => v > 0, 'Enter your price'), validityDays: z.number().int().min(7).max(365), paymentTerms: z.string().trim().min(5).max(2000), exclusions: z.string().trim().max(2000).optional() }),
+  teamId: id.optional(),
+});
+export const EvaluatorSchema = z.object({ userId: id, role: z.enum(['technical', 'commercial', 'both']) });
+export const ScoreSchema = z.object({ kind: z.enum(['technical', 'commercial']), score: z.number().int().min(0).max(100), criteria: z.record(z.string(), z.number().min(0).max(100)).default({}), comment: z.string().trim().min(5).max(4000) });
+export const ShortlistSchema = z.object({ bidIds: z.array(id).min(1).max(10) });
+export const AwardSchema = z.object({ bidId: id, reason: z.string().trim().min(10).max(2000) });
+export const TenderCancelSchema = z.object({ reason: z.string().trim().min(10).max(2000) });
+export const NegotiationSchema = z.object({ body: z.string().trim().min(2).max(4000), revisedAmount: money.optional() });

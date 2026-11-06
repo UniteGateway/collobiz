@@ -160,6 +160,23 @@ async function stage08(db: Db, refs: SeedRefs) {
   ]);
 }
 
+async function stage09(db: Db, refs: SeedRefs) {
+  const have = await db.select({ id: s.tenders.id }).from(s.tenders).limit(1);
+  if (have.length) return;
+  const closesAt = new Date(Date.now() + 14 * 24 * 3600 * 1000);
+  const [t] = await db.insert(s.tenders).values({
+    code: 'TND-2026-000001', issuerOrgId: refs.orgs.uniteSolar, title: 'O&M services for 5 MW Shirur ground-mount plant', sector: 'solar', workPackage: 'Annual O&M (module cleaning, preventive maintenance, SCADA monitoring)',
+    scope: 'Three-year operations and maintenance contract for the 5 MW Shirur ground-mount solar plant: fortnightly module cleaning, quarterly preventive maintenance of inverters and transformers, 24x7 SCADA monitoring and a 4-hour breakdown response.',
+    budget: 4_500_000_00, closesAt, eligibility: { minLevel: 'verified', sectors: ['solar'], certifications: [] }, techWeight: 70, minTechScore: 60, status: 'published', publishedAt: new Date(), createdBy: refs.users.uniteAdmin,
+  }).returning();
+  const doc = storeDemoPdf(refs.orgs.uniteSolar, 'Tender scope of work');
+  await db.insert(s.tenderDocuments).values({ tenderId: t.id, title: 'Scope of work & technical specification', fileName: 'TND-2026-000001-scope.pdf', objectKey: doc.key, sha256: doc.sha, size: doc.size, mime: 'application/pdf', uploadedBy: refs.users.uniteAdmin });
+  await db.insert(s.tenderEvaluators).values([
+    { tenderId: t.id, userId: refs.users.evaluator, role: 'technical', addedBy: refs.users.uniteAdmin },
+    { tenderId: t.id, userId: refs.users.uniteAdmin, role: 'commercial', addedBy: refs.users.uniteAdmin },
+  ]);
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
@@ -167,4 +184,5 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await stage06(db, refs);
   await stage07(db, refs);
   await stage08(db, refs);
+  await stage09(db, refs);
 }

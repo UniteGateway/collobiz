@@ -18,7 +18,9 @@ async function scan(url) {
 for (const u of ['/', '/about', '/membership', '/login', '/support/contact', '/registry']) await scan(WEB + u);
 await p.goto(WEB + '/login'); await p.getByLabel('Email').fill('asha@voltepc.example'); await p.getByLabel('Password').fill('Collabiz#2026');
 await p.getByRole('button', { name: 'Sign in' }).last().click(); await p.waitForURL(/dashboard/);
-for (const u of ['/dashboard', '/company/team', '/onboarding/kyc', '/settings/privacy', '/profile']) await scan(WEB + u);
+for (const u of ['/dashboard', '/company/team', '/onboarding/kyc', '/settings/privacy', '/profile', '/tenders', '/tenders/new']) await scan(WEB + u);
+const tid = await p.evaluate(async () => (await (await fetch('/api/v1/tenders')).json()).open?.[0]?.id);
+if (tid) for (const u of ['documents', 'bid']) await scan(`${WEB}/tenders/${tid}/${u}`);
 await scan(ADMIN + '/login');
 await b.close();
 process.exit(total ? 1 : 0);
