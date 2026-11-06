@@ -72,7 +72,7 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 071,Commercial Evaluation,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/commercial,tender-evaluator,tenders,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage09.e2e.ts,Qualified bids only; commercial sealed until technical complete
 072,AI Proposal Draft Builder,"Tenders, Quotations & Negotiation",14,web,/tenders/[id]/ai-proposal,verified-partner,proposals,desktop,responsive,ai-explainable,planned,,
 073,Negotiation & Revision Workspace,"Tenders, Quotations & Negotiation",09,web,/tenders/[id]/negotiation,tender-party,proposals,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage09.e2e.ts,"Bidder-only price revisions, versioned"
-074,"Award, LOI & Work Order","Tenders, Quotations & Negotiation",10,web,/tenders/[id]/award,tender-issuer,contracts,desktop,responsive,content,planned,,
+074,"Award, LOI & Work Order","Tenders, Quotations & Negotiation",10,web,/tenders/[id]/award,tender-issuer,contracts,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage10.e2e.ts,Draft from award → second-person approval → hash-bound signatures; amend/terminate
 075,Active Projects Portfolio,Project Execution,11,web,/projects,partner,projects,desktop,native,project-scope,planned,,
 076,Project Overview Dashboard,Project Execution,11,web,/projects/[id],project-member,projects,desktop,responsive,project-scope,planned,,
 077,Milestone & Schedule Planner,Project Execution,11,web,/projects/[id]/milestones,project-member,projects,desktop,responsive,content,planned,,
@@ -146,7 +146,7 @@ id,title,family,stage,app,route,access,api_module,atlas_layout,mobile,pattern,st
 145,Account Security & MFA,"Profile, Settings & Governance",02,web,/settings/security,authenticated,identity,mobile-first,native,content,verified,scripts/e2e-suites.mjs apps/api/test/stage02.e2e.ts,"TOTP enrol/disable, password change revokes sessions, session list; web + native"
 146,"Languages, Currencies & Regions","Profile, Settings & Governance",15,web,/settings/regional,authenticated,identity,desktop,responsive,content,planned,,
 147,Notification Preferences,"Profile, Settings & Governance",13,web,/settings/notifications,authenticated,notifications,mobile-first,native,content,planned,,
-148,Documents & Agreements Vault,"Profile, Settings & Governance",10,web,/vault,partner,contracts,desktop,responsive,content,planned,,
+148,Documents & Agreements Vault,"Profile, Settings & Governance",10,web,/vault,partner,contracts,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage10.e2e.ts,"Contracts, agreements, KYB docs, NDAs, certificates with hashes"
 149,"Privacy, Consent & Data Rights","Profile, Settings & Governance",03,web,/settings/privacy,authenticated,identity,desktop,responsive,content,verified,scripts/e2e-suites.mjs apps/api/test/stage03.e2e.ts,"Consent ledger, export download, 30-day data requests"
 150,"Help, Feedback & Account Closure","Profile, Settings & Governance",13,web,/help,authenticated,support,mobile-first,native,content,planned,,
 151,Lead Protection Dashboard,Five Trust Feature Extensions,06,web,/lead-protection,partner,lead-protection,desktop,native,commercial-record,verified,scripts/e2e-suites.mjs apps/api/test/stage06.e2e.ts,Web + native

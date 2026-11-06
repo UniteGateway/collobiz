@@ -610,6 +610,7 @@ suites.push({
 });
 
 // ---------------- Stage 09 ----------------
+let lastAwardedTender = null; // handed from the Stage 09 lifecycle to the Stage 10 contract journey
 import { createRequire as __cr } from 'node:module';
 const __pg = __cr(new URL('../apps/api/package.json', import.meta.url))('pg');
 async function sqlExec(q, params = []) {
@@ -755,6 +756,7 @@ suites.push({
     await page.getByLabel('Award justification').fill('Highest combined score and revised price within budget.');
     await page.getByRole('button', { name: 'Award tender' }).click();
     await page.getByText('Tender awarded. All bidders have been notified.').waitFor();
+    lastAwardedTender = base;
     // 137 admin oversight
     await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
     await page.goto(ADMIN + '/tenders');
@@ -765,5 +767,66 @@ suites.push({
     await page.getByText('tender.awarded').first().waitFor();
     expect(await page.getByText('Condition-based maintenance').count() === 0, 'admin sees bid content');
     await shot('137-tender-admin');
+  },
+});
+
+// ---------------- Stage 10 ----------------
+suites.push({
+  name: 'Stage 10 · 148 vault lists agreements, NDAs and certificates',
+  run: async ({ page, WEB, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/vault');
+    await page.getByRole('tab', { name: /Platform agreements/ }).click();
+    await page.getByRole('table', { name: 'Platform agreements' }).getByText('COLLABIZ Partner Terms').first().waitFor();
+    await page.getByRole('tab', { name: /Team NDAs/ }).click();
+    await page.getByRole('table', { name: 'Team NDAs' }).getByText('TM-000001').waitFor();
+    await page.getByRole('tab', { name: /Lead certificates/ }).click();
+    await page.getByRole('table', { name: 'Lead certificates' }).waitFor();
+    await shot('148-vault');
+  },
+});
+
+suites.push({
+  name: 'Stage 10 · 074 LOI from award → second-person approval → both parties sign → executed in 148 vault',
+  only: 'desktop',
+  run: async ({ page, WEB, expect, shot }) => {
+    expect(!!lastAwardedTender, 'Stage 09 lifecycle did not award a tender');
+    const base = lastAwardedTender;
+    await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
+    await page.goto(base + '/award');
+    await page.getByLabel('Document type').selectOption('loi');
+    await page.getByRole('button', { name: 'Create draft from award' }).click();
+    await page.getByRole('region', { name: 'Edit draft' }).waitFor();
+    await page.getByLabel('Agreement text').fill((await page.getByLabel('Agreement text').inputValue()) + '\nSite access only between 08:00 and 18:00.');
+    await page.getByRole('button', { name: 'Save draft' }).click();
+    await page.getByRole('button', { name: 'Submit for approval' }).click();
+    await page.getByText('You wrote this version, so another approver must review it.').waitFor();
+    const code = (await page.getByRole('heading', { name: /Letter of Intent CTR-/ }).textContent()).match(/CTR-\d{4}-\d{6}/)[0];
+    // Second person approves
+    await webLoginMfa(page, WEB, 'evaluator@collabiz.local');
+    await page.goto(base + '/award');
+    await page.getByRole('button', { name: `Open ${code}` }).click();
+    await page.getByRole('button', { name: 'Approve and lock version' }).click();
+    await page.getByText('Approved · immutable').waitFor();
+    await shot('074-approved');
+    // Counterparty signs from the vault
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/vault');
+    await page.getByRole('button', { name: `Open ${code}` }).click();
+    await page.getByLabel('Type your full name').fill('Asha Patil');
+    await page.getByLabel(/I am authorised to sign/).check();
+    await page.getByRole('button', { name: 'Sign document' }).click();
+    await page.getByRole('table', { name: 'Signatures' }).getByText('Asha Patil').waitFor();
+    // Issuer countersigns → executed
+    await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
+    await page.goto(base + '/award');
+    await page.getByRole('button', { name: `Open ${code}` }).click();
+    await page.getByLabel('Type your full name').fill('Sanjay Kulkarni');
+    await page.getByLabel(/I am authorised to sign/).check();
+    await page.getByRole('button', { name: 'Sign document' }).click();
+    await page.getByRole('table', { name: 'Signatures' }).getByText('Sanjay Kulkarni').waitFor();
+    await page.getByRole('heading', { name: new RegExp(code) }).locator('..').getByText('Executed').waitFor();
+    expect(await page.getByRole('region', { name: 'Edit draft' }).count() === 0, 'approved contract still editable');
+    await shot('074-executed');
   },
 });

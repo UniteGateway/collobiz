@@ -26,6 +26,7 @@ export function TenderTabs({ t }: { t: any }) {
   if (issuerSide && (t.role === 'issuer' || ev !== 'technical')) tabs.push(['commercial', 'Commercial evaluation']);
   if (issuerSide) tabs.push(['comparison', 'Bid comparison']);
   if (t.role === 'issuer' || t.role === 'bidder' || (t.role === 'evaluator' && t.canManage)) tabs.push(['negotiation', 'Negotiation']);
+  if (t.status === 'awarded' && (t.role === 'issuer' || t.role === 'evaluator' || t.role === 'bidder')) tabs.push(['award', 'Award & contracts']);
   return <nav aria-label="Tender sections" className="cz-tabs">{tabs.map(([p, l]) => <Link key={p} href={`/tenders/${t.id}/${p}`} aria-current={path === `/tenders/${t.id}/${p}` ? 'page' : undefined}>{l}</Link>)}</nav>;
 }
 

@@ -52,6 +52,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const e2 = err as { code?: string; cause?: { code?: string } };
     const pgCode = e2?.code ?? e2?.cause?.code;
     if (pgCode === '23505') return res.status(409).json({ statusCode: 409, error: 'Conflict', message: 'A record with these details already exists' });
+    // Integrity triggers (e.g. immutable approved contract versions, append-only signatures) — never a 500.
+    if (pgCode === 'P0001') {
+      this.log.warn(`integrity trigger blocked a write: ${(e2?.cause as { message?: string } | undefined)?.message ?? (err as Error)?.message}`);
+      return res.status(409).json({ statusCode: 409, error: 'Conflict', message: 'This record is locked and cannot be changed.' });
+    }
     if (pgCode === '22P02') return res.status(400).json({ statusCode: 400, error: 'BadRequest', message: 'Malformed identifier' });
     this.log.error(err instanceof Error ? err.stack : String(err));
     return res.status(500).json({ statusCode: 500, error: 'InternalError', message: 'Unexpected error. The incident has been logged.' });

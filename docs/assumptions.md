@@ -23,6 +23,8 @@ Running log of engineering decisions and assumptions made without asking (per in
 | D-15 | 2026-11-06 | Brand tokens sampled from the approved logo: navy `#011E48` (wordmark), `#03325D` (mark), green `#55A444`, grey `#7A7A7B` (tagline). Raster logo used; final vector lockup pending (App. E). | Instruction 5. |
 | D-16 | 2026-11-06 | Public marketing content (001–003, 007) is code-defined until the CMS (screen 142, Stage 15) exists. | Stage ordering. |
 | D-17 | 2026-11-06 | AI matching uses a deterministic, explainable rules engine (`AI_PROVIDER=rules`); an LLM provider adapter is optional and never changes contractual/finance state. | §4.2, §4.3, §6.5; no API key provided. |
+| D-18 | 2026-11-06 | Contract approval always needs a second person: the approver must hold `contract.approve` or `org.manage` in the issuing organization and must not be the version's author. Organizations with a single admin cannot self-approve; they must add a colleague. | §7.1 two-person principle; Stage 10 gate. |
+| D-19 | 2026-11-06 | Tender bids are sealed with AES-256-GCM field encryption plus a SHA-256 commitment that is re-verified at opening. The tender issuer and assigned evaluators see envelopes only at the stage that allows it. Platform administrators never see bid content. | Stage 09 gate (sealed-bid boundaries). |
 
 ## Assumptions
 

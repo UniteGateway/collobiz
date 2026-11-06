@@ -57,6 +57,13 @@
       "when": 1793971366881,
       "tag": "0007_stage09_tenders",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793973721595,
+      "tag": "0008_stage10_contracts",
+      "breakpoints": true
     }
   ]
 }

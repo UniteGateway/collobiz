@@ -112,4 +112,7 @@ export const SCREEN_STATUS: Record<string, ScreenProgress> = {
   '071': v([E2E, 'apps/api/test/stage09.e2e.ts'], 'Qualified bids only; commercial sealed until technical complete'),
   '073': v([E2E, 'apps/api/test/stage09.e2e.ts'], 'Bidder-only price revisions, versioned'),
   '137': v([E2E, 'apps/api/test/stage09.e2e.ts'], 'Metadata, seals and audit trail only — never content'),
+  // ---- Stage 10 ----
+  '074': v([E2E, 'apps/api/test/stage10.e2e.ts'], 'Draft from award → second-person approval → hash-bound signatures; amend/terminate'),
+  '148': v([E2E, 'apps/api/test/stage10.e2e.ts'], 'Contracts, agreements, KYB docs, NDAs, certificates with hashes'),
 };

@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Stage 10 — Contracts & document vault (2026-11-06)
+- LOI, work order and contract drafted from the tender award; versioned drafts, two-person approval, approved versions locked by a database trigger, hash-bound click-to-sign by both parties, amendments that supersede on execution, termination; documents & agreements vault; screens 074 and 148.
+
 ### Stage 09 — Tenders, RFQs & sealed bids (2026-11-06)
 - Tender lifecycle (draft → publish → close → open → technical → commercial → negotiation → award/cancel) with encrypted, hash-sealed two-envelope bids, seal verification at opening, evaluator conflict-of-interest checks, staged envelope disclosure, weighted comparison, negotiation with versioned price revisions, and platform oversight; screens 065–071, 073 (web) and 137 (admin).
 - Fixed: web/admin `useQuery` loading flag was briefly false when a dependent path became available, crashing pages that read the data.

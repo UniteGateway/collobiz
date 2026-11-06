@@ -229,3 +229,41 @@ Commands: 131 unit/integration tests pass · 28/28 browser journeys · `node scr
 - AI proposal drafting (072) is Stage 14.
 - The letter of award / contract follows in Stage 10 (074).
 - Tender documents use local private storage until S3 is configured (B-03).
+
+## Stage 10 — Contracts and document workflows ✅
+
+**Acceptance gate:** an approved agreement version is immutable — **met**. Evidence: `apps/api/test/stage10.e2e.ts` (8 tests) and 2 browser journeys.
+- A PostgreSQL trigger (`contract_versions_immutable`) rejects:
+  - any `UPDATE` or `DELETE` of an approved version;
+  - any change to the text, terms or number of a submitted version.
+- The tests prove this with direct SQL as well as the API; the API maps the error to 409.
+- Signatures are append-only (trigger `contract_signatures_append_only`).
+- Each edit after a submission creates a new version. A rejected version stays on record with the reviewer's note.
+- Approval is two-person: the approver needs approval rights in the issuing organization (`contract.approve` or `org.manage`) and must not be the version's author.
+- Each signature binds to the approved version's SHA-256. The signer submits the hash they saw, and a mismatch is refused. The evidence recorded is typed name, designation, IP, user agent and timestamp. Signing requires an idempotency key.
+- The counterparty never sees internal drafts. The contract only becomes visible to them once a version is approved; before that it returns 404 on every route.
+- Amendments are new contracts that supersede the original only when executed, so the original stays in force until then. Termination is issuer-only, applies only to executed contracts, and requires a reason.
+
+### Delivered
+- Migration `0008_stage10_contracts.sql`: contracts, contract_versions and contract_signatures, plus the two integrity triggers.
+- API: `ContractsModule` (`apps/api/src/modules/contracts/contracts.controller.ts`):
+  - `GET /contracts`, `POST /tenders/:id/contracts` (LOI, work order or contract drafted from the award, including the negotiated price).
+  - Draft, submit, review, sign, amend and terminate.
+  - Text download with an `X-Content-SHA256` header.
+  - `GET /vault`.
+- Error filter: PostgreSQL integrity-trigger errors (`P0001`) map to 409 "This record is locked".
+- Web: 074 award documents (new tender tab "Award & contracts") and 148 vault. The vault has tabs for contracts, platform agreements, KYB documents, team NDAs and lead certificates, and `?contract=` deep links from notifications. A shared `ContractPanel` drives the full workflow.
+- Smoke runner: `SUITE` accepts `a|b` alternation. The Stage 10 contract journey continues from the tender awarded in the Stage 09 journey.
+
+### Commands & results (2026-11-06)
+| Command | Result |
+|---|---|
+| `pnpm --filter @collabiz/api test` | 136/136 passed (11 suites) |
+| `node scripts/e2e-smoke.mjs` | 53/53 passed |
+| `node scripts/a11y-scan.mjs` | 0 violations (includes /vault) |
+| mobile · lint · typecheck | 10/10 · clean · clean |
+
+### Remaining
+- The templates are drafts marked "SUBJECT TO LEGAL REVIEW". Approved legal wording and a qualified e-signature provider (Aadhaar eSign / DSC) are still open (B-08); click-to-sign evidence is the interim mechanism.
+- PDF rendering and S3 storage of executed copies wait on B-03; plain-text downloads with hashes are provided meanwhile.
+- Single-admin partner organizations cannot approve their own contracts: approval always needs a second person. This is recorded as decision D-18.

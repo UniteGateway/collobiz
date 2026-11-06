@@ -4,7 +4,7 @@
 
 Source: Master Book Section 05 (functional specification) and the 165-screen UI Design Atlas (U01–U10). Screen IDs and titles are preserved verbatim.
 
-**Status:** verified 91 · implemented 0 · scaffolded 0 · planned 74
+**Status:** verified 93 · implemented 0 · scaffolded 0 · planned 72
 
 Status meaning: *planned* (not started) → *scaffolded* (route + shell) → *implemented* (wired to real API) → *verified* (automated test passed).
 
@@ -128,7 +128,7 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 071 | Commercial Evaluation | 09 | web `/tenders/[id]/commercial` | tender-evaluator | tenders | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage09.e2e.ts |
 | 072 | AI Proposal Draft Builder | 14 | web `/tenders/[id]/ai-proposal` | verified-partner | proposals | desktop | responsive | planned |  |
 | 073 | Negotiation & Revision Workspace | 09 | web `/tenders/[id]/negotiation` | tender-party | proposals | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage09.e2e.ts |
-| 074 | Award, LOI & Work Order | 10 | web `/tenders/[id]/award` | tender-issuer | contracts | desktop | responsive | planned |  |
+| 074 | Award, LOI & Work Order | 10 | web `/tenders/[id]/award` | tender-issuer | contracts | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage10.e2e.ts |
 
 ## 08 · Project Execution
 
@@ -242,7 +242,7 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 145 | Account Security & MFA | 02 | web `/settings/security` | authenticated | identity | mobile-first | native | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage02.e2e.ts |
 | 146 | Languages, Currencies & Regions | 15 | web `/settings/regional` | authenticated | identity | desktop | responsive | planned |  |
 | 147 | Notification Preferences | 13 | web `/settings/notifications` | authenticated | notifications | mobile-first | native | planned |  |
-| 148 | Documents & Agreements Vault | 10 | web `/vault` | partner | contracts | desktop | responsive | planned |  |
+| 148 | Documents & Agreements Vault | 10 | web `/vault` | partner | contracts | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage10.e2e.ts |
 | 149 | Privacy, Consent & Data Rights | 03 | web `/settings/privacy` | authenticated | identity | desktop | responsive | verified | scripts/e2e-suites.mjs<br>apps/api/test/stage03.e2e.ts |
 | 150 | Help, Feedback & Account Closure | 13 | web `/help` | authenticated | support | mobile-first | native | planned |  |
 

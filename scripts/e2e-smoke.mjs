@@ -38,7 +38,7 @@ for (const [label, viewport] of [['desktop', { width: 1440, height: 900 }], ['mo
   if (process.env.DEBUG) page.on('framenavigated', (f) => f === page.mainFrame() && console.info('  nav', f.url()));
   for (const s of suites) {
     if (s.only && s.only !== label) continue;
-    if (process.env.SUITE && !s.name.includes(process.env.SUITE)) continue;
+    if (process.env.SUITE && !process.env.SUITE.split('|').some((x) => s.name.includes(x))) continue;
     await step(`[${label}] ${s.name}`, async () => {
       try {
         await s.run({ page, ctx, WEB, ADMIN, expect, label, shot: async (n) => SHOTS && page.screenshot({ path: `${SHOTS}/${label}-${n}.png`, fullPage: false }) });

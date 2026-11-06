@@ -273,3 +273,15 @@ export const ShortlistSchema = z.object({ bidIds: z.array(id).min(1).max(10) });
 export const AwardSchema = z.object({ bidId: id, reason: z.string().trim().min(10).max(2000) });
 export const TenderCancelSchema = z.object({ reason: z.string().trim().min(10).max(2000) });
 export const NegotiationSchema = z.object({ body: z.string().trim().min(2).max(4000), revisedAmount: money.optional() });
+
+// ---------- Contracts (Stage 10 — 074, 148) ----------
+export const CONTRACT_KINDS = ['loi', 'work_order', 'contract'] as const;
+export const ContractTermsSchema = z.object({
+  value: money.optional(), startDate: z.string().date().optional(), endDate: z.string().date().optional(),
+  paymentTerms: z.string().trim().max(2000).optional(), deliverables: z.string().trim().max(5000).optional(),
+});
+export const ContractCreateSchema = z.object({ kind: z.enum(CONTRACT_KINDS), title: z.string().trim().min(5).max(200).optional() });
+export const ContractDraftSchema = z.object({ body: z.string().trim().min(50).max(50000), terms: ContractTermsSchema.default({}), changeNote: z.string().trim().max(500).optional() });
+export const ContractReviewSchema = z.object({ decision: z.enum(['approve', 'reject']), note: z.string().trim().max(2000).optional() }).refine((v) => v.decision === 'approve' || (v.note?.length ?? 0) >= 5, { message: 'Explain why you are rejecting this version', path: ['note'] });
+export const ContractSignSchema = z.object({ typedName: z.string().trim().min(3).max(120), title: z.string().trim().max(120).optional(), consent: z.literal(true, { message: 'Confirm that you are authorised to sign for your organization' }), bodyHash: z.string().regex(/^[0-9a-f]{64}$/) });
+export const ContractTerminateSchema = z.object({ reason: z.string().trim().min(10).max(2000) });
