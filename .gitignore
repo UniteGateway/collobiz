@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.next/
+.expo/
+*.tsbuildinfo
+coverage/
+.env
+.env.*.local
+apps/api/storage/
+apps/mobile/dist/
+test-results/
+playwright-report/
+.turbo/
+*.log

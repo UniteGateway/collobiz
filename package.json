@@ -1,0 +1,30 @@
+{
+  "name": "collabiz",
+  "private": true,
+  "description": "COLLABIZ \u2014 Connect. Collaborate. Grow. Powered by Unite Group.",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter ./packages/** run build && pnpm -r --filter ./apps/** --filter !@collabiz/mobile run build",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test",
+    "dev:api": "pnpm --filter @collabiz/api dev",
+    "dev:web": "pnpm --filter @collabiz/web dev",
+    "dev:admin": "pnpm --filter @collabiz/admin dev",
+    "dev:mobile": "pnpm --filter @collabiz/mobile start",
+    "db:migrate": "pnpm --filter @collabiz/api db:migrate",
+    "db:seed": "pnpm --filter @collabiz/api db:seed",
+    "registry": "node scripts/generate-registry.mjs",
+    "e2e": "node scripts/e2e-smoke.mjs"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "19.3.0",
+      "react-dom": "19.3.0",
+      "@types/react": "~19.2.0"
+    }
+  }
+}

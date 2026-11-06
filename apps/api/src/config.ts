@@ -1,0 +1,50 @@
+/** Typed, validated runtime configuration. Defaults are development-only; production refuses dev secrets. */
+import { z } from 'zod';
+
+const bool = z.preprocess((v) => v === true || v === 'true' || v === '1', z.boolean());
+
+const Env = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  API_PORT: z.coerce.number().default(4000),
+  DATABASE_URL: z.string().default('postgres://postgres:postgres@localhost:5432/collabiz'),
+  REDIS_URL: z.string().default('redis://localhost:6379'),
+  JWT_ACCESS_SECRET: z.string().min(16).default('dev-access-secret-change-me'),
+  JWT_REFRESH_SECRET: z.string().min(16).default('dev-refresh-secret-change-me'),
+  FIELD_ENCRYPTION_KEY: z.string().regex(/^[0-9a-f]{64}$/i).default('0'.repeat(64)),
+  DOWNLOAD_URL_SECRET: z.string().min(16).default('dev-download-secret-change-me'),
+  CORS_ORIGINS: z.string().default('http://localhost:3000,http://localhost:3001,http://localhost:8081'),
+  STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
+  STORAGE_LOCAL_DIR: z.string().default('./storage'),
+  MAIL_DRIVER: z.enum(['outbox', 'smtp']).default('outbox'),
+  IDENTITY_PROVIDER: z.enum(['local', 'oidc']).default('local'),
+  AI_PROVIDER: z.enum(['rules', 'anthropic']).default('rules'),
+  ESIGN_PROVIDER: z.string().default('local'),
+  MEETING_PROVIDER: z.string().default('local'),
+  FEATURE_INVESTOR_DATA_ROOM: bool.default(false),
+  FEATURE_FINANCE_INTRODUCTIONS: bool.default(false),
+  ACCESS_TOKEN_TTL_SEC: z.coerce.number().default(900),
+  REFRESH_TOKEN_TTL_DAYS: z.coerce.number().default(14),
+  /** Two-person approval threshold for payouts and awards (minor units, default ₹5 lakh). §7.1 */
+  DUAL_APPROVAL_THRESHOLD: z.coerce.number().default(5_00_000_00),
+  /** Expose OTP codes in API responses for local development / automated tests only. */
+  DEV_EXPOSE_OTP: bool.default(false),
+});
+export type AppConfig = z.infer<typeof Env>;
+
+let cached: AppConfig | null = null;
+export function config(): AppConfig {
+  if (cached) return cached;
+  const parsed = Env.parse(process.env);
+  if (parsed.NODE_ENV === 'production') {
+    for (const k of ['JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET', 'DOWNLOAD_URL_SECRET'] as const) {
+      if (parsed[k].includes('dev-')) throw new Error(`${k} must be set to a strong secret in production`);
+    }
+    if (/^0+$/.test(parsed.FIELD_ENCRYPTION_KEY)) throw new Error('FIELD_ENCRYPTION_KEY must be set in production');
+    if (parsed.DEV_EXPOSE_OTP) throw new Error('DEV_EXPOSE_OTP cannot be enabled in production');
+  }
+  cached = parsed;
+  return parsed;
+}
+export const resetConfigForTests = () => {
+  cached = null;
+};

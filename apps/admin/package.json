@@ -1,0 +1,31 @@
+{
+  "name": "@collabiz/admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint app lib components",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@collabiz/types": "workspace:*",
+    "@collabiz/ui": "workspace:*",
+    "next": "16.4.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@collabiz/config": "workspace:*",
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "^22.15.0",
+    "@types/react": "~19.2.0",
+    "@types/react-dom": "~19.2.0",
+    "eslint": "^9.39.0",
+    "jsdom": "^26.1.0",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
