@@ -19,6 +19,7 @@ import { z } from 'zod';
 import {
   assertTransition, AwardSchema, BidDraftSchema, patchOf, BidMachine, EvaluatorSchema, MEMBERSHIP_LEVELS, NegotiationSchema, ScoreSchema, ShortlistSchema, TenderCancelSchema, TenderCreateSchema, TenderMachine,
   type BidState, type TenderState,
+  sectorName,
 } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import { auditEvents, bidScores, bids, memberships, negotiationMessages, notifications, organizations, partnerProfiles, tenderDocuments, tenderEvaluators, tenders, users } from '../../db/schema';
@@ -106,7 +107,7 @@ export class TendersService {
       { key: 'verified', label: 'Verified partner organization', ok: o?.verificationStatus === 'verified' && (o.type === 'partner_company' || o.type === 'partner_individual'), detail: o?.verificationStatus ?? 'unknown' },
       { key: 'not_issuer', label: 'Not the issuing organization', ok: ctx.orgId !== t.issuerOrgId, detail: ctx.orgId === t.issuerOrgId ? 'You issued this tender' : 'OK' },
       { key: 'level', label: `Membership level ${el.minLevel ?? 'registered'} or higher`, ok: levelIdx(o?.membershipLevel) >= levelIdx(el.minLevel ?? 'registered'), detail: o?.membershipLevel ?? 'none' },
-      { key: 'sector', label: el.sectors?.length ? `Works in ${el.sectors.join(', ')}` : 'Any sector', ok: !el.sectors?.length || (p?.sectors ?? []).some((s) => el.sectors!.includes(s)), detail: (p?.sectors ?? []).join(', ') || 'No sectors on profile' },
+      { key: 'sector', label: el.sectors?.length ? `Works in ${el.sectors.map(sectorName).join(', ')}` : 'Any sector', ok: !el.sectors?.length || (p?.sectors ?? []).some((s) => el.sectors!.includes(s)), detail: (p?.sectors ?? []).map(sectorName).join(', ') || 'No sectors on profile' },
       ...(el.certifications ?? []).map((c) => ({ key: `cert:${c}`, label: `Certification: ${c}`, ok: (p?.certifications ?? []).includes(c), detail: (p?.certifications ?? []).includes(c) ? 'On profile' : 'Missing from profile' })),
       { key: 'no_conflict', label: 'No evaluator conflict of interest', ok: conflicted.length === 0, detail: conflicted.length ? 'A member of your organization is an evaluator on this tender' : 'OK' },
     ];

@@ -32,7 +32,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   if (loading || !me) return <LoadingState label="Checking administrator session…" />;
   const sections = GROUPS.map((g) => ({
     title: g.title,
-    items: g.ids.map((id) => SCREENS.find((s) => s.id === id)!).filter((s) => LIVE.has(SCREEN_STATUS[s.id]?.status ?? '')).map((s) => ({ href: s.route, label: LABELS[s.id]?.[0] ?? s.title, icon: LABELS[s.id]?.[1] })),
+    items: [
+      ...g.ids.map((id) => SCREENS.find((s) => s.id === id)!).filter((s) => LIVE.has(SCREEN_STATUS[s.id]?.status ?? '')).map((s) => ({ href: s.route, label: LABELS[s.id]?.[0] ?? s.title, icon: LABELS[s.id]?.[1] })),
+      // Supporting queues that are not registry screens of their own.
+      ...(g.title === 'Partners & compliance' ? [{ href: '/reputation-appeals', label: 'Reputation appeals', icon: 'verify' as IconName }] : []),
+    ],
   })).filter((g) => g.items.length);
   const initials = me.fullName.split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
   return (

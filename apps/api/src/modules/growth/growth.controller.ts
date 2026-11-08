@@ -13,7 +13,7 @@ import { BadRequestException, Body, ConflictException, Controller, ForbiddenExce
 import { ApiTags } from '@nestjs/swagger';
 import { and, desc, eq, inArray, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { computeReputation, rankPartners, sectorName, type ReputationEvent } from '@collabiz/types';
+import { computeReputation, rankPartners, regionLabel, scorePartner, sectorName, type ReputationEvent } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import {
   aiSettings, aiSuggestions, assessmentAttempts, assetUses, certificates, courseProgress, courses, marketingAssets, organizations, partnerProfiles,
@@ -343,9 +343,9 @@ export class MarketingController {
 .eyebrow{color:#2E7D32;font-weight:600;font-size:14px}ul{padding-left:20px;line-height:1.8}.badge{display:inline-block;background:#E7F4E3;color:#2F6F25;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600}
 footer{margin-top:40px;border-top:1px solid #E3E7EE;padding-top:16px;font-size:12px;color:#5E6573}</style></head><body><main>
 <div class="eyebrow">${esc(o.displayName)} · in partnership with Unite Group</div><h1>${esc(b.headline)}</h1>
-<p>${esc(p?.headline ?? '')}</p><p><span class="badge">Verified COLLABIZ partner · ${esc(levelName(o.membershipLevel))}</span></p>
+<p>${esc(p?.headline ?? '')}</p><p><span class="badge">${o.membershipLevel === 'verified' ? 'Verified COLLABIZ partner' : `${esc(levelName(o.membershipLevel))} COLLABIZ partner · verified`}</span></p>
 <h2>${esc(b.sector)}</h2><ul>${b.services.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>
-<p>${esc(o.city ?? '')}${o.city ? ', ' : ''}${esc(o.country)}</p>
+<p>${esc([o.city, regionLabel(o.country)].filter(Boolean).join(', '))}</p>
 <footer>Co-branded with Unite Group through COLLABIZ. Unite Group branding is used under the partner brand guidelines; it does not imply that Unite Group has approved any specific quotation or warranty. Verification ID ${o.id.slice(0, 8).toUpperCase()}.</footer>
 </main></body></html>`;
     await this.db.insert(assetUses).values({ assetId: b.assetId, organizationId: o.id, userId: ctx.userId, kind: 'cobrand' });
@@ -397,6 +397,14 @@ export class AiController {
   async matching(@Ctx() ctx: RequestContext) {
     await this.ai.assertEnabled('opportunity_match');
     const feed = await this.opps.feed(ctx);
+    // Re-score with this partner's verified reputation (the shared feed has no access to the reputation module).
+    const [me] = await this.db.select().from(partnerProfiles).where(eq(partnerProfiles.organizationId, ctx.orgId!)).limit(1);
+    const myRep = (await this.rep.score(ctx.orgId!)).score;
+    if (me) for (const i of feed.items) {
+      const o = i.opportunity;
+      i.match = scorePartner({ id: ctx.orgId!, name: '', sectors: me.sectors, regions: me.regions, capacityMax: me.capacityMax, certifications: me.certifications, reputationScore: myRep, verified: true, consentToMatch: true }, { category: o.sector, region: o.region, value: o.estimatedValue, requiredCertifications: o.requiredCertifications });
+    }
+    feed.items.sort((a, b) => (b.match?.score ?? 0) - (a.match?.score ?? 0));
     const dismissed = await this.db.select({ id: aiSuggestions.opportunityId }).from(aiSuggestions).where(and(eq(aiSuggestions.organizationId, ctx.orgId!), eq(aiSuggestions.kind, 'opportunity_match'), eq(aiSuggestions.status, 'rejected')));
     const hide = new Set(dismissed.map((d) => d.id));
     return { consent: feed.consent, provider: config().AI_PROVIDER, promptVersion: PROMPT_VERSION,

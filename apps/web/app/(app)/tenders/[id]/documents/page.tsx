@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Alert, Button, Card, DataTable, EmptyState, LoadingState, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
+import { Alert, Button, ButtonLink, Card, DataTable, EmptyState, LoadingState, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { fmt, SEALED_NOTE, TenderSummary, TenderTabs, useTender } from '@/components/Tenders';
 import { api } from '@/lib/api';
@@ -49,6 +49,7 @@ export default function TenderDocuments() {
       {d.role === 'bidder' && d.eligibility && (
         <Card title="Your eligibility" actions={<StatusBadge status={d.eligibility.eligible ? 'eligible' : 'not_eligible'} tone={d.eligibility.eligible ? 'success' : 'danger'} label={d.eligibility.eligible ? 'Eligible' : 'Not eligible'} />}>
           <ul className="cz-checklist">{d.eligibility.checks.map((c: any) => <li key={c.key} data-ok={c.ok}>{c.ok ? '✅' : '❌'} {c.label} <span className="cz-muted">— {c.detail}</span></li>)}</ul>
+          {d.eligibility.eligible && d.status === 'published' && <div className="cz-row" style={{ gap: 8, marginTop: 12 }}><ButtonLink href={`/tenders/${t.id}/bid`} variant="accent">Prepare bid</ButtonLink><ButtonLink href={`/tenders/${t.id}/ai-proposal`} variant="secondary">Draft technical sections with AI</ButtonLink></div>}
         </Card>
       )}
       <Card title="Tender documents">

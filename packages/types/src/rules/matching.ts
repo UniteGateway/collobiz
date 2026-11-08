@@ -1,3 +1,4 @@
+import { certLabel, regionLabel, sectorName } from '../taxonomy';
 /**
  * Explainable AI opportunity matching — §4.2: sector, geography, capacity, certifications and user
  * consent; no autonomous contract promises. Output is a DRAFT suggestion for human accept/reject (§6.5).
@@ -37,18 +38,18 @@ export function scorePartner(p: MatchPartner, t: MatchTarget): MatchSuggestion |
   const factors: MatchFactor[] = [];
   const uncertainty: string[] = [];
   const sector = p.sectors.includes(t.category) ? 1 : 0;
-  factors.push({ factor: 'Sector', weight: 35, score: sector, detail: sector ? `Works in ${t.category}` : `No declared ${t.category} capability` });
+  factors.push({ factor: 'Sector', weight: 35, score: sector, detail: sector ? `Works in ${sectorName(t.category)}` : `No declared ${sectorName(t.category)} capability` });
   let geo = 0.5;
   if (!t.region) uncertainty.push('Opportunity location not specified');
   else geo = p.regions.includes(t.region) ? 1 : p.regions.some((r) => t.region!.startsWith(r) || r.startsWith(t.region!)) ? 0.7 : 0;
-  factors.push({ factor: 'Geography', weight: 20, score: geo, detail: geo === 1 ? `Covers ${t.region}` : geo > 0 ? 'Partial coverage' : 'Outside declared coverage' });
+  factors.push({ factor: 'Geography', weight: 20, score: geo, detail: geo === 1 ? `Covers ${regionLabel(t.region!)}` : geo > 0 ? `Partial coverage of ${regionLabel(t.region!)}` : `Outside declared coverage (${regionLabel(t.region!)})` });
   let cap = 0.5;
   if (t.value == null || p.capacityMax == null) uncertainty.push('Capacity or value data missing');
   else cap = p.capacityMax >= t.value ? 1 : Math.max(0, p.capacityMax / t.value);
   factors.push({ factor: 'Capacity', weight: 20, score: cap, detail: cap >= 1 ? 'Declared capacity sufficient' : `Capacity covers ${Math.round(cap * 100)}% of value` });
   const req = t.requiredCertifications ?? [];
   const cert = req.length ? req.filter((c) => p.certifications.includes(c)).length / req.length : 1;
-  factors.push({ factor: 'Certifications', weight: 10, score: cert, detail: req.length ? `${Math.round(cert * 100)}% of required certifications` : 'No certifications required' });
+  factors.push({ factor: 'Certifications', weight: 10, score: cert, detail: !req.length ? 'No certifications required' : cert === 1 ? `Holds ${req.map(certLabel).join(', ')}` : `Missing ${req.filter((c) => !p.certifications.includes(c)).map(certLabel).join(', ')}` });
   let rep = 0.5;
   if (p.reputationScore == null) uncertainty.push('No verified delivery history yet');
   else rep = p.reputationScore / 100;

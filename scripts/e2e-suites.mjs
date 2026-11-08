@@ -866,6 +866,62 @@ suites.push({
     await shot('147-prefs');
   },
 });
+// ---------------- Stage 14 ----------------
+suites.push({
+  name: 'Stage 14 · 029 scorecard → 116/117/118 course, certificate, public check → 114 brochure → 160/162 AI → 140 controls',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, expect, shot }) => {
+    await webLogin(page, WEB, 'rohit@voltepc.example');
+    await page.goto(WEB + '/performance');
+    await page.getByText(/out of 100/).first().waitFor();
+    await page.getByRole('table', { name: 'Certified milestones' }).getByText('Late').waitFor();
+    await shot('029-performance');
+    // 116/117 — read every module, pass the assessment
+    await page.goto(WEB + '/learning');
+    await page.locator('[data-course="CZ-101"]').click();
+    // The first unread module is open on arrival; marking it read opens the next one.
+    for (let i = 0; i < 3; i++) {
+      await page.getByRole('button', { name: 'Mark as read' }).click();
+      await page.locator('.cz-modules li[data-done]').nth(i).waitFor();
+    }
+    const answers = ['When the customer pays a certified milestone', 'A sealed, time-stamped certificate', 'Unite Group, within a timed window', 'Four'];
+    for (const a of answers) await page.getByLabel(a, { exact: true }).check();
+    await page.getByRole('button', { name: 'Submit answers' }).click();
+    await page.getByText(/Passed — 100%/).waitFor();
+    const code = (await page.getByText(/Certificate CZC-\d{4}-\d{8} issued/).textContent()).match(/CZC-\d{4}-\d{8}/)[0];
+    await shot('117-assessment');
+    await page.goto(WEB + '/certificates');
+    await page.getByText(code).waitFor();
+    // Public check, signed out
+    await page.context().clearCookies();
+    await page.goto(WEB + '/verify-certificate?code=' + code);
+    await page.getByText('Genuine and current').waitFor();
+    await page.getByText('Rohit Deshmukh').waitFor();
+    // 114 — brochure preview for a verified partner
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/resources/brochure');
+    await page.getByRole('button', { name: 'Create preview' }).click();
+    await page.frameLocator('iframe[title="Brochure preview"]').getByText('Volt EPC · in partnership with Unite Group').waitFor();
+    // 160 — matches explain themselves in words and use verified reputation
+    await page.goto(WEB + '/ai/matching');
+    await page.getByText('Covers Maharashtra').first().waitFor();
+    expect(await page.getByText('Reputation 73/100').count() > 0, 'reputation not used in matching');
+    await page.getByRole('button', { name: 'Not relevant' }).first().click();
+    // 162 — team builder marks the ISO 45001 gap
+    await page.goto(WEB + '/ai/team-builder');
+    const opt = await page.getByLabel('Opportunity').locator('option', { hasText: 'OPP-2026-00003' }).getAttribute('value');
+    await page.getByLabel('Opportunity').selectOption(opt);
+    await page.getByRole('button', { name: 'Build team plan' }).click();
+    await page.getByText('Certified partner (ISO 45001)').waitFor();
+    await page.getByText('Gap — partner needed').first().waitFor();
+    await shot('162-team-builder');
+    // 140 — super admin sees the outputs and can switch a capability off (audited)
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/ai');
+    await page.getByRole('heading', { name: 'Recent outputs' }).waitFor();
+    await shot('140-ai-governance');
+  },
+});
 // ---------------- Stage 10 ----------------
 let lastExecutedContract = null; // handed to the Stage 11 project journey
 suites.push({

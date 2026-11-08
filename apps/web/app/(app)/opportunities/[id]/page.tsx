@@ -218,7 +218,7 @@ export default function OpportunityDetail() {
                 {open && elig.data && (elig.data.eligible
                   ? <ButtonLink href={`/opportunities/${id}/apply`} variant="accent" size="lg">Apply now<Icon name="arrow" size={16} /></ButtonLink>
                   : <ButtonLink href={`/opportunities/${id}/eligibility`} variant="secondary">See how to qualify</ButtonLink>)}
-                {open && elig.data && !elig.data.eligible && <p className="cz-muted" style={{ fontSize: 12.5, margin: '10px 0 0' }}>Missing a capability? <Link href="/teams/new">Form a team</Link> with partners who have it.</p>}
+                {open && elig.data && !elig.data.eligible && <p className="cz-muted" style={{ fontSize: 12.5, margin: '10px 0 0' }}>Missing a capability? <Link href={`/ai/team-builder?opportunity=${id}`}>Plan a team</Link> with partners who have it.</p>}
               </div>
             ) : (
               <div className="cz-od-card">
