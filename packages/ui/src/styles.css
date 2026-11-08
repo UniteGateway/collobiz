@@ -1094,3 +1094,40 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
   .cz-cert dl { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .cz-brochure-preview iframe, .cz-brochure-empty { height: 420px; }
 }
+
+/* ===================== Stages 15–16 — global, alliances, regional, admin analytics & CMS ===================== */
+.cz-market-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.cz-market { display: flex; flex-direction: column; gap: 4px; padding: 16px; border-radius: 16px; border: 1px solid var(--cz-grey-200); background: #fff; }
+.cz-market[data-active] { border-color: var(--cz-navy-100); background: linear-gradient(160deg, #fff 55%, var(--cz-navy-50)); }
+.cz-market strong { font-size: 15.5px; color: var(--cz-navy-900); }
+.cz-market .cz-muted { font-size: 12.5px; }
+.cz-market-code { font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--cz-grey-600); }
+.cz-chipset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.cz-chipset legend { font-size: 13px; font-weight: 500; color: var(--cz-grey-700); margin-bottom: 8px; padding: 0; }
+.cz-chipset label { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--cz-grey-200); font-size: 13px; cursor: pointer; background: #fff; }
+.cz-chipset label[data-on] { background: var(--cz-navy-700); border-color: var(--cz-navy-700); color: #fff; }
+.cz-chipset input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.cz-chipset label:focus-within { outline: 2px solid var(--cz-navy-500); outline-offset: 2px; }
+.cz-checklist-big { list-style: none; margin: 14px 0 0; padding: 0; }
+.cz-checklist-big li + li { border-top: 1px solid var(--cz-grey-100); }
+.cz-checklist-big label { display: flex; gap: 12px; align-items: flex-start; padding: 12px 4px; cursor: pointer; }
+.cz-checklist-big input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.cz-checklist-big label:focus-within .cz-check-box { outline: 2px solid var(--cz-navy-500); outline-offset: 2px; }
+.cz-check-box { width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--cz-grey-300); display: grid; place-items: center; flex: none; margin-top: 1px; color: #fff; }
+.cz-checklist-big label[data-done] .cz-check-box { background: var(--cz-green-600); border-color: var(--cz-green-600); }
+.cz-checklist-big label > span:last-child { display: flex; flex-direction: column; gap: 2px; font-size: 14px; color: var(--cz-navy-900); }
+.cz-checklist-big label[data-done] strong { text-decoration: line-through; text-decoration-color: var(--cz-grey-300); color: var(--cz-grey-600); }
+.cz-checklist-big .cz-muted { font-size: 13px; }
+.cz-bars { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; align-items: end; gap: 10px; height: 160px; }
+.cz-bars li { display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; font-size: 11.5px; color: var(--cz-grey-600); }
+.cz-bars li > span:first-child { width: 100%; max-width: 44px; border-radius: 8px 8px 3px 3px; background: var(--cz-navy-700); min-height: 3px; }
+.cz-bars strong { font-size: 12px; color: var(--cz-navy-900); }
+.cz-cms { display: grid; grid-template-columns: minmax(240px, 320px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.cz-cms-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--cz-grey-200); border-radius: 16px; background: #fff; overflow: hidden; }
+.cz-cms-list li + li { border-top: 1px solid var(--cz-grey-100); }
+.cz-cms-list button { width: 100%; text-align: left; border: 0; background: none; font: inherit; padding: 12px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.cz-cms-list button:hover, .cz-cms-list button[aria-current] { background: var(--cz-grey-50); }
+.cz-cms-list button[aria-current] { box-shadow: inset 3px 0 0 var(--cz-navy-700); }
+.cz-cms-list strong { font-size: 14px; color: var(--cz-navy-900); }
+.cz-cms-list .cz-muted { font-size: 12px; }
+@media (max-width: 900px) { .cz-cms { grid-template-columns: minmax(0, 1fr); } }

@@ -181,4 +181,15 @@ export const SCREEN_STATUS: Record<string, ScreenProgress> = {
   '163': v([E2E, 'apps/api/test/stage14.e2e.ts'], 'Public reputation profile'),
   '164': v([E2E, 'apps/api/test/stage14.e2e.ts'], 'Reviews tied to shared certified projects; appeals'),
   '165': v([E2E, 'apps/api/test/stage14.e2e.ts'], 'Criteria for next level; no auto-promotion'),
+  // ---- Stages 15-16 ----
+  '119': v([E2E, 'apps/api/test/stage15.e2e.ts'], 'International listings and markets'),
+  '120': v([E2E, 'apps/api/test/stage15.e2e.ts'], 'Unite staff decide; never own org'),
+  '121': v([E2E, 'apps/api/test/stage15.e2e.ts'], 'Dated territories; exclusivity enforced'),
+  '122': v([E2E, 'apps/api/test/stage15.e2e.ts'], 'Direction must match India; routed to Unite Exim'),
+  '123': v([E2E, 'apps/api/test/stage15.e2e.ts'], 'Only the receiving org decides; binding terms via Contracts'),
+  '125': v([E2E, 'apps/api/test/stage15.e2e.ts'], 'Disabled pending regulatory review (B-09)'),
+  '126': v([E2E, 'apps/api/test/stage15.e2e.ts'], 'Guidance, not legal advice; progress saved per enquiry'),
+  '139': v([E2E, 'apps/api/test/stage15.e2e.ts'], 'Aggregates only; CSV export'),
+  '142': v([E2E, 'apps/api/test/stage15.e2e.ts'], 'Versioned; policy pages by super admin'),
+  '146': v([E2E, 'apps/api/test/stage15.e2e.ts'], 'Available languages; dated indicative rates; money in INR'),
 };

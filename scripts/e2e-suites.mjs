@@ -922,6 +922,62 @@ suites.push({
     await shot('140-ai-governance');
   },
 });
+// ---------------- Stages 15–16 ----------------
+suites.push({
+  name: 'Stage 15 · 119 markets → 122 export enquiry → 126 checklist → 123 alliance → 146 region → 125 data room off → 139/142 admin',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot }) => {
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/global');
+    await page.locator('[data-opp="OPP-2026-00008"]').waitFor();
+    await shot('119-global');
+    await page.goto(WEB + '/global/import-export');
+    await page.getByLabel('Product').fill('Distribution transformers 250 kVA');
+    await page.getByLabel('Quantity').fill('20 units');
+    await page.getByLabel('Destination').selectOption('KE');
+    await page.getByRole('button', { name: 'Send to Unite Exim' }).click();
+    await page.getByText(/sent to Unite Exim/).waitFor();
+    await page.getByRole('link', { name: 'See the documents checklist' }).click();
+    await page.getByText('Kenya PVoC inspection').waitFor();
+    await page.getByText(/not legal or customs advice/).waitFor();
+    await page.getByText('Importer-Exporter Code (IEC)').click();
+    await page.getByText(/1 of \d+ ready/).waitFor();
+    await shot('126-checklist');
+    // 123 — Volt decides the incoming alliance
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/alliances');
+    const card = page.locator('[data-proposal="ALL-2026-30418"]');
+    await card.getByLabel(/Note for/).fill('Interested — let us meet next week');
+    await card.getByRole('button', { name: 'Discuss' }).click();
+    await card.getByText('In discussion').waitFor();
+    // 146 — region preview converts at the dated reference rate
+    await page.goto(WEB + '/settings/regional');
+    await page.getByLabel('Show amounts in').selectOption('AED');
+    await page.getByText(/≈ .* AED/).waitFor();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByText('Saved.').waitFor();
+    // 125 — investor data room explains it is switched off
+    await page.goto(WEB + '/data-room');
+    await page.getByText(/regulatory review/).waitFor();
+    // 139/142 — admin analytics and content
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/analytics');
+    await page.getByRole('heading', { name: 'Commission ledger' }).waitFor();
+    await shot('139-analytics');
+    await page.goto(ADMIN + '/cms');
+    await page.getByRole('button', { name: /How is my reputation calculated/ }).click();
+    await page.getByLabel('Change note (optional)').fill('Clarified appeals');
+    await page.getByLabel('Body').fill('Only from certified milestones and reviews by companies you worked with. You can appeal a review you believe is wrong; it stops counting while compliance looks at it.');
+    await page.getByRole('button', { name: 'Publish', exact: true }).click();
+    await page.getByText('Published.').waitFor();
+    await page.getByText('Version 2 — How is my reputation calculated?').waitFor();
+    // The partner help page now serves the published version
+    await webLogin(page, WEB, 'meera@consult.example');
+    await page.goto(WEB + '/help');
+    await page.getByRole('button', { name: 'How is my reputation calculated?' }).click();
+    await page.getByText(/it stops counting while compliance looks at it/).waitFor();
+  },
+});
 // ---------------- Stage 10 ----------------
 let lastExecutedContract = null; // handed to the Stage 11 project journey
 suites.push({

@@ -21,11 +21,13 @@ export const MODULES: Module[] = [
   { key: 'projects', label: 'Projects', icon: 'projects', home: '/projects', match: ['/projects'], ownTabs: true },
   { key: 'trading', label: 'Trading', icon: 'trading', home: '/trading', match: ['/trading'], ownTabs: true },
   { key: 'earnings', label: 'Earnings', icon: 'earnings', home: '/earnings', match: ['/earnings', '/commissions', '/payouts', '/payments', '/tax-records', '/finance'], ownTabs: true },
+  { key: 'global', label: 'Global', icon: 'map', home: '/global', match: ['/global', '/alliances', '/data-room'],
+    tabs: [['/global', 'Markets'], ['/global/import-export', 'Import & export'], ['/global/compliance', 'Compliance'], ['/alliances', 'Alliances'], ['/global/country-partner', 'Country partner'], ['/global/territory', 'My territory']] },
   { key: 'growth', label: 'Performance', icon: 'award', home: '/performance', match: ['/performance', '/reputation', '/learning', '/certificates', '/resources'],
     tabs: [['/performance', 'Scorecard'], ['/reputation/reviews', 'Reviews'], ['/reputation/excellence', 'Next level'], ['/learning', 'Learning'], ['/certificates', 'Certificates'], ['/resources', 'Marketing'], ['/resources/social', 'Social posts'], ['/resources/brochure', 'Brochure']] },
   { key: 'documents', label: 'Documents', icon: 'documents', home: '/vault', match: ['/vault'] },
   { key: 'account', label: 'Account', icon: 'settings', home: '/profile', match: ['/profile', '/company', '/settings'],
-    tabs: [['/profile', 'Profile'], ['/company/team', 'Company & team'], ['/settings/notifications', 'Notifications'], ['/settings/security', 'Security'], ['/settings/privacy', 'Privacy & data']] },
+    tabs: [['/profile', 'Profile'], ['/company/team', 'Company & team'], ['/settings/notifications', 'Notifications'], ['/settings/regional', 'Language & region'], ['/settings/security', 'Security'], ['/settings/privacy', 'Privacy & data']] },
   { key: 'help', label: 'Help & support', icon: 'help', home: '/help', match: ['/help', '/support'], tabs: [['/help', 'Help & feedback'], ['/support/tickets', 'Support tickets']] },
 ];
 
