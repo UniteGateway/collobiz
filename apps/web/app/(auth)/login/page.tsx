@@ -2,9 +2,9 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Alert, Button, Checkbox, Tabs, TextInput } from '@collabiz/ui';
+import { Alert, Button, Checkbox, Icon, Tabs, TextInput } from '@collabiz/ui';
 import { api } from '@/lib/api';
-import { useMutation } from '@/lib/hooks';
+import { useMutation, useQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
 import { ApiError } from '@collabiz/types';
 
@@ -39,6 +39,19 @@ function LoginInner() {
     return true;
   });
   const m = mode === 'login' ? loginM : registerM;
+  // Demo environments only (DEMO_MODE=true on the API): one-click sign-in to sample partner accounts.
+  const features = useQuery<{ demoMode?: boolean }>('/public/demo');
+  const GUESTS = [
+    { email: 'asha@voltepc.example', name: 'Asha Patil', role: 'EPC contractor · Volt EPC', icon: 'projects' as const },
+    { email: 'ravi@sunrise.example', name: 'Ravi Patel', role: 'Trader & distributor · Sunrise Traders', icon: 'trading' as const },
+    { email: 'meera@consult.example', name: 'Meera Iyer', role: 'Consultant', icon: 'briefcase' as const },
+  ];
+  const guestM = useMutation(async (email: string) => {
+    await api.post('/auth/login', { email, password: 'Collabiz#2026' });
+    await refresh();
+    router.replace(next && next.startsWith('/') ? next : '/dashboard');
+    return true;
+  });
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value });
 
   return (
@@ -47,7 +60,6 @@ function LoginInner() {
         <Link href="/"><img src="/brand/collabiz-logo.png" alt="COLLABIZ — Connect. Collaborate. Grow." width={260} /></Link>
       </div>
       <section className="cz-card">
-        <p className="cz-breadcrumb">Registration &amp; Verification <span className="cz-screen-id">SCREEN 011</span></p>
         <Tabs value={mode} onChange={(v) => { setMode(v); setNeedMfa(false); }} tabs={[{ value: 'login', label: 'Sign in' }, { value: 'register', label: 'Create account' }]} />
         <form noValidate onSubmit={(e) => { e.preventDefault(); m.run(); }}>
           {m.error && !(mode === 'login' && needMfa && !f.mfaCode) && <Alert tone="danger">{m.error}</Alert>}
@@ -70,6 +82,24 @@ function LoginInner() {
           <Button type="submit" loading={m.pending} style={{ width: '100%', marginTop: 12 }}>{mode === 'login' ? 'Sign in' : 'Create account'}</Button>
         </form>
       </section>
+      {features.data?.demoMode && mode === 'login' && (
+        <section className="cz-card cz-guest" aria-labelledby="guest-h" style={{ marginTop: 16 }}>
+          <h2 id="guest-h" style={{ fontSize: 16, margin: 0 }}>Explore as a guest</h2>
+          <p className="cz-muted" style={{ fontSize: 13.5, margin: '4px 0 12px' }}>Sign in to a sample partner account. All companies and figures are demonstration data.</p>
+          {guestM.error && <Alert tone="danger">{guestM.error}</Alert>}
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 8 }}>
+            {GUESTS.map((g) => (
+              <li key={g.email}>
+                <button type="button" className="cz-guest-btn" onClick={() => guestM.run(g.email)} disabled={guestM.pending} aria-label={`Continue as ${g.name}, ${g.role}`}>
+                  <span className="cz-guest-icon"><Icon name={g.icon} size={18} /></span>
+                  <span style={{ flex: 1, textAlign: 'left' }}><strong>{g.name}</strong><span>{g.role}</span></span>
+                  <Icon name="arrow" size={16} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <p className="cz-muted" style={{ textAlign: 'center', fontSize: 13, marginTop: 16 }}>Registration is free. COLLABIZ never charges fees for recruiting partners.</p>
     </main>
   );

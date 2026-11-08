@@ -68,4 +68,10 @@ describe('Recovery — partner home and public figures', () => {
     const none = await api(app).get('/v1/admin/tenders?paged=true&q=zz-no-such-tender').set(auth(t.superadmin)).expect(200);
     expect(none.body).toMatchObject({ total: 0, items: [] });
   });
+
+  it('guest sign-in flag is public and exposes nothing but demo mode', async () => {
+    const r = await api(app).get('/v1/public/demo').expect(200);
+    expect(Object.keys(r.body)).toEqual(['demoMode']);
+    await api(app).get('/v1/meta/features').expect(401);
+  });
 });

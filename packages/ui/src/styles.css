@@ -760,3 +760,12 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
 }
 .cz-ta-sm { display: none; }
 @media (max-width: 720px) { .cz-ta-sm { display: inline; } }
+
+/* Guest sign-in (demo environments only) */
+.cz-guest-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--cz-grey-200); border-radius: 12px; background: #fff; font: inherit; color: var(--cz-navy-900); cursor: pointer; transition: border-color .15s, background .15s; }
+.cz-guest-btn:hover { border-color: var(--cz-navy-500); background: var(--cz-navy-50); }
+.cz-guest-btn:focus-visible { outline: 2px solid var(--cz-navy-500); outline-offset: 2px; }
+.cz-guest-btn:disabled { opacity: .6; cursor: wait; }
+.cz-guest-btn strong { display: block; font-size: 14.5px; }
+.cz-guest-btn span span { display: block; font-size: 12.5px; color: var(--cz-grey-600); }
+.cz-guest-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--cz-navy-50); color: var(--cz-navy-700); flex: none; }

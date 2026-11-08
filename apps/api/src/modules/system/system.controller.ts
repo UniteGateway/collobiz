@@ -69,6 +69,13 @@ export class SystemController {
     return { ...row, openValue: Number(row.openValue), asOf: new Date().toISOString() };
   }
 
+  /** Public: whether this is a demonstration environment (login page offers guest sign-in). Nothing else is exposed. */
+  @Public()
+  @Get('public/demo')
+  demo() {
+    return { demoMode: config().DEMO_MODE };
+  }
+
   @Get('meta/features')
   features() {
     return {
