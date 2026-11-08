@@ -277,6 +277,69 @@ async function stage13(db: Db, refs: SeedRefs) {
   ]);
 }
 
+/** Stage 14 demo content: courses, approved marketing assets, and a completed 2025 project that gives Volt EPC a verified track record. */
+async function stage14(db: Db, refs: SeedRefs) {
+  const have = await db.select({ id: s.courses.id }).from(s.courses).limit(1);
+  if (have.length) return;
+  const q = (question: string, options: string[], answer: number) => ({ q: question, options, answer });
+  await db.insert(s.courses).values([
+    { code: 'CZ-101', title: 'Working with Unite Group on COLLABIZ', summary: 'How Unite-first routing, protected leads and the commission ledger work — the essentials for every partner.', level: 'foundation', minutes: 25,
+      modules: [
+        { title: 'The Unite-first model', body: 'Business on COLLABIZ flows through four routes: Unite-owned listings, partner-originated leads, the partner exchange and joint execution. Partner-originated opportunities get a timed first review by Unite Group before they can be released to other partners.' },
+        { title: 'Protecting your introductions', body: 'Register a customer with written consent and evidence. A sealed, time-stamped certificate protects your introduction for the protection window shown on it. Disputes are decided on evidence, by someone who is not a party.' },
+        { title: 'How commission is earned', body: 'Commission moves from projected to eligible to earned to paid. It becomes earned only when the customer pays a certified milestone under the contract — never on signature or invoice alone.' },
+      ],
+      questions: [
+        q('When does commission become earned?', ['When the contract is signed', 'When the customer pays a certified milestone', 'When the partner raises an invoice', 'When Unite approves the lead'], 1),
+        q('What protects a registered introduction?', ['A sealed, time-stamped certificate', 'An email to Unite', 'A signed NDA only', 'Nothing until the deal closes'], 0),
+        q('Who reviews a partner-originated opportunity first?', ['Any verified partner', 'The customer', 'Unite Group, within a timed window', 'The partner’s own team'], 2),
+        q('How many routes can business follow on COLLABIZ?', ['Two', 'Three', 'Four', 'Five'], 2),
+      ], passMark: 75 },
+    { code: 'CZ-201', title: 'Rooftop solar EPC quality essentials', summary: 'Structure, electrical BoS and commissioning checks that Unite Solar inspects before certifying a milestone.', sector: 'solar', level: 'professional', minutes: 40,
+      modules: [
+        { title: 'Structure and mounting', body: 'Check purlin spacing against the design, torque on clamps, and roof waterproofing at every penetration. Photograph each shed before modules go up.' },
+        { title: 'Electrical balance of system', body: 'String voltages must sit inside the inverter window at the lowest site temperature. Label every string and test insulation resistance before energising.' },
+        { title: 'Evidence for certification', body: 'Milestone evidence needs dated photos, test reports and the inspection checklist. Missing evidence is the most common reason a milestone is returned.' },
+      ],
+      questions: [
+        q('What must be tested before energising strings?', ['Module colour', 'Insulation resistance', 'Inverter weight', 'Roof colour'], 1),
+        q('Which evidence is required for certification?', ['Dated photos, test reports and the inspection checklist', 'Only an invoice', 'A phone call', 'The purchase order'], 0),
+        q('String voltage must stay within the inverter window at…', ['The highest site temperature', 'The lowest site temperature', 'Noon only', 'Any temperature'], 1),
+      ], passMark: 70 },
+    { code: 'CZ-202', title: 'Bidding well on sealed tenders', summary: 'Prepare compliant technical and commercial envelopes and avoid common disqualification reasons.', level: 'professional', minutes: 30,
+      modules: [
+        { title: 'Before you bid', body: 'Download every tender document, check eligibility and ask clarifications before the deadline. Clarifications and answers are shared with all bidders.' },
+        { title: 'The two envelopes', body: 'Technical evaluators never see prices. Put your method, experience and timeline in the technical envelope; price and payment terms only in the commercial envelope.' },
+      ],
+      questions: [
+        q('Who can see your price before commercial opening?', ['Technical evaluators', 'Other bidders', 'Nobody', 'Platform administrators'], 2),
+        q('Where do clarification answers go?', ['Only to you', 'To every bidder', 'Nowhere', 'To the evaluator only'], 1),
+      ], passMark: 70 },
+  ]);
+  await db.insert(s.marketingAssets).values([
+    { kind: 'brochure', title: 'Rooftop solar for factories — one-page overview', body: 'Cut daytime power costs with rooftop solar delivered by a verified Unite Group partner. Design, supply, installation and commissioning; Tier-1 modules; performance monitoring from day one.', sector: 'solar', approvedBy: refs.users.superadmin },
+    { kind: 'brochure', title: 'Transformer and LT panel supply', body: 'BIS-certified distribution transformers and IEC 61439 panels sourced through Unite Group companies, with milestone-based payment and tracked delivery.', sector: 'power_equipment', approvedBy: refs.users.superadmin },
+    { kind: 'social', title: 'LinkedIn — we are now a verified partner', body: 'We’re proud to be a verified partner on COLLABIZ, the Unite Group collaboration network. Verified identity, protected introductions and transparent commissions — talk to us about your next project. #COLLABIZ #UniteGroup', channel: 'linkedin', minLevel: 'verified', approvedBy: refs.users.superadmin },
+    { kind: 'social', title: 'WhatsApp — rooftop solar offer', body: 'Planning rooftop solar for your factory? We deliver with Unite Solar as a verified COLLABIZ partner — design to commissioning, with clear milestones. Reply to book a free roof assessment.', channel: 'whatsapp', sector: 'solar', minLevel: 'verified', approvedBy: refs.users.superadmin },
+    { kind: 'social', title: 'LinkedIn — certified partner announcement', body: 'Our team has completed COLLABIZ certification for rooftop solar quality. Every milestone we deliver is inspected and certified before invoicing. #CertifiedPartner', channel: 'linkedin', minLevel: 'certified', approvedBy: refs.users.superadmin },
+    { kind: 'guide', title: 'Brand guidelines for co-branded material', body: 'Use the Unite Group partner lock-up only with your verified partner badge. Do not alter colours, add price claims or imply Unite Group warranties. Every co-branded piece must carry the standard footer.', approvedBy: refs.users.superadmin },
+  ]);
+  // A completed 2025 project (matches the published case study) — the source of Volt EPC's verified outcomes.
+  const [p] = await db.insert(s.projects).values({ code: 'PRJ-2025-000014', title: '1.2 MW rooftop solar — Pune auto-components plant', description: 'Completed demo project used for verified reputation.', ownerOrgId: refs.orgs.uniteSolar, leadOrgId: refs.orgs.volt,
+    value: 5_40_00_000_00, site: 'Chakan, Pune', region: 'IN-MH', startDate: '2025-06-01', endDate: '2025-08-31', status: 'closed', completedAt: new Date('2025-08-28'), closedAt: new Date('2025-09-30'), createdBy: refs.users.uniteAdmin }).returning();
+  await db.insert(s.projectMembers).values([
+    { projectId: p.id, organizationId: refs.orgs.uniteSolar, role: 'owner', addedBy: refs.users.uniteAdmin },
+    { projectId: p.id, organizationId: refs.orgs.volt, role: 'lead', allocatedValue: 5_40_00_000_00, addedBy: refs.users.uniteAdmin },
+  ]);
+  await db.insert(s.milestones).values([
+    { projectId: p.id, seq: 1, title: 'Structure & mounting', dueDate: '2025-07-05', amount: 2_00_00_000_00, status: 'invoiced', progressPct: 100, certifiedAt: new Date('2025-07-03'), certifiedBy: refs.users.uniteAdmin, certifiedAmount: 2_00_00_000_00 },
+    { projectId: p.id, seq: 2, title: 'Electrical BoS', dueDate: '2025-08-01', amount: 2_00_00_000_00, status: 'invoiced', progressPct: 100, certifiedAt: new Date('2025-08-06'), certifiedBy: refs.users.uniteAdmin, certifiedAmount: 2_00_00_000_00 },
+    { projectId: p.id, seq: 3, title: 'Commissioning & net-metering', dueDate: '2025-08-31', amount: 1_40_00_000_00, status: 'invoiced', progressPct: 100, certifiedAt: new Date('2025-08-27'), certifiedBy: refs.users.uniteAdmin, certifiedAmount: 1_40_00_000_00 },
+  ]);
+  await db.insert(s.partnerReviews).values({ projectId: p.id, reviewerOrgId: refs.orgs.uniteSolar, reviewerUserId: refs.users.uniteAdmin, subjectOrgId: refs.orgs.volt, quality: 5, timeliness: 4, communication: 5,
+    comment: 'Clean installation and complete evidence for every milestone. Electrical work finished five days late after a monsoon delay, but the team kept us informed throughout.' });
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
@@ -289,4 +352,5 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await stage11b(db, refs);
   await stage12(db, refs);
   await stage13(db, refs);
+  await stage14(db, refs);
 }

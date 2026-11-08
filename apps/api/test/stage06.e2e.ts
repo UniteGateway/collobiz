@@ -93,7 +93,8 @@ describe('Stage 06 — lead protection & Unite-first routing (gate: priority rev
     });
     it('pause and resume extend the due time by the paused business minutes', async () => {
       await api(app).post(`/v1/admin/routing/${asha.opportunity.id}/decision`).set(auth(t.uniteAdmin)).set(k('p')).send({ decision: 'pause', reason: 'Awaiting buyer site survey confirmation' }).expect(200);
-      await pool.query(`update routing_events set paused_at = paused_at - interval '2 days' where opportunity_id = $1`, [asha.opportunity.id]);
+      // Seven days always spans business hours, whatever day the suite runs (two days from a weekend evening contains none).
+      await pool.query(`update routing_events set paused_at = paused_at - interval '7 days' where opportunity_id = $1`, [asha.opportunity.id]);
       const r = await api(app).post(`/v1/admin/routing/${asha.opportunity.id}/decision`).set(auth(t.uniteAdmin)).set(k('rs')).send({ decision: 'resume', reason: 'Survey confirmed' }).expect(200);
       expect(r.body.paused).toBe(false);
       expect(new Date(r.body.dueAt).getTime()).toBeGreaterThan(new Date(asha.routing.dueAt).getTime());
