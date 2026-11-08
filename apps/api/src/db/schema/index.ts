@@ -12,3 +12,4 @@ export * from './trading';
 export * from './finance';
 export * from './comms';
 export * from './growth';
+export * from './global';

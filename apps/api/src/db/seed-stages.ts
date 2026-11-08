@@ -340,6 +340,44 @@ async function stage14(db: Db, refs: SeedRefs) {
     comment: 'Clean installation and complete evidence for every milestone. Electrical work finished five days late after a monsoon delay, but the team kept us informed throughout.' });
 }
 
+/** Stage 15 demo content: international listings, reference rates, managed help pages, a country-partner application and an alliance proposal. */
+async function stage15(db: Db, refs: SeedRefs) {
+  const have = await db.select({ id: s.fxRates.id }).from(s.fxRates).limit(1);
+  if (have.length) return;
+  const today = new Date().toISOString().slice(0, 10);
+  await db.insert(s.fxRates).values([
+    { currency: 'USD', inrPerUnit: '84.2000', asOf: today, source: 'Reference rate entered by Unite finance (demo)' },
+    { currency: 'AED', inrPerUnit: '22.9300', asOf: today, source: 'Reference rate entered by Unite finance (demo)' },
+    { currency: 'EUR', inrPerUnit: '91.4000', asOf: today, source: 'Reference rate entered by Unite finance (demo)' },
+    { currency: 'GBP', inrPerUnit: '108.6000', asOf: today, source: 'Reference rate entered by Unite finance (demo)' },
+    { currency: 'SAR', inrPerUnit: '22.4500', asOf: today, source: 'Reference rate entered by Unite finance (demo)' },
+    { currency: 'KES', inrPerUnit: '0.6500', asOf: today, source: 'Reference rate entered by Unite finance (demo)' },
+  ]);
+  const in45 = new Date(Date.now() + 45 * 86400_000);
+  const intl = [
+    { code: 'OPP-2026-00007', title: '5 MW solar carport programme — logistics parks, Dubai', summary: 'Unite Exim is assembling an EPC and supply partner group for carport solar at three logistics parks in Jebel Ali. Indian EPC partners with export experience preferred.', sector: 'solar', country: 'AE', city: 'Dubai', estimatedValue: 18_00_00_000_00, route: 'unite_owned' },
+    { code: 'OPP-2026-00008', title: 'Distribution transformers for county electrification — Kenya', summary: 'Supply of 250 distribution transformers (100–315 kVA) for a county electrification programme. Pre-shipment PVoC inspection required.', sector: 'power_equipment', country: 'KE', city: 'Nairobi', estimatedValue: 9_50_00_000_00, route: 'unite_owned' },
+  ];
+  for (const o of intl) {
+    const [row] = await db.insert(s.opportunities).values({ ...o, kind: o.sector === 'solar' ? 'project' : 'product_supply', source: 'unite_listing', deadline: in45, visibility: 'verified_partners', minLevel: 'verified', requiredCertifications: [], ownerOrgId: refs.orgs.uniteExim, groupCompanyOrgId: refs.orgs.uniteExim, status: 'accepted', listed: true, publishedAt: new Date(), createdBy: refs.users.uniteAdmin, version: 2 }).returning();
+    await db.insert(s.opportunityEvents).values([{ opportunityId: row.id, version: 1, toStatus: 'draft', reason: 'Seeded', actorUserId: refs.users.uniteAdmin }, { opportunityId: row.id, version: 2, fromStatus: 'draft', toStatus: 'accepted', reason: 'Seeded (demo)', actorUserId: refs.users.uniteAdmin }]);
+  }
+  const pages = [
+    { slug: 'how-lead-protection-works', title: 'How lead protection works', body: 'Register the customer with consent and evidence. Unite Group reviews within 4 business hours, and your certificate shows the protection window.' },
+    { slug: 'when-is-commission-earned', title: 'When is commission earned?', body: 'Only when the customer pays for a certified milestone under the contract. Projected amounts are estimates.' },
+    { slug: 'forming-a-team', title: 'Forming a collaboration team', body: 'Invite verified partners. They see the team workspace only after accepting and signing the NDA.' },
+    { slug: 'are-my-bids-private', title: 'Are my tender bids private?', body: 'Yes. Bids are encrypted and sealed until opening; competitors never see your price, and technical evaluators never see prices.' },
+    { slug: 'how-reputation-works', title: 'How is my reputation calculated?', body: 'Only from certified milestones and reviews by companies you worked with on certified projects. It cannot be bought or boosted, and you can appeal a review you believe is wrong.' },
+    { slug: 'your-data-rights', title: 'Your data rights', body: 'Export your data, or request correction or deletion, from Settings → Privacy & data. Some records are kept for legal retention periods.' },
+  ];
+  for (const pg of pages) {
+    const [row] = await db.insert(s.contentPages).values({ ...pg, kind: 'help', status: 'published', version: 1, updatedBy: refs.users.superadmin, publishedAt: new Date() }).returning();
+    await db.insert(s.contentRevisions).values({ pageId: row.id, version: 1, title: pg.title, body: pg.body, changedBy: refs.users.superadmin, note: 'Initial content (demo)' });
+  }
+  await db.insert(s.countryPartnerApplications).values({ organizationId: refs.orgs.sunrise, country: 'AE', sectors: ['power_equipment', 'trading'], localEntity: 'Sunrise Trading FZE', localRegistration: 'JAFZA-FZE-204417', teamSize: 6, plan: 'Year one: stock transformers and LT panels in Jebel Ali, serve EPCs building logistics-park solar, and route Indian EPC demand through Unite Exim. Target six orders and two service contracts.', references: [{ name: 'Gulf Logistics Parks LLC', contact: 'procurement@glp.example' }], submittedBy: refs.users.ravi });
+  await db.insert(s.allianceProposals).values({ code: 'ALL-2026-30418', kind: 'strategic_alliance', proposerOrgId: refs.orgs.deccan, targetOrgId: refs.orgs.volt, title: 'Southern India rooftop alliance', rationale: 'Deccan stocks switchgear and cables across Karnataka and Tamil Nadu; Volt EPC has proven rooftop delivery. Together we can bid for C&I rooftop programmes in the south with local stock and faster mobilisation.', scope: 'Joint bids for rooftop projects above 1 MW in Karnataka and Tamil Nadu; Deccan supplies BoS materials at agreed partner pricing.', markets: ['IN'], sectors: ['solar', 'power_equipment'], proposerSharePct: 30, durationMonths: 24, createdBy: refs.users.deepak });
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
@@ -353,4 +391,5 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await stage12(db, refs);
   await stage13(db, refs);
   await stage14(db, refs);
+  await stage15(db, refs);
 }

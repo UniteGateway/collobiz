@@ -21,7 +21,7 @@ import {
 } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import {
-  announcementReads, announcements, commissionEntries, contracts, dataRequests, feedback, meetingAttendees, meetings, memberships, messages, messageThreads, notificationPreferences, notifications, organizations,
+  announcementReads, announcements, commissionEntries, contentPages, contracts, dataRequests, feedback, meetingAttendees, meetings, memberships, messages, messageThreads, notificationPreferences, notifications, organizations,
   projectMembers, projects, supportTickets, threadMembers, ticketMessages, userBlocks, users,
 } from '../../db/schema';
 import { body } from '../../common/http';
@@ -555,7 +555,10 @@ export class SupportController {
 
   // ---------- 150 help, feedback & closure ----------
   @Get('help/articles')
-  help() {
+  async help() {
+    // Published help pages from the content system (142) take precedence; the built-in set is the fallback.
+    const managed = await this.db.select().from(contentPages).where(and(eq(contentPages.kind, 'help'), eq(contentPages.status, 'published'), eq(contentPages.locale, 'en-IN'))).orderBy(contentPages.createdAt);
+    if (managed.length) return managed.map((p) => ({ id: p.slug, title: p.title, body: p.body }));
     return [
       { id: 'protected-leads', title: 'How lead protection works', body: 'Register the customer with consent and evidence. Unite reviews within 4 business hours; your certificate shows the protection window.' },
       { id: 'earned-commission', title: 'When is commission earned?', body: 'Only when the customer pays for a certified milestone under the contract. Projected amounts are estimates.' },

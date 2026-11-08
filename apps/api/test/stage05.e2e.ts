@@ -39,7 +39,7 @@ describe('Stage 05 — opportunity marketplace (gate: real listings and eligibil
     const v = await api(app).get(`/v1/opportunities?minValue=${100 * 1_00_000 * 100}`).set(auth(t.ravi)).expect(200);
     expect(v.body.every((o: any) => o.estimatedValue >= 100 * 1_00_000 * 100)).toBe(true);
     const c = await api(app).get('/v1/opportunities/categories').set(auth(t.asha)).expect(200);
-    expect(c.body.find((x: any) => x.sector === 'solar').count).toBe(1);
+    expect(c.body.find((x: any) => x.sector === 'solar').count).toBe(2); // Chakan (India) + Dubai carport programme (Stage 15 seed)
   });
 
   it('041 eligibility explains each check; unverified, wrong-sector and under-level partners are blocked', async () => {
