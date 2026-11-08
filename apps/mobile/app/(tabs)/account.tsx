@@ -30,6 +30,13 @@ export default function Account() {
         </Section>
       )}
       {org && (
+        <Section title="Performance & learning">
+          <Row icon="ribbon" title="Reputation" subtitle="Score, verified record and reviews" onPress={go('/reputation')} />
+          <Row icon="trending-up" title="Next membership level" onPress={go('/reputation/excellence')} />
+          <Row icon="school" title="Learning & certificates" onPress={go('/learning')} />
+        </Section>
+      )}
+      {org && (
         <Section title="Money">
           <Row icon="wallet" iconTint={theme.colors.green700} title="Earnings" subtitle="Projected, earned and paid commission" onPress={go('/earnings')} />
           <Row icon="card" iconTint={theme.colors.green700} title="Payments received" onPress={go('/payments')} />

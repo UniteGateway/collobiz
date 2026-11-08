@@ -46,7 +46,12 @@ export default function Marketplace() {
   const header = (
     <View>
       <View style={s.header}>
-        <Text style={s.h1} accessibilityRole="header">Opportunities</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+          <Text style={s.h1} accessibilityRole="header">Opportunities</Text>
+          <Pressable onPress={() => router.push('/ai-matches')} accessibilityRole="button" accessibilityLabel="AI matches" style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 8 }} testID="ai-matches">
+            <Icon name="sparkles" size={16} color={theme.colors.green700} /><Text style={{ color: theme.colors.green700, fontWeight: '600' }}>AI matches</Text>
+          </Pressable>
+        </View>
       </View>
       <SearchBar value={text} onChangeText={setText} placeholder="Keyword, city or OPP code" label="Search opportunities" />
       <Segmented label="Source" value={scope} onChange={setScope} options={[
