@@ -11,14 +11,14 @@
 | Measure | Count |
 |---|---|
 | Registry screens | 165 |
-| Route implemented | 130 |
-| Not built | 35 |
-| Functional with API e2e + browser journey | 89 |
-| Functional with API e2e only | 14 |
+| Route implemented | 165 |
+| Not built | 0 |
+| Functional with API e2e + browser journey | 116 |
+| Functional with API e2e only | 23 |
 | Passed the new quality gate | 5 |
 | Native required | 46 |
-| Native implemented | 32 |
-| Native with automated test | 9 |
+| Native implemented | 46 |
+| Native with automated test | 17 |
 
 
 ## 2. Automated test results (re-run during this audit)
@@ -164,7 +164,7 @@ npx expo export --platform web      → Exported (used only to render native lay
 | 012 | OTP & Email Verification | web · `/verify` | Functional — API e2e + browser journey (stage02.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 013 | Select Account Type | web · `/onboarding/account-type` | Functional — API e2e + browser journey (stage03.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 014 | Individual Partner Registration | web · `/onboarding/individual` | Wired to API — no automated evidence | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add browser journey; add native test; re-verify |
-| 015 | Company Partner Registration | web · `/onboarding/company` | Functional — API e2e + browser journey (stage03.e2e.ts) | Below premium standard — pending redesign | **Native missing** | Redesign to Phase B system; build native screen; re-verify |
+| 015 | Company Partner Registration | web · `/onboarding/company` | Functional — API e2e + browser journey (stage03.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 016 | Partner Industry & Skills Selection | web · `/onboarding/industries` | Functional — browser journey only | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 017 | Geographical Coverage Selection | web · `/onboarding/coverage` | Functional — browser journey only | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 018 | Business Profile Builder | web · `/onboarding/profile` | Functional — browser journey only | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
@@ -178,7 +178,7 @@ npx expo export --platform web      → Exported (used only to render native lay
 | 026 | My Leads & Pipeline | web · `/my/leads` | Functional — browser journey only | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 027 | Earnings & Settlement Summary | web · `/earnings/summary` | Functional — browser journey only | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 028 | Tasks & Follow-up Calendar | web · `/tasks` | Functional — API e2e + browser journey (stage07.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
-| 029 | Partner Performance Scorecard | web · `/performance` | Not built | — | Responsive web only | Build in Stage 14 under the new design system |
+| 029 | Partner Performance Scorecard | web · `/performance` | Functional — API e2e + browser journey (stage14.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 030 | Quick Actions & Activity Center | web · `/activity` | Functional — API e2e + browser journey (stage07.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 031 | All Opportunities Marketplace | web · `/marketplace` | Functional — API e2e + browser journey (recovery.e2e.ts, stage05.e2e.ts) | **Passed quality gate** (2026-11-08) | Native + test | Maintain |
 | 032 | Unite Group Opportunities | web · `/marketplace/unite` | Static page | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
@@ -204,7 +204,7 @@ npx expo export --platform web      → Exported (used only to render native lay
 | 052 | Customer CRM Profile | web · `/crm/customers/[id]` | Functional — browser journey only | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 053 | Sales Pipeline Kanban | web · `/crm/pipeline` | Functional — API e2e + browser journey (stage07.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 054 | Lead Follow-up & Conversion Timeline | web · `/leads/[id]/timeline` | Functional — API e2e + browser journey (stage07.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
-| 055 | Find Collaboration Partners | web · `/partners/find` | Functional — browser journey only | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 055 | Find Collaboration Partners | web · `/partners/find` | Functional — API e2e + browser journey (stage15.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 056 | Partner Directory & Profiles | web · `/partners` | Functional — API e2e only (no browser journey) (stage08.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
 | 057 | AI Partner Match Suggestions | web · `/partners/ai-matches` | Functional — API e2e + browser journey (stage08.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 058 | Invite Partner to Collaborate | web · `/teams/[id]/invite` | Functional — API e2e + browser journey (stage08.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
@@ -221,7 +221,7 @@ npx expo export --platform web      → Exported (used only to render native lay
 | 069 | Bid Comparison Table | web · `/tenders/[id]/comparison` | Functional — API e2e + browser journey (stage09.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 070 | Technical Evaluation | web · `/tenders/[id]/technical` | Functional — API e2e + browser journey (stage09.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 071 | Commercial Evaluation | web · `/tenders/[id]/commercial` | Functional — API e2e + browser journey (stage09.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
-| 072 | AI Proposal Draft Builder | web · `/tenders/[id]/ai-proposal` | Not built | — | Responsive web only | Build in Stage 14 under the new design system |
+| 072 | AI Proposal Draft Builder | web · `/tenders/[id]/ai-proposal` | Functional — API e2e only (no browser journey) (stage14.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
 | 073 | Negotiation & Revision Workspace | web · `/tenders/[id]/negotiation` | Functional — API e2e + browser journey (stage09.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 074 | Award, LOI & Work Order | web · `/tenders/[id]/award` | Functional — API e2e + browser journey (stage10.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 075 | Active Projects Portfolio | web · `/projects` | Functional — browser journey only | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
@@ -249,33 +249,33 @@ npx expo export --platform web      → Exported (used only to render native lay
 | 097 | Commission Calculator | web · `/commissions/calculator` | Functional — browser journey only | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 098 | Commission Approval Workflow | web · `/commissions/approvals` | Functional — API e2e + browser journey (stage12.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 099 | Invoice / Payout Request | web · `/payouts/request` | Functional — API e2e + browser journey (stage12.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
-| 100 | Payment & Settlement History | web · `/payments/history` | Functional — API e2e + browser journey (stage04.e2e.ts, stage05.e2e.ts, stage08.e2e.ts, stage09.e2e.ts, stage11.e2e.ts, stage11b.e2e.ts, stage12.e2e.ts) | Below premium standard — pending redesign | Native + test | Redesign to Phase B system; re-verify |
-| 101 | Tax / TDS / GST Records | web · `/tax-records` | Functional — browser journey only | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 100 | Payment & Settlement History | web · `/payments/history` | Functional — API e2e + browser journey (stage04.e2e.ts, stage05.e2e.ts, stage08.e2e.ts, stage09.e2e.ts, stage11.e2e.ts, stage11b.e2e.ts, stage12.e2e.ts, stage14.e2e.ts) | Below premium standard — pending redesign | Native + test | Redesign to Phase B system; re-verify |
+| 101 | Tax / TDS / GST Records | web · `/tax-records` | Functional — API e2e + browser journey (stage14.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 102 | Finance & Funding Opportunities | web · `/finance/opportunities` | Functional — API e2e + browser journey (stage12.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 103 | Project Finance Enquiry | web · `/finance/enquiry` | Functional — API e2e + browser journey (stage12.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 104 | Payment Disputes & Reconciliation | web · `/finance/disputes` | Functional — API e2e only (no browser journey) (stage12.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
-| 105 | Unified Business Inbox | web · `/inbox` | Not built | — | **Native missing** | Build in Stage 13 under the new design system |
-| 106 | One-to-One Partner Chat | web · `/chat/[id]` | Not built | — | **Native missing** | Build in Stage 13 under the new design system |
-| 107 | Project Group Chat | web · `/chat/groups/[id]` | Not built | — | Responsive web only | Build in Stage 13 under the new design system |
-| 108 | Audio / Video Meeting Room | web · `/meetings/[id]/room` | Not built | — | **Native missing** | Build in Stage 13 under the new design system |
-| 109 | Meeting Scheduling | web · `/meetings` | Not built | — | Responsive web only | Build in Stage 13 under the new design system |
-| 110 | Business Announcements | web · `/announcements` | Not built | — | **Native missing** | Build in Stage 13 under the new design system |
-| 111 | Notifications & Alerts Center | web · `/notifications` | Not built | — | **Native missing** | Build in Stage 13 under the new design system |
-| 112 | Support Tickets & Escalation | web · `/support/tickets` | Not built | — | Responsive web only | Build in Stage 13 under the new design system |
-| 113 | Marketing Resources Library | web · `/resources` | Not built | — | Responsive web only | Build in Stage 14 under the new design system |
-| 114 | Co-Branded Brochure Generator | web · `/resources/brochure` | Not built | — | Responsive web only | Build in Stage 14 under the new design system |
-| 115 | Approved Social Campaign Assets | web · `/resources/social` | Not built | — | Responsive web only | Build in Stage 14 under the new design system |
-| 116 | Training & Learning Center | web · `/learning` | Not built | — | **Native missing** | Build in Stage 14 under the new design system |
-| 117 | Certification Assessment | web · `/learning/assessments/[id]` | Not built | — | Responsive web only | Build in Stage 14 under the new design system |
-| 118 | Partner Certificate & Badge | web · `/certificates` | Not built | — | Responsive web only | Build in Stage 14 under the new design system |
-| 119 | Global Opportunities Portal | web · `/global` | Not built | — | Responsive web only | Build in Stage 15 under the new design system |
-| 120 | Country Partner Registration | web · `/global/country-partner` | Not built | — | **Native missing** | Build in Stage 15 under the new design system |
-| 121 | International Territory Dashboard | web · `/global/territory` | Not built | — | Responsive web only | Build in Stage 15 under the new design system |
-| 122 | Import / Export Enquiry Desk | web · `/global/import-export` | Not built | — | Responsive web only | Build in Stage 15 under the new design system |
-| 123 | JV & Strategic Alliance Proposals | web · `/alliances` | Not built | — | Responsive web only | Build in Stage 15 under the new design system |
+| 105 | Unified Business Inbox | web · `/inbox` | Functional — API e2e + browser journey (stage13.e2e.ts) | Below premium standard — pending redesign | Native + test | Redesign to Phase B system; re-verify |
+| 106 | One-to-One Partner Chat | web · `/chat/[id]` | Functional — API e2e + browser journey (stage13.e2e.ts) | Below premium standard — pending redesign | Native + test | Redesign to Phase B system; re-verify |
+| 107 | Project Group Chat | web · `/chat/groups/[id]` | Static page | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
+| 108 | Audio / Video Meeting Room | web · `/meetings/[id]/room` | Functional — API e2e + browser journey (stage13.e2e.ts) | Below premium standard — pending redesign | Native + test | Redesign to Phase B system; re-verify |
+| 109 | Meeting Scheduling | web · `/meetings` | Functional — API e2e + browser journey (stage13.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 110 | Business Announcements | web · `/announcements` | Functional — API e2e only (no browser journey) (stage13.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add browser journey; add native test; re-verify |
+| 111 | Notifications & Alerts Center | web · `/notifications` | Functional — API e2e + browser journey (stage13.e2e.ts) | Below premium standard — pending redesign | Native + test | Redesign to Phase B system; re-verify |
+| 112 | Support Tickets & Escalation | web · `/support/tickets` | Functional — API e2e + browser journey (stage13.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 113 | Marketing Resources Library | web · `/resources` | Functional — API e2e only (no browser journey) (stage14.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
+| 114 | Co-Branded Brochure Generator | web · `/resources/brochure` | Functional — API e2e + browser journey (stage14.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 115 | Approved Social Campaign Assets | web · `/resources/social` | Functional — API e2e only (no browser journey) (stage14.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
+| 116 | Training & Learning Center | web · `/learning` | Functional — API e2e + browser journey (stage14.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
+| 117 | Certification Assessment | web · `/learning/assessments/[id]` | Functional — API e2e + browser journey (stage14.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 118 | Partner Certificate & Badge | web · `/certificates` | Functional — API e2e + browser journey (stage14.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 119 | Global Opportunities Portal | web · `/global` | Functional — API e2e + browser journey (stage15.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 120 | Country Partner Registration | web · `/global/country-partner` | Functional — API e2e + browser journey (stage15.e2e.ts) | Below premium standard — pending redesign | Native + test | Redesign to Phase B system; re-verify |
+| 121 | International Territory Dashboard | web · `/global/territory` | Functional — API e2e only (no browser journey) (stage15.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
+| 122 | Import / Export Enquiry Desk | web · `/global/import-export` | Functional — API e2e + browser journey (stage15.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 123 | JV & Strategic Alliance Proposals | web · `/alliances` | Functional — API e2e + browser journey (stage15.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 124 | Consortium Formation | web · `/consortiums` | Functional — API e2e only (no browser journey) (stage08.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
-| 125 | Investor Opportunity Data Room | web · `/data-room` | Not built | — | Responsive web only | Build in Stage 15 under the new design system |
-| 126 | Cross-Border Compliance Checklist | web · `/global/compliance` | Not built | — | Responsive web only | Build in Stage 15 under the new design system |
+| 125 | Investor Opportunity Data Room | web · `/data-room` | Functional — API e2e + browser journey (stage15.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 126 | Cross-Border Compliance Checklist | web · `/global/compliance` | Functional — API e2e + browser journey (stage15.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 127 | Group Admin Executive Dashboard | admin · `/` | Wired to API — no automated evidence | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; add browser journey; re-verify |
 | 128 | Group Companies & Business Units | admin · `/group-companies` | Functional — API e2e + browser journey (stage04.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; re-verify |
 | 129 | Admin Users & Permissions | admin · `/users` | Functional — API e2e + browser journey (stage02.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; re-verify |
@@ -288,18 +288,18 @@ npx expo export --platform web      → Exported (used only to render native lay
 | 136 | Product & Catalogue Management | admin · `/catalogue` | Functional — API e2e + browser journey (stage04.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; re-verify |
 | 137 | Project / Tender Administration | admin · `/tenders` | Functional — API e2e + browser journey (recovery.e2e.ts, stage09.e2e.ts) | **Passed quality gate** (2026-11-08) | n/a (desktop admin) | Maintain |
 | 138 | Finance & Settlement Controls | admin · `/finance` | Functional — API e2e + browser journey (stage12.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; re-verify |
-| 139 | Performance Analytics & BI | admin · `/analytics` | Not built | — | n/a (desktop admin) | Build in Stage 16 under the new design system |
-| 140 | AI Monitoring & Recommendation Controls | admin · `/ai` | Not built | — | n/a (desktop admin) | Build in Stage 14 under the new design system |
+| 139 | Performance Analytics & BI | admin · `/analytics` | Functional — API e2e + browser journey (stage15.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; re-verify |
+| 140 | AI Monitoring & Recommendation Controls | admin · `/ai` | Functional — API e2e + browser journey (stage14.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; re-verify |
 | 141 | Audit Logs & Security Center | admin · `/audit` | Functional — API e2e + browser journey (stage02.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; re-verify |
-| 142 | Global Content & CMS Management | admin · `/cms` | Not built | — | n/a (desktop admin) | Build in Stage 15 under the new design system |
+| 142 | Global Content & CMS Management | admin · `/cms` | Functional — API e2e + browser journey (stage15.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; re-verify |
 | 143 | My Partner Profile | web · `/profile` | Functional — API e2e + browser journey (stage03.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 144 | Company Team & Sub-Accounts | web · `/company/team` | Functional — API e2e + browser journey (stage02.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 145 | Account Security & MFA | web · `/settings/security` | Functional — API e2e + browser journey (stage02.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
-| 146 | Languages, Currencies & Regions | web · `/settings/regional` | Not built | — | Responsive web only | Build in Stage 15 under the new design system |
-| 147 | Notification Preferences | web · `/settings/notifications` | Not built | — | **Native missing** | Build in Stage 13 under the new design system |
+| 146 | Languages, Currencies & Regions | web · `/settings/regional` | Functional — API e2e + browser journey (stage15.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 147 | Notification Preferences | web · `/settings/notifications` | Functional — API e2e + browser journey (stage13.e2e.ts) | Below premium standard — pending redesign | Native + test | Redesign to Phase B system; re-verify |
 | 148 | Documents & Agreements Vault | web · `/vault` | Functional — API e2e + browser journey (stage10.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 149 | Privacy, Consent & Data Rights | web · `/settings/privacy` | Functional — API e2e + browser journey (stage03.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
-| 150 | Help, Feedback & Account Closure | web · `/help` | Not built (stage12.e2e.ts) | — | **Native missing** | Build in Stage 13 under the new design system |
+| 150 | Help, Feedback & Account Closure | web · `/help` | Functional — API e2e only (no browser journey) (stage12.e2e.ts, stage13.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add browser journey; add native test; re-verify |
 | 151 | Lead Protection Dashboard | web · `/lead-protection` | Functional — API e2e + browser journey (stage06.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 152 | Digital Lead Registration Certificate | web · `/leads/[id]/registration-certificate` | Functional — API e2e only (no browser journey) (stage06.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
 | 153 | Lead Ownership Dispute Center | web · `/lead-disputes` | Functional — API e2e + browser journey (stage06.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
@@ -309,9 +309,9 @@ npx expo export --platform web      → Exported (used only to render native lay
 | 157 | Commission Agreement & Milestones | web · `/commissions/agreements/[id]/milestones` | Functional — browser journey only | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 158 | Live Earnings & Settlement Tracker | web · `/earnings/live` | Functional — browser journey only | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 159 | Commission Dispute Resolution | web · `/commissions/disputes` | Functional — API e2e + browser journey (stage12.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
-| 160 | AI Opportunity Matching Dashboard | web · `/ai/matching` | Not built | — | **Native missing** | Build in Stage 14 under the new design system |
-| 161 | AI Recommended Partners | web · `/ai/partners` | Not built | — | Responsive web only | Build in Stage 14 under the new design system |
-| 162 | AI Project Collaboration Builder | web · `/ai/team-builder` | Not built | — | Responsive web only | Build in Stage 14 under the new design system |
-| 163 | Partner Reputation Profile | web · `/partners/[id]/reputation` | Not built | — | **Native missing** | Build in Stage 14 under the new design system |
-| 164 | Verified Performance & Reviews | web · `/reputation/reviews` | Not built | — | **Native missing** | Build in Stage 14 under the new design system |
-| 165 | Partner Excellence & Certification | web · `/reputation/excellence` | Not built (stage01.e2e.ts) | — | **Native missing** | Build in Stage 14 under the new design system |
+| 160 | AI Opportunity Matching Dashboard | web · `/ai/matching` | Functional — API e2e + browser journey (stage14.e2e.ts) | Below premium standard — pending redesign | Native + test | Redesign to Phase B system; re-verify |
+| 161 | AI Recommended Partners | web · `/ai/partners` | Functional — API e2e only (no browser journey) (stage14.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
+| 162 | AI Project Collaboration Builder | web · `/ai/team-builder` | Functional — API e2e + browser journey (stage14.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 163 | Partner Reputation Profile | web · `/partners/[id]/reputation` | Functional — API e2e only (no browser journey) (stage14.e2e.ts) | Below premium standard — pending redesign | Native + test | Redesign to Phase B system; add browser journey; re-verify |
+| 164 | Verified Performance & Reviews | web · `/reputation/reviews` | Functional — API e2e only (no browser journey) (stage14.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add browser journey; add native test; re-verify |
+| 165 | Partner Excellence & Certification | web · `/reputation/excellence` | Functional — API e2e + browser journey (stage01.e2e.ts, stage14.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |

@@ -21,7 +21,7 @@ beforeEach(() => { mockGet.mockReset(); mockPost.mockReset(); mockPush.mockReset
 const course = (completed: number[]) => ({ id: 'c1', code: 'CZ-101', title: 'Working with Unite Group', summary: 'Essentials', passMark: 75, modules: [{ title: 'Model', body: 'Four routes.' }, { title: 'Leads', body: 'Certificates.' }], completedModules: completed, assessment: { questions: [{ q: 'When is commission earned?', options: ['On signature', 'When the customer pays'] }], attemptsLeftToday: 3 }, certificate: null });
 
 describe('Stage 14 (native)', () => {
-  it('117 locks the assessment until modules are read, then grades on the server', async () => {
+  it('Screen 117 — locks the assessment until modules are read, then grades on the server', async () => {
     mockGet.mockResolvedValueOnce(course([0]));
     render(<CoursePlayer />);
     await waitFor(() => screen.getByText('Read every module to unlock the assessment.'));
@@ -39,7 +39,7 @@ describe('Stage 14 (native)', () => {
     expect(screen.getByText(/Certificate CZC-2026-12345678 issued/)).toBeTruthy();
   });
 
-  it('160 shows reasons for each match and hides a dismissed one', async () => {
+  it('Screen 160 — shows reasons for each match and hides a dismissed one', async () => {
     mockGet.mockResolvedValue({ consent: true, promptVersion: 'rules-2026.11', items: [{ opportunity: { id: 'o1', code: 'OPP-2026-00001', title: '2 MW rooftop solar EPC', sector: 'solar', city: 'Pune', estimatedValue: 8000000, publisher: 'Unite Solar' }, match: { score: 93, factors: [{ factor: 'Geography', score: 1, detail: 'Covers Maharashtra' }, { factor: 'Verified reputation', score: 0.73, detail: 'Reputation 73/100' }] } }] });
     mockPost.mockResolvedValue({ ok: true });
     render(<AiMatches />);
@@ -51,7 +51,7 @@ describe('Stage 14 (native)', () => {
     expect(mockPost).toHaveBeenCalledWith('/ai/matching/o1/feedback', { useful: false, reason: 'Not relevant' });
   });
 
-  it('163 shows the score with its verified record; 165 lists the next-level criteria', async () => {
+  it('Screen 163 — shows the score with its verified record; 165 lists the next-level criteria', async () => {
     mockGet.mockResolvedValueOnce({ score: { score: 73, tier: 'trusted', outcomes: 3, onTimeOutcomes: 2, publishedReviews: 1, excludedReviews: 0, components: { onTimeRate: 0.67, reviews: 4.7 } }, outcomes: [{ id: 'm1', title: 'Electrical BoS', projectCode: 'PRJ-2025-000014', certifiedAt: '2025-08-06', onTime: false }], tips: [] });
     const r = render(<Reputation />);
     await waitFor(() => screen.getByText('73'));

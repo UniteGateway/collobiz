@@ -15,7 +15,9 @@ const mobileFiles = walk(join(root, 'apps/mobile/app')).filter((f) => f.endsWith
 const mobileById = new Map();
 for (const f of mobileFiles) {
   const src = readFileSync(f, 'utf8');
-  for (const m of src.matchAll(/ScreenView id="(\d{3})"|\/\*\* Screens? (\d{3})\b/g)) mobileById.set(m[1] ?? m[2], f.slice(root.length));
+  for (const m of src.matchAll(/ScreenView id="(\d{3})"/g)) mobileById.set(m[1], f.slice(root.length));
+  // Doc comments such as "Screens 014 (individual) / 015 (company)" name every screen a file implements.
+  for (const line of src.match(/\/\*\* Screens? [^\n]*/g) ?? []) for (const id of line.split(/[—-]/)[0].match(/\b\d{3}\b/g) ?? []) mobileById.set(id, f.slice(root.length));
 }
 const smoke = readFileSync(join(root, 'scripts/e2e-suites.mjs'), 'utf8');
 const apiTests = walk(join(root, 'apps/api/test')).filter((f) => f.endsWith('.e2e.ts')).map((f) => [f.slice(root.length), readFileSync(f, 'utf8')]);

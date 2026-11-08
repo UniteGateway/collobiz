@@ -215,7 +215,7 @@
     "mobile": "native",
     "registryStatus": "verified",
     "file": "apps/web/app/(auth)/login/page.tsx",
-    "lines": 81,
+    "lines": 111,
     "usesApi": true,
     "marker": false,
     "placeholder": false,
@@ -301,7 +301,7 @@
     "apiTests": [
       "stage03.e2e.ts"
     ],
-    "native": null,
+    "native": "apps/mobile/app/onboarding/details.tsx",
     "nativeTest": false
   },
   {
@@ -558,14 +558,16 @@
     "app": "web",
     "route": "/performance",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/performance/page.tsx",
+    "lines": 65,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -899,7 +901,7 @@
     "placeholder": false,
     "smokeHit": true,
     "apiTests": [],
-    "native": null,
+    "native": "apps/mobile/app/leads/new.tsx",
     "nativeTest": false
   },
   {
@@ -1074,7 +1076,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage15.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -1305,7 +1309,7 @@
     "mobile": "responsive",
     "registryStatus": "verified",
     "file": "apps/web/app/(app)/tenders/[id]/documents/page.tsx",
-    "lines": 108,
+    "lines": 109,
     "usesApi": true,
     "marker": true,
     "placeholder": false,
@@ -1403,14 +1407,16 @@
     "app": "web",
     "route": "/tenders/[id]/ai-proposal",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/tenders/[id]/ai-proposal/page.tsx",
+    "lines": 59,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
     "smokeHit": false,
-    "apiTests": [],
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -1469,7 +1475,7 @@
     "placeholder": false,
     "smokeHit": true,
     "apiTests": [],
-    "native": "apps/mobile/app/(tabs)/projects.tsx",
+    "native": "apps/mobile/app/projects/index.tsx",
     "nativeTest": false
   },
   {
@@ -1963,7 +1969,8 @@
       "stage09.e2e.ts",
       "stage11.e2e.ts",
       "stage11b.e2e.ts",
-      "stage12.e2e.ts"
+      "stage12.e2e.ts",
+      "stage14.e2e.ts"
     ],
     "native": "apps/mobile/app/payments.tsx",
     "nativeTest": true
@@ -1982,7 +1989,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2053,16 +2062,18 @@
     "app": "web",
     "route": "/inbox",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/inbox/page.tsx",
+    "lines": 92,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
-    "native": null,
-    "nativeTest": false
+    "smokeHit": true,
+    "apiTests": [
+      "stage13.e2e.ts"
+    ],
+    "native": "apps/mobile/app/(tabs)/messages.tsx",
+    "nativeTest": true
   },
   {
     "id": "106",
@@ -2071,16 +2082,18 @@
     "app": "web",
     "route": "/chat/[id]",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/chat/[id]/page.tsx",
+    "lines": 13,
     "usesApi": false,
-    "marker": false,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
-    "native": null,
-    "nativeTest": false
+    "smokeHit": true,
+    "apiTests": [
+      "stage13.e2e.ts"
+    ],
+    "native": "apps/mobile/app/chat/[id].tsx",
+    "nativeTest": true
   },
   {
     "id": "107",
@@ -2089,15 +2102,15 @@
     "app": "web",
     "route": "/chat/groups/[id]",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/chat/groups/[id]/page.tsx",
+    "lines": 13,
     "usesApi": false,
-    "marker": false,
+    "marker": true,
     "placeholder": false,
     "smokeHit": false,
     "apiTests": [],
-    "native": null,
+    "native": "apps/mobile/app/chat/[id].tsx",
     "nativeTest": false
   },
   {
@@ -2107,16 +2120,18 @@
     "app": "web",
     "route": "/meetings/[id]/room",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/meetings/[id]/room/page.tsx",
+    "lines": 106,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
-    "native": null,
-    "nativeTest": false
+    "smokeHit": true,
+    "apiTests": [
+      "stage13.e2e.ts"
+    ],
+    "native": "apps/mobile/app/meetings/[id].tsx",
+    "nativeTest": true
   },
   {
     "id": "109",
@@ -2125,15 +2140,17 @@
     "app": "web",
     "route": "/meetings",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/meetings/page.tsx",
+    "lines": 100,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
-    "native": null,
+    "smokeHit": true,
+    "apiTests": [
+      "stage13.e2e.ts"
+    ],
+    "native": "apps/mobile/app/meetings/index.tsx",
     "nativeTest": false
   },
   {
@@ -2143,15 +2160,17 @@
     "app": "web",
     "route": "/announcements",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/announcements/page.tsx",
+    "lines": 47,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
     "smokeHit": false,
-    "apiTests": [],
-    "native": null,
+    "apiTests": [
+      "stage13.e2e.ts"
+    ],
+    "native": "apps/mobile/app/announcements.tsx",
     "nativeTest": false
   },
   {
@@ -2161,16 +2180,18 @@
     "app": "web",
     "route": "/notifications",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/notifications/page.tsx",
+    "lines": 56,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
-    "native": null,
-    "nativeTest": false
+    "smokeHit": true,
+    "apiTests": [
+      "stage13.e2e.ts"
+    ],
+    "native": "apps/mobile/app/notifications.tsx",
+    "nativeTest": true
   },
   {
     "id": "112",
@@ -2179,14 +2200,16 @@
     "app": "web",
     "route": "/support/tickets",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/support/tickets/page.tsx",
+    "lines": 130,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage13.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2197,14 +2220,16 @@
     "app": "web",
     "route": "/resources",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/resources/page.tsx",
+    "lines": 16,
     "usesApi": false,
-    "marker": false,
+    "marker": true,
     "placeholder": false,
     "smokeHit": false,
-    "apiTests": [],
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2215,14 +2240,16 @@
     "app": "web",
     "route": "/resources/brochure",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/resources/brochure/page.tsx",
+    "lines": 47,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2233,14 +2260,16 @@
     "app": "web",
     "route": "/resources/social",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/resources/social/page.tsx",
+    "lines": 13,
     "usesApi": false,
-    "marker": false,
+    "marker": true,
     "placeholder": false,
     "smokeHit": false,
-    "apiTests": [],
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2251,15 +2280,17 @@
     "app": "web",
     "route": "/learning",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/learning/page.tsx",
+    "lines": 36,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
-    "native": null,
+    "smokeHit": true,
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
+    "native": "apps/mobile/app/learning/index.tsx",
     "nativeTest": false
   },
   {
@@ -2269,16 +2300,18 @@
     "app": "web",
     "route": "/learning/assessments/[id]",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/learning/assessments/[id]/page.tsx",
+    "lines": 81,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
-    "native": null,
-    "nativeTest": false
+    "smokeHit": true,
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
+    "native": "apps/mobile/app/learning/[id].tsx",
+    "nativeTest": true
   },
   {
     "id": "118",
@@ -2287,14 +2320,16 @@
     "app": "web",
     "route": "/certificates",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/certificates/page.tsx",
+    "lines": 40,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2305,14 +2340,16 @@
     "app": "web",
     "route": "/global",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/global/page.tsx",
+    "lines": 52,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage15.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2323,16 +2360,18 @@
     "app": "web",
     "route": "/global/country-partner",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/global/country-partner/page.tsx",
+    "lines": 57,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
-    "native": null,
-    "nativeTest": false
+    "apiTests": [
+      "stage15.e2e.ts"
+    ],
+    "native": "apps/mobile/app/global/country-partner.tsx",
+    "nativeTest": true
   },
   {
     "id": "121",
@@ -2341,14 +2380,16 @@
     "app": "web",
     "route": "/global/territory",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/global/territory/page.tsx",
+    "lines": 47,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
     "smokeHit": false,
-    "apiTests": [],
+    "apiTests": [
+      "stage15.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2359,14 +2400,16 @@
     "app": "web",
     "route": "/global/import-export",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/global/import-export/page.tsx",
+    "lines": 64,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage15.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2377,14 +2420,16 @@
     "app": "web",
     "route": "/alliances",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/alliances/page.tsx",
+    "lines": 86,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage15.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2415,14 +2460,16 @@
     "app": "web",
     "route": "/data-room",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/data-room/page.tsx",
+    "lines": 20,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage15.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2433,14 +2480,16 @@
     "app": "web",
     "route": "/global/compliance",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/global/compliance/page.tsx",
+    "lines": 59,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage15.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2688,14 +2737,16 @@
     "app": "admin",
     "route": "/analytics",
     "mobile": "desktop-admin",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/admin/app/(console)/analytics/page.tsx",
+    "lines": 71,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage15.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2706,14 +2757,16 @@
     "app": "admin",
     "route": "/ai",
     "mobile": "desktop-admin",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/admin/app/(console)/ai/page.tsx",
+    "lines": 61,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2744,14 +2797,16 @@
     "app": "admin",
     "route": "/cms",
     "mobile": "desktop-admin",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/admin/app/(console)/cms/page.tsx",
+    "lines": 56,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage15.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2822,14 +2877,16 @@
     "app": "web",
     "route": "/settings/regional",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
-    "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/settings/regional/page.tsx",
+    "lines": 50,
+    "usesApi": true,
+    "marker": true,
+    "placeholder": true,
+    "smokeHit": true,
+    "apiTests": [
+      "stage15.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2840,16 +2897,18 @@
     "app": "web",
     "route": "/settings/notifications",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/settings/notifications/page.tsx",
+    "lines": 49,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
-    "native": null,
-    "nativeTest": false
+    "smokeHit": true,
+    "apiTests": [
+      "stage13.e2e.ts"
+    ],
+    "native": "apps/mobile/app/settings/notifications.tsx",
+    "nativeTest": true
   },
   {
     "id": "148",
@@ -2898,17 +2957,18 @@
     "app": "web",
     "route": "/help",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/help/page.tsx",
+    "lines": 104,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
     "smokeHit": false,
     "apiTests": [
-      "stage12.e2e.ts"
+      "stage12.e2e.ts",
+      "stage13.e2e.ts"
     ],
-    "native": null,
+    "native": "apps/mobile/app/help.tsx",
     "nativeTest": false
   },
   {
@@ -3092,16 +3152,18 @@
     "app": "web",
     "route": "/ai/matching",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/ai/matching/page.tsx",
+    "lines": 45,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
-    "native": null,
-    "nativeTest": false
+    "smokeHit": true,
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
+    "native": "apps/mobile/app/ai-matches.tsx",
+    "nativeTest": true
   },
   {
     "id": "161",
@@ -3110,14 +3172,16 @@
     "app": "web",
     "route": "/ai/partners",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/ai/partners/page.tsx",
+    "lines": 48,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
     "smokeHit": false,
-    "apiTests": [],
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -3128,14 +3192,16 @@
     "app": "web",
     "route": "/ai/team-builder",
     "mobile": "responsive",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/ai/team-builder/page.tsx",
+    "lines": 47,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -3146,16 +3212,18 @@
     "app": "web",
     "route": "/partners/[id]/reputation",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/partners/[id]/reputation/page.tsx",
+    "lines": 64,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
     "smokeHit": false,
-    "apiTests": [],
-    "native": null,
-    "nativeTest": false
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
+    "native": "apps/mobile/app/reputation/index.tsx",
+    "nativeTest": true
   },
   {
     "id": "164",
@@ -3164,15 +3232,17 @@
     "app": "web",
     "route": "/reputation/reviews",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/reputation/reviews/page.tsx",
+    "lines": 85,
+    "usesApi": true,
+    "marker": true,
     "placeholder": false,
     "smokeHit": false,
-    "apiTests": [],
-    "native": null,
+    "apiTests": [
+      "stage14.e2e.ts"
+    ],
+    "native": "apps/mobile/app/reputation/reviews.tsx",
     "nativeTest": false
   },
   {
@@ -3182,17 +3252,18 @@
     "app": "web",
     "route": "/reputation/excellence",
     "mobile": "native",
-    "registryStatus": "unknown",
-    "file": null,
-    "lines": 1,
-    "usesApi": false,
-    "marker": false,
-    "placeholder": false,
+    "registryStatus": "verified",
+    "file": "apps/web/app/(app)/reputation/excellence/page.tsx",
+    "lines": 41,
+    "usesApi": true,
+    "marker": true,
+    "placeholder": true,
     "smokeHit": true,
     "apiTests": [
-      "stage01.e2e.ts"
+      "stage01.e2e.ts",
+      "stage14.e2e.ts"
     ],
-    "native": null,
+    "native": "apps/mobile/app/reputation/excellence.tsx",
     "nativeTest": false
   }
 ]

@@ -22,7 +22,7 @@ import NotificationPrefs from '../app/settings/notifications';
 beforeEach(() => { mockGet.mockReset(); mockPost.mockReset(); mockPut.mockReset(); mockPush.mockReset(); });
 
 describe('Stage 13 (native)', () => {
-  it('105 inbox lists conversations with unread counts and opens a thread', async () => {
+  it('Screen 105 — inbox lists conversations with unread counts and opens a thread', async () => {
     mockGet.mockResolvedValue([
       { id: 't1', kind: 'direct', title: 'Deepak Rao (Deccan Distributors)', lastMessageAt: new Date().toISOString(), unread: 2, preview: { author: 'Deepak Rao', text: 'Price holds until Friday' } },
       { id: 't2', kind: 'project', title: 'PRJ-2026-000001 · Chakan rooftop', lastMessageAt: null, unread: 0, preview: null },
@@ -36,7 +36,7 @@ describe('Stage 13 (native)', () => {
     expect(mockPush).toHaveBeenCalledWith('/chat/t1');
   });
 
-  it('106 chat shows bubbles, placeholders for removed messages, and sends', async () => {
+  it('Screen 106 — chat shows bubbles, placeholders for removed messages, and sends', async () => {
     mockGet.mockResolvedValue({ id: 't1', kind: 'direct', subject: null, retentionDays: 730, members: [{ userId: 'u-asha', name: 'Asha Patil', org: 'Volt EPC' }, { userId: 'u-deepak', name: 'Deepak Rao', org: 'Deccan' }],
       messages: [
         { id: 'm1', author: 'Deepak Rao', org: 'Deccan', mine: false, createdAt: new Date().toISOString(), body: 'Two units in stock', state: 'visible', canDelete: false },
@@ -52,7 +52,7 @@ describe('Stage 13 (native)', () => {
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/chat/threads/t1/messages', { body: 'Please hold both' }));
   });
 
-  it('108 room shows my own RSVP, people, and explains that video is not connected', async () => {
+  it('Screen 108 — room shows my own RSVP, people, and explains that video is not connected', async () => {
     const soon = Date.now() + 5 * 60_000;
     mockGet.mockResolvedValue({ id: 'mt', title: 'Transformer delivery', agenda: 'Confirm dates', startsAt: new Date(soon).toISOString(), endsAt: new Date(soon + 1800_000).toISOString(), status: 'scheduled', cancelReason: null, minutes: null, actionItems: [], isOrganizer: false,
       attendees: [{ userId: 'u-deepak', name: 'Deepak Rao', org: 'Deccan', rsvp: 'accepted', joinedAt: null }, { userId: 'u-asha', name: 'Asha Patil', org: 'Volt EPC', rsvp: 'tentative', joinedAt: null }],
@@ -64,7 +64,7 @@ describe('Stage 13 (native)', () => {
     expect(screen.getByTestId('join')).toBeTruthy();
   });
 
-  it('111 notifications open the matching native screen and mark read', async () => {
+  it('Screen 111 — notifications open the matching native screen and mark read', async () => {
     mockGet.mockResolvedValue({ unread: 1, items: [{ id: 'n1', kind: 'meeting', title: 'Meeting invite', body: 'Tomorrow 11:00', link: '/meetings?id=11111111-2222-3333-4444-555555555555', createdAt: new Date().toISOString(), readAt: null }] });
     mockPost.mockResolvedValue({ ok: true });
     render(<Notifications />);
@@ -74,7 +74,7 @@ describe('Stage 13 (native)', () => {
     expect(mockPost).toHaveBeenCalledWith('/notifications/read', { ids: ['n1'] });
   });
 
-  it('147 mandatory email cannot be switched off; changes save', async () => {
+  it('Screen 147 — mandatory email cannot be switched off; changes save', async () => {
     mockGet.mockResolvedValue([{ kind: 'contract', email: true, sms: false, push: true, mandatory: true }, { kind: 'message', email: false, sms: false, push: true, mandatory: false }]);
     mockPut.mockResolvedValue([]);
     render(<NotificationPrefs />);
