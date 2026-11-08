@@ -1,6 +1,6 @@
 # COLLABIZ — Development Recovery & UI Quality Audit
 
-**Date:** 2026-11-06 · **Branch:** `claude/collabiz-platform-build` · **Audited commit:** `c1279e2`
+**Date:** 2026-11-06 (gate updated 2026-11-08) · **Branch:** `claude/collabiz-platform-build` · **Audited commit:** `c1279e2`
 **Method:** repository inspection, route-to-registry mapping (`scripts/audit-routes.mjs`), full automated test run, evidence screenshots with authorized demo accounts (`scripts/capture-screens.mjs`), independent mobile bundle builds and native-layout rendering.
 
 > **Verdict: the platform's back end is broadly functional. The user interface does not meet the approved international corporate standard.**

@@ -8,13 +8,14 @@
     "mobile": "responsive",
     "registryStatus": "verified",
     "file": "apps/web/app/(public)/page.tsx",
-    "lines": 68,
-    "usesApi": false,
+    "lines": 219,
+    "usesApi": true,
     "marker": false,
     "placeholder": false,
     "smokeHit": true,
     "apiTests": [
       "stage01.e2e.ts",
+      "stage05.e2e.ts",
       "stage09.e2e.ts",
       "stage12.e2e.ts"
     ],
@@ -444,16 +445,17 @@
     "mobile": "native",
     "registryStatus": "verified",
     "file": "apps/web/app/(app)/dashboard/page.tsx",
-    "lines": 51,
+    "lines": 153,
     "usesApi": true,
     "marker": true,
     "placeholder": false,
     "smokeHit": false,
     "apiTests": [
+      "recovery.e2e.ts",
       "stage05.e2e.ts"
     ],
-    "native": "apps/mobile/app/home.tsx",
-    "nativeTest": false
+    "native": "apps/mobile/app/(tabs)/home.tsx",
+    "nativeTest": true
   },
   {
     "id": "024",
@@ -508,7 +510,7 @@
     "placeholder": false,
     "smokeHit": true,
     "apiTests": [],
-    "native": "apps/mobile/app/leads/index.tsx",
+    "native": "apps/mobile/app/(tabs)/leads.tsx",
     "nativeTest": false
   },
   {
@@ -596,16 +598,17 @@
     "mobile": "native",
     "registryStatus": "verified",
     "file": "apps/web/app/(app)/marketplace/page.tsx",
-    "lines": 14,
-    "usesApi": false,
+    "lines": 182,
+    "usesApi": true,
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
     "apiTests": [
+      "recovery.e2e.ts",
       "stage05.e2e.ts"
     ],
-    "native": "apps/mobile/app/marketplace.tsx",
-    "nativeTest": false
+    "native": "apps/mobile/app/(tabs)/marketplace.tsx",
+    "nativeTest": true
   },
   {
     "id": "032",
@@ -694,14 +697,16 @@
     "mobile": "native",
     "registryStatus": "verified",
     "file": "apps/web/app/(app)/opportunities/[id]/page.tsx",
-    "lines": 66,
+    "lines": 237,
     "usesApi": true,
     "marker": true,
-    "placeholder": false,
+    "placeholder": true,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "recovery.e2e.ts"
+    ],
     "native": "apps/mobile/app/opportunities/[id]/index.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "037",
@@ -1464,7 +1469,7 @@
     "placeholder": false,
     "smokeHit": true,
     "apiTests": [],
-    "native": "apps/mobile/app/projects/index.tsx",
+    "native": "apps/mobile/app/(tabs)/projects.tsx",
     "nativeTest": false
   },
   {
@@ -2644,12 +2649,13 @@
     "mobile": "desktop-admin",
     "registryStatus": "verified",
     "file": "apps/admin/app/(console)/tenders/page.tsx",
-    "lines": 51,
+    "lines": 181,
     "usesApi": true,
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
     "apiTests": [
+      "recovery.e2e.ts",
       "stage09.e2e.ts"
     ],
     "native": null,

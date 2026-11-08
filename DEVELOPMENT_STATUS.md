@@ -10,11 +10,11 @@ This file is the single place to see where the build stands. It follows the reco
 |---|---|---|
 | A — Audit | Route/test/native inventory for all 165 screens; findings and corrective plan | Done (`docs/audit/AUDIT_REPORT.md`) |
 | B — Design system | White surfaces, navy/green from the logo, Inter/SF type, icon set, refined tables/forms/states, task-based navigation, demo labelling, status-tone fix | Done |
-| C — Five priority screens | 001, 023, 031, 036, 137 rebuilt individually on real APIs | In progress: all five redesigned; quality gate below |
-| D — Native mobile | Tab shell, native core partner workflows, native tests | Next |
-| E — Quality gate | Per-screen evidence; remaining screens wait until the first five pass | Running per screen |
+| C — Five priority screens | 001, 023, 031, 036, 137 rebuilt individually on real APIs | **Done — all five passed the gate (2026-11-08)** |
+| D — Native mobile | Tab shell, native core partner workflows, native tests | Core done: tab bar (Home, Discover, Leads, Projects, Account), component set v2, native 023/031/036 rebuilt and tested, Field labels linked. Remaining: restyle the other native screens' content, 14 missing native screens |
+| E — Quality gate | Per-screen evidence; remaining screens wait until the first five pass | 5 of 165 passed; recorded in `docs/audit/quality-gate.json` |
 
-**Expansion is paused.** The 35 unbuilt screens (Stage 13–16 UI) and the restyling of the other 125 implemented screens wait until the five priority screens pass the gate and Phase D is done.
+The five priority screens have passed. Next: finish Phase D, then bring the remaining implemented screens through the gate module by module, before building the 35 unbuilt screens (Stage 13–16 UI).
 
 ## Priority screens
 
@@ -28,13 +28,16 @@ This file is the single place to see where the build stands. It follows the reco
 
 Quality-gate status per screen is recorded in `docs/audit/quality-gate.json` and summarised in `AUDIT_REPORT.md`. A screen is entered there only after its journeys pass and its screenshots have been reviewed.
 
+## Test-infrastructure fix found during the gate
+- Browser journeys that change data directly with SQL (e.g. moving a tender's closing time) were writing to the **demo** database while the servers ran on the disposable e2e database, so the Stage 09 lifecycle journey timed out. `scripts/e2e-run.sh` now gives the journeys the e2e database. No demo data was altered (the update matched no rows there).
+
 ## Shell fixes found during Phase C
 - Phones: the top bar overflowed by 31 px on every partner page (sign-out button). Sign-out moved into the menu drawer; menu button is icon-only below 720 px. Verified 390 px with no horizontal scroll on Home, Opportunities, Projects and Earnings.
 - Off-canvas drawer cast a shadow into the page while closed. Fixed.
 - Duplicate controls: the Opportunities module tabs repeated the source filter. Tabs now: Browse · Recommended · My applications · Saved & alerts · Categories · Map.
 
 ## Known gaps (honest list)
-- **Native mobile:** 32 of 46 native screens exist; 14 missing; 6 tested. Native layouts still use the pre-recovery style (screen-ID crumbs, no tab bar). Field labels are not programmatically associated with inputs. → Phase D.
+- **Native mobile:** 32 of 46 native screens exist; 14 missing; 9 have automated tests. All native screens now use component set v2 (no screen-ID crumbs); only 023/031/036 have been redesigned in content. Visual evidence is rendered through react-native-web (`scripts/capture-native.mjs`); no on-device runs (B-06).
 - **Demo data depth:** the curated demo has one tender, so the 137 dashboard shows little volume. Adding more curated (clearly labelled) demo tenders is planned; it must not disturb the seeded counts the API tests rely on.
 - **Stage 13 (messaging, meetings, support):** API only, no tests, no UI.
 - **Stages 14–16:** not started.

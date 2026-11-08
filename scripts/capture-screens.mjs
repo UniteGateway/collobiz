@@ -18,7 +18,7 @@ const plan = [
   { name: '036-opportunity-not-eligible', login: ['web', 'asha@voltepc.example'], path: async (p) => `/opportunities/${(await api(p, '/opportunities?q=OPP-2026-00003'))[0].id}` },
   { name: '036-opportunity-owner', login: ['admin-web', 'unite.admin@collabiz.local'], path: async (p) => `/opportunities/${(await api(p, '/opportunities?q=OPP-2026-00001'))[0].id}` },
   { name: '137-tender-admin', login: ['admin', 'superadmin@collabiz.local'], path: '/tenders', base: 'admin' },
-  { name: '137-tender-admin-inspector', login: ['admin', 'superadmin@collabiz.local'], path: '/tenders', base: 'admin', after: async (p) => { await p.locator('.cz-ta-tender button').first().click(); await p.getByRole('heading', { name: 'Audit trail' }).waitFor(); } },
+  { name: '137-tender-admin-inspector', login: ['admin', 'superadmin@collabiz.local'], path: '/tenders', base: 'admin', after: async (p) => { await p.locator('.cz-ta-tender button').first().click(); await p.getByRole('heading', { name: 'Audit trail' }).waitFor(); await p.waitForTimeout(600); } },
   { name: '070-technical-eval', login: ['mfa', 'evaluator@collabiz.local'], path: async (p) => { const d = await api(p, '/tenders'); const t = d.evaluating.find((x) => ['technical_evaluation', 'commercial_evaluation', 'negotiation', 'awarded'].includes(x.status)); return t ? `/tenders/${t.id}/technical` : '/tenders'; } },
   { name: '073-negotiation', login: ['mfa', 'unite.admin@collabiz.local'], path: async (p) => { const d = await api(p, '/tenders'); const t = d.issued.find((x) => ['negotiation', 'awarded'].includes(x.status)); return t ? `/tenders/${t.id}/negotiation` : '/tenders'; } },
   { name: '065-tender-dashboard', login: ['web', 'ravi@sunrise.example'], path: '/tenders' },

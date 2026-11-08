@@ -20,7 +20,7 @@ export default function TabsLayout() {
       tabBarStyle: { backgroundColor: 'rgba(255,255,255,0.97)', borderTopColor: colors.grey200 },
     }}>
       <Tabs.Screen name="home" options={tab('Home', 'home-outline', 'home')} />
-      <Tabs.Screen name="marketplace" options={tab('Opportunities', 'storefront-outline', 'storefront')} />
+      <Tabs.Screen name="marketplace" options={tab('Discover', 'storefront-outline', 'storefront')} />
       <Tabs.Screen name="leads" options={tab('Leads', 'shield-checkmark-outline', 'shield-checkmark')} />
       <Tabs.Screen name="projects" options={tab('Projects', 'folder-open-outline', 'folder-open')} />
       <Tabs.Screen name="account" options={tab('Account', 'person-circle-outline', 'person-circle')} />

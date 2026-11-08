@@ -36,7 +36,7 @@ try {
   await page.getByText(/Good (morning|afternoon|evening), Asha/).waitFor({ timeout: 20000 });
   await page.getByText('Needs your attention').waitFor();
   await shot('023-home');
-  await page.getByRole('tab', { name: 'Opportunities' }).click();
+  await page.getByRole('tab', { name: 'Discover' }).click();
   await page.getByTestId('result-count').getByText(/opportunit/).waitFor();
   await shot('031-opportunities');
   await page.getByTestId('opp-OPP-2026-00003').click();

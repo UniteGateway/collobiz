@@ -104,7 +104,7 @@ export function Section({ title, footer, children }: { title?: string; footer?: 
     <View style={{ marginBottom: space.xl }}>
       {title && <Text style={s.sectionTitle} accessibilityRole="header">{title}</Text>}
       <View style={s.group}>
-        {items.map((c, i) => <View key={i} style={i > 0 ? s.groupSep : undefined}>{c}</View>)}
+        {items.map((c, i) => <React.Fragment key={i}>{i > 0 && <View style={s.groupSep} />}{c}</React.Fragment>)}
       </View>
       {footer && <Text style={s.sectionFooter}>{footer}</Text>}
     </View>
@@ -221,7 +221,7 @@ export const s = StyleSheet.create({
   sectionTitle: { fontSize: 13, fontWeight: '600', color: colors.grey600, textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 8, marginLeft: 16 },
   sectionFooter: { fontSize: 13, color: colors.grey600, marginTop: 8, marginHorizontal: 16, lineHeight: 18 },
   group: { backgroundColor: colors.white, borderRadius: 14, overflow: 'hidden', borderWidth: HAIR, borderColor: colors.grey200 },
-  groupSep: { borderTopWidth: HAIR, borderTopColor: colors.grey200, marginLeft: 16 },
+  groupSep: { height: HAIR, backgroundColor: colors.grey200, marginLeft: 16 },
   kpi: { backgroundColor: colors.white, borderRadius: 16, padding: 14, flex: 1, minWidth: 150, borderWidth: HAIR, borderColor: colors.grey200, gap: 2 },
   kpiLabel: { fontSize: 13, fontWeight: '500', color: colors.grey600 },
   kpiValue: { fontSize: 26, fontWeight: '700', color: colors.navy900, letterSpacing: -0.5, marginTop: 4 },

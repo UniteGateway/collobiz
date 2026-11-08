@@ -1,6 +1,6 @@
 # COLLABIZ — Development Recovery & UI Quality Audit
 
-**Date:** 2026-11-06 · **Branch:** `claude/collabiz-platform-build` · **Audited commit:** `c1279e2`
+**Date:** 2026-11-06 (gate updated 2026-11-08) · **Branch:** `claude/collabiz-platform-build` · **Audited commit:** `c1279e2`
 **Method:** repository inspection, route-to-registry mapping (`scripts/audit-routes.mjs`), full automated test run, evidence screenshots with authorized demo accounts (`scripts/capture-screens.mjs`), independent mobile bundle builds and native-layout rendering.
 
 > **Verdict: the platform's back end is broadly functional. The user interface does not meet the approved international corporate standard.**
@@ -13,12 +13,12 @@
 | Registry screens | 165 |
 | Route implemented | 130 |
 | Not built | 35 |
-| Functional with API e2e + browser journey | 88 |
+| Functional with API e2e + browser journey | 89 |
 | Functional with API e2e only | 14 |
-| Passed the new quality gate | 0 |
+| Passed the new quality gate | 5 |
 | Native required | 46 |
 | Native implemented | 32 |
-| Native with automated test | 6 |
+| Native with automated test | 9 |
 
 
 ## 2. Automated test results (re-run during this audit)
@@ -150,7 +150,7 @@ npx expo export --platform web      → Exported (used only to render native lay
 
 | ID | Screen | App · route | Functional evidence | UI quality | Mobile | Corrective action |
 |---|---|---|---|---|---|---|
-| 001 | Website homepage | web · `/` | Functional — API e2e + browser journey (stage01.e2e.ts, stage09.e2e.ts, stage12.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
+| 001 | Website homepage | web · `/` | Functional — API e2e + browser journey (stage01.e2e.ts, stage05.e2e.ts, stage09.e2e.ts, stage12.e2e.ts) | **Passed quality gate** (2026-11-08) | Responsive web only | Maintain |
 | 002 | About COLLABIZ | web · `/about` | Functional — API e2e + browser journey (stage09.e2e.ts, stage12.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 003 | How Collaboration Works | web · `/how-it-works` | Functional — API e2e + browser journey (stage09.e2e.ts, stage12.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 004 | Unite Group Companies Directory | web · `/group-companies` | Functional — API e2e + browser journey (stage04.e2e.ts, stage09.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
@@ -172,7 +172,7 @@ npx expo export --platform web      → Exported (used only to render native lay
 | 020 | Bank & Tax Profile | web · `/onboarding/bank-tax` | Functional — browser journey only | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 021 | Agreement Acceptance & e-Sign | web · `/onboarding/agreements` | Functional — API e2e + browser journey (stage03.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
 | 022 | Verification Status & Approval | web · `/onboarding/status` | Functional — API e2e + browser journey (stage03.e2e.ts) | Below premium standard — pending redesign | Native + test | Redesign to Phase B system; re-verify |
-| 023 | Partner Home Dashboard | web · `/dashboard` | Functional — API e2e only (no browser journey) (stage05.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add browser journey; add native test; re-verify |
+| 023 | Partner Home Dashboard | web · `/dashboard` | Functional — API e2e only (no browser journey) (recovery.e2e.ts, stage05.e2e.ts) | **Passed quality gate** (2026-11-08) | Native + test | Maintain |
 | 024 | My Opportunities Overview | web · `/my/opportunities` | Functional — browser journey only | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 025 | Recommended Business Feed | web · `/feed` | Functional — API e2e + browser journey (stage05.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 026 | My Leads & Pipeline | web · `/my/leads` | Functional — browser journey only | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
@@ -180,12 +180,12 @@ npx expo export --platform web      → Exported (used only to render native lay
 | 028 | Tasks & Follow-up Calendar | web · `/tasks` | Functional — API e2e + browser journey (stage07.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 029 | Partner Performance Scorecard | web · `/performance` | Not built | — | Responsive web only | Build in Stage 14 under the new design system |
 | 030 | Quick Actions & Activity Center | web · `/activity` | Functional — API e2e + browser journey (stage07.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
-| 031 | All Opportunities Marketplace | web · `/marketplace` | Functional — API e2e + browser journey (stage05.e2e.ts) | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
+| 031 | All Opportunities Marketplace | web · `/marketplace` | Functional — API e2e + browser journey (recovery.e2e.ts, stage05.e2e.ts) | **Passed quality gate** (2026-11-08) | Native + test | Maintain |
 | 032 | Unite Group Opportunities | web · `/marketplace/unite` | Static page | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
 | 033 | Approved Partner Exchange | web · `/marketplace/exchange` | Functional — API e2e only (no browser journey) (stage05.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; add browser journey; re-verify |
 | 034 | Opportunity Category Browser | web · `/marketplace/categories` | Functional — API e2e + browser journey (stage05.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 035 | Advanced Search & Filter | web · `/marketplace/search` | Functional — API e2e + browser journey (stage05.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
-| 036 | Opportunity Detail Page | web · `/opportunities/[id]` | Functional — browser journey only | Below premium standard — pending redesign | Native, untested | Redesign to Phase B system; add native test; re-verify |
+| 036 | Opportunity Detail Page | web · `/opportunities/[id]` | Functional — API e2e + browser journey (recovery.e2e.ts) | **Passed quality gate** (2026-11-08) | Native + test | Maintain |
 | 037 | Saved Opportunities & Alerts | web · `/marketplace/saved` | Functional — API e2e + browser journey (stage05.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 038 | Location-Based Opportunities Map | web · `/marketplace/map` | Functional — API e2e + browser journey (stage05.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
 | 039 | Product & Service Detail | web · `/catalogue/[id]` | Functional — API e2e + browser journey (stage04.e2e.ts) | Below premium standard — pending redesign | Responsive web only | Redesign to Phase B system; re-verify |
@@ -286,7 +286,7 @@ npx expo export --platform web      → Exported (used only to render native lay
 | 134 | Lead Ownership & Conflict Resolution | admin · `/lead-conflicts` | Functional — API e2e + browser journey (stage06.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; re-verify |
 | 135 | Commission Policy Configuration | admin · `/commission-policy` | Functional — API e2e only (no browser journey) (stage12.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; add browser journey; re-verify |
 | 136 | Product & Catalogue Management | admin · `/catalogue` | Functional — API e2e + browser journey (stage04.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; re-verify |
-| 137 | Project / Tender Administration | admin · `/tenders` | Functional — API e2e + browser journey (stage09.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; re-verify |
+| 137 | Project / Tender Administration | admin · `/tenders` | Functional — API e2e + browser journey (recovery.e2e.ts, stage09.e2e.ts) | **Passed quality gate** (2026-11-08) | n/a (desktop admin) | Maintain |
 | 138 | Finance & Settlement Controls | admin · `/finance` | Functional — API e2e + browser journey (stage12.e2e.ts) | Below premium standard — pending redesign | n/a (desktop admin) | Redesign to Phase B system; re-verify |
 | 139 | Performance Analytics & BI | admin · `/analytics` | Not built | — | n/a (desktop admin) | Build in Stage 16 under the new design system |
 | 140 | AI Monitoring & Recommendation Controls | admin · `/ai` | Not built | — | n/a (desktop admin) | Build in Stage 14 under the new design system |
