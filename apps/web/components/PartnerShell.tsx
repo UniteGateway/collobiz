@@ -15,14 +15,14 @@ export function DemoRibbon() {
 export function PartnerShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { me, logout, switchOrg } = useSession();
-  const alerts = useQuery<unknown[]>(me ? '/me/notifications' : null, { unread: 'true' });
+  const alerts = useQuery<{ unread: number }>(me ? '/notifications' : null, { unread: 'true' });
   const initials = me?.fullName.split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
   const orgs = me?.memberships.filter((m, i, a) => a.findIndex((x) => x.organizationId === m.organizationId) === i) ?? [];
-  const unread = alerts.data?.length ?? 0;
+  const unread = alerts.data?.unread ?? 0;
   const tools = me ? (
     <>
       <UiLink href="/marketplace/search" className="cz-icon-btn" aria-label="Advanced search"><Icon name="search" /></UiLink>
-      <UiLink href="/activity" className="cz-icon-btn" aria-label={unread ? `${unread} unread notifications` : 'Notifications'}><Icon name="bell" />{unread > 0 && <span className="cz-dot">{unread > 99 ? '99+' : unread}</span>}</UiLink>
+      <UiLink href="/notifications" className="cz-icon-btn" aria-label={unread ? `${unread} unread notifications` : 'Notifications'}><Icon name="bell" />{unread > 0 && <span className="cz-dot">{unread > 99 ? '99+' : unread}</span>}</UiLink>
     </>
   ) : null;
   const menu = me ? (

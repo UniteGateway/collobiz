@@ -15,13 +15,16 @@ export const MODULES: Module[] = [
     tabs: [['/my/leads', 'My leads'], ['/crm/pipeline', 'Pipeline'], ['/tasks', 'Tasks'], ['/activity', 'Activity'], ['/lead-protection', 'Protection'], ['/lead-disputes', 'Disputes']] },
   { key: 'collaboration', label: 'Collaboration', icon: 'teams', home: '/teams', match: ['/teams', '/partners', '/collaboration', '/consortiums'],
     tabs: [['/teams', 'My teams'], ['/collaboration/requests', 'Requests'], ['/partners/find', 'Find partners'], ['/partners/ai-matches', 'AI matches'], ['/partners', 'Directory'], ['/consortiums', 'Consortiums']] },
+  { key: 'messages', label: 'Messages', icon: 'messages', home: '/inbox', match: ['/inbox', '/chat', '/meetings', '/announcements', '/notifications'],
+    tabs: [['/inbox', 'Inbox'], ['/meetings', 'Meetings'], ['/announcements', 'Announcements'], ['/notifications', 'Notifications']] },
   { key: 'tenders', label: 'Tenders', icon: 'tenders', home: '/tenders', match: ['/tenders'], ownTabs: true },
   { key: 'projects', label: 'Projects', icon: 'projects', home: '/projects', match: ['/projects'], ownTabs: true },
   { key: 'trading', label: 'Trading', icon: 'trading', home: '/trading', match: ['/trading'], ownTabs: true },
   { key: 'earnings', label: 'Earnings', icon: 'earnings', home: '/earnings', match: ['/earnings', '/commissions', '/payouts', '/payments', '/tax-records', '/finance'], ownTabs: true },
   { key: 'documents', label: 'Documents', icon: 'documents', home: '/vault', match: ['/vault'] },
   { key: 'account', label: 'Account', icon: 'settings', home: '/profile', match: ['/profile', '/company', '/settings'],
-    tabs: [['/profile', 'Profile'], ['/company/team', 'Company & team'], ['/settings/security', 'Security'], ['/settings/privacy', 'Privacy & data']] },
+    tabs: [['/profile', 'Profile'], ['/company/team', 'Company & team'], ['/settings/notifications', 'Notifications'], ['/settings/security', 'Security'], ['/settings/privacy', 'Privacy & data']] },
+  { key: 'help', label: 'Help & support', icon: 'help', home: '/help', match: ['/help', '/support'], tabs: [['/help', 'Help & feedback'], ['/support/tickets', 'Support tickets']] },
 ];
 
 export function moduleFor(path: string) {
@@ -33,10 +36,10 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}): Nav
   const sections: NavSection[] = [];
   if (me?.activeOrg && !verified) sections.push({ title: 'Get started', items: [{ href: '/onboarding/status', label: 'Complete verification', icon: 'verify' }] });
   if (!me?.activeOrg) sections.push({ title: 'Get started', items: [{ href: '/onboarding/account-type', label: 'Create partner account', icon: 'verify' }] });
-  const work = MODULES.filter((m) => !['account', 'documents'].includes(m.key)).map((m) => ({ href: m.home, label: m.label, icon: m.icon, count: m.key === 'home' ? undefined : undefined }));
+  const work = MODULES.filter((m) => !['account', 'documents', 'help'].includes(m.key)).map((m) => ({ href: m.home, label: m.label, icon: m.icon, count: m.key === 'home' ? undefined : undefined }));
   sections.push({ title: 'Workspace', items: work });
   if (me?.capabilities.includes('commission.approve')) sections.push({ title: 'Finance', items: [{ href: '/commissions/approvals', label: 'Commission approvals', icon: 'verify' }] });
-  sections.push({ title: 'Account', items: [{ href: '/vault', label: 'Documents', icon: 'documents' }, { href: '/profile', label: 'Settings', icon: 'settings' }, { href: '/support/contact', label: 'Help & support', icon: 'help' }] });
+  sections.push({ title: 'Account', items: [{ href: '/vault', label: 'Documents', icon: 'documents' }, { href: '/profile', label: 'Settings', icon: 'settings' }, { href: '/help', label: 'Help & support', icon: 'help' }] });
   void counts;
   return sections;
 }

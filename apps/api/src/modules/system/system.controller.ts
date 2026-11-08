@@ -53,7 +53,6 @@ export class SystemController {
     };
   }
 
-  @Public()
   /** 001 — live platform figures for the public homepage. Aggregates only; nothing identifies an organization. */
   @Public()
   @Get('public/stats')
@@ -76,6 +75,8 @@ export class SystemController {
     return { demoMode: config().DEMO_MODE };
   }
 
+  /** Public by design (Stage 01, §7.3): which regulated modules are switched on. Configuration names only, no secrets. */
+  @Public()
   @Get('meta/features')
   features() {
     return {

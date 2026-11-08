@@ -236,6 +236,47 @@ async function stage12(db: Db, refs: SeedRefs) {
   }
 }
 
+/** Stage 13 demo content: a partner conversation, announcements, an upcoming meeting and a support request (all demo data). */
+async function stage13(db: Db, refs: SeedRefs) {
+  const ago = (min: number) => new Date(Date.now() - min * 60_000);
+  const [t] = await db.insert(s.messageThreads).values({ kind: 'direct', subject: 'Transformer stock for Chakan', retentionDays: 730, createdBy: refs.users.deepak, lastMessageAt: ago(42) }).returning();
+  await db.insert(s.threadMembers).values([
+    { threadId: t.id, userId: refs.users.deepak, organizationId: refs.orgs.deccan, lastReadAt: ago(40) },
+    { threadId: t.id, userId: refs.users.asha, organizationId: refs.orgs.volt, lastReadAt: ago(300) },
+  ]);
+  const msgs: [string, string, string, number][] = [
+    ['deepak', 'deccan', 'Hi Asha — we have two 1000 kVA transformers in our Pune warehouse if the Chakan job needs them.', 380],
+    ['asha', 'volt', 'Thanks Deepak. Delivery by the 20th would work. Can you share the test certificates?', 330],
+    ['deepak', 'deccan', 'Yes. I will upload the routine test reports to the enquiry today.', 120],
+    ['deepak', 'deccan', 'Uploaded. Price holds until Friday; ex-works Pune.', 42],
+  ];
+  for (const [u, o, body, min] of msgs) await db.insert(s.messages).values({ threadId: t.id, authorUserId: refs.users[u], authorOrgId: refs.orgs[o], bodyEnc: encryptField(body), createdAt: ago(min) });
+
+  await db.insert(s.announcements).values([
+    { title: 'New solar tender window opens 15 November', body: 'Unite Solar will publish three C&I rooftop tenders (2–5 MW) for verified partners. Make sure your ISO 45001 certificate and recent project references are on your profile before the window opens.', audience: 'verified_partners', sector: 'solar', important: true, createdBy: refs.users.superadmin, publishedAt: ago(60 * 20) },
+    { title: 'Faster commission payouts from December', body: 'Approved commission will now be paid in weekly runs instead of monthly. Nothing changes in how commission is earned: only when the customer pays the certified milestone.', audience: 'partners', important: false, createdBy: refs.users.superadmin, publishedAt: ago(60 * 72) },
+  ]);
+
+  const start = new Date(); start.setDate(start.getDate() + 1); start.setHours(11, 0, 0, 0);
+  const [m] = await db.insert(s.meetings).values({ title: 'Transformer delivery and test certificates', agenda: 'Confirm delivery date for Chakan, review routine test reports, agree payment terms.', startsAt: start, endsAt: new Date(start.getTime() + 30 * 60_000), organizerUserId: refs.users.asha, organizerOrgId: refs.orgs.volt, roomKey: randomUUID().replace(/-/g, '').slice(0, 16) }).returning();
+  await db.insert(s.meetingAttendees).values([
+    { meetingId: m.id, userId: refs.users.asha, organizationId: refs.orgs.volt, rsvp: 'accepted' },
+    { meetingId: m.id, userId: refs.users.deepak, organizationId: refs.orgs.deccan, rsvp: 'accepted' },
+    { meetingId: m.id, userId: refs.users.rohit, organizationId: refs.orgs.volt, rsvp: 'pending' },
+  ]);
+
+  const [tk] = await db.insert(s.supportTickets).values({ code: 'TKT-2026-104512', requesterUserId: refs.users.asha, organizationId: refs.orgs.volt, category: 'technical', priority: 'normal', subject: 'Milestone photos upload slowly from site', status: 'in_progress', firstResponseDueAt: new Date(Date.now() + 20 * 3600_000), firstRespondedAt: ago(90), assigneeUserId: refs.users.compliance }).returning();
+  await db.insert(s.ticketMessages).values([
+    { ticketId: tk.id, authorUserId: refs.users.asha, body: 'Uploading site photos for the Chakan milestone takes several minutes per image on the site’s 4G connection.', createdAt: ago(240) },
+    { ticketId: tk.id, authorUserId: refs.users.compliance, fromStaff: true, body: 'Thanks Asha. We are adding automatic image compression before upload; in the meantime you can upload from the office and attach later.', createdAt: ago(90) },
+  ]);
+  await db.insert(s.notifications).values([
+    { userId: refs.users.asha, kind: 'message', title: 'New message from Deepak Rao', body: 'Open the conversation to read it.', link: `/chat/${t.id}`, createdAt: ago(42) },
+    { userId: refs.users.asha, kind: 'meeting', title: 'Meeting tomorrow: Transformer delivery and test certificates', body: 'Deepak Rao accepted.', link: `/meetings/${m.id}/room`, createdAt: ago(100) },
+    { userId: refs.users.asha, kind: 'support', title: 'Reply on TKT-2026-104512', body: 'We are adding automatic image compression before upload…', link: `/support/tickets?id=${tk.id}`, createdAt: ago(90) },
+  ]);
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
@@ -247,4 +288,5 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await stage11(db, refs);
   await stage11b(db, refs);
   await stage12(db, refs);
+  await stage13(db, refs);
 }

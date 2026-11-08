@@ -812,6 +812,60 @@ suites.push({
   },
 });
 
+// ---------------- Stage 13 ----------------
+suites.push({
+  name: 'Stage 13 · 105/106 message a partner → 109/108 schedule a meeting → 112 support request → 111/147 notifications',
+  run: async ({ page, WEB, expect, label, shot }) => {
+    const note = pick(label, 'Can you hold two transformers for the Chakan job?', 'Please confirm stock for the Ranjangaon site.');
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/inbox');
+    await page.getByRole('button', { name: 'New message' }).click();
+    await page.getByLabel('To').fill('Ravi');
+    await page.getByRole('button', { name: /Ravi Patel/ }).first().click();
+    await page.getByLabel('Message', { exact: true }).fill(note);
+    await page.getByRole('button', { name: 'Send', exact: true }).click();
+    await page.waitForURL(/\/chat\//);
+    await page.getByText(note).first().waitFor();
+    await page.getByLabel('Message', { exact: true }).fill('Thanks — following up after the site visit.');
+    await page.getByRole('button', { name: 'Send', exact: true }).click();
+    await page.getByText('Thanks — following up after the site visit.').last().waitFor();
+    await shot('106-chat');
+    // The recipient sees it in their inbox
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/inbox');
+    await page.locator('[data-thread]').filter({ hasText: 'Asha Patil' }).first().click();
+    await page.getByText(note).first().waitFor();
+    // 109 — Ravi schedules a meeting with Asha
+    await page.goto(WEB + '/meetings');
+    await page.getByRole('button', { name: 'Schedule meeting' }).click();
+    await page.getByLabel('Title').fill('Stock confirmation call');
+    await page.getByLabel('Search people to invite').fill('Asha');
+    await page.getByRole('button', { name: /Asha Patil/ }).first().click();
+    await page.getByRole('button', { name: 'Send invitations' }).click();
+    await page.locator('[data-meeting]').filter({ hasText: 'Stock confirmation call' }).first().waitFor();
+    await page.locator('[data-meeting] a', { hasText: 'Stock confirmation call' }).first().click();
+    await page.getByRole('heading', { name: 'Agenda' }).waitFor();
+    await shot('108-room');
+    // 112 — support request with a response deadline
+    await page.goto(WEB + '/support/tickets');
+    await page.getByRole('button', { name: 'New request' }).click();
+    await page.getByLabel('Subject').fill('Cannot see my payout reference');
+    await page.getByLabel('Describe the problem').fill('The payout for milestone 1 shows settled but no bank reference is shown.');
+    await page.getByRole('button', { name: 'Send request' }).click();
+    await page.getByRole('heading', { name: 'Cannot see my payout reference' }).waitFor();
+    await page.getByText(/Reply due by/).waitFor();
+    // 111/147 — Asha has a meeting notification; mandatory email cannot be switched off
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/notifications');
+    await page.getByText('Meeting invite: Stock confirmation call').first().waitFor();
+    await page.goto(WEB + '/settings/notifications');
+    expect(await page.getByRole('switch', { name: 'Contracts by email' }).isDisabled(), 'mandatory email switch is editable');
+    await page.getByRole('switch', { name: 'Messages by sms' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
+    await page.getByText('Preferences saved.').waitFor();
+    await shot('147-prefs');
+  },
+});
 // ---------------- Stage 10 ----------------
 let lastExecutedContract = null; // handed to the Stage 11 project journey
 suites.push({
