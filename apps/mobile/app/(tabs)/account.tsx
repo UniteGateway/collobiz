@@ -37,14 +37,19 @@ export default function Account() {
       )}
       {org && (
         <Section title="Work">
+          <Row icon="folder-open" title="Projects & site progress" onPress={go('/projects')} />
+          <Row icon="calendar" title="Meetings" onPress={go('/meetings')} />
+          <Row icon="megaphone" title="Announcements" onPress={go('/announcements')} />
           <Row icon="bar-chart" title="Sales pipeline" onPress={go('/pipeline')} />
           <Row icon="shield-checkmark" title="Lead protection" onPress={go('/lead-protection')} />
           <Row icon="cube" title="Product enquiries & prices" onPress={go('/trading/enquiry')} />
           <Row icon="time" title="Activity" onPress={go('/activity')} />
         </Section>
       )}
-      <Section title="Security">
+      <Section title="Settings & help">
+        <Row icon="notifications" title="Notifications" onPress={go('/settings/notifications')} />
         <Row icon="lock-closed" title="Sign-in & two-factor" onPress={go('/security')} />
+        <Row icon="help-buoy" title="Help & support" onPress={go('/help')} />
       </Section>
       <Section>
         <Row title="Sign out" icon="log-out-outline" iconTint={theme.colors.danger} chevron={false} onPress={confirmSignOut} testID="sign-out" />

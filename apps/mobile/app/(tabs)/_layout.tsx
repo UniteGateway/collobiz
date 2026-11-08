@@ -9,7 +9,7 @@ const tab = (title: string, icon: Name, active: Name) => ({
   tabBarIcon: ({ color, focused, size }: { color: unknown; focused: boolean; size: number }) => <Ionicons name={focused ? active : icon} size={size - 2} color={String(color)} />,
 });
 
-/** Partner tab bar (Phase D): the five places partners go every day. Everything else is one tap from Account. */
+/** Partner tab bar: the five places partners go every day. Projects, earnings and everything else are one tap from Home or Account. */
 export default function TabsLayout() {
   return (
     <Tabs screenOptions={{
@@ -22,7 +22,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="home" options={tab('Home', 'home-outline', 'home')} />
       <Tabs.Screen name="marketplace" options={tab('Discover', 'storefront-outline', 'storefront')} />
       <Tabs.Screen name="leads" options={tab('Leads', 'shield-checkmark-outline', 'shield-checkmark')} />
-      <Tabs.Screen name="projects" options={tab('Projects', 'folder-open-outline', 'folder-open')} />
+      <Tabs.Screen name="messages" options={tab('Messages', 'chatbubbles-outline', 'chatbubbles')} />
       <Tabs.Screen name="account" options={tab('Account', 'person-circle-outline', 'person-circle')} />
     </Tabs>
   );
