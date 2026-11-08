@@ -12,7 +12,7 @@ psql "$E2E_DB" -c "drop schema if exists public cascade; drop schema if exists d
 (cd apps/api && DATABASE_URL="$E2E_DB" node -r @swc-node/register src/db/migrate.ts >/dev/null && DATABASE_URL="$E2E_DB" node -r @swc-node/register src/db/seed.ts | tail -1)
 DB_OVERRIDE="$E2E_DB" scripts/dev-restart.sh
 status=0
-node scripts/e2e-smoke.mjs "$@" || status=$?
+DATABASE_URL="$E2E_DB" node scripts/e2e-smoke.mjs "$@" || status=$?   # direct SQL in journeys must hit the e2e database too
 [ -z "${SUITE:-}" ] && { node scripts/a11y-scan.mjs > "${LOG_DIR:-/tmp}/a11y.txt" 2>&1 || status=$?; grep -c ": 0 violation" "${LOG_DIR:-/tmp}/a11y.txt" | sed 's/^/a11y pages clean: /'; }
 scripts/dev-restart.sh >/dev/null   # back to the demo database
 exit $status
