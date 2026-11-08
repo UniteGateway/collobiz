@@ -22,6 +22,8 @@ const Env = z.object({
   /** Video provider for meeting rooms: local/none (scheduling, agenda, minutes only) or jitsi. */
   MEETING_PROVIDER: z.string().default('local'),
   MEETING_JITSI_BASE_URL: z.string().url().default('https://meet.jit.si'),
+  /** Shows the 'demonstration environment' ribbon; demo seeds are refused in production regardless. */
+  DEMO_MODE: bool.default(false),
   FEATURE_INVESTOR_DATA_ROOM: bool.default(false),
   FEATURE_FINANCE_INTRODUCTIONS: bool.default(false),
   ACCESS_TOKEN_TTL_SEC: z.coerce.number().default(900),

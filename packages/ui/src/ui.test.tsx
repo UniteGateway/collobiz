@@ -26,6 +26,10 @@ describe('components', () => {
     expect(screen.getByText('Reupload requested').getAttribute('data-status')).toBe('reupload_requested');
     expect(toneForStatus('settled')).toBe('success');
     expect(toneForStatus('disputed')).toBe('danger');
+    // Regression (audit §3.4): negated states must not render as success
+    for (const st of ['disqualified', 'not_awarded', 'unverified', 'inactive', 'Disqualified']) expect(toneForStatus(st)).toBe('danger');
+    expect(toneForStatus('technically_qualified')).toBe('success');
+    expect(toneForStatus('pending_review')).toBe('warning');
   });
   it('PermissionDenied is announced', () => {
     render(<PermissionDenied />);

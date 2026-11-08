@@ -1,4 +1,7 @@
 /** UI smoke suites, appended stage by stage. Each suite drives real UI → API → DB paths. */
+
+/** Realistic fixture names: one per viewport. The e2e database is rebuilt for every run, so titles never carry timestamps. */
+const pick = (label, desktop, mobile) => (label === 'mobile' ? mobile : desktop);
 const suites = [
   {
     name: 'Stage 01 · 001 homepage renders brand and CTAs',
@@ -90,7 +93,7 @@ suites.push(
     name: 'Stage 02 · 011/012 register, verify email by OTP, reach dashboard',
     run: async ({ page, WEB, expect, shot, label }) => {
       await page.context().clearCookies();
-      const email = `e2e.${label}.${Date.now()}@example.com`;
+      const email = `priya.${label}@nova-energy.example`;
       await page.goto(WEB + '/login?mode=register');
       await page.getByLabel('Full name').fill('E2E Partner');
       await page.getByLabel('Email').fill(email);
@@ -124,7 +127,7 @@ suites.push(
       await webLogin(page, WEB, 'ravi@sunrise.example');
       await page.goto(WEB + '/company/team');
       await page.getByText('ravi@sunrise.example').waitFor();
-      const invitee = `sales.${label}.${Date.now()}@sunrise.example`;
+      const invitee = `sales.${label}@sunrise.example`;
       await page.getByLabel('Full name').fill('Sales Lead');
       await page.getByLabel('Work email').fill(invitee);
       await page.getByRole('button', { name: 'Send invitation' }).click();
@@ -192,7 +195,7 @@ suites.push({
   name: 'Stage 03 · 013–022 web onboarding → 130 admin verifies → partner verified',
   run: async ({ page, WEB, ADMIN, expect, shot, label }) => {
     const name = `Nova ${label}`;
-    await registerVerified(page, WEB, `nova.${label}.${Date.now()}@example.com`, name);
+    await registerVerified(page, WEB, `ops.${label}@nova-projects.example`, name);
     // 013
     await page.getByText('Company partner').click();
     await page.getByRole('button', { name: 'Contractor / EPC' }).click();
@@ -327,7 +330,7 @@ suites.push({
     await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
     await page.goto(ADMIN + '/catalogue');
     await page.getByRole('button', { name: 'New item' }).click();
-    const name = `Hybrid Inverter ${label} ${Date.now()}`;
+    const name = pick(label, 'Hybrid Inverter 10 kW — 3-phase', 'Hybrid Inverter 5 kW — single-phase');
     await page.getByLabel('Name').fill(name);
     await page.getByLabel('Description').fill('Hybrid inverter with battery interface for C&I sites.');
     await page.getByLabel('List price ₹').fill('180000');
@@ -426,7 +429,7 @@ suites.push({
     await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
     await page.goto(ADMIN + '/opportunities');
     await page.getByRole('button', { name: 'Publish opportunity' }).click();
-    const title = `Solar O&M contractor ${label} ${Date.now()}`;
+    const title = pick(label, 'Solar O&M contractor — Pune rooftop portfolio', 'Solar O&M contractor — Nashik rooftop portfolio');
     await page.getByLabel('Title').fill(title);
     await page.getByLabel('Scope summary').fill('Annual O&M for 3 MW of rooftop plants in Pune with monthly reporting.');
     await page.getByLabel('City').fill('Pune');
@@ -441,7 +444,7 @@ suites.push({
 suites.push({
   name: 'Stage 06 · 043–052 lead wizard → certificate → 132 admin releases → public verify → 153 dispute',
   run: async ({ page, WEB, ADMIN, label, expect, shot }) => {
-    const uniq = `${label}${Date.now()}`;
+    const uniq = pick(label, 'Forge', 'Foundry');
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.goto(WEB + '/leads/new');
     await page.getByLabel('Date consent obtained').fill(new Date(Date.now() - 3600_000).toISOString().slice(0, 16));
@@ -517,7 +520,7 @@ suites.push({
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.goto(WEB + '/crm/pipeline');
     await page.getByRole('button', { name: 'New deal' }).click();
-    const title = `Battery retrofit ${label} ${Date.now()}`;
+    const title = pick(label, 'Battery retrofit — Hinjewadi data centre', 'Battery retrofit — Chakan cold store');
     await page.getByLabel('Deal title').fill(title);
     await page.getByLabel('Value ₹').fill('1800000');
     await page.getByRole('button', { name: 'Create' }).click();
@@ -530,7 +533,7 @@ suites.push({
     await shot('053-pipeline');
     await card.getByRole('link').click();
     await page.getByText(/contacted|new → qualified — Budget confirmed by CFO/).first().waitFor();
-    const taskTitle = `Share battery sizing note ${label} ${Date.now()}`;
+    const taskTitle = pick(label, 'Share battery sizing note with the CFO', 'Send battery sizing note to the plant head');
     await page.getByLabel('Follow-up', { exact: true }).fill(taskTitle);
     await page.getByLabel('Due', { exact: true }).fill(new Date(Date.now() + 86400_000).toISOString().slice(0, 16));
     await page.getByRole('button', { name: 'Add', exact: true }).click();
@@ -554,7 +557,7 @@ suites.push({
 suites.push({
   name: 'Stage 08 · 055/057 discovery → 154 team → 058 invite → 059/062 accept+NDA → 156 workspace → 063 sharing → 064 activate',
   run: async ({ page, WEB, label, expect, shot }) => {
-    const name = `Kolhapur Foundry Team ${label} ${Date.now()}`;
+    const name = pick(label, 'Kolhapur Foundry Rooftop Team', 'Satara Foundry Rooftop Team');
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.goto(WEB + '/partners/find');
     await page.locator('[data-partner="Sunrise Traders"]').waitFor();
@@ -653,7 +656,7 @@ suites.push({
   name: 'Stage 09 · full sealed-bid lifecycle: 066 publish → 068 sealed bids → open → 070 → 071 → 069 → 073 → award → 137 admin',
   only: 'desktop',
   run: async ({ page, WEB, ADMIN, label, expect, shot }) => {
-    const title = `Transformer yard O&M ${label} ${Date.now()}`;
+    const title = pick(label, 'Transformer yard O&M — Chakan plant', 'Transformer yard O&M — Ranjangaon plant');
     // 066 — issuer drafts and publishes
     await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
     await page.goto(WEB + '/tenders/new');
@@ -848,7 +851,7 @@ suites.push({
     await page.getByRole('link', { name: 'Milestones' }).click();
     await page.getByRole('table', { name: 'Milestones' }).getByText('Structure & module mounting — Shed A').waitFor();
     await page.getByRole('link', { name: 'Site progress' }).click();
-    const note = `Inverter plinths cast (${label} ${Date.now()})`;
+    const note = pick(label, 'Inverter plinths cast on the east shed; curing for 7 days.', 'Inverter plinths cast on the west shed; curing for 7 days.');
     await page.getByLabel('What happened on site?').fill(note);
     await page.getByLabel('Milestone').selectOption({ index: 1 });
     await page.getByLabel('Progress %').fill('70');
@@ -976,7 +979,7 @@ suites.push({
   name: 'Stage 11b · 087 requirement → 089 quotes → 090 PO → 091 accept → 092 dispatch/GRN → 094 claim → close; 093 routing → 088',
   only: 'desktop',
   run: async ({ page, WEB, label, expect, shot }) => {
-    const title = `Cable for inverter yard ${label} ${Date.now()}`;
+    const title = pick(label, 'Armoured cable for the inverter yard — Chakan', 'Armoured cable for the inverter yard — Talegaon');
     // 087 — buyer posts a requirement
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.goto(WEB + '/trading/requirements/new');

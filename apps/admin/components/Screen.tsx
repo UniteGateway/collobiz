@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { SCREENS, SCREEN_FAMILIES, type ScreenAccess } from '@collabiz/types';
+import { SCREENS, type ScreenAccess } from '@collabiz/types';
 import { PageHeader, LoadingState, PermissionDenied, Alert, ButtonLink, ErrorState } from '@collabiz/ui';
 import { useSession, type Me } from '@/lib/session';
 import { isForbidden } from '@/lib/hooks';
@@ -43,10 +43,9 @@ export function Screen({ id, children, actions, description, title }: { id: stri
     if (!loading && def && def.access !== 'public' && !me) router.replace(`/login?next=${encodeURIComponent(path)}`);
   }, [loading, me, def, router, path]);
   if (!def) return <ErrorState error={`Unknown screen ${id}`} />;
-  const family = SCREEN_FAMILIES[def.family - 1]?.name;
   return (
     <div data-screen={id}>
-      <PageHeader title={title ?? def.title} screenId={id} breadcrumb={`Unite-first hybrid network / ${family}`} actions={!denial ? actions : undefined} description={description} />
+      <PageHeader title={title ?? def.title} screenId={id} eyebrow="Unite Group administration" showScreenId={process.env.NEXT_PUBLIC_SHOW_SCREEN_IDS === 'true'} actions={!denial ? actions : undefined} description={description} />
       {loading && def.access !== 'public' ? <LoadingState /> : denial ? (
         <div className="cz-card">
           <PermissionDenied reason={denial.reason} />

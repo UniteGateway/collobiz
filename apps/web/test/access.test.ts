@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { accessDenial } from '../components/Screen';
-import { buildNav } from '../components/PartnerShell';
+import { MODULES, moduleFor, partnerNav } from '../lib/navigation';
 import type { Me } from '../lib/session';
 
 const base: Me = {
@@ -27,7 +27,21 @@ describe('client access gate (UX mirror of API rules)', () => {
     expect(accessDenial('super-admin', base)).not.toBeNull();
     expect(accessDenial('super-admin', { ...base, platformRoles: ['super_admin'] })).toBeNull();
   });
-  it('navigation only lists implemented, non-public, non-parameterised routes', () => {
-    for (const sec of buildNav()) for (const it of sec.items) expect(it.href.includes('[')).toBe(false);
+  it('navigation is task-based and compact (audit §3.2): no registry titles, no parameterised routes', () => {
+    const verified = { ...base, activeOrg: { ...base.activeOrg!, verificationStatus: 'verified' } };
+    const items = partnerNav(verified).flatMap((s) => s.items);
+    expect(items.length).toBeLessThanOrEqual(14);
+    for (const it of items) { expect(it.href.includes('[')).toBe(false); expect(it.icon).toBeTruthy(); }
+    expect(items.map((i) => i.label)).not.toContain('OTP & Email Verification');
+    expect(partnerNav(base).flatMap((s) => s.items)[0]).toMatchObject({ href: '/onboarding/status' }); // unverified: verification first
+    expect(partnerNav({ ...verified, capabilities: ['commission.approve'] }).some((s) => s.title === 'Finance')).toBe(true);
+  });
+  it('every page maps to the most specific module', () => {
+    expect(moduleFor('/marketplace/map')?.key).toBe('opportunities');
+    expect(moduleFor('/opportunities/abc')?.key).toBe('opportunities');
+    expect(moduleFor('/projects/1/milestones')?.key).toBe('projects');
+    expect(moduleFor('/earnings/live')?.key).toBe('earnings');
+    expect(moduleFor('/login')).toBeNull();
+    for (const m of MODULES) for (const [h] of m.tabs ?? []) expect(moduleFor(h)?.key).toBe(m.key);
   });
 });

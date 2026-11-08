@@ -128,4 +128,11 @@ describe('Stage 05 — opportunity marketplace (gate: real listings and eligibil
     expect(r.body.length).toBeGreaterThan(0);
     expect(r.body.every((o: any) => o.lat != null && o.lng != null)).toBe(true);
   });
+
+  it('001 public stats are live aggregates with no organization details', async () => {
+    const r = await api(app).get('/v1/public/stats').expect(200);
+    expect(r.body).toMatchObject({ verifiedPartners: expect.any(Number), groupCompanies: expect.any(Number), openOpportunities: expect.any(Number), openValue: expect.any(Number) });
+    expect(r.body.verifiedPartners).toBeGreaterThan(0);
+    expect(Object.keys(r.body).sort()).toEqual(['activeSectors', 'asOf', 'groupCompanies', 'openOpportunities', 'openValue', 'protectedLeads', 'verifiedPartners']);
+  });
 });

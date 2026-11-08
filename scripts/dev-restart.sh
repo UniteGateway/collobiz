@@ -6,6 +6,8 @@ cd "$(dirname "$0")/.."
 for p in 4000 3000 3001; do fuser -k -n tcp $p >/dev/null 2>&1 || true; done
 sleep 1
 set -a; [ -f .env ] && . ./.env; set +a
+# Browser suites run against a disposable database so test data never reaches the demo database (audit §3.1).
+if [ -n "${DB_OVERRIDE:-}" ]; then export DATABASE_URL="$DB_OVERRIDE"; fi
 (cd apps/api && nohup node dist/main.js > "$LOG_DIR/api.log" 2>&1 &)
 (cd apps/web && nohup npx next start -p 3000 > "$LOG_DIR/web.log" 2>&1 &)
 (cd apps/admin && nohup npx next start -p 3001 > "$LOG_DIR/admin.log" 2>&1 &)

@@ -2,7 +2,8 @@
 import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { SCREENS, SCREEN_FAMILIES, type ScreenAccess } from '@collabiz/types';
-import { PageHeader, LoadingState, PermissionDenied, Alert, ButtonLink, ErrorState } from '@collabiz/ui';
+import { PageHeader, LoadingState, PermissionDenied, Alert, ButtonLink, ErrorState, UiLink } from '@collabiz/ui';
+import { moduleFor } from '@/lib/navigation';
 import { useSession, type Me } from '@/lib/session';
 import { isForbidden } from '@/lib/hooks';
 
@@ -33,7 +34,10 @@ export function accessDenial(access: ScreenAccess, me: Me | null): { reason: str
   }
 }
 
-export function Screen({ id, children, actions, description, title }: { id: string; children: React.ReactNode; actions?: React.ReactNode; description?: React.ReactNode; title?: string }) {
+/** Development aid only; never enabled in production builds. */
+const SHOW_IDS = process.env.NEXT_PUBLIC_SHOW_SCREEN_IDS === 'true';
+
+export function Screen({ id, children, actions, description, title, eyebrow }: { id: string; children: React.ReactNode; actions?: React.ReactNode; description?: React.ReactNode; title?: string; eyebrow?: string }) {
   const def = SCREENS.find((s) => s.id === id);
   const { me, loading } = useSession();
   const router = useRouter();
@@ -43,10 +47,14 @@ export function Screen({ id, children, actions, description, title }: { id: stri
     if (!loading && def && def.access !== 'public' && !me) router.replace(`/login?next=${encodeURIComponent(path)}`);
   }, [loading, me, def, router, path]);
   if (!def) return <ErrorState error={`Unknown screen ${id}`} />;
+  const mod = moduleFor(path);
   const family = SCREEN_FAMILIES[def.family - 1]?.name;
   return (
     <div data-screen={id}>
-      <PageHeader title={title ?? def.title} screenId={id} breadcrumb={`Unite-first hybrid network / ${family}`} actions={!denial ? actions : undefined} description={description} />
+      <PageHeader title={title ?? def.title} screenId={id} eyebrow={eyebrow ?? mod?.label ?? (def.access === 'public' ? undefined : family)} showScreenId={SHOW_IDS} actions={!denial ? actions : undefined} description={description} />
+      {mod?.tabs && !mod.ownTabs && mod.tabs.some(([h]) => h === path) && (
+        <nav aria-label={`${mod.label} sections`} className="cz-tabs">{mod.tabs.map(([h, l]) => <UiLink key={h} href={h} aria-current={h === path ? 'page' : undefined}>{l}</UiLink>)}</nav>
+      )}
       {loading && def.access !== 'public' ? <LoadingState /> : denial ? (
         <div className="cz-card">
           <PermissionDenied reason={denial.reason} />
