@@ -12,6 +12,7 @@ const OPEN = [...OPEN_OPPORTUNITY_STATES] as string[];
 /** Constant SQL list (values are compile-time constants, not user input). */
 export const OPEN_LIST = sql.raw(`(${OPEN.map((s) => `'${s}'`).join(',')})`);
 
+export type ListSort = 'newest' | 'closing' | 'value';
 export interface ListFilters { q?: string; sector?: string; city?: string; region?: string; route?: string; kind?: string; minValue?: number; maxValue?: number; deadlineBefore?: string; scope?: 'all' | 'unite' | 'exchange'; mapped?: boolean }
 
 @Injectable()
@@ -54,12 +55,29 @@ export class OpportunitiesService {
     return c;
   }
 
-  async list(ctx: RequestContext | null, f: ListFilters, limit = 50) {
+  async list(ctx: RequestContext | null, f: ListFilters, limit = 50, offset = 0, sort: ListSort = 'newest') {
     const v = viewerOf(ctx);
+    const order = sort === 'closing' ? [sql`${opportunities.deadline} asc nulls last`, desc(opportunities.publishedAt)]
+      : sort === 'value' ? [sql`${opportunities.estimatedValue} desc nulls last`, desc(opportunities.publishedAt)]
+      : [desc(opportunities.publishedAt), desc(opportunities.createdAt)];
     const rows = await this.db.select({ o: opportunities, ownerName: organizations.displayName })
       .from(opportunities).innerJoin(organizations, eq(organizations.id, opportunities.ownerOrgId))
-      .where(and(this.visibility(v), ...this.filters(f))).orderBy(desc(opportunities.publishedAt), desc(opportunities.createdAt)).limit(Math.min(200, limit));
+      .where(and(this.visibility(v), ...this.filters(f))).orderBy(...order, opportunities.id).limit(Math.min(200, limit)).offset(Math.max(0, offset));
     return rows.map((r) => this.present(r.o, r.ownerName, v));
+  }
+
+  /** 031 — one page of results plus the total and per-route counts for the same filters. */
+  async page(ctx: RequestContext | null, f: ListFilters, limit: number, offset: number, sort: ListSort) {
+    const v = viewerOf(ctx);
+    const base = and(this.visibility(v), ...this.filters({ ...f, scope: 'all', route: undefined }));
+    const [c] = await this.db.select({
+      all: sql<number>`count(*)::int`,
+      unite: sql<number>`count(*) filter (where ${opportunities.route} = 'unite_owned')::int`,
+      exchange: sql<number>`count(*) filter (where ${opportunities.route} in ('partner_exchange','partner_originated') and ${opportunities.status} = 'released')::int`,
+    }).from(opportunities).where(base);
+    const [{ total }] = await this.db.select({ total: sql<number>`count(*)::int` }).from(opportunities).where(and(this.visibility(v), ...this.filters(f)));
+    const items = await this.list(ctx, f, limit, offset, sort);
+    return { items, total: Number(total), limit, offset, sort, counts: { all: Number(c.all), unite: Number(c.unite), exchange: Number(c.exchange) } };
   }
 
   present(o: Opp, ownerName: string | null, v: Viewer) {
@@ -104,18 +122,19 @@ export class OpportunitiesService {
     add('partner', 'Partner account', v.partner ? 'pass' : 'fail', v.partner ? 'Partner organization selected' : 'Create or select a partner organization');
     add('verified', 'KYB verification', v.verified ? 'pass' : 'fail', v.verified ? 'Organization verified' : `Verification status: ${ctx.orgVerificationStatus ?? 'none'}`);
     const need = levelRank(o.minLevel);
-    add('level', `Membership level ≥ ${o.minLevel}`, v.levelRank >= need ? 'pass' : 'fail', `Your level: ${ctx.orgMembershipLevel ?? 'none'}`);
+    const lvl = (l: string | null | undefined) => (l ? `${l.charAt(0).toUpperCase()}${l.slice(1).replace('_', ' ')} partner` : 'none');
+    add('level', 'Membership level', v.levelRank >= need ? 'pass' : 'fail', `Requires ${lvl(o.minLevel)} or above · you are ${lvl(ctx.orgMembershipLevel)}`);
     const sectorOk = !!p?.sectors.includes(o.sector);
     add('sector', 'Sector capability', sectorOk ? 'pass' : 'fail', sectorOk ? `Declared capability in ${sectorName(o.sector)}` : `Add ${sectorName(o.sector)} to your industries (screen 016) if you have this capability`);
     const missing = o.requiredCertifications.filter((c) => !p?.certifications.includes(c));
     add('certifications', 'Required certifications', missing.length ? 'fail' : 'pass', missing.length ? `Missing: ${missing.join(', ')}` : o.requiredCertifications.length ? 'All held' : 'None required');
     if (o.region) {
       const cov = !!p?.regions.some((r) => r === o.region || o.region!.startsWith(r) || r.startsWith(o.region!));
-      add('coverage', 'Geographic coverage', cov ? 'pass' : p?.willingToTravel ? 'warn' : 'warn', cov ? `Covers ${o.region}` : p?.willingToTravel ? 'Outside declared coverage (willing to travel)' : 'Outside declared coverage');
+      add('coverage', 'Geographic coverage', cov ? 'pass' : p?.willingToTravel ? 'warn' : 'warn', cov ? 'Inside your declared service area' : p?.willingToTravel ? 'Outside declared coverage (willing to travel)' : 'Outside declared coverage');
     }
     if (o.estimatedValue && p?.capacityMax) add('capacity', 'Declared capacity', p.capacityMax >= o.estimatedValue ? 'pass' : 'warn', p.capacityMax >= o.estimatedValue ? 'Capacity sufficient' : 'Value exceeds your declared capacity — consider a team (screen 060)');
     const open = OPEN.includes(o.status) && o.listed && (!o.deadline || o.deadline > new Date());
-    add('open', 'Accepting applications', open ? 'pass' : 'fail', open ? (o.deadline ? `Closes ${o.deadline.toISOString().slice(0, 10)}` : 'Open') : 'Not currently accepting applications');
+    add('open', 'Accepting applications', open ? 'pass' : 'fail', open ? (o.deadline ? `Closes ${o.deadline.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}` : 'Open until filled') : 'Not currently accepting applications');
     if (ctx.orgId && ctx.orgId === o.ownerOrgId) add('own', 'Not your own listing', 'fail', 'You cannot apply to your own opportunity');
     const existing = ctx.orgId ? await this.db.select().from(opportunityApplications).where(and(eq(opportunityApplications.opportunityId, o.id), eq(opportunityApplications.organizationId, ctx.orgId), sql`${opportunityApplications.status} <> 'withdrawn'`)).limit(1) : [];
     if (existing.length) add('duplicate', 'No existing application', 'fail', `Already applied (${existing[0].status})`);

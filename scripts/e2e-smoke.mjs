@@ -23,7 +23,7 @@ async function step(name, fn) {
     console.info(`✓ ${name}`);
   } catch (e) {
     results.push({ name, ok: false, error: e.message });
-    console.error(`✗ ${name}: ${e.message.split('\n')[0]}`);
+    console.error(`✗ ${name}: ${process.env.E2E_VERBOSE ? e.message : e.message.split('\n')[0]}`);
   }
 }
 const expect = (cond, msg) => { if (!cond) throw new Error(msg); };

@@ -10,7 +10,7 @@ export interface Module { key: string; label: string; icon: IconName; home: stri
 export const MODULES: Module[] = [
   { key: 'home', label: 'Home', icon: 'home', home: '/dashboard', match: ['/dashboard'] },
   { key: 'opportunities', label: 'Opportunities', icon: 'opportunities', home: '/marketplace', match: ['/marketplace', '/opportunities', '/my/opportunities', '/feed', '/rfq'],
-    tabs: [['/marketplace', 'All'], ['/marketplace/unite', 'Unite Group'], ['/marketplace/exchange', 'Partner exchange'], ['/feed', 'Recommended'], ['/my/opportunities', 'My applications'], ['/marketplace/saved', 'Saved & alerts'], ['/marketplace/categories', 'Categories'], ['/marketplace/map', 'Map']] },
+    tabs: [['/marketplace', 'Browse'], ['/feed', 'Recommended'], ['/my/opportunities', 'My applications'], ['/marketplace/saved', 'Saved & alerts'], ['/marketplace/categories', 'Categories'], ['/marketplace/map', 'Map']] },
   { key: 'leads', label: 'Leads & CRM', icon: 'leads', home: '/my/leads', match: ['/my/leads', '/leads', '/crm', '/tasks', '/activity', '/lead-protection', '/lead-disputes'],
     tabs: [['/my/leads', 'My leads'], ['/crm/pipeline', 'Pipeline'], ['/tasks', 'Tasks'], ['/activity', 'Activity'], ['/lead-protection', 'Protection'], ['/lead-disputes', 'Disputes']] },
   { key: 'collaboration', label: 'Collaboration', icon: 'teams', home: '/teams', match: ['/teams', '/partners', '/collaboration', '/consortiums'],

@@ -13,7 +13,7 @@ import { MailService } from '../../common/adapters';
 import { Idempotent } from '../../common/idempotency';
 import { randomDigits } from '../../common/crypto';
 import { viewerOf } from '../../common/viewer';
-import { OpportunitiesService, OPEN_LIST, type ListFilters } from './opportunities.service';
+import { OpportunitiesService, OPEN_LIST, type ListFilters, type ListSort } from './opportunities.service';
 
 const num = (v?: string) => (v == null || v === '' ? undefined : Number(v));
 function filtersFrom(q: Record<string, string | undefined>): ListFilters {
@@ -47,7 +47,10 @@ export class OpportunitiesController {
   @Public()
   @Get('opportunities')
   list(@OptionalCtx() ctx: RequestContext | null, @Query() q: Record<string, string>) {
-    return this.svc.list(ctx, filtersFrom(q), Number(q.limit) || 50);
+    const sort = (['newest', 'closing', 'value'].includes(q.sort) ? q.sort : 'newest') as ListSort;
+    // paged=true returns { items, total, counts } for the marketplace; the plain array form is kept for existing callers.
+    if (q.paged === 'true') return this.svc.page(ctx, filtersFrom(q), Math.min(50, Number(q.limit) || 12), Math.max(0, Number(q.offset) || 0), sort);
+    return this.svc.list(ctx, filtersFrom(q), Number(q.limit) || 50, 0, sort);
   }
 
   /** 034 — category browser (counts of visible open opportunities per sector). */

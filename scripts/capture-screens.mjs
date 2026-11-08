@@ -15,7 +15,10 @@ const plan = [
   { name: '023-dashboard', login: ['web', 'asha@voltepc.example'], path: '/dashboard' },
   { name: '031-marketplace', login: ['web', 'asha@voltepc.example'], path: '/marketplace' },
   { name: '036-opportunity', login: ['web', 'asha@voltepc.example'], path: async (p) => `/opportunities/${(await api(p, '/opportunities?q=OPP-2026-00001'))[0].id}` },
+  { name: '036-opportunity-not-eligible', login: ['web', 'asha@voltepc.example'], path: async (p) => `/opportunities/${(await api(p, '/opportunities?q=OPP-2026-00003'))[0].id}` },
+  { name: '036-opportunity-owner', login: ['admin-web', 'unite.admin@collabiz.local'], path: async (p) => `/opportunities/${(await api(p, '/opportunities?q=OPP-2026-00001'))[0].id}` },
   { name: '137-tender-admin', login: ['admin', 'superadmin@collabiz.local'], path: '/tenders', base: 'admin' },
+  { name: '137-tender-admin-inspector', login: ['admin', 'superadmin@collabiz.local'], path: '/tenders', base: 'admin', after: async (p) => { await p.locator('.cz-ta-tender button').first().click(); await p.getByRole('heading', { name: 'Audit trail' }).waitFor(); } },
   { name: '070-technical-eval', login: ['mfa', 'evaluator@collabiz.local'], path: async (p) => { const d = await api(p, '/tenders'); const t = d.evaluating.find((x) => ['technical_evaluation', 'commercial_evaluation', 'negotiation', 'awarded'].includes(x.status)); return t ? `/tenders/${t.id}/technical` : '/tenders'; } },
   { name: '073-negotiation', login: ['mfa', 'unite.admin@collabiz.local'], path: async (p) => { const d = await api(p, '/tenders'); const t = d.issued.find((x) => ['negotiation', 'awarded'].includes(x.status)); return t ? `/tenders/${t.id}/negotiation` : '/tenders'; } },
   { name: '065-tender-dashboard', login: ['web', 'ravi@sunrise.example'], path: '/tenders' },
@@ -30,7 +33,7 @@ for (const [vw, w, h] of [['desktop', 1440, 900], ['mobile', 390, 844]]) {
     if (who !== key) {
       await ctx.clearCookies();
       if (s.login?.[0] === 'web') await webLogin(page, WEB, s.login[1]);
-      if (s.login?.[0] === 'mfa') await webLoginMfa(page, WEB, s.login[1]);
+      if (s.login?.[0] === 'mfa' || s.login?.[0] === 'admin-web') await webLoginMfa(page, WEB, s.login[1]);
       if (s.login?.[0] === 'admin') await adminLogin(page, ADMIN, s.login[1]);
       who = key;
     }
@@ -40,6 +43,7 @@ for (const [vw, w, h] of [['desktop', 1440, 900], ['mobile', 390, 844]]) {
     await page.goto(base + path);
     await page.waitForLoadState('networkidle').catch(() => {});
     await page.waitForTimeout(800);
+    if (s.after) await s.after(page);
     await page.screenshot({ path: `${out}/${s.name}-${vw}.png`, fullPage: true });
     console.log(`${s.name}-${vw}: ${path}`);
   }

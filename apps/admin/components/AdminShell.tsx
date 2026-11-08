@@ -40,7 +40,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       sections={[{ items: [{ href: '/', label: 'Overview', icon: 'home' }, { href: '/opportunities', label: 'Opportunity publishing', icon: 'opportunities' }] }, ...sections]} currentPath={path}
       userMenu={
         <div className="cz-row" style={{ gap: 10, flexWrap: 'nowrap' }}>
-          <div className="cz-user"><div className="cz-user-text"><strong>{me.fullName}</strong><span>{me.platformRoles.map((r) => r.replace('_', ' ')).join(', ') || 'No platform role'}</span></div><span className="cz-avatar" aria-hidden>{initials}</span></div>
+          <div className="cz-user"><div className="cz-user-text"><strong>{me.fullName}</strong><span>{me.platformRoles.map((r) => r.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase())).join(', ') || 'No platform role'}</span></div><span className="cz-avatar" aria-hidden>{initials}</span></div>
           <Button variant="ghost" size="sm" onClick={logout} aria-label="Sign out"><Icon name="logout" size={16} /><span className="cz-sr-only">Sign out</span></Button>
         </div>
       }>

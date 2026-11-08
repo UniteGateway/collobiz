@@ -7,6 +7,7 @@ import React, { createContext, useContext, useEffect, useId, useRef, useState } 
 import {
   AlertTriangle, ArrowRight, BadgeCheck, Bell, BookOpen, Briefcase, Building2, CalendarClock, ChartColumn, CheckCircle2, ChevronLeft, ChevronRight, CircleHelp, ClipboardList, FileSignature,
   FileText, FolderKanban, Gavel, Handshake, Inbox, Info, LayoutDashboard, Lock, LogOut, Map, Menu, MessageSquare, Package, Search, Settings, ShieldCheck, Store, Truck, Users, Wallet, X,
+  Award, Bookmark, Building, Check, CircleAlert, Clock, Download, ExternalLink, Eye, IndianRupee, Layers, MapPin, Pencil, Plus, Share2, SlidersHorizontal, UserRound, XCircle,
   type LucideIcon,
 } from 'lucide-react';
 import { toneForStatus, toneColors, humanize, type Tone } from './tokens';
@@ -20,6 +21,7 @@ export const ICONS = {
   trading: Truck, earnings: Wallet, messages: MessageSquare, inbox: Inbox, settings: Settings, help: CircleHelp, users: Users, building: Building2, verify: BadgeCheck,
   audit: ClipboardList, documents: FileText, map: Map, calendar: CalendarClock, learning: BookOpen, briefcase: Briefcase, package: Package, lock: Lock, bell: Bell, search: Search,
   info: Info, warning: AlertTriangle, success: CheckCircle2, arrow: ArrowRight, logout: LogOut, menu: Menu, close: X, prev: ChevronLeft, next: ChevronRight,
+  bookmark: Bookmark, filter: SlidersHorizontal, sector: Layers, location: MapPin, company: Building, clock: Clock, value: IndianRupee, check: Check, cross: XCircle, alert: CircleAlert, share: Share2, download: Download, external: ExternalLink, eye: Eye, edit: Pencil, plus: Plus, award: Award, user: UserRound,
 } satisfies Record<string, LucideIcon>;
 export type IconName = keyof typeof ICONS;
 export function Icon({ name, size = 18, className, label }: { name: IconName; size?: number; className?: string; label?: string }) {
@@ -50,10 +52,10 @@ export function Logo({ src = '/brand/collabiz-mark.png', label = 'collabiz', hre
 export interface NavItem { href: string; label: string; screen?: string; icon?: IconName; count?: number }
 export interface NavSection { title?: string; items: NavItem[] }
 export function AppShell({
-  topNav = [], sections, currentPath, userInitials, userMenu, children, brandLabel, logoSrc, product, tools, banner,
+  topNav = [], sections, currentPath, userInitials, userMenu, children, brandLabel, logoSrc, product, tools, banner, sidebarFooter,
 }: {
   topNav?: NavItem[]; sections: NavSection[]; currentPath: string; userInitials?: string; userMenu?: React.ReactNode;
-  children: React.ReactNode; brandLabel?: string; logoSrc?: string; product?: string; tools?: React.ReactNode; banner?: React.ReactNode;
+  children: React.ReactNode; brandLabel?: string; logoSrc?: string; product?: string; tools?: React.ReactNode; banner?: React.ReactNode; sidebarFooter?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const all = [...topNav, ...sections.flatMap((s) => s.items)].map((n) => n.href);
@@ -65,7 +67,7 @@ export function AppShell({
       <a href="#main" className="cz-skip">Skip to content</a>
       {banner}
       <header className="cz-topbar">
-        <button className="cz-menu-btn" aria-expanded={open} aria-controls="cz-sidebar" onClick={() => setOpen(!open)}><Icon name={open ? 'close' : 'menu'} size={16} />Menu</button>
+        <button className="cz-menu-btn" aria-expanded={open} aria-controls="cz-sidebar" onClick={() => setOpen(!open)} aria-label="Menu"><Icon name={open ? 'close' : 'menu'} size={16} /><span className="cz-menu-label">Menu</span></button>
         <Logo label={brandLabel} src={logoSrc} product={product} />
         {topNav.length > 0 && (
           <nav aria-label="Primary">
@@ -90,6 +92,7 @@ export function AppShell({
               ))}
             </div>
           ))}
+          {sidebarFooter && <div className="cz-sidebar-foot">{sidebarFooter}</div>}
         </aside>
         <main id="main" className="cz-main" tabIndex={-1}>{children}</main>
       </div>

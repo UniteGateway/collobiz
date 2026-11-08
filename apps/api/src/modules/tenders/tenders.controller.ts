@@ -14,7 +14,7 @@
 import { BadRequestException, Body, ConflictException, Controller, Delete, ForbiddenException, Get, HttpCode, Injectable, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { and, asc, desc, eq, inArray, ne, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, ne, or, sql, type SQL } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   assertTransition, AwardSchema, BidDraftSchema, patchOf, BidMachine, EvaluatorSchema, MEMBERSHIP_LEVELS, NegotiationSchema, ScoreSchema, ShortlistSchema, TenderCancelSchema, TenderCreateSchema, TenderMachine,
@@ -693,6 +693,9 @@ export class TendersController {
   }
 }
 
+/** Stage groups used by the 137 dashboard filters and KPI strip. */
+const ADMIN_STAGES: Record<string, string[]> = { live: ['published'], evaluating: ['closed', 'opened', 'technical_evaluation', 'commercial_evaluation', 'negotiation'], awarded: ['awarded'], draft: ['draft'], cancelled: ['cancelled'] };
+
 /** 137 — platform tender administration: metadata, counts and integrity only. Never bid content. */
 @ApiTags('admin')
 @Controller('admin/tenders')
@@ -703,16 +706,44 @@ export class AdminTendersController {
     if (!ctx.platformRoles.length || !ctx.caps.has('tender.evaluate')) throw new ForbiddenException('Platform tender administration only');
   }
 
+  /**
+   * Tender register. With paged=true returns { items, total, summary, attention } for the 137 dashboard:
+   * free-text search (title, code, issuer), stage groups, pagination and integrity exceptions. The plain array form is kept.
+   */
   @Get()
-  async list(@Ctx() ctx: RequestContext, @Query('status') status?: string) {
+  async list(@Ctx() ctx: RequestContext, @Query() q: Record<string, string | undefined>) {
     this.assertPlatform(ctx);
+    const conds: SQL[] = [];
+    if (q.status) conds.push(eq(tenders.status, q.status));
+    const group = q.stage ? ADMIN_STAGES[q.stage] : undefined;
+    if (group) conds.push(inArray(tenders.status, group));
+    if (q.q) conds.push(or(ilike(tenders.title, `%${q.q}%`), ilike(tenders.code, `%${q.q}%`), ilike(organizations.displayName, `%${q.q}%`))!);
+    const where = conds.length ? and(...conds) : undefined;
+    const paged = q.paged === 'true';
+    const limit = paged ? Math.min(50, Number(q.limit) || 15) : 200;
+    const offset = paged ? Math.max(0, Number(q.offset) || 0) : 0;
     const rows = await this.db.select({ t: tenders, issuer: organizations.displayName,
       submitted: sql<number>`(select count(*)::int from bids b where b.tender_id = ${tenders.id} and b.status not in ('draft','withdrawn'))`,
       withdrawn: sql<number>`(select count(*)::int from bids b where b.tender_id = ${tenders.id} and b.status = 'withdrawn')`,
       evaluators: sql<number>`(select count(*)::int from tender_evaluators e where e.tender_id = ${tenders.id})`,
-    }).from(tenders).innerJoin(organizations, eq(organizations.id, tenders.issuerOrgId)).where(status ? eq(tenders.status, status) : undefined).orderBy(desc(tenders.createdAt)).limit(200);
-    return rows.map((r) => ({ id: r.t.id, code: r.t.code, title: r.t.title, sector: r.t.sector, status: r.t.status, issuer: r.issuer, closesAt: r.t.closesAt, publishedAt: r.t.publishedAt, openedAt: r.t.openedAt, cancelReason: r.t.cancelReason,
+    }).from(tenders).innerJoin(organizations, eq(organizations.id, tenders.issuerOrgId)).where(where).orderBy(desc(tenders.createdAt), tenders.id).limit(limit).offset(offset);
+    const items = rows.map((r) => ({ id: r.t.id, code: r.t.code, title: r.t.title, sector: r.t.sector, status: r.t.status, issuer: r.issuer, closesAt: r.t.closesAt, publishedAt: r.t.publishedAt, openedAt: r.t.openedAt, cancelReason: r.t.cancelReason,
       overdueToClose: r.t.status === 'published' && r.t.closesAt.getTime() < Date.now(), submitted: r.submitted, withdrawn: r.withdrawn, evaluators: r.evaluators }));
+    if (!paged) return items;
+    const [{ total }] = await this.db.select({ total: sql<number>`count(*)::int` }).from(tenders).innerJoin(organizations, eq(organizations.id, tenders.issuerOrgId)).where(where);
+    const byStatus = await this.db.select({ status: tenders.status, n: sql<number>`count(*)::int` }).from(tenders).groupBy(tenders.status);
+    const count = (states: readonly string[]) => byStatus.filter((b) => states.includes(b.status)).reduce((a, b) => a + Number(b.n), 0);
+    // Integrity exceptions: past closing but still published, or a tender beyond draft with no evaluation panel.
+    const attention = await this.db.execute<{ id: string; code: string; title: string; issue: string; at: Date }>(sql`
+      select t.id, t.code, t.title, 'overdue_close' as issue, t.closes_at as at from tenders t where t.status = 'published' and t.closes_at < now()
+      union all
+      select t.id, t.code, t.title, 'no_evaluators', t.closes_at from tenders t where t.status in ('published','closed','opened','technical_evaluation','commercial_evaluation')
+        and not exists (select 1 from tender_evaluators e where e.tender_id = t.id)
+      order by at limit 6`).then((x) => x.rows);
+    const [{ closingSoon }] = await this.db.select({ closingSoon: sql<number>`count(*)::int` }).from(tenders).where(and(eq(tenders.status, 'published'), sql`${tenders.closesAt} between now() and now() + interval '7 days'`));
+    return { items, total: Number(total), limit, offset,
+      summary: { all: count(Object.values(ADMIN_STAGES).flat()), live: count(ADMIN_STAGES.live), evaluating: count(ADMIN_STAGES.evaluating), awarded: count(ADMIN_STAGES.awarded), draft: count(ADMIN_STAGES.draft), cancelled: count(ADMIN_STAGES.cancelled), closingSoon: Number(closingSoon) },
+      attention: attention.map((a) => ({ ...a, at: a.at })) };
   }
 
   @Get(':id')

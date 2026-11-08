@@ -374,27 +374,65 @@ suites.push({
   run: async ({ page, WEB, shot }) => {
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.goto(WEB + '/marketplace');
-    await page.getByLabel('Search', { exact: true }).fill('OPP-2026-00003');
+    await page.getByLabel('Search opportunities').fill('OPP-2026-00003');
     await page.locator('[data-opp="OPP-2026-00003"]').click();
-    await page.getByRole('link', { name: /Check eligibility/ }).click();
+    // The detail page explains the gap inline, then links to the full eligibility screen (041).
+    await page.getByRole('heading', { name: 'Not eligible yet' }).waitFor();
+    await page.locator('.cz-od-checks [data-check="certifications"]').getByText('Missing: ISO45001').waitFor();
+    await page.getByRole('link', { name: 'See how to qualify' }).click();
     await page.locator('[data-check="certifications"]').getByText('Missing: ISO45001').waitFor();
     await shot('041-eligibility');
     await webLogin(page, WEB, 'ravi@sunrise.example');
     await page.goto(WEB + '/marketplace/unite');
     const card = page.locator('[data-opp="OPP-2026-00004"]');
     await card.click();
-    await page.getByRole('heading', { name: 'Key facts' }).waitFor();
-    const already = await page.getByText('Your organization applied').count();
+    await page.getByRole('heading', { name: 'About this opportunity' }).waitFor();
+    await page.getByRole('heading', { name: /You can apply|Your application/ }).waitFor();
+    const already = await page.getByRole('heading', { name: 'Your application' }).count();
     if (!already) {
-      await page.getByRole('link', { name: /Check eligibility/ }).click();
-      await page.getByRole('link', { name: 'Continue to application' }).click();
+      await page.getByRole('link', { name: /Apply now/ }).click();
       await page.getByLabel(/Why your organization/).fill('Sunrise has cleared HT cable imports through Mundra for three utilities.');
       await page.getByRole('button', { name: 'Submit application' }).click();
-      await page.getByText('Your organization applied').waitFor();
+      await page.getByRole('heading', { name: 'Your application' }).waitFor();
+      await page.getByRole('list', { name: 'Application progress' }).getByText('Submitted').waitFor();
     }
     await page.goto(WEB + '/my/opportunities');
     await page.getByRole('table', { name: 'Applications' }).getByText('Import sourcing of HT cables').waitFor();
     await shot('024-mine');
+  },
+});
+suites.push({
+  name: 'Recovery · 031 marketplace sources, filters, chips, sort and result count',
+  run: async ({ page, WEB, expect, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/marketplace');
+    const count = page.locator('.cz-mkt-summary p');
+    await count.getByText(/\d+ opportunit/).waitFor();
+    const all = Number((await count.locator('strong').textContent()) ?? 0);
+    // Source segments carry live counts and filter the list.
+    await page.getByRole('group', { name: 'Source' }).getByRole('button', { name: /^Unite Group/ }).click();
+    await page.waitForFunction((n) => Number(document.querySelector('.cz-mkt-summary p strong')?.textContent) < n, all);
+    expect(await page.locator('.cz-route-partner').count() === 0, 'partner listings shown under Unite Group');
+    await page.getByRole('group', { name: 'Source' }).getByRole('button', { name: /^All/ }).click();
+    // A sector filter becomes a removable chip.
+    await page.getByLabel('Sector').selectOption('solar');
+    const chip = page.getByRole('button', { name: 'Remove filter Solar & Renewable Energy' });
+    await chip.waitFor();
+    // Results refresh after the filter settles: the construction listing must leave, the solar one must stay.
+    await page.locator('[data-opp="OPP-2026-00003"]').waitFor({ state: 'detached' });
+    await page.locator('[data-opp="OPP-2026-00001"]').waitFor();
+    await chip.click();
+    await page.locator('[data-opp="OPP-2026-00003"]').waitFor();
+    // Sorting by value puts the largest listing first.
+    await page.getByLabel('Sort by').selectOption('value');
+    const top = await page.evaluate(async () => (await (await fetch('/api/v1/opportunities?paged=true&sort=value&limit=1')).json()).items[0].code);
+    await page.waitForFunction((c) => document.querySelector('[data-opp]')?.getAttribute('data-opp') === c, top);
+    // Nothing matching shows a helpful empty state with a way out.
+    await page.getByLabel('Search opportunities').fill('zzqx nothing matches');
+    await page.getByRole('heading', { name: 'No opportunities match these filters' }).waitFor();
+    await page.getByRole('button', { name: 'Clear filters' }).click();
+    await page.locator('[data-opp]').first().waitFor();
+    await shot('031-marketplace');
   },
 });
 suites.push({

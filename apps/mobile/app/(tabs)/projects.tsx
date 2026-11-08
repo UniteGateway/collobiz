@@ -11,7 +11,7 @@ export default function Projects() {
   if (q.error) return <ErrorView error={q.error} onRetry={q.reload} />;
   const rows = q.data ?? [];
   return (
-    <ScreenView id="075">
+    <ScreenView id="075" tab title="Projects">
       <Stack.Screen options={{ title: 'Projects' }} />
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
         <Kpi label="Active" value={rows.filter((p) => p.status === 'active').length} />

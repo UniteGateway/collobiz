@@ -37,7 +37,8 @@ export function accessDenial(access: ScreenAccess, me: Me | null): { reason: str
 /** Development aid only; never enabled in production builds. */
 const SHOW_IDS = process.env.NEXT_PUBLIC_SHOW_SCREEN_IDS === 'true';
 
-export function Screen({ id, children, actions, description, title, eyebrow }: { id: string; children: React.ReactNode; actions?: React.ReactNode; description?: React.ReactNode; title?: string; eyebrow?: string }) {
+/** `header={false}` lets a screen render its own hero (it must then provide the page's h1); access gating is unchanged. */
+export function Screen({ id, children, actions, description, title, eyebrow, header = true }: { id: string; children: React.ReactNode; actions?: React.ReactNode; description?: React.ReactNode; title?: string; eyebrow?: string; header?: boolean }) {
   const def = SCREENS.find((s) => s.id === id);
   const { me, loading } = useSession();
   const router = useRouter();
@@ -51,7 +52,7 @@ export function Screen({ id, children, actions, description, title, eyebrow }: {
   const family = SCREEN_FAMILIES[def.family - 1]?.name;
   return (
     <div data-screen={id}>
-      <PageHeader title={title ?? def.title} screenId={id} eyebrow={eyebrow ?? mod?.label ?? (def.access === 'public' ? undefined : family)} showScreenId={SHOW_IDS} actions={!denial ? actions : undefined} description={description} />
+      {header && <PageHeader title={title ?? def.title} screenId={id} eyebrow={eyebrow ?? mod?.label ?? (def.access === 'public' ? undefined : family)} showScreenId={SHOW_IDS} actions={!denial ? actions : undefined} description={description} />}
       {mod?.tabs && !mod.ownTabs && mod.tabs.some(([h]) => h === path) && (
         <nav aria-label={`${mod.label} sections`} className="cz-tabs">{mod.tabs.map(([h, l]) => <UiLink key={h} href={h} aria-current={h === path ? 'page' : undefined}>{l}</UiLink>)}</nav>
       )}

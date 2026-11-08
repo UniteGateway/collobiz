@@ -21,7 +21,7 @@ export function PartnerShell({ children }: { children: React.ReactNode }) {
   const unread = alerts.data?.length ?? 0;
   const tools = me ? (
     <>
-      <UiLink href="/marketplace/search" className="cz-icon-btn" aria-label="Search opportunities"><Icon name="search" /></UiLink>
+      <UiLink href="/marketplace/search" className="cz-icon-btn" aria-label="Advanced search"><Icon name="search" /></UiLink>
       <UiLink href="/activity" className="cz-icon-btn" aria-label={unread ? `${unread} unread notifications` : 'Notifications'}><Icon name="bell" />{unread > 0 && <span className="cz-dot">{unread > 99 ? '99+' : unread}</span>}</UiLink>
     </>
   ) : null;
@@ -39,11 +39,12 @@ export function PartnerShell({ children }: { children: React.ReactNode }) {
         <div className="cz-user-text"><strong>{me.fullName}</strong><span>{me.activeOrg?.name ?? 'No organization yet'}</span></div>
         <span className="cz-avatar" aria-hidden>{initials}</span>
       </div>
-      <Button variant="ghost" size="sm" onClick={logout} aria-label="Sign out"><Icon name="logout" size={16} /><span className="cz-sr-only">Sign out</span></Button>
+      <Button variant="ghost" size="sm" onClick={logout} aria-label="Sign out" className="cz-hide-sm"><Icon name="logout" size={16} /><span className="cz-sr-only">Sign out</span></Button>
     </div>
   ) : null;
   return (
-    <AppShell sections={partnerNav(me)} currentPath={path} product="Partner" tools={tools} userMenu={menu} banner={<DemoRibbon />}>
+    <AppShell sections={partnerNav(me)} currentPath={path} product="Partner" tools={tools} userMenu={menu} banner={<DemoRibbon />}
+      sidebarFooter={me ? <><div className="cz-sidebar-user"><span className="cz-avatar" aria-hidden>{initials}</span><span><strong>{me.fullName}</strong><span>{me.activeOrg?.name ?? 'No organization yet'}</span></span></div><button type="button" className="cz-sidebar-signout" onClick={logout}><Icon name="logout" size={16} />Sign out</button></> : undefined}>
       {children}
     </AppShell>
   );
