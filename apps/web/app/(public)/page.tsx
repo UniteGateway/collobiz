@@ -90,6 +90,7 @@ export default function HomePage() {
                 {['Projected', 'Eligible', 'Earned', 'Paid'].map((st, i) => <li key={st} data-done={i < 3}>{st}</li>)}
               </ol>
             </div>
+            <span className="cz-preview-caption">Live listing · status cards are illustrative</span>
           </div>
         </div>
       </section>
