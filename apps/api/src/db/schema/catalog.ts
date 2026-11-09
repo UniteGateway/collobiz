@@ -52,6 +52,10 @@ export const catalogItems = pgTable('catalog_items', {
   priceVisibility: text('price_visibility').notNull().default('verified_partners'),
   visibility: text('visibility').notNull().default('public'), // public | partners | private
   specs: jsonb('specs').notNull().default(sql`'{}'::jsonb`),
+  /** Product photo in private storage (served through the catalogue API, only to people who can see the item). */
+  imageKey: text('image_key'),
+  /** Where the photo was copied from (the company's own website), so re-imports only fetch changed images. */
+  imageSource: text('image_source'),
   status: text('status').notNull().default('draft'), // draft | published | archived
   createdBy: uuid('created_by').references(() => users.id),
   createdAt: createdAt(),

@@ -1,4 +1,5 @@
-import { BadRequestException, Body, Controller, ForbiddenException, Get, HttpCode, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, ForbiddenException, Get, HttpCode, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { and, desc, eq, ilike, inArray, or, sql, type SQL } from 'drizzle-orm';
 import { z } from 'zod';
@@ -8,7 +9,7 @@ import { businessUnits, catalogItems, groupCompanies, organizations, successStor
 import { body } from '../../common/http';
 import { Ctx, OptionalCtx, Public, RequireCaps, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
-import { MailService } from '../../common/adapters';
+import { MailService, StorageService } from '../../common/adapters';
 import { randomDigits } from '../../common/crypto';
 import { canSeePrice, viewerOf, type Viewer } from '../../common/viewer';
 
@@ -26,6 +27,7 @@ function present(i: Item & { ownerName?: string | null }, v: Viewer) {
   return {
     id: i.id, kind: i.kind, name: i.name, sector: i.sector, description: i.description, sku: i.sku, unit: i.unit, specs: i.specs, status: i.status, visibility: i.visibility,
     ownerOrgId: i.ownerOrgId, ownerName: i.ownerName ?? null, currency: i.currency, priceVisibility: i.priceVisibility,
+    image: i.imageKey ? `/api/v1/catalog/${i.id}/image` : null,
     listPrice: show ? i.listPrice : null,
     priceNote: show ? null : i.priceVisibility === 'on_request' ? 'Price on request' : i.priceVisibility === 'certified_partners' ? 'Visible to certified partners' : 'Visible to verified partners',
   };
@@ -35,7 +37,7 @@ function present(i: Item & { ownerName?: string | null }, v: Viewer) {
 @ApiTags('catalog')
 @Controller()
 export class CatalogController {
-  constructor(@InjectDb() private db: Db, private mail: MailService, private audit: AuditService) {}
+  constructor(@InjectDb() private db: Db, private mail: MailService, private audit: AuditService, private storage: StorageService) {}
 
   @Public()
   @Get('public/group-companies')
@@ -72,6 +74,23 @@ export class CatalogController {
     const related = await this.db.select({ id: catalogItems.id, name: catalogItems.name, kind: catalogItems.kind }).from(catalogItems)
       .where(and(eq(catalogItems.sector, r.item.sector), sql`${catalogItems.id} <> ${id}`, visibleTo(v), eq(catalogItems.status, 'published'))).limit(4);
     return { ...present({ ...r.item, ownerName: r.ownerName }, v), related };
+  }
+
+  /** Product photo — served only if the viewer can see the item; types checked by magic bytes. */
+  @Public()
+  @Get('catalog/:id/image')
+  async image(@OptionalCtx() ctx: RequestContext | null, @Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+    const v = viewerOf(ctx);
+    const [r] = await this.db.select({ key: catalogItems.imageKey, visibility: catalogItems.visibility }).from(catalogItems).where(and(eq(catalogItems.id, id), visibleTo(v))).limit(1);
+    if (!r?.key) throw new NotFoundException('No image');
+    const buf = await this.storage.get(r.key).catch(() => null);
+    if (!buf) throw new NotFoundException('No image');
+    const head = buf.subarray(0, 4).toString('latin1');
+    const type = head.startsWith('\x89PNG') ? 'image/png' : head.startsWith('RIFF') ? 'image/webp' : 'image/jpeg';
+    res.setHeader('Content-Type', type);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', r.visibility === 'public' ? 'public, max-age=86400' : 'private, max-age=3600');
+    res.end(buf);
   }
 
   /** 039 — "Request price / quotation": routes to the owning company; full enquiry desk in Stage 11 (088). */

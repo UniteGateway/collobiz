@@ -22,7 +22,7 @@ This file is the single place to see where the build stands. It follows the reco
 | Registry screens with a working route | **165 of 165** |
 | Covered by API tests and a browser journey | **165** |
 | Native screens required / built / with tests | 46 / 46 / **46** |
-| API tests | 245 passing (29 suites) |
+| API tests | 246 passing (29 suites) |
 | Browser journeys (desktop + phone) | 82 passing on a fresh database; axe scan clean on all 50 pages (2026-11-09: fixed low-contrast header "Join as partner" button and home-page step numbers) |
 | Native tests | 77 passing (16 suites) |
 | UI component tests | 30 passing |
@@ -101,9 +101,10 @@ All **360 products and services** published on www.unitepowertek.com were import
 - **What was kept:** each product's PT code (stored as the SKU), product line, sub-category, models, the site's own description, key features, applications, benefits, the specification table (one row per model), its image address, and a link back to its page.
 - **Nothing invented:** 193 products have no description on the website, and most have no published specifications ("available on request"). COLLABIZ shows them the same way.
 - **Prices:** none are published; partners request a quotation, as on the website.
-- **Re-import:** `node dist/db/import-catalogue.js powertek` (`--draft` to review first) updates products by PT code and never deletes. The data is in `apps/api/src/db/data/powertek-catalogue.ts`.
+- **Photos:** 349 product photos (the other 11 products have none on the website) are copied once into COLLABIZ's own private storage (44 MB) and served from COLLABIZ, only to viewers who can see that product. Pages don't depend on the website being up, and the site's security policy needs no change. A re-import copies only new or changed photos. They appear on catalogue cards and product pages.
+- **Re-import:** `node dist/db/import-catalogue.js powertek` (`--draft` to review first, `--no-images` to skip photos) updates products by PT code and never deletes. The data is in `apps/api/src/db/data/powertek-catalogue.ts`.
 - **Product page:** specifications now show in a fixed order (product line, category, models, model rows in number order, features, applications, benefits), with a link to the company website. Long values wrap on phones.
-- **Tests:** `apps/api/test/catalogue-import.e2e.ts` (2): all 360 added then updated in place, codes and specifications kept, nothing invented, and products found in the public catalogue search.
+- **Tests:** `apps/api/test/catalogue-import.e2e.ts` (3). They check that all 360 products are added and then updated in place, codes and specifications are kept, and nothing is invented. Photos are copied once, re-runs fetch only failures, non-images are rejected, photos are served with the right type, and hidden products' photos are not served.
 
 ## HR, Payroll and Finance through ERPNext (added 2026-11-09)
 

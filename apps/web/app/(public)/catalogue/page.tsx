@@ -8,7 +8,7 @@ import { PublicScreen } from '@/components/PublicScreen';
 import { useQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
 
-interface CatalogItem { id: string; kind: string; name: string; sector: string; description: string; unit: string | null; listPrice: number | null; currency: string; priceNote: string | null; ownerName: string; ownerOrgId: string; visibility: string; specs: Record<string, string> }
+interface CatalogItem { id: string; kind: string; name: string; sector: string; description: string; unit: string | null; listPrice: number | null; currency: string; priceNote: string | null; ownerName: string; ownerOrgId: string; visibility: string; specs: Record<string, string>; image: string | null }
 
 function CatalogueInner() {
   const owner = useSearchParams().get('owner') ?? undefined;
@@ -28,6 +28,7 @@ function CatalogueInner() {
         <div className="cz-grid cz-grid-3">
           {items.data.map((i) => (
             <Link key={i.id} href={`/catalogue/${i.id}`} className="cz-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+              {i.image && <img className="cz-cat-thumb" src={i.image} alt="" loading="lazy" decoding="async" />}
               <div className="cz-row" style={{ justifyContent: 'space-between' }}><StatusBadge status={i.kind} tone="brand" />{i.visibility === 'partners' && <StatusBadge status="partners" tone="info" label="Partners only" />}</div>
               <h2 style={{ marginTop: 8 }}>{i.name}</h2>
               <p className="cz-muted" style={{ fontSize: 13 }}>{i.ownerName} · {sectorName(i.sector)}</p>

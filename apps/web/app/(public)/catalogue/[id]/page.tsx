@@ -33,6 +33,7 @@ export default function ItemPage() {
     <PublicScreen id="039" title={i.name} description={`${i.ownerName} · ${sectorName(i.sector)} · ${i.kind}`}>
       <div className="cz-grid cz-grid-2" style={{ alignItems: 'start' }}>
         <Card title="Description">
+          {i.image && <img className="cz-cat-photo" src={i.image} alt={i.name} />}
           <p style={{ whiteSpace: 'pre-wrap' }}>{i.description}</p>
           {Object.keys(i.specs ?? {}).length > 0 && <DescriptionList items={orderedSpecs(i.specs)} />}
         </Card>

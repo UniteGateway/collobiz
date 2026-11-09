@@ -2,23 +2,33 @@ import type { INestApplication } from '@nestjs/common';
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from '../src/db/schema';
-import { importCatalogue } from '../src/db/import-catalogue';
+import { importCatalogue, type ImageFetcher } from '../src/db/import-catalogue';
+import { POWERTEK_CATALOGUE } from '../src/db/data/powertek-catalogue';
 import { api, bootApp, resetDatabase, seed } from './helpers';
 
 /** Unite Powertek's published catalogue (360 products from unitepowertek.com) imports into COLLABIZ, idempotently. */
 describe('Catalogue import — Unite Powertek', () => {
   let app: INestApplication;
   let pool: Pool;
+  const BAD = 'https://www.unitepowertek.com/catalogue/pt-002.jpg';
+  const JPEG = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(200, 7)]);
+  const fetched: string[] = [];
+  const fakeImages: ImageFetcher = async (url) => { fetched.push(url); if (url === BAD) return Buffer.from('<html>not an image</html>'); return JPEG; };
   beforeAll(async () => { await resetDatabase(); await seed(); app = await bootApp(); pool = new Pool({ connectionString: process.env.DATABASE_URL }); });
   afterAll(async () => { await pool?.end(); await app?.close(); });
 
   it('adds all 360 products to Powertek, then updates in place on a second run', async () => {
     const db = drizzle(pool, { schema }) as any;
     const before = (await pool.query("select count(*)::int n from catalog_items c join organizations o on o.id = c.owner_org_id where o.display_name = 'Powertek'")).rows[0].n;
-    const r1 = await importCatalogue(db, 'powertek', {}, () => undefined);
-    expect(r1).toMatchObject({ owner: 'Powertek', created: 360, updated: 0, total: before + 360 });
-    const r2 = await importCatalogue(db, 'powertek', {}, () => undefined);
-    expect(r2).toMatchObject({ created: 0, updated: 360, total: before + 360 });
+    const r1 = await importCatalogue(db, 'powertek', { images: fakeImages }, () => undefined);
+    const withPhoto = POWERTEK_CATALOGUE.filter((i) => i.image).length;
+    const bad = POWERTEK_CATALOGUE.filter((i) => i.image === BAD).length;
+    expect(r1).toMatchObject({ owner: 'Powertek', created: 360, updated: 0, total: before + 360, images: { copied: withPhoto - bad, failed: bad, none: 360 - withPhoto, unchanged: 0 } });
+    expect(fetched.every((u) => u.startsWith('https://www.unitepowertek.com/'))).toBe(true);
+    fetched.length = 0;
+    const r2 = await importCatalogue(db, 'powertek', { images: fakeImages }, () => undefined);
+    expect(r2).toMatchObject({ created: 0, updated: 360, total: before + 360, images: { copied: 0, unchanged: withPhoto - bad, failed: bad } });
+    expect(new Set(fetched)).toEqual(new Set([BAD])); // only failures are retried
     await expect(importCatalogue(db, 'nonexistent', {}, () => undefined)).rejects.toThrow(/Unknown catalogue/);
   });
 
@@ -34,5 +44,20 @@ describe('Catalogue import — Unite Powertek', () => {
     const pub = await api(app).get('/v1/catalog?q=transformer').expect(200);
     const names = (pub.body.items ?? pub.body).map((i: any) => i.name);
     expect(names).toEqual(expect.arrayContaining(['Distribution Transformers']));
+  });
+
+  it('serves each product photo from COLLABIZ, only when the product is visible to the viewer', async () => {
+    const item = (await api(app).get('/v1/catalog?q=solar%20water%20pumps').expect(200)).body;
+    const pump = (item.items ?? item).find((i: any) => i.name === 'Solar Water Pumps');
+    expect(pump.image).toBe(`/api/v1/catalog/${pump.id}/image`);
+    const img = await api(app).get(`/v1/catalog/${pump.id}/image`).expect(200);
+    expect(img.headers['content-type']).toBe('image/jpeg');
+    expect(img.headers['cache-control']).toMatch(/public/);
+    expect(Buffer.compare(img.body, JPEG)).toBe(0);
+    const noPhoto = (await pool.query("select id from catalog_items where sku like 'PT-%' and image_key is null limit 1")).rows[0].id;
+    await api(app).get(`/v1/catalog/${noPhoto}/image`).expect(404);
+    await pool.query("update catalog_items set visibility = 'private' where id = $1", [pump.id]);
+    await api(app).get(`/v1/catalog/${pump.id}/image`).expect(404); // hidden item: no photo either
+    await pool.query("update catalog_items set visibility = 'public' where id = $1", [pump.id]);
   });
 });

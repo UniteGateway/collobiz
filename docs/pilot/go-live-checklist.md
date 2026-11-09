@@ -103,7 +103,7 @@ $C exec api node dist/db/bootstrap.js --platform-name "<registered name of the o
   $C exec api node dist/db/bootstrap.js --agreements /tmp/agreements --legal-reviewed
   ```
   A changed text becomes a new version and replaces the draft. Partners who accepted the draft are asked to accept the new version.
-- ☐ 5.2b Load the Unite Powertek product catalogue: 360 products taken from www.unitepowertek.com, published in the COLLABIZ catalogue. It is safe to repeat; products are matched by PT code. Add `--draft` to import them for review instead of publishing.
+- ☐ 5.2b Load the Unite Powertek product catalogue: 360 products taken from www.unitepowertek.com, published in the COLLABIZ catalogue. It is safe to repeat; products are matched by PT code. It also copies the 349 product photos (about 44 MB) into COLLABIZ storage, so the server needs outbound internet access during the import. Add `--draft` to import for review instead of publishing, or `--no-images` to skip photos.
   ```bash
   $C exec api node dist/db/import-catalogue.js powertek
   ```

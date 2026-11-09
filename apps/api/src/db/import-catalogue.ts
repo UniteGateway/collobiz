@@ -4,6 +4,9 @@
  *
  *   node dist/db/import-catalogue.js powertek                 # into the group company whose name contains "Powertek"
  *   node dist/db/import-catalogue.js powertek --draft         # import as drafts for review instead of publishing
+ *   node dist/db/import-catalogue.js powertek --no-images     # skip copying product photos
+ * Product photos are copied once from the company's website into COLLABIZ storage (and re-copied only if the source
+ * address changes), so pages never depend on the other site being up and no outside image host is needed.
  *   (development: node -r @swc-node/register src/db/import-catalogue.ts powertek)
  */
 import { and, eq, ilike, or, sql } from 'drizzle-orm';
@@ -11,10 +14,26 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { createPool, type Db } from './client';
 import * as s from './schema';
 import { POWERTEK_CATALOGUE, type PowertekItem } from './data/powertek-catalogue';
+import { StorageService } from '../common/adapters';
+
+export type ImageFetcher = (url: string) => Promise<Buffer>;
+const MAX_IMAGE = 5 * 1024 * 1024;
+/** Downloads one image with a timeout and size limit. */
+export const httpImage: ImageFetcher = async (url) => {
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 20_000);
+  try {
+    const r = await fetch(url, { signal: ctl.signal, headers: { 'User-Agent': 'COLLABIZ catalogue import (Unite Group)' } });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (buf.length > MAX_IMAGE) throw new Error('image larger than 5 MB');
+    return buf;
+  } finally { clearTimeout(t); }
+};
+const mimeOf = (b: Buffer) => (b[0] === 0xff && b[1] === 0xd8 ? 'image/jpeg' : b.subarray(0, 4).toString('latin1') === '\x89PNG' ? 'image/png' : b.subarray(0, 4).toString('latin1') === 'RIFF' ? 'image/webp' : null);
 
 const SOURCES: Record<string, { match: string; items: PowertekItem[] }> = { powertek: { match: 'powertek', items: POWERTEK_CATALOGUE } };
 
-export async function importCatalogue(db: Db, source: string, o: { publish?: boolean } = {}, log: (m: string) => void = console.log) {
+export async function importCatalogue(db: Db, source: string, o: { publish?: boolean; images?: ImageFetcher | false } = {}, log: (m: string) => void = console.log) {
   const src = SOURCES[source];
   if (!src) throw new Error(`Unknown catalogue "${source}". Available: ${Object.keys(SOURCES).join(', ')}`);
   const owners = await db.select({ id: s.organizations.id, name: s.organizations.displayName }).from(s.groupCompanies).innerJoin(s.organizations, eq(s.organizations.id, s.groupCompanies.organizationId))
@@ -28,15 +47,39 @@ export async function importCatalogue(db: Db, source: string, o: { publish?: boo
     if (found) { await db.update(s.catalogItems).set(values).where(eq(s.catalogItems.id, found.id)); updated++; }
     else { await db.insert(s.catalogItems).values({ ...values, ownerOrgId: owner.id, sku: it.sku, currency: 'INR' }); created++; }
   }
+  // Photos: copy new or changed ones, a few at a time.
+  const fetchImage = o.images === undefined ? httpImage : o.images;
+  const images = { copied: 0, unchanged: 0, failed: 0, none: 0 };
+  if (fetchImage) {
+    const storage = new StorageService();
+    const rows = await db.select({ id: s.catalogItems.id, sku: s.catalogItems.sku, imageKey: s.catalogItems.imageKey, imageSource: s.catalogItems.imageSource }).from(s.catalogItems).where(eq(s.catalogItems.ownerOrgId, owner.id));
+    const bySku = new Map(src.items.map((i) => [i.sku, i.image]));
+    const todo = rows.filter((r) => { const u = r.sku ? bySku.get(r.sku) : undefined; if (!u) { if (r.sku && bySku.has(r.sku)) images.none++; return false; } if (r.imageKey && r.imageSource === u) { images.unchanged++; return false; } return true; });
+    let next = 0;
+    const worker = async () => {
+      while (next < todo.length) {
+        const r = todo[next++]; const url = bySku.get(r.sku!)!;
+        try {
+          const buf = await fetchImage(url);
+          const mime = mimeOf(buf);
+          if (!mime) throw new Error('not a JPEG, PNG or WebP image');
+          const stored = await storage.put(buf, mime, `catalog/${owner.id}`);
+          await db.update(s.catalogItems).set({ imageKey: stored.key, imageSource: url }).where(eq(s.catalogItems.id, r.id));
+          images.copied++;
+        } catch (e) { images.failed++; log(`  image for ${r.sku} not copied: ${(e as Error).message}`); }
+      }
+    };
+    await Promise.all(Array.from({ length: 4 }, worker));
+  }
   const [n] = await db.select({ n: sql<number>`count(*)::int` }).from(s.catalogItems).where(eq(s.catalogItems.ownerOrgId, owner.id));
-  log(`${owner.name}: ${created} added, ${updated} updated, ${n.n} catalogue items in total`);
-  return { owner: owner.name, created, updated, total: n.n };
+  log(`${owner.name}: ${created} added, ${updated} updated, ${n.n} catalogue items in total${fetchImage ? `; photos: ${images.copied} copied, ${images.unchanged} unchanged, ${images.none} without a photo on the website, ${images.failed} failed` : ''}`);
+  return { owner: owner.name, created, updated, total: n.n, images };
 }
 
 if (require.main === module) {
   const [source, ...flags] = process.argv.slice(2);
   const pool = createPool();
-  importCatalogue(drizzle(pool, { schema: s }) as unknown as Db, source ?? '', { publish: !flags.includes('--draft') })
+  importCatalogue(drizzle(pool, { schema: s }) as unknown as Db, source ?? '', { publish: !flags.includes('--draft'), images: flags.includes('--no-images') ? false : httpImage })
     .then(() => pool.end())
     .catch(async (e) => { console.error(`Import stopped: ${e.message}`); await pool.end(); process.exit(1); });
 }

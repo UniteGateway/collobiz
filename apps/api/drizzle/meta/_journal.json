@@ -162,6 +162,13 @@
       "when": 1794227920673,
       "tag": "0022_erp_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794238614441,
+      "tag": "0023_catalog_images",
+      "breakpoints": true
     }
   ]
 }
