@@ -29,7 +29,7 @@ function CatalogueInner() {
           {items.data.map((i) => (
             <Link key={i.id} href={`/catalogue/${i.id}`} className="cz-card" style={{ textDecoration: 'none', color: 'inherit' }}>
               {i.image && <img className="cz-cat-thumb" src={i.image} alt="" loading="lazy" decoding="async" />}
-              <div className="cz-row" style={{ justifyContent: 'space-between' }}><StatusBadge status={i.kind} tone="brand" />{i.visibility === 'partners' && <StatusBadge status="partners" tone="info" label="Partners only" />}</div>
+              <div className="cz-row" style={{ justifyContent: 'space-between' }}><StatusBadge status={i.kind} tone="brand" /><span className="cz-row" style={{ gap: 6 }}>{i.specs?.Availability?.startsWith('Sourcing') && <StatusBadge status="sourcing" tone="warning" label="Sourcing" />}{i.visibility === 'partners' && <StatusBadge status="partners" tone="info" label="Partners only" />}</span></div>
               <h2 style={{ marginTop: 8 }}>{i.name}</h2>
               <p className="cz-muted" style={{ fontSize: 13 }}>{i.ownerName} · {sectorName(i.sector)}</p>
               <p style={{ fontSize: 14 }}>{i.description.slice(0, 140)}{i.description.length > 140 ? '…' : ''}</p>

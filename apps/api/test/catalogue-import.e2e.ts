@@ -60,4 +60,18 @@ describe('Catalogue import — Unite Powertek', () => {
     await api(app).get(`/v1/catalog/${pump.id}/image`).expect(404); // hidden item: no photo either
     await pool.query("update catalog_items set visibility = 'public' where id = $1", [pump.id]);
   });
+
+  it('innovation pipeline: partner-only "Sourcing" items under Unite Exim, unbranded, invisible to the public', async () => {
+    const db = drizzle(pool, { schema }) as any;
+    const r = await importCatalogue(db, 'innovation', { images: false }, () => undefined);
+    expect(r).toMatchObject({ owner: 'Unite Exim', created: 25, updated: 0 });
+    const rows = (await pool.query("select name, description, specs, visibility, status, list_price, image_key from catalog_items where sku like 'INV-%'")).rows;
+    expect(rows).toHaveLength(25);
+    expect(rows.every((x) => x.visibility === 'partners' && x.status === 'published' && x.list_price === null && x.image_key === null)).toBe(true);
+    expect(rows.every((x) => x.specs.Availability.startsWith('Sourcing') && /Sourcing:/.test(x.description))).toBe(true);
+    const BRANDS = /alibaba|ecoflow|jackery|bluetti|anker|growatt|huawei|jinko|longi|trina|tesla|byd|catl|luminous|havells|tata power|exide|amaron|su-kam|microtek|livguard|v-guard|crompton|godrej|samsung|lg\b|haier|daikin|voltas/i;
+    expect(rows.filter((x) => BRANDS.test(`${x.name} ${x.description} ${Object.values(x.specs).join(' ')}`)).map((x) => x.name)).toEqual([]);
+    const anon = await api(app).get('/v1/catalog?q=vendor%20cart').expect(200);
+    expect((anon.body.items ?? anon.body).some((i: any) => i.name === 'Solar Street-Vendor Cart')).toBe(false); // public cannot see partner-only items
+  });
 });

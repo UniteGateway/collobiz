@@ -22,7 +22,7 @@ This file is the single place to see where the build stands. It follows the reco
 | Registry screens with a working route | **165 of 165** |
 | Covered by API tests and a browser journey | **165** |
 | Native screens required / built / with tests | 46 / 46 / **46** |
-| API tests | 246 passing (29 suites) |
+| API tests | 247 passing (29 suites) |
 | Browser journeys (desktop + phone) | 82 passing on a fresh database; axe scan clean on all 50 pages (2026-11-09: fixed low-contrast header "Join as partner" button and home-page step numbers) |
 | Native tests | 77 passing (16 suites) |
 | UI component tests | 30 passing |
@@ -93,6 +93,17 @@ Everything needed to run a small, controlled pilot, without buying or registerin
 | **Legal review pack** (`docs/pilot/legal-review-pack.docx` + `.md`) | Every legal text the app shows or generates, compiled for counsel's tracked-changes markup, with 24 questions and an answer table. It covers partner terms, lead registration, privacy notice, team NDA, the offer agreement and work order, commission terms, the tender contract and LOI, buyer consent, and the regulated businesses. Rebuild it with `scripts/legal-pack/build.mjs`. |
 | **Pilot check-in** (web: Help & support → Pilot check-in; app: Account → Pilot check-in) | A two-minute weekly survey: usefulness 1–5, ease 1–5, recommend 0–10, features used, most valuable, blockers, wish, would keep using, may we contact you. One answer per person per 20 hours. |
 | **Pilot feedback results** (admin → Pilot feedback) | Check-ins, usefulness, ease, recommendation score (NPS) and would-keep-using against the pilot targets. Also features used, a week-by-week table, comments (contact details only with consent), CSV download, and **Send reminder** (in-app reminder to verified partner contacts who haven't checked in for 6 days; at most once a day). Visible to `analytics.read` roles only. Tests: `test/pilot.e2e.ts` (3), `apps/mobile/test/pilot.test.tsx` (2), browser journey (partner sends a check-in, a second one the same day is held back, Unite reads it). The admin page is checked by the gate sweep (X16, X17). |
+
+## Innovation pipeline — renewable-integrated products for India (added 2026-11-09)
+
+25 unbranded, renewable-integrated product types that Unite Exim could bring to market in India through COLLABIZ partners. They were chosen so as not to overlap with the Powertek range. Examples: solar street-vendor cart, solar DC shop refrigerator, solar home kit with BLDC fan, pay-as-you-go solar home system, e-rickshaw battery-swapping cabinet, solar lighting tower, solar insect trap, solar-charged sprayer, solar road studs, solar tailoring kit, solar digital classroom kit, sodium-ion storage, PV-T panels, ice thermal storage.
+
+- **How it was built:** written for COLLABIZ, not copied from Alibaba or any supplier. Alibaba's terms forbid automated collection, and its listings, photos and descriptions belong to the sellers. There are no brand names (a test checks for 28 common brands) and no photos.
+- **Honest status:** every item is marked **"Sourcing — supplied on order once a supplier and Indian certifications are confirmed"**. There is no price, and the items are visible to **verified partners only**, never the public.
+- **What partners see:** market fit for India, typical buyers, an indicative India supply status (made in India / emerging / mostly imported), launch priority, what to check before launch (BIS, ALMM, BEE and road-authority rules as applicable), and government schemes that may help.
+- **Demand testing:** partners' quotation requests show which products have real demand before Unite Exim commits to a supplier.
+- **Import:** `node dist/db/import-catalogue.js innovation`. It is safe to repeat; items are matched by code (INV-001 to INV-025). The data is in `apps/api/src/db/data/innovation-catalogue.ts`.
+- **Tests:** the catalogue import test: 25 partner-only "Sourcing" items under Unite Exim, no price or photo, no brand names, hidden from the public.
 
 ## Unite Powertek product catalogue (added 2026-11-09)
 

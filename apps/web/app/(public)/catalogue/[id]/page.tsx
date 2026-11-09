@@ -9,8 +9,8 @@ import { api } from '@/lib/api';
 import { useMutation, useQuery, isNotFound } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
 
-const FIRST = ['Product line', 'Category', 'Models'];
-const LAST = ['Specifications', 'Key features', 'Applications', 'Benefits', 'Product page'];
+const FIRST = ['Product line', 'Availability', 'Launch priority', 'India supply (indicative)', 'Category', 'Models'];
+const LAST = ['Market fit', 'Typical buyers', 'Specifications', 'Key features', 'Applications', 'Benefits', 'Check before launch', 'Schemes that may help', 'Product page'];
 /** Specs are stored as a JSON object (key order is not kept), so show them in a fixed, readable order. */
 function orderedSpecs(specs: Record<string, unknown>) {
   const rank = (k: string) => (FIRST.includes(k) ? FIRST.indexOf(k) : LAST.includes(k) ? 100 + LAST.indexOf(k) : 50);
