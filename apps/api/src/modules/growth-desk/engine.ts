@@ -79,7 +79,7 @@ export const rulesWriter: GrowthWriter = {
     ].join('\n');
     return {
       subject, body, provider: 'rules', promptVersion: 'growth-rules-v1',
-      sources: [{ type: 'agent_pitch', ref: agent.name }, { type: 'contact_source', ref: `${c.source}: ${c.sourceDetail}` }, ...reasons.slice(0, 3).map((r) => ({ type: 'match_reason', ref: r }))],
+      sources: [{ type: 'agent_pitch', ref: agent.name }, { type: 'contact_source', ref: `${CONTACT_SOURCE_LABELS[c.source] ?? c.source}: ${c.sourceDetail}` }, ...reasons.slice(0, 3).map((r) => ({ type: 'match_reason', ref: r }))],
       blocked: blockedClaimsIn(`${subject}\n${agent.pitch}\n${agent.callToAction}`),
     };
   },

@@ -23,7 +23,7 @@ This file is the single place to see where the build stands. It follows the reco
 | Covered by API tests and a browser journey | **165** |
 | Native screens required / built / with tests | 46 / 46 / **46** |
 | API tests | 231 passing (26 suites) |
-| Browser journeys (desktop + phone) | 79 passing on a fresh database; axe scan clean on all 49 pages (2026-11-09: fixed low-contrast header "Join as partner" button and home-page step numbers) |
+| Browser journeys (desktop + phone) | 80 passing on a fresh database; axe scan clean on all 50 pages (2026-11-09: fixed low-contrast header "Join as partner" button and home-page step numbers) |
 | Native tests | 77 passing (16 suites) |
 | UI component tests | 30 passing |
 

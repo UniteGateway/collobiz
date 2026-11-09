@@ -146,7 +146,7 @@ function DraftItem({ lead, onDone }: { lead: Lead; onDone: () => void }) {
       ) : (
         <>
           <pre className="cz-draft"><span className="cz-draft-subject">To: {lead.contact.email} · Subject: {m.subject}</span>{'\n\n'}{m.body}</pre>
-          <span className="cz-muted" style={{ fontSize: 12.5 }}>Drafted by {m.provider === 'rules' ? 'the built-in rules engine' : m.provider} ({m.promptVersion}){m.edited ? ' · edited by staff' : ''} · Sources: {m.sources.map((s) => s.ref).join('; ')}</span>
+          <span className="cz-muted" style={{ fontSize: 12.5 }}>Drafted by {m.provider === 'rules' ? 'the built-in rules engine' : m.provider} ({m.promptVersion}){m.edited ? ' · edited by staff' : ''} · Sources: {m.sources.map((s) => (s.type === 'contact_source' ? s.ref.replace(/^([a-z_]+):/, (_, k: string) => `${CONTACT_SOURCE_LABELS[k] ?? k}:`) : s.ref)).join('; ')}</span>
           <div className="cz-row" style={{ gap: 8 }}>
             <Button size="sm" disabled={m.status === 'blocked'} loading={act.pending} onClick={() => act.run(() => api.post(`/admin/growth/messages/${m.id}/decide`, { decision: 'approve' }))}>Approve</Button>
             <Button size="sm" variant="secondary" onClick={() => setEditing(true)}>Edit</Button>
