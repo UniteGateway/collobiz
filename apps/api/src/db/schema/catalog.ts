@@ -13,6 +13,14 @@ export const groupCompanies = pgTable('group_companies', {
   description: text('description'),
   website: text('website'),
   status: text('status').notNull().default('active'), // active | inactive
+  /** Workspace: kind of company in the group (parent, operating, manufacturing, infra, projects, jv, international, media, business, trade, fintech, allied). */
+  category: text('category').notNull().default('business'),
+  /** Workspace: holding company, if any. */
+  parentOrgId: uuid('parent_org_id').references(() => organizations.id),
+  /** Takes part in Unite-first lead routing (needs a configured review team and SLA). */
+  receivesLeads: boolean('receives_leads').notNull().default(true),
+  /** Shown on the public website's group-company list (off until legal names and details are confirmed). */
+  listedPublicly: boolean('listed_publicly').notNull().default(true),
   /** Unite-first routing: first-review window and business calendar (Stage 06, screen 133). */
   slaMinutes: integer('sla_minutes').notNull().default(240),
   calendar: jsonb('calendar').notNull().default(sql`'{"timezone":"Asia/Kolkata","workdays":[1,2,3,4,5],"startHour":9,"endHour":18,"holidays":[]}'::jsonb`),

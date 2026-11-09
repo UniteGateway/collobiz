@@ -44,7 +44,7 @@ export class CatalogController {
       id: organizations.id, brandName: groupCompanies.brandName, legalName: organizations.legalName, legalEntityCode: groupCompanies.legalEntityCode, city: organizations.city, country: organizations.country,
       sectors: groupCompanies.sectors, description: groupCompanies.description, website: groupCompanies.website,
       publishedItems: sql<number>`(select count(*)::int from catalog_items c where c.owner_org_id = ${organizations.id} and c.status = 'published' and c.visibility = 'public')`,
-    }).from(groupCompanies).innerJoin(organizations, eq(organizations.id, groupCompanies.organizationId)).where(eq(groupCompanies.status, 'active')).orderBy(groupCompanies.brandName);
+    }).from(groupCompanies).innerJoin(organizations, eq(organizations.id, groupCompanies.organizationId)).where(and(eq(groupCompanies.status, 'active'), eq(groupCompanies.listedPublicly, true))).orderBy(groupCompanies.brandName);
   }
 
   @Public()

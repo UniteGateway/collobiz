@@ -89,6 +89,11 @@ const EXTRA = [
   { id: 'X19', title: 'Growth Desk agent', app: 'admin', route: `/growth/agents/${growthAgentId}`, access: 'unite-admin' },
   { id: 'X20', title: 'New Growth Desk agent', app: 'admin', route: '/growth/agents/new', access: 'unite-admin' },
   { id: 'X21', title: 'Lead database', app: 'admin', route: '/growth/contacts', access: 'unite-admin' },
+  { id: 'X22', title: 'Workspace', app: 'admin', route: '/workspace', access: 'unite-admin' },
+  { id: 'X23', title: 'Workspace apps', app: 'admin', route: '/workspace/apps', access: 'unite-admin' },
+  { id: 'X24', title: 'Group companies (workspace)', app: 'admin', route: '/workspace/companies', access: 'unite-admin' },
+  { id: 'X25', title: 'Meet', app: 'admin', route: '/workspace/meet', access: 'unite-admin' },
+  { id: 'X26', title: 'Workspace search', app: 'admin', route: '/workspace/search?q=solar', access: 'unite-admin' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

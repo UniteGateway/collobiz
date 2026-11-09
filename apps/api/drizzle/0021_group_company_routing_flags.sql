@@ -1,0 +1,4 @@
+ALTER TABLE "group_companies" ADD COLUMN "receives_leads" boolean DEFAULT true NOT NULL;--> statement-breakpoint
+ALTER TABLE "group_companies" ADD COLUMN "listed_publicly" boolean DEFAULT true NOT NULL;--> statement-breakpoint
+-- Demo workspace companies (seeded with placeholder codes) stay out of lead routing and the public list until confirmed.
+UPDATE "group_companies" SET "receives_leads" = false, "listed_publicly" = false WHERE "legal_entity_code" IN ('UG-UNITEGROUPINC-PLACEHOLDER', 'UG-UNITEDEVELOPERS-PLACEHOLDER', 'UG-UNITEGREENINFRA-PLACEHOLDER', 'UG-UNITEGLOBALINFRA-PLACEHOLDER', 'UG-UNITIF-PLACEHOLDER', 'UG-UNITEGREENENERGYLLC-PLACEHOLDER', 'UG-FILMS99-PLACEHOLDER', 'UG-UNITEAQUA-PLACEHOLDER', 'UG-EVPANTHER-PLACEHOLDER', 'UG-UNITECEMENT-PLACEHOLDER', 'UG-UNITESTEEL-PLACEHOLDER', 'UG-UNITEDIGITALBANK-PLACEHOLDER');

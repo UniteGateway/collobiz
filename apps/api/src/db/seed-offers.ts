@@ -6,7 +6,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { createPool } from './client';
 import * as s from './schema';
-import { growthDemo, offerSalesDemo, offersDemo, pilotDemo, venturesDemo } from './seed-stages';
+import { groupCompaniesDemo, growthDemo, offerSalesDemo, offersDemo, pilotDemo, venturesDemo } from './seed-stages';
 
 async function main() {
   const pool = createPool();
@@ -27,9 +27,11 @@ async function main() {
   await venturesDemo(db, refs);
   console.log('Unite businesses in place');
   await pilotDemo(db, refs);
+  console.log('Pilot check-ins in place');
   await growthDemo(db, refs);
   console.log('Growth Desk demo in place');
-  console.log('Pilot check-ins in place');
+  await groupCompaniesDemo(db, refs);
+  console.log('Unite Group companies in place');
   await pool.end();
 }
 main().catch((e) => { console.error(e); process.exit(1); });

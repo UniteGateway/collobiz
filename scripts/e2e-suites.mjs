@@ -1693,3 +1693,40 @@ suites.push({
     await shot('growth-unsubscribed');
   },
 });
+
+// Unite Group workspace: home numbers, one search, apps with phases and integrations, group companies, scheduling a meeting.
+suites.push({
+  name: 'Workspace · Unite admin: home, search across apps, apps launcher with phases, group companies filter, schedule a meeting',
+  only: 'desktop',
+  run: async ({ page, ADMIN, shot, expect }) => {
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/workspace');
+    await page.getByRole('heading', { name: /One platform/ }).waitFor();
+    await page.getByText('Group companies', { exact: true }).first().waitFor();
+    await shot('workspace-home');
+    await page.getByLabel('Search the workspace').fill('Volt');
+    await page.getByLabel('Search the workspace').press('Enter');
+    await page.getByRole('heading', { name: 'Results for “Volt”' }).waitFor();
+    await page.locator('[data-group="companies"]').getByText('Volt EPC').waitFor();
+    await page.getByRole('link', { name: 'Apps' }).first().click();
+    await page.locator('[data-app="hr"]').getByText('Coming in Phase B').waitFor();
+    expect(await page.locator('[data-integration="erpnext"]').getByText('Not connected').isVisible(), 'ERPNext shown as connected');
+    await page.getByRole('link', { name: 'Companies' }).first().click();
+    await page.locator('[data-company="Unite Group Inc."]').waitFor();
+    await page.getByRole('button', { name: /^International/ }).click();
+    await page.locator('[data-company="Unite Green Energy Projects"]').getByText('Georgia', { exact: false }).waitFor();
+    expect(await page.locator('[data-company="Unite Solar"]').count() === 0, 'Indian company shown under International');
+    await shot('workspace-companies');
+    await page.getByRole('link', { name: 'Meet' }).first().click();
+    await page.getByRole('button', { name: /New meeting/ }).click();
+    const dlg = page.locator('dialog[open]');
+    await dlg.getByLabel('Title').fill('SOLCART partner review — Maharashtra');
+    const d = new Date(Date.now() + 2 * 86400_000);
+    await dlg.getByLabel('Date').fill(d.toISOString().slice(0, 10));
+    await dlg.getByLabel('Find people').fill('Asha');
+    await dlg.getByText(/Asha Patil · Volt EPC/).click();
+    await dlg.getByRole('button', { name: 'Schedule and send invites' }).click();
+    await page.locator('[data-meeting="SOLCART partner review — Maharashtra"]').waitFor();
+    await shot('workspace-meet');
+  },
+});

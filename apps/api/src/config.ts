@@ -26,6 +26,10 @@ const Env = z.object({
   AI_PROVIDER: z.enum(['rules', 'anthropic']).default('rules'),
   /** Growth Desk outreach sending. Off until a separate marketing e-mail domain/service is configured; approved drafts wait. */
   GROWTH_SENDING_ENABLED: bool.default(false),
+  /** ERPNext (HR, payroll, accounting — Phases B and C). Base URL of the site, and token auth for a dedicated integration user. */
+  ERPNEXT_URL: z.string().url().optional(),
+  ERPNEXT_API_KEY: z.string().optional(),
+  ERPNEXT_API_SECRET: z.string().optional(),
   ESIGN_PROVIDER: z.string().default('local'),
   /** Video provider for meeting rooms: local/none (scheduling, agenda, minutes only) or jitsi. */
   MEETING_PROVIDER: z.string().default('local'),

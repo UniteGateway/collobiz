@@ -22,7 +22,7 @@ This file is the single place to see where the build stands. It follows the reco
 | Registry screens with a working route | **165 of 165** |
 | Covered by API tests and a browser journey | **165** |
 | Native screens required / built / with tests | 46 / 46 / **46** |
-| API tests | 231 passing (26 suites) |
+| API tests | 236 passing (27 suites) |
 | Browser journeys (desktop + phone) | 80 passing on a fresh database; axe scan clean on all 50 pages (2026-11-09: fixed low-contrast header "Join as partner" button and home-page step numbers) |
 | Native tests | 77 passing (16 suites) |
 | UI component tests | 30 passing |
@@ -93,6 +93,34 @@ Everything needed to run a small, controlled pilot, without buying or registerin
 | **Legal review pack** (`docs/pilot/legal-review-pack.docx` + `.md`) | Every legal text the app shows or generates, compiled for counsel's tracked-changes markup, with 24 questions and an answer table. It covers partner terms, lead registration, privacy notice, team NDA, the offer agreement and work order, commission terms, the tender contract and LOI, buyer consent, and the regulated businesses. Rebuild it with `scripts/legal-pack/build.mjs`. |
 | **Pilot check-in** (web: Help & support → Pilot check-in; app: Account → Pilot check-in) | A two-minute weekly survey: usefulness 1–5, ease 1–5, recommend 0–10, features used, most valuable, blockers, wish, would keep using, may we contact you. One answer per person per 20 hours. |
 | **Pilot feedback results** (admin → Pilot feedback) | Check-ins, usefulness, ease, recommendation score (NPS) and would-keep-using against the pilot targets. Also features used, a week-by-week table, comments (contact details only with consent), CSV download, and **Send reminder** (in-app reminder to verified partner contacts who haven't checked in for 6 days; at most once a day). Visible to `analytics.read` roles only. Tests: `test/pilot.e2e.ts` (3), `apps/mobile/test/pilot.test.tsx` (2), browser journey (partner sends a check-in, a second one the same day is held back, Unite reads it). The admin page is checked by the gate sweep (X16, X17). |
+
+## Unite Group workspace, Phase A (added 2026-11-09)
+
+A group-wide home inside COLLABIZ (admin → **Workspace**), laid out like the reference screens but in COLLABIZ branding. It uses one sign-in, one database, one permission model and one audit trail across every app. **Every number is computed from records on the platform; nothing is estimated or typed in.**
+
+| Page | What it shows |
+|---|---|
+| **Home** `/workspace` | Key numbers: group companies and countries, verified partners, live projects and portfolio value, open offers and opportunities, sales won this month and to date, Unite Group people. Business apps; business lines (live projects plus won sales per company); "Waiting for you", which shows only the queues your role can act on; your meetings; recent activity from real records; the COLLABIZ AI box (searches today, answers in words once an AI provider is connected). |
+| **Apps** `/workspace/apps` | All 31 business apps by category (business suite, operations, communication, AI & analytics): 19 live, 4 partly live, 8 planned, each with its phase. Integrations panel showing what is connected (e-mail, ERPNext, AI, video, marketing e-mail, e-signature, cloud storage), never secrets. |
+| **Companies** `/workspace/companies` | The 15 Unite Group companies (names from the group's company list), each with type, country, parent company and real activity: people, live projects, businesses, products, open offers, won sales. Filters: India, international, manufacturing, businesses. |
+| **Meet** `/workspace/meet` | Schedule a meeting and invite colleagues or verified partners, join by link, see upcoming meetings, minutes and action items, and a month calendar. Live video and recordings wait for a video provider. |
+| **Search** | One box across companies, partners, Unite businesses, opportunities, projects, direct offers, the lead database (Unite admins only) and Unite Group people. Each result opens in the right app. |
+
+**Protecting existing behaviour:** Unite-first lead routing used to take the first matching company in no fixed order. With more companies that could send solar leads to the wrong one, so each company now has two settings:
+- "receives leads": on for Unite Solar, Powertek and Unite Exim; off for the new companies.
+- "listed publicly": off for the new companies, until their legal details are confirmed.
+
+Routing also now picks the oldest matching company, so the result is the same every time. All earlier tests pass unchanged.
+
+**ERPNext (HR, payroll, accounts):** `docs/integrations/erpnext.md` describes the connection, the data each side owns, and what is needed (an ERPNext site, an integration user's API key, CA set-up). The settings `ERPNEXT_URL`, `ERPNEXT_API_KEY` and `ERPNEXT_API_SECRET` are ready; the status shows "Not connected".
+
+Tests: `apps/api/test/workspace.e2e.ts` (5), a browser journey (home → search → apps → companies filter → schedule a meeting with a partner), and five pages in the gate sweep (X22–X26).
+
+**Next phases:**
+- B: HR and payroll through ERPNext.
+- C: Finance and accounting through ERPNext, with commission posting.
+- D: Procurement, inventory, manufacturing (Powertek) and logistics.
+- E: Franchise, POS, real estate, drive and wiki.
 
 ## AI Growth Desk, Phase 1 (added 2026-11-09)
 
@@ -184,6 +212,7 @@ Quality-gate status per screen is recorded in `docs/audit/quality-gate.json` and
 | B-09 | Investor data room and finance introductions are regulated activities | Regulatory/legal review before switching on |
 | — | Video provider for meeting rooms; language-model provider for AI drafts | Choice of provider, credentials, data-processing review |
 | — | Pilot: hosting server, two DNS names, SMTP e-mail account, operating legal entity (B-01), approved commission rates (B-10), legal review of the pack, pilot partner list | Unite Group decisions and accounts. Everything else is ready (`docs/pilot/go-live-checklist.md` §1). Nothing has been registered or purchased. |
+| — | Workspace phases B/C: an ERPNext site (Frappe Cloud or self-hosted), integration user API key, CA set-up of accounts and GST/TDS; legal names and codes for the 12 newly listed group companies | Unite Group decisions and accounts |
 | — | Growth Desk: Claude API key (Phase 2), separate marketing e-mail domain and service (Phase 3), licences for any trade-data sources, legal answers to Q22–24 | Unite Group decisions and accounts |
 | — | Full launch: managed database, S3 storage (B-03), SMS with DLT (B-04), e-signature provider (B-08), payment rails, KYC providers | Commercial approval and credentials |
 

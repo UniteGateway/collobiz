@@ -1,0 +1,3 @@
+ALTER TABLE "group_companies" ADD COLUMN "category" text DEFAULT 'business' NOT NULL;--> statement-breakpoint
+ALTER TABLE "group_companies" ADD COLUMN "parent_org_id" uuid;--> statement-breakpoint
+ALTER TABLE "group_companies" ADD CONSTRAINT "group_companies_parent_org_id_organizations_id_fk" FOREIGN KEY ("parent_org_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;

@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { and, desc, eq, inArray, isNull, ne, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, ne, or, sql } from 'drizzle-orm';
 import {
   assertTransition, businessMinutesBetween, duplicateScore, DisputeMachine, LeadClaimMachine, slaStatus, DEFAULT_CALENDAR,
   type BusinessCalendar, type DisputeState, type LeadClaimState, type LeadCreateInput,
@@ -26,7 +26,8 @@ export class LeadsService {
   async register(ctx: RequestContext, b: LeadCreateInput) {
     if (ctx.orgVerificationStatus !== 'verified') throw new ForbiddenException('Only verified partners can register protected leads');
     if (new Date(b.consent.obtainedAt) > new Date()) throw new BadRequestException({ statusCode: 400, message: 'Consent date cannot be in the future', issues: [{ path: 'consent.obtainedAt', message: 'Cannot be in the future' }] });
-    const [gc] = await this.db.select().from(groupCompanies).where(sql`${b.sector} = any(${groupCompanies.sectors}) and ${groupCompanies.status} = 'active'`).limit(1);
+    const [gc] = await this.db.select().from(groupCompanies).innerJoin(organizations, eq(organizations.id, groupCompanies.organizationId))
+      .where(sql`${b.sector} = any(${groupCompanies.sectors}) and ${groupCompanies.status} = 'active' and ${groupCompanies.receivesLeads}`).orderBy(asc(organizations.createdAt)).limit(1).then((r) => r.map((x) => x.group_companies));
     const code = await this.opps.nextCode();
     const registeredAt = new Date();
     const snapshot = {

@@ -315,7 +315,7 @@ export class CommsController {
   async myMeetings(@Ctx() ctx: RequestContext) {
     const rows = await this.db.select({ m: meetings, rsvp: meetingAttendees.rsvp, organizer: users.fullName }).from(meetingAttendees).innerJoin(meetings, eq(meetings.id, meetingAttendees.meetingId)).innerJoin(users, eq(users.id, meetings.organizerUserId))
       .where(eq(meetingAttendees.userId, ctx.userId)).orderBy(asc(meetings.startsAt));
-    return rows.map((r) => ({ id: r.m.id, title: r.m.title, startsAt: r.m.startsAt, endsAt: r.m.endsAt, status: r.m.status, organizer: r.organizer, isOrganizer: r.m.organizerUserId === ctx.userId, myRsvp: r.rsvp, projectId: r.m.projectId }));
+    return rows.map((r) => ({ id: r.m.id, title: r.m.title, startsAt: r.m.startsAt, endsAt: r.m.endsAt, status: r.m.status, organizer: r.organizer, isOrganizer: r.m.organizerUserId === ctx.userId, myRsvp: r.rsvp, projectId: r.m.projectId, hasMinutes: !!r.m.minutes, actionItems: (r.m.actionItems as unknown[]).length }));
   }
 
   private async meetingFor(ctx: RequestContext, id: string) {

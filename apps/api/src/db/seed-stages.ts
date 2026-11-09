@@ -487,6 +487,7 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await offerSalesDemo(db, refs);
   await venturesDemo(db, refs);
   await growthDemo(db, refs);
+  await groupCompaniesDemo(db, refs);
 }
 
 /** Demo pilot check-ins (spread over three weeks) so the admin results page has something to show. Not part of the test seed. */
@@ -589,4 +590,36 @@ export async function growthDemo(db: Db, refs: SeedRefs) {
   await step('Sabarmati Pharma', 'won', true);
   await step('Thar Solar Parks', 'replied', true);
   await step('Kaveri Textiles', 'approved', false);
+}
+
+/** Unite Group companies for the workspace (names from the group's own company list; legal entity codes are placeholders until confirmed). */
+export async function groupCompaniesDemo(db: Db, refs: SeedRefs) {
+  const C: [key: string, name: string, legal: string, category: string, country: string, city: string | null, sectors: string[], description: string][] = [
+    ['uniteGroupInc', 'Unite Group Inc.', 'Unite Group Inc.', 'parent', 'XX', null, ['consulting'], 'Group holding company and global investments.'],
+    ['uniteDevelopers', 'Unite Developers Global Inc.', 'Unite Developers Global Inc.', 'operating', 'IN', null, ['solar', 'infrastructure', 'construction_epc'], 'Renewable energy, infrastructure and EPC projects.'],
+    ['uniteGreenInfra', 'Unite Green Infra', 'Unite Green Infra Pvt. Ltd.', 'infra', 'IN', null, ['infrastructure'], 'Green infrastructure and projects.'],
+    ['uniteGlobalInfra', 'Unite Global Infra Projects', 'Unite Global Infra Projects Pvt. Ltd.', 'projects', 'IN', null, ['infrastructure', 'construction_epc'], 'Large infrastructure and energy projects.'],
+    ['unitif', 'UNITIF Green Industrial Parks', 'UNITIF Green Industrial Parks', 'jv', 'IN', null, ['real_estate', 'infrastructure'], 'Green industrial parks.'],
+    ['uniteGreenEnergyLlc', 'Unite Green Energy Projects', 'Unite Green Energy Projects LLC', 'international', 'GE', null, ['solar'], 'Utility-scale renewable energy projects.'],
+    ['films99', '99Films', '99Films', 'media', 'US', null, ['media'], 'Content, films and creative ecosystem.'],
+    ['uniteAqua', 'Unite Aqua', 'Unite Aqua', 'business', 'IN', null, ['infrastructure'], 'Water and sustainability solutions.'],
+    ['evPanther', 'EV Panther', 'EV Panther', 'business', 'IN', null, ['ev'], 'EV mobility and charging solutions.'],
+    ['uniteCement', 'Unite Cement', 'Unite Cement', 'business', 'IN', null, ['manufacturing'], 'Cement manufacturing and OEM supply.'],
+    ['uniteSteel', 'Unite Steel', 'Unite Steel', 'business', 'IN', null, ['manufacturing'], 'Steel and fabrication solutions.'],
+    ['uniteDigitalBank', 'Unite Digital Bank', 'Unite Digital Bank', 'fintech', 'XX', null, ['financial_services'], 'Digital banking and green finance (subject to regulatory approval).'],
+  ];
+  for (const [key, name, legal, category, country, city, sectors, description] of C) {
+    const [found] = await db.select({ id: s.organizations.id }).from(s.organizations).where(and(eq(s.organizations.legalName, legal), eq(s.organizations.type, 'group_company'))).limit(1);
+    const orgId = found?.id ?? (await db.insert(s.organizations).values({ legalName: legal, displayName: name, type: 'group_company', country, city, verificationStatus: 'verified', membershipLevel: 'strategic' }).returning())[0].id;
+    refs.orgs[key] = orgId;
+    await db.insert(s.groupCompanies).values({ organizationId: orgId, legalEntityCode: `UG-${key.toUpperCase()}-PLACEHOLDER`, brandName: name, sectors, description, category, receivesLeads: false, listedPublicly: false }).onConflictDoNothing();
+  }
+  const set = async (key: string, category: string, description?: string) => {
+    if (refs.orgs[key]) await db.update(s.groupCompanies).set({ category, ...(description ? { description } : {}) }).where(eq(s.groupCompanies.organizationId, refs.orgs[key]));
+  };
+  await set('uniteSolar', 'business', 'Solar products, rooftop and utility-scale EPC, O&M and the franchise network.');
+  await set('powertek', 'manufacturing', 'Transformers, switchgear, panels, EV charging and BESS manufacturing.');
+  await set('uniteExim', 'trade', 'Global trade and commodity exports and imports.');
+  const parent = refs.orgs.uniteGroupInc;
+  if (parent) await db.update(s.groupCompanies).set({ parentOrgId: parent }).where(and(sql`${s.groupCompanies.organizationId} <> ${parent}`, sql`${s.groupCompanies.parentOrgId} is null`));
 }
