@@ -20,3 +20,6 @@ apps/mobile/ios/
 # Filled-in pilot server settings (secrets)
 infra/pilot/pilot.env
 infra/erpnext/erpnext.env
+
+# Source exports shared with the owner (never committed)
+collabiz-source-*.zip
