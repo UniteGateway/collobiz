@@ -1359,3 +1359,6 @@ a.cz-app-tile:hover { border-color: var(--cz-navy-500); box-shadow: 0 6px 18px r
 /* Catalogue photos */
 .cz-cat-thumb { display: block; width: calc(100% + 2px); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; margin-bottom: 12px; background: var(--cz-grey-50); }
 .cz-cat-photo { display: block; width: 100%; max-height: 420px; object-fit: contain; border-radius: 12px; background: var(--cz-grey-50); margin-bottom: 16px; }
+.cz-progress-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.cz-progress { flex: 1; height: 10px; border-radius: 999px; background: var(--cz-grey-100); overflow: hidden; min-width: 70px; }
+.cz-progress i { display: block; height: 100%; background: var(--cz-green-600); border-radius: 999px; }

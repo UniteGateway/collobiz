@@ -22,7 +22,7 @@ This file is the single place to see where the build stands. It follows the reco
 | Registry screens with a working route | **165 of 165** |
 | Covered by API tests and a browser journey | **165** |
 | Native screens required / built / with tests | 46 / 46 / **46** |
-| API tests | 247 passing (29 suites) |
+| API tests | 254 passing (30 suites) |
 | Browser journeys (desktop + phone) | 82 passing on a fresh database; axe scan clean on all 50 pages (2026-11-09: fixed low-contrast header "Join as partner" button and home-page step numbers) |
 | Native tests | 77 passing (16 suites) |
 | UI component tests | 30 passing |
@@ -116,6 +116,23 @@ All **360 products and services** published on www.unitepowertek.com were import
 - **Re-import:** `node dist/db/import-catalogue.js powertek` (`--draft` to review first, `--no-images` to skip photos) updates products by PT code and never deletes. The data is in `apps/api/src/db/data/powertek-catalogue.ts`.
 - **Product page:** specifications now show in a fixed order (product line, category, models, model rows in number order, features, applications, benefits), with a link to the company website. Long values wrap on phones.
 - **Tests:** `apps/api/test/catalogue-import.e2e.ts` (3). They check that all 360 products are added and then updated in place, codes and specifications are kept, and nothing is invented. Photos are copied once, re-runs fetch only failures, non-images are rejected, photos are served with the right type, and hidden products' photos are not served.
+
+## ERPNext operations: Inventory, Manufacturing, POS, Procurement, Logistics (added 2026-11-09)
+
+Every app ERPNext can power now has its COLLABIZ screen. Each reads live from ERPNext when connected and shows clearly labelled sample data otherwise.
+
+| App | What it shows (ERPNext source) | Who |
+|---|---|---|
+| **Inventory & Stores** (`/workspace/inventory`) | Items in stock, stock value, stock by warehouse, items to reorder (projected stock at or below zero), recent stock movements, and dispatches with transporter, vehicle and LR number (Bin, Item, Stock Entry, Delivery Note) | Unite admins, super admins |
+| **Manufacturing** (`/workspace/manufacturing`) | Work orders by status, late orders, units produced against planned with progress bars, active bills of materials (Work Order, BOM) | Unite admins, super admins |
+| **Retail POS** (`/workspace/pos`) | Sales today and this month, by store, recent bills (POS Invoice) | Unite admins, finance, super admins |
+| **Procurement** (`/workspace/procurement`) | Open purchase orders and value, late deliveries, pending material requests; partner quotations stay in the trading marketplace (Purchase Order, Material Request) | Unite admins, super admins |
+| **Logistics** | Dispatches are live under Inventory; fleet and live tracking come later | — |
+| **Catalogue → ERPNext items** | One button sends all published group-company products, including the 360 Powertek products, to ERPNext as Items (item code = PT code; products are stock items, services are not). Existing items are linked; nothing is created twice. Refused on sample data. | Unite admins, super admins |
+
+Apps: **26 of 31 live**, 3 partly live (Logistics, Documents, Wiki), 2 planned (Franchise, Real Estate).
+
+Tests: `apps/api/test/erp-ops.e2e.ts` (7) against a fake Frappe server (roles; stock, reorder and dispatch figures; work-order status, late and progress; POS today versus month; purchase orders and material requests; item sync creates once, links existing, never duplicates; sample data refused). Also a browser journey (Operations) and gate sweep X30–X33.
 
 ## HR, Payroll and Finance through ERPNext (added 2026-11-09)
 

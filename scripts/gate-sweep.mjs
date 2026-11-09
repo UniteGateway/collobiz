@@ -97,6 +97,10 @@ const EXTRA = [
   { id: 'X27', title: 'Human Resources', app: 'admin', route: '/workspace/hr', access: 'unite-admin' },
   { id: 'X28', title: 'Payroll', app: 'admin', route: '/workspace/payroll', access: 'finance' },
   { id: 'X29', title: 'Finance and Accounting', app: 'admin', route: '/workspace/finance', access: 'finance' },
+  { id: 'X30', title: 'Inventory and Stores', app: 'admin', route: '/workspace/inventory', access: 'unite-admin' },
+  { id: 'X31', title: 'Manufacturing', app: 'admin', route: '/workspace/manufacturing', access: 'unite-admin' },
+  { id: 'X32', title: 'Retail POS', app: 'admin', route: '/workspace/pos', access: 'unite-admin' },
+  { id: 'X33', title: 'Procurement', app: 'admin', route: '/workspace/procurement', access: 'unite-admin' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

@@ -83,3 +83,13 @@ export function SourceBanner({ source }: { source: 'erpnext' | 'sample' }) {
     : <Alert tone="warning" title="Sample data — ERPNext is not connected yet.">These people and figures are illustrative so you can review the screens. Connect ERPNext to see your real records (Apps → Integrations).</Alert>;
 }
 export const rupees = (r: number) => `₹${Math.round(r).toLocaleString('en-IN')}`;
+
+/** A row of headline numbers for workspace pages. */
+export function KpiRow({ items, tint = 'navy' }: { items: [IconName, string | number, string, string][]; tint?: string }) {
+  return (
+    <div className="cz-ws-kpis">
+      {items.map(([icon, v, l, sub]) => <div key={l} className="cz-ws-kpi"><span className={`cz-app-icon cz-tint-${tint}`}><Icon name={icon} size={20} /></span><div><strong>{v}</strong><span>{l}</span><small>{sub}</small></div></div>)}
+    </div>
+  );
+}
+export const shortDate = (d: string | null) => (d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—');

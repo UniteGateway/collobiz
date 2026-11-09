@@ -14,7 +14,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { and, desc, eq, inArray, notInArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { InjectDb, type Db } from '../../db/client';
-import { commissionAgreements, commissionEntries, erpSyncRecords, organizations } from '../../db/schema';
+import { catalogItems, commissionAgreements, commissionEntries, erpSyncRecords, groupCompanies, organizations } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
@@ -25,6 +25,9 @@ import { ErpnextSource, erpSource, type ErpSource } from './erp.source';
 const POSTABLE = ['approved', 'invoiced', 'settled'];
 const hrRoles = (ctx: RequestContext) => ctx.platformRoles.some((r) => r === 'super_admin' || r === 'unite_admin');
 const moneyRoles = (ctx: RequestContext) => ctx.platformRoles.some((r) => r === 'super_admin' || r === 'finance');
+const opsRoles = hrRoles;
+const posRoles = (ctx: RequestContext) => hrRoles(ctx) || moneyRoles(ctx);
+const today = () => new Date().toISOString().slice(0, 10);
 
 @Injectable()
 export class ErpService {
@@ -113,6 +116,96 @@ export class ErpController {
       });
       return { period: p.period, employees: p.slips.length, gross: sum('gross'), deductions: sum('deductions'), net: sum('net'), statutory: p.statutory, byCompany, slips: p.slips };
     });
+  }
+
+  // ---------- Inventory & stores (and dispatches) ----------
+  @Get('admin/inventory/overview')
+  async inventory(@Ctx() ctx: RequestContext) {
+    if (!opsRoles(ctx)) throw new ForbiddenException('Inventory is for Unite admins and super admins');
+    return this.svc.call(async (s) => {
+      const o = await s.ops('inventory');
+      const stock = o.stock ?? [];
+      const warehouses = [...new Set(stock.map((r) => r.warehouse))].sort().map((w) => { const rs = stock.filter((r) => r.warehouse === w); return { warehouse: w, items: rs.filter((r) => r.qty > 0).length, value: rs.reduce((a, r) => a + r.value, 0) }; });
+      const reorder = stock.filter((r) => r.projected <= 0).sort((a, b) => a.projected - b.projected);
+      return {
+        itemsInStock: new Set(stock.filter((r) => r.qty > 0).map((r) => r.item)).size, warehouses, stockValue: stock.reduce((a, r) => a + r.value, 0),
+        reorder, stock, movements: o.movements ?? [], dispatches: o.dispatches ?? [], dispatchesToBill: (o.dispatches ?? []).filter((d) => d.status === 'To Bill').length,
+      };
+    });
+  }
+
+  // ---------- Manufacturing ----------
+  @Get('admin/manufacturing/overview')
+  async manufacturing(@Ctx() ctx: RequestContext) {
+    if (!opsRoles(ctx)) throw new ForbiddenException('Manufacturing is for Unite admins and super admins');
+    return this.svc.call(async (s) => {
+      const o = await s.ops('manufacturing');
+      const wos = o.workOrders ?? [];
+      const open = wos.filter((w) => !['Completed', 'Stopped', 'Closed', 'Cancelled'].includes(w.status));
+      return {
+        boms: o.boms ?? 0, inProcess: wos.filter((w) => w.status === 'In Process').length, notStarted: wos.filter((w) => w.status === 'Not Started').length,
+        completed: wos.filter((w) => w.status === 'Completed').length, overdue: open.filter((w) => w.due && w.due < today()).length,
+        unitsPlanned: open.reduce((a, w) => a + w.qty, 0), unitsProduced: open.reduce((a, w) => a + w.produced, 0), workOrders: wos,
+      };
+    });
+  }
+
+  // ---------- Retail POS ----------
+  @Get('admin/pos/overview')
+  async pos(@Ctx() ctx: RequestContext) {
+    if (!posRoles(ctx)) throw new ForbiddenException('Store sales are for Unite admins, finance and super admins');
+    return this.svc.call(async (s) => {
+      const sales = (await s.ops('pos')).pos ?? [];
+      const t = today();
+      const stores = [...new Set(sales.map((x) => x.store))].sort().map((store) => { const xs = sales.filter((x) => x.store === store); return { store, bills: xs.length, amount: xs.reduce((a, x) => a + x.amount, 0), today: xs.filter((x) => x.date === t).reduce((a, x) => a + x.amount, 0) }; });
+      const td = sales.filter((x) => x.date === t);
+      return { todayBills: td.length, todayAmount: td.reduce((a, x) => a + x.amount, 0), monthBills: sales.length, monthAmount: sales.reduce((a, x) => a + x.amount, 0), stores, recent: sales.slice(0, 12) };
+    });
+  }
+
+  // ---------- Procurement ----------
+  @Get('admin/procurement/overview')
+  async procurement(@Ctx() ctx: RequestContext) {
+    if (!opsRoles(ctx)) throw new ForbiddenException('Procurement is for Unite admins and super admins');
+    return this.svc.call(async (s) => {
+      const o = await s.ops('procurement');
+      const pos = o.purchaseOrders ?? [];
+      const open = pos.filter((p) => !['Completed', 'Closed', 'Cancelled'].includes(p.status));
+      return {
+        openOrders: open.length, openValue: open.reduce((a, p) => a + p.amount, 0), lateDeliveries: open.filter((p) => p.received < 100 && p.due && p.due < today()).length,
+        openMaterialRequests: o.openMaterialRequests ?? 0, purchaseOrders: pos,
+      };
+    });
+  }
+
+  /** Sends Unite group companies' published catalogue products to ERPNext as Items (item code = SKU). Never creates an item twice. */
+  @Post('admin/erp/items/sync')
+  @HttpCode(200)
+  async syncItems(@Ctx() ctx: RequestContext) {
+    if (!opsRoles(ctx)) throw new ForbiddenException('Only Unite admins and super admins send the catalogue to ERPNext');
+    const s = this.svc.source();
+    if (!(s instanceof ErpnextSource)) throw new ConflictException('The catalogue can only be sent to a connected ERPNext — sample data cannot be changed.');
+    const done = await this.db.select({ id: erpSyncRecords.sourceId }).from(erpSyncRecords).where(and(eq(erpSyncRecords.kind, 'catalog_item'), eq(erpSyncRecords.status, 'posted')));
+    const rows = await this.db.select({ i: catalogItems }).from(catalogItems).innerJoin(groupCompanies, eq(groupCompanies.organizationId, catalogItems.ownerOrgId))
+      .where(and(eq(catalogItems.status, 'published'), sql`${catalogItems.sku} is not null`, done.length ? notInArray(catalogItems.id, done.map((x) => x.id)) : undefined)).limit(500);
+    let created = 0, linked = 0, failed = 0;
+    for (const { i } of rows) {
+      const record = async (status: string, erpName: string | null, error: string | null) => {
+        await this.db.insert(erpSyncRecords).values({ kind: 'catalog_item', sourceId: i.id, erpDoctype: 'Item', erpName, status, error, attempts: 1, postedBy: ctx.userId, postedAt: status === 'posted' ? new Date() : null })
+          .onConflictDoUpdate({ target: [erpSyncRecords.kind, erpSyncRecords.sourceId], set: { erpName, status, error, attempts: sql`${erpSyncRecords.attempts} + 1`, postedBy: ctx.userId, postedAt: status === 'posted' ? new Date() : null, updatedAt: new Date() } });
+      };
+      try {
+        const [existing] = await s.client.list<{ name: string }>('Item', { fields: ['name'], filters: [['item_code', '=', i.sku!]], limit: 1 });
+        if (existing) { await record('posted', existing.name, null); linked++; continue; }
+        const doc = await s.client.insert<{ name: string }>('Item', {
+          item_code: i.sku, item_name: i.name.slice(0, 140), description: i.description, item_group: i.kind === 'service' ? 'Services' : config().ERPNEXT_ITEM_GROUP ?? 'Products',
+          stock_uom: 'Nos', is_stock_item: i.kind === 'service' ? 0 : 1, include_item_in_manufacturing: i.kind === 'service' ? 0 : 1,
+        });
+        await record('posted', doc.name, null); created++;
+      } catch (err) { await record('failed', null, (err as Error).message.slice(0, 300)); failed++; }
+    }
+    await this.audit.record(ctx, { action: 'erp.items_synced', objectType: 'erp_sync', after: { created, linked, failed } });
+    return { created, linked, failed, considered: rows.length };
   }
 
   // ---------- Finance ----------

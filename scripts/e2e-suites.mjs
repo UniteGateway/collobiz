@@ -1709,7 +1709,7 @@ suites.push({
     await page.getByRole('heading', { name: 'Results for “Volt”' }).waitFor();
     await page.locator('[data-group="companies"]').getByText('Volt EPC').waitFor();
     await page.getByRole('navigation', { name: 'Workspace' }).getByRole('link', { name: 'Apps', exact: true }).click();
-    await page.locator('[data-app="inventory"]').getByText('Coming in Phase D').waitFor();
+    await page.locator('[data-app="franchise"]').getByText('Coming in Phase E').waitFor();
     expect(await page.locator('[data-app="hr"][data-status="live"]').count() === 1, 'HR not shown as live');
     await page.locator('[data-integration="erpnext"]').getByText('Not connected').waitFor();
     await page.getByRole('navigation', { name: 'Workspace' }).getByRole('link', { name: 'Companies', exact: true }).click();
@@ -1756,5 +1756,29 @@ suites.push({
     await page.getByText('Partner commission → books').waitFor();
     expect(await page.getByRole('button', { name: 'Post approved commission to ERPNext' }).count() === 0, 'posting offered on sample data');
     await shot('finance-books');
+  },
+});
+
+// Operations on ERPNext (sample data in demo): inventory reorders, manufacturing progress, store sales, purchase orders.
+suites.push({
+  name: 'Operations · Unite admin sees inventory reorders, work orders, store sales and purchase orders; catalogue send waits for ERPNext',
+  only: 'desktop',
+  run: async ({ page, ADMIN, shot, expect }) => {
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/workspace/inventory');
+    await page.getByText('Needs reordering').waitFor();
+    await page.getByRole('table', { name: 'Items to reorder' }).getByText('AC EV Chargers').waitFor();
+    await page.getByText('Deccan Roadways').waitFor();
+    expect(await page.getByRole('button', { name: 'Send catalogue to ERPNext' }).count() === 0, 'catalogue send offered on sample data');
+    await shot('ops-inventory');
+    await page.goto(ADMIN + '/workspace/manufacturing');
+    await page.getByRole('progressbar', { name: /Distribution Transformers/ }).waitFor();
+    await page.getByRole('button', { name: /^Late/ }).click();
+    await page.getByText('Battery Racks & Cabinets').waitFor();
+    await page.goto(ADMIN + '/workspace/pos');
+    await page.getByText('By store — this month').waitFor();
+    await page.goto(ADMIN + '/workspace/procurement');
+    await page.getByText('Andhra Copper Works').waitFor();
+    await shot('ops-procurement');
   },
 });

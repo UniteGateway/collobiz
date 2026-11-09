@@ -14,8 +14,16 @@ export interface LeaveRequest { id: string; employee: string; employeeName: stri
 export interface Slip { id: string; employee: string; employeeName: string; company: string; gross: number; deductions: number; net: number }
 export interface Payroll { period: { start: string; end: string } | null; slips: Slip[]; statutory: { pf: number; esi: number; pt: number; tds: number; lwf: number; other: number } }
 export interface CompanyBooks { company: string; receivable: number; payable: number; salesThisMonth: number; purchasesThisMonth: number; overdueInvoices: number }
+export interface StockRow { item: string; itemName: string; warehouse: string; qty: number; projected: number; reserved: number; value: number; uom: string }
+export interface Movement { id: string; type: string; date: string; company: string; value: number; status: string }
+export interface WorkOrder { id: string; item: string; itemName: string; qty: number; produced: number; status: string; start: string | null; due: string | null; company: string }
+export interface PosSale { id: string; date: string; customer: string; store: string; amount: number; company: string }
+export interface PurchaseOrder { id: string; supplier: string; date: string; due: string | null; amount: number; received: number; status: string; company: string }
+export interface Dispatch { id: string; customer: string; date: string; status: string; transporter: string | null; vehicle: string | null; lrNo: string | null; company: string; amount: number }
+export interface Ops { stock: StockRow[]; movements: Movement[]; workOrders: WorkOrder[]; boms: number; pos: PosSale[]; purchaseOrders: PurchaseOrder[]; openMaterialRequests: number; dispatches: Dispatch[] }
 export interface ErpSource {
   kind: 'erpnext' | 'sample';
+  ops(part: 'inventory' | 'manufacturing' | 'pos' | 'procurement'): Promise<Partial<Ops>>;
   employees(): Promise<Employee[]>;
   leave(status?: string): Promise<LeaveRequest[]>;
   decideLeave(id: string, decision: 'Approved' | 'Rejected'): Promise<LeaveRequest>;
@@ -71,6 +79,41 @@ export class ErpnextSource implements ErpSource {
     for (const l of lines) if (l.component) statutory[bucket(l.component)] += Number(l.amount ?? 0);
     return { period: { start: last.start_date, end: last.end_date }, statutory, slips: slips.map((s) => ({ id: s.name, employee: s.employee, employeeName: s.employee_name, company: s.company, gross: Number(s.gross_pay), deductions: Number(s.total_deduction), net: Number(s.net_pay) })) };
   }
+  async ops(part: 'inventory' | 'manufacturing' | 'pos' | 'procurement'): Promise<Partial<Ops>> {
+    const c = this.client;
+    if (part === 'inventory') {
+      const [bins, items, ses, dns] = await Promise.all([
+        c.list<any>('Bin', { fields: ['item_code', 'warehouse', 'actual_qty', 'projected_qty', 'reserved_qty', 'stock_value', 'stock_uom'], limit: 20000 }),
+        c.list<any>('Item', { fields: ['item_code', 'item_name'], filters: [['disabled', '=', 0]], limit: 20000 }),
+        c.list<any>('Stock Entry', { fields: ['name', 'stock_entry_type', 'posting_date', 'company', 'total_outgoing_value', 'total_incoming_value', 'docstatus'], orderBy: 'posting_date desc', limit: 15 }),
+        c.list<any>('Delivery Note', { fields: ['name', 'customer', 'posting_date', 'status', 'transporter_name', 'vehicle_no', 'lr_no', 'company', 'grand_total'], filters: [['docstatus', '<', 2]], orderBy: 'posting_date desc', limit: 20 }),
+      ]);
+      const names = new Map(items.map((i) => [i.item_code, i.item_name]));
+      return {
+        stock: bins.map((b) => ({ item: b.item_code, itemName: names.get(b.item_code) ?? b.item_code, warehouse: b.warehouse, qty: Number(b.actual_qty ?? 0), projected: Number(b.projected_qty ?? 0), reserved: Number(b.reserved_qty ?? 0), value: Number(b.stock_value ?? 0), uom: b.stock_uom ?? 'Nos' })),
+        movements: ses.map((x) => ({ id: x.name, type: x.stock_entry_type, date: x.posting_date, company: x.company, value: Number(x.total_incoming_value || x.total_outgoing_value || 0), status: ['Draft', 'Submitted', 'Cancelled'][x.docstatus ?? 0] })),
+        dispatches: dns.map((d) => ({ id: d.name, customer: d.customer, date: d.posting_date, status: d.status, transporter: d.transporter_name ?? null, vehicle: d.vehicle_no ?? null, lrNo: d.lr_no ?? null, company: d.company, amount: Number(d.grand_total ?? 0) })),
+      };
+    }
+    if (part === 'manufacturing') {
+      const [wos, boms] = await Promise.all([
+        c.list<any>('Work Order', { fields: ['name', 'production_item', 'item_name', 'qty', 'produced_qty', 'status', 'planned_start_date', 'expected_delivery_date', 'company'], filters: [['docstatus', '<', 2]], orderBy: 'planned_start_date desc', limit: 200 }),
+        c.list<any>('BOM', { fields: ['name'], filters: [['is_active', '=', 1], ['docstatus', '=', 1]], limit: 5000 }),
+      ]);
+      return { boms: boms.length, workOrders: wos.map((w) => ({ id: w.name, item: w.production_item, itemName: w.item_name ?? w.production_item, qty: Number(w.qty ?? 0), produced: Number(w.produced_qty ?? 0), status: w.status, start: w.planned_start_date ?? null, due: w.expected_delivery_date ?? null, company: w.company })) };
+    }
+    if (part === 'pos') {
+      const since = monthStart();
+      const rows = await c.list<any>('POS Invoice', { fields: ['name', 'posting_date', 'customer', 'pos_profile', 'grand_total', 'company'], filters: [['docstatus', '=', 1], ['posting_date', '>=', since]], orderBy: 'posting_date desc', limit: 20000 });
+      return { pos: rows.map((r) => ({ id: r.name, date: r.posting_date, customer: r.customer, store: r.pos_profile ?? 'Store', amount: Number(r.grand_total ?? 0), company: r.company })) };
+    }
+    const [pos, mrs] = await Promise.all([
+      c.list<any>('Purchase Order', { fields: ['name', 'supplier', 'transaction_date', 'schedule_date', 'grand_total', 'per_received', 'status', 'company'], filters: [['docstatus', '<', 2]], orderBy: 'transaction_date desc', limit: 200 }),
+      c.list<any>('Material Request', { fields: ['name'], filters: [['docstatus', '=', 1], ['status', 'in', ['Pending', 'Partially Ordered']]], limit: 5000 }),
+    ]);
+    return { openMaterialRequests: mrs.length, purchaseOrders: pos.map((p) => ({ id: p.name, supplier: p.supplier, date: p.transaction_date, due: p.schedule_date ?? null, amount: Number(p.grand_total ?? 0), received: Number(p.per_received ?? 0), status: p.status, company: p.company })) };
+  }
+
   async books() {
     const since = `${new Date().getFullYear() - 1}-01-01`;
     const [sales, purchases] = await Promise.all([
@@ -149,6 +192,53 @@ export class SampleSource implements ErpSource {
     });
     return { period: { start: fmt(start), end: fmt(end) }, slips, statutory };
   }
+  async ops(part: 'inventory' | 'manufacturing' | 'pos' | 'procurement'): Promise<Partial<Ops>> {
+    const d = (off: number) => new Date(Date.now() + off * 86400_000).toISOString().slice(0, 10);
+    if (part === 'inventory') {
+      const items: [string, string, string, number, number, number][] = [
+        ['PT-040', 'Distribution Transformers', 'Finished Goods - PT', 6, 2, 3850000], ['PT-049', 'PCC Panels', 'Finished Goods - PT', 4, 4, 1240000], ['PT-063', 'Ring Main Units (RMU)', 'Finished Goods - PT', 1, 3, 860000],
+        ['PT-001', 'Mono PERC Solar PV Modules', 'Main Store - US', 820, 0, 9020000], ['PT-009', 'Hybrid Solar Inverters', 'Main Store - US', 14, 6, 1610000], ['PT-106', 'Solar Water Pumps', 'Main Store - US', 9, 12, 1305000],
+        ['PT-182', 'AC EV Chargers', 'Main Store - US', 0, 4, 0], ['PT-084', 'Battery Racks & Cabinets', 'Finished Goods - PT', 11, 0, 935000],
+      ];
+      return {
+        stock: items.map(([item, itemName, warehouse, qty, reserved, value]) => ({ item, itemName, warehouse, qty, reserved, projected: qty - reserved, value, uom: 'Nos' })),
+        movements: [
+          { id: 'MAT-STE-2026-00118', type: 'Material Receipt', date: d(-1), company: 'Unite Solar', value: 2640000, status: 'Submitted' },
+          { id: 'MAT-STE-2026-00117', type: 'Manufacture', date: d(-2), company: 'Powertek', value: 1925000, status: 'Submitted' },
+          { id: 'MAT-STE-2026-00116', type: 'Material Transfer', date: d(-3), company: 'Powertek', value: 410000, status: 'Submitted' },
+          { id: 'MAT-STE-2026-00115', type: 'Material Issue', date: d(-5), company: 'Unite Solar', value: 182000, status: 'Submitted' },
+        ],
+        dispatches: [
+          { id: 'MAT-DN-2026-00042', customer: 'Shree Ganesh Polymers', date: d(-1), status: 'To Bill', transporter: 'Deccan Roadways', vehicle: 'TS09UB4521', lrNo: 'LR-88213', company: 'Unite Solar', amount: 2310000 },
+          { id: 'MAT-DN-2026-00041', customer: 'Vindhya Infra Projects', date: d(-2), status: 'Completed', transporter: 'Krishna Logistics', vehicle: 'MP09HG7713', lrNo: 'LR-55102', company: 'Powertek', amount: 1925000 },
+          { id: 'MAT-DN-2026-00040', customer: 'Thar Solar Parks', date: d(-4), status: 'To Bill', transporter: null, vehicle: null, lrNo: null, company: 'Unite Solar', amount: 640000 },
+        ],
+      };
+    }
+    if (part === 'manufacturing') return {
+      boms: 12,
+      workOrders: [
+        { id: 'MFG-WO-2026-00031', item: 'PT-040', itemName: 'Distribution Transformers (1000 kVA)', qty: 4, produced: 1, status: 'In Process', start: d(-6), due: d(8), company: 'Powertek' },
+        { id: 'MFG-WO-2026-00030', item: 'PT-049', itemName: 'PCC Panels', qty: 6, produced: 6, status: 'Completed', start: d(-14), due: d(-2), company: 'Powertek' },
+        { id: 'MFG-WO-2026-00029', item: 'PT-063', itemName: 'Ring Main Units (RMU)', qty: 3, produced: 0, status: 'Not Started', start: d(2), due: d(16), company: 'Powertek' },
+        { id: 'MFG-WO-2026-00028', item: 'PT-084', itemName: 'Battery Racks & Cabinets', qty: 10, produced: 4, status: 'In Process', start: d(-9), due: d(-1), company: 'Powertek' },
+      ],
+    };
+    if (part === 'pos') {
+      const stores = ['Solar Experience Centre — Hyderabad', 'Franchise Store — Vijayawada', 'Franchise Store — Pune'];
+      return { pos: Array.from({ length: 18 }, (_, i) => ({ id: `ACC-PSINV-2026-${String(200 + i).padStart(5, '0')}`, date: d(-(i % 6)), customer: ['Walk-in Customer', 'Ravi Kumar', 'Walk-in Customer', 'Lakshmi Traders', 'Walk-in Customer', 'Sai Agro Farms'][i % 6], store: stores[i % 3], amount: [18500, 42000, 7600, 126000, 9900, 64000][i % 6], company: 'Unite Solar' })) };
+    }
+    return {
+      openMaterialRequests: 5,
+      purchaseOrders: [
+        { id: 'PUR-ORD-2026-00087', supplier: 'Sunrise Traders', date: d(-3), due: d(7), amount: 1840000, received: 0, status: 'To Receive and Bill', company: 'Powertek' },
+        { id: 'PUR-ORD-2026-00086', supplier: 'Andhra Copper Works', date: d(-8), due: d(-1), amount: 2620000, received: 60, status: 'To Receive and Bill', company: 'Powertek' },
+        { id: 'PUR-ORD-2026-00085', supplier: 'Deccan Distributors', date: d(-12), due: d(-5), amount: 740000, received: 100, status: 'To Bill', company: 'Unite Solar' },
+        { id: 'PUR-ORD-2026-00084', supplier: 'Sunrise Traders', date: d(-20), due: d(-10), amount: 455000, received: 100, status: 'Completed', company: 'Unite Solar' },
+      ],
+    };
+  }
+
   async books() {
     return [
       { company: 'Unite Solar', receivable: 18450000, payable: 6230000, salesThisMonth: 9200000, purchasesThisMonth: 4100000, overdueInvoices: 3 },

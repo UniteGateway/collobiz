@@ -61,7 +61,8 @@ On Linux, also add `extra_hosts: ["host.docker.internal:host-gateway"]` to the `
    ERPNEXT_COMMISSION_PAYABLE_ACCOUNT=Creditors - <ABBR>
    ERPNEXT_TDS_PAYABLE_ACCOUNT=TDS Payable - <ABBR>
    ```
-4. Restart COLLABIZ. Workspace → Apps → Integrations should show **ERPNext: Connected**. HR, Payroll and Finance then show live data instead of sample data.
+4. Restart COLLABIZ. Workspace → Apps → Integrations should show **ERPNext: Connected**. HR, Payroll, Finance, Inventory, Manufacturing, POS and Procurement then show live data instead of sample data.
+5. Workspace → Inventory → **Send catalogue to ERPNext** creates the COLLABIZ products (for example the 360 Powertek products) as ERPNext Items, with the PT code as item code. Give the integration user the **Stock User**, **Manufacturing User** and **Purchase User** roles as well. Optionally set `ERPNEXT_ITEM_GROUP` if products should go into a group other than "Products".
 
 ## Before payroll goes live
 - Your CA sets up: chart of accounts, GST settings (India Compliance), salary components and structures, PF/ESI/PT registrations, and income-tax slabs.

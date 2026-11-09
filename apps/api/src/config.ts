@@ -35,6 +35,8 @@ const Env = z.object({
   ERPNEXT_COMMISSION_PAYABLE_ACCOUNT: z.string().optional(),
   ERPNEXT_TDS_PAYABLE_ACCOUNT: z.string().optional(),
   ERPNEXT_GST_INPUT_ACCOUNT: z.string().optional(),
+  /** ERPNext item group for products sent from the COLLABIZ catalogue (default "Products", which ERPNext creates). */
+  ERPNEXT_ITEM_GROUP: z.string().optional(),
   ESIGN_PROVIDER: z.string().default('local'),
   /** Video provider for meeting rooms: local/none (scheduling, agenda, minutes only) or jitsi. */
   MEETING_PROVIDER: z.string().default('local'),
