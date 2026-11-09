@@ -16,3 +16,4 @@ export * from './global';
 export * from './offers';
 export * from './growth-desk';
 export * from './erp';
+export * from './franchise-property';

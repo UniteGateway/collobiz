@@ -1782,3 +1782,49 @@ suites.push({
     await shot('ops-procurement');
   },
 });
+
+// Franchise and Real Estate: a live franchisee reports sales and holds a park plot for a buyer; Unite approves an applicant and books the plot.
+suites.push({
+  name: 'Franchise & Property · partner reports franchise sales and holds a plot; Unite approves an applicant and books the plot',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/franchise');
+    const pune = page.locator('[data-franchise="Pune"]');
+    await pune.waitFor();
+    await pune.getByLabel('Sales (₹)').fill('1850000');
+    await pune.getByLabel('Orders').fill('14');
+    await pune.getByRole('button', { name: 'Report sales' }).click();
+    await pune.getByText('₹55,500').first().waitFor(); // 3% royalty on ₹18.5 lakh
+    await shot('franchise-partner');
+    await page.goto(WEB + '/property');
+    await page.locator('a[data-project="UNITIF Green Industrial Park — Phase 1"]').click();
+    const row = page.locator('[data-unit="P-05"]');
+    await row.getByRole('button', { name: 'Hold for a buyer' }).click();
+    const dlg = page.locator('dialog[open]');
+    await dlg.getByLabel('Buyer name').fill('Kaveri Agro Foods');
+    await dlg.getByLabel('Buyer city').fill('Kurnool');
+    await dlg.getByLabel('The buyer agreed to be introduced to Unite Group for this unit').check();
+    await dlg.getByRole('button', { name: 'Hold unit' }).click();
+    await row.getByRole('button', { name: 'Release' }).waitFor();
+    await shot('property-partner');
+
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/workspace/franchise');
+    await page.locator('[data-unit="Bengaluru"]').getByRole('link').click();
+    await page.getByLabel('Franchise fee (₹)').fill('200000');
+    await page.getByLabel('Royalty (% of sales)').fill('3.5');
+    await page.getByRole('button', { name: 'Approve' }).click();
+    await page.getByRole('switch', { name: 'Site selected and approved' }).waitFor();
+    await page.getByRole('switch', { name: 'Site selected and approved' }).click();
+    await page.locator('[role=switch][aria-label="Site selected and approved"][aria-checked="true"]').waitFor();
+    await shot('franchise-admin');
+    await page.goto(ADMIN + '/workspace/property');
+    await page.locator('[data-project="UNITIF Green Industrial Park — Phase 1"]').getByRole('link').click();
+    const p5 = page.locator('[data-unit="P-05"]');
+    await p5.getByText('Buyer: Kaveri Agro Foods').waitFor();
+    await p5.getByRole('button', { name: 'Booked' }).click();
+    await p5.getByRole('button', { name: 'Sold' }).waitFor();
+    await shot('property-admin');
+  },
+});

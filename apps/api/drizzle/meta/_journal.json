@@ -169,6 +169,13 @@
       "when": 1794238614441,
       "tag": "0023_catalog_images",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794242640946,
+      "tag": "0024_franchise_property",
+      "breakpoints": true
     }
   ]
 }

@@ -30,7 +30,8 @@ describe('client access gate (UX mirror of API rules)', () => {
   it('navigation is task-based and compact (audit §3.2): no registry titles, no parameterised routes', () => {
     const verified = { ...base, activeOrg: { ...base.activeOrg!, verificationStatus: 'verified' } };
     const items = partnerNav(verified).flatMap((s) => s.items);
-    expect(items.length).toBeLessThanOrEqual(14);
+    // 14 in the audit (§3.2); +1 for "Unite businesses" (ventures, franchise, property sales), a primary area added on request.
+    expect(items.length).toBeLessThanOrEqual(15);
     for (const it of items) { expect(it.href.includes('[')).toBe(false); expect(it.icon).toBeTruthy(); }
     expect(items.map((i) => i.label)).not.toContain('OTP & Email Verification');
     expect(partnerNav(base).flatMap((s) => s.items)[0]).toMatchObject({ href: '/onboarding/status' }); // unverified: verification first

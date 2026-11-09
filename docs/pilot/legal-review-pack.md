@@ -262,9 +262,17 @@ Unsubscribing works without signing in, applies to every Unite business and camp
 
 **Q24.** May licensed directory and trade-data contacts be used for automated e-mail outreach under typical licence terms, or only for manual contact? Please list what to check in each data licence.
 
+## Franchise and property channel partners
+
+Unite companies can be opened for franchising. Verified partner companies apply for a format and city; Unite approves with a fee, a royalty percentage of reported monthly sales and an optional target, and a unit goes live only after a seven-item set-up checklist. Separately, partners can hold a unit in a Unite property project for a named buyer for 48 hours, after recording how the buyer agreed to be introduced, and earn the project's commission rate on sale. Residential, commercial and plotted projects need a RERA number before partners can sell, and partners must give their RERA agent number to hold units in them.
+
+**Q25.** Franchising: please provide or review a franchise agreement, and advise on disclosure to applicants, trademark licensing, GST on the fee and royalty, and any state-specific rules.
+
+**Q26.** Property channel partners: must every partner be a registered agent in the project's state; are the 48-hour hold and our consent record acceptable; please provide a channel-partner agreement. Industrial-park plots are treated as not needing project RERA registration — please confirm per state.
+
 ## Checklist for counsel
 
-Please answer or mark "not for pilot". Items 1, 4, 5, 10, 11 and 14 must be resolved before partners are invited; items 22–24 before any Growth Desk message is sent.
+Please answer or mark "not for pilot". Items 1, 4, 5, 10, 11 and 14 must be resolved before partners are invited; items 22–24 before any Growth Desk message is sent; items 25–26 before franchises or property are offered to partners.
 
 | Q | Question | Answer |
 |---|---|---|
@@ -292,5 +300,7 @@ Please answer or mark "not for pilot". Items 1, 4, 5, 10, 11 and 14 must be reso
 | Q22 | The DPDP Act 2023 has no general "legitimate interest" ground (unlike the GDPR); it relies on consent and the "legitimate uses" in section 7. Can … | |
 | Q23 | For overseas recipients (UAE, Kenya, Nigeria, UK, US and others), which anti-spam and data-protection rules apply (e.g. GDPR/PECR, CAN-SPAM), and is … | |
 | Q24 | May licensed directory and trade-data contacts be used for automated e-mail outreach under typical licence terms, or only for manual contact? Please … | |
+| Q25 | Franchising: please provide or review a franchise agreement, and advise on disclosure to applicants, trademark licensing, GST on the fee and royalty, … | |
+| Q26 | Property channel partners: must every partner be a registered agent in the project's state; are the 48-hour hold and our consent record acceptable; … | |
 
 Return the marked-up document to the pilot owner. Approved texts are loaded with the bootstrap command (go-live checklist 5.2a) and the "DRAFT" wording is removed only from approved documents.

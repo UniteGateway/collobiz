@@ -1362,3 +1362,14 @@ a.cz-app-tile:hover { border-color: var(--cz-navy-500); box-shadow: 0 6px 18px r
 .cz-progress-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
 .cz-progress { flex: 1; height: 10px; border-radius: 999px; background: var(--cz-grey-100); overflow: hidden; min-width: 70px; }
 .cz-progress i { display: block; height: 100%; background: var(--cz-green-600); border-radius: 999px; }
+
+/* Tables that become labelled rows on phones (unit inventories). Each <td> carries data-label. */
+@media (max-width: 640px) {
+  .cz-table-stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .cz-table.cz-table-stack { min-width: 0; }
+  .cz-table-stack, .cz-table-stack tbody, .cz-table-stack tr, .cz-table-stack td { display: block; width: 100%; box-sizing: border-box; }
+  .cz-table-stack tr { padding: 10px 14px; border-bottom: 1px solid var(--cz-grey-200); }
+  .cz-table-stack td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 3px 0 !important; border: 0 !important; text-align: right !important; }
+  .cz-table-stack td::before { content: attr(data-label); color: var(--cz-grey-600); font-size: 13px; text-align: left; }
+  .cz-table-stack td:empty, .cz-table-stack td[data-label=""]::before { display: none; }
+}

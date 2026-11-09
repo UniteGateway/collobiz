@@ -488,6 +488,8 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await venturesDemo(db, refs);
   await growthDemo(db, refs);
   await groupCompaniesDemo(db, refs);
+  await franchiseDemo(db, refs);
+  await propertyDemo(db, refs);
 }
 
 /** Demo pilot check-ins (spread over three weeks) so the admin results page has something to show. Not part of the test seed. */
@@ -622,4 +624,50 @@ export async function groupCompaniesDemo(db: Db, refs: SeedRefs) {
   await set('uniteExim', 'trade', 'Global trade and commodity exports and imports.');
   const parent = refs.orgs.uniteGroupInc;
   if (parent) await db.update(s.groupCompanies).set({ parentOrgId: parent }).where(and(sql`${s.groupCompanies.organizationId} <> ${parent}`, sql`${s.groupCompanies.parentOrgId} is null`));
+}
+
+/** Franchise demo: Unite Solar franchising, units at each stage, two months of reported sales for the live store. */
+export async function franchiseDemo(db: Db, refs: SeedRefs) {
+  const [any] = await db.select({ id: s.franchiseUnits.id }).from(s.franchiseUnits).limit(1);
+  if (any || !refs.orgs.uniteSolar || !refs.orgs.volt) return;
+  await db.update(s.groupCompanies).set({ franchiseOpen: true }).where(eq(s.groupCompanies.organizationId, refs.orgs.uniteSolar));
+  const now = new Date().toISOString();
+  const all = { site: now, agreement: now, fee: now, training: now, branding: now, stock: now, launch: now };
+  const m = (off: number) => { const d = new Date(); d.setMonth(d.getMonth() + off); return d.toISOString().slice(0, 7); };
+  const U = (o: Partial<typeof s.franchiseUnits.$inferInsert> & Pick<typeof s.franchiseUnits.$inferInsert, 'franchiseeOrgId' | 'city' | 'region' | 'status' | 'appliedBy'>) => ({
+    code: `FR-2026-${Math.floor(10000 + Math.random() * 89999)}`, brandOrgId: refs.orgs.uniteSolar, format: 'store', message: 'We have a showroom on a main road with parking, an installation team and existing solar customers in the city.', ...o,
+  });
+  const units = await db.insert(s.franchiseUnits).values([
+    U({ franchiseeOrgId: refs.orgs.volt, city: 'Pune', region: 'IN-MH', status: 'live', fee: 5_00_000_00, royaltyBps: 300, monthlyTarget: 25_00_000_00, checklist: all, appliedBy: refs.users.asha, openedAt: new Date(Date.now() - 70 * 86400_000), format: 'experience_centre' }),
+    ...(refs.orgs.sunrise ? [U({ franchiseeOrgId: refs.orgs.sunrise, city: 'Ahmedabad', region: 'IN-GJ', status: 'setup', fee: 3_00_000_00, royaltyBps: 300, monthlyTarget: 15_00_000_00, checklist: { site: now, agreement: now, fee: now, training: now }, appliedBy: refs.users.ravi })] : []),
+    ...(refs.orgs.meera ? [U({ franchiseeOrgId: refs.orgs.meera, city: 'Mysuru', region: 'IN-KA', status: 'approved', fee: 1_50_000_00, royaltyBps: 400, monthlyTarget: 6_00_000_00, format: 'kiosk', appliedBy: refs.users.meera })] : []),
+    ...(refs.orgs.deccan && refs.users.deepak ? [U({ franchiseeOrgId: refs.orgs.deccan, city: 'Bengaluru', region: 'IN-KA', status: 'applied', format: 'service_point', appliedBy: refs.users.deepak, message: 'Our distribution warehouse in Peenya can host a SOLCART service point with two trained technicians.' })] : []),
+  ]).returning();
+  const live = units[0];
+  await db.insert(s.franchiseReports).values([
+    { unitId: live.id, month: m(-2), sales: 21_40_000_00, orders: 18, royalty: Math.round(21_40_000_00 * 0.03), submittedBy: refs.users.asha },
+    { unitId: live.id, month: m(-1), sales: 27_85_000_00, orders: 23, royalty: Math.round(27_85_000_00 * 0.03), submittedBy: refs.users.asha },
+  ]);
+}
+
+/** Real-estate demo: an industrial park (no RERA needed) and a residential project with a clearly fake demo RERA number. */
+export async function propertyDemo(db: Db, refs: SeedRefs) {
+  const [any] = await db.select({ id: s.propertyProjects.id }).from(s.propertyProjects).limit(1);
+  const owner = refs.orgs.unitif ?? refs.orgs.uniteSolar;
+  const res = refs.orgs.uniteDevelopers ?? refs.orgs.uniteSolar;
+  if (any || !owner || !refs.users.uniteAdmin) return;
+  const [park, homes] = await db.insert(s.propertyProjects).values([
+    { code: 'PRJ-10001', ownerOrgId: owner, name: 'UNITIF Green Industrial Park — Phase 1', kind: 'industrial_park', city: 'Kurnool', region: 'IN-AP', commissionBps: 150, openToPartners: true, createdBy: refs.users.uniteAdmin,
+      description: 'Plug-and-play industrial plots with shared rooftop solar, water recycling and an internal substation, close to the national highway. Suited to MSME manufacturing and warehousing.' },
+    { code: 'PRJ-10002', ownerOrgId: res, name: 'Unite Green Residency (demo)', kind: 'residential', city: 'Hyderabad', region: 'IN-TG', reraNumber: 'DEMO-RERA-0001', commissionBps: 200, openToPartners: true, createdBy: refs.users.uniteAdmin,
+      description: 'Solar-powered residential apartments with EV charging, rainwater harvesting and a rooftop garden. Demonstration project with a placeholder RERA number.' },
+  ]).returning();
+  await db.insert(s.propertyUnits).values([
+    ...Array.from({ length: 12 }, (_, i) => ({ projectId: park.id, unitNo: `P-${String(i + 1).padStart(2, '0')}`, unitType: i < 9 ? 'plot' : 'shed', areaSqft: i < 9 ? 10_000 + i * 2_500 : 8_000, price: (i < 9 ? 45_00_000_00 + i * 9_00_000_00 : 1_20_00_000_00), status: i === 2 ? 'sold' : i === 5 ? 'booked' : 'available', buyerName: i === 2 ? 'Rajhans Auto Components' : i === 5 ? 'Narmada Cold Storage' : null, soldAt: i === 2 ? new Date() : null, bookedAt: i === 2 || i === 5 ? new Date() : null })),
+    ...Array.from({ length: 10 }, (_, i) => ({ projectId: homes.id, unitNo: `A-${101 + i}`, unitType: 'flat', areaSqft: i % 2 ? 1450 : 1180, price: i % 2 ? 98_00_000_00 : 79_00_000_00, status: i === 0 ? 'sold' : 'available', buyerName: i === 0 ? 'A. Sharma' : null, soldAt: i === 0 ? new Date() : null, bookedAt: i === 0 ? new Date() : null })),
+  ]);
+  if (refs.orgs.volt && refs.users.asha) {
+    await db.update(s.propertyUnits).set({ status: 'held', heldByOrgId: refs.orgs.volt, heldByUserId: refs.users.asha, heldUntil: new Date(Date.now() + 30 * 3600_000), buyerName: 'Shree Ganesh Polymers', buyerCity: 'Pune', consentMethod: 'meeting_minutes' })
+      .where(and(eq(s.propertyUnits.projectId, park.id), eq(s.propertyUnits.unitNo, 'P-04')));
+  }
 }

@@ -66,6 +66,8 @@ const offerId = await one("select id from direct_offers where code = 'DO-2026-10
 const salesOfferId = await one("select id from direct_offers where code = 'DO-2026-100001'");
 const ventureId = await one("select id from unite_ventures where slug = 'solcart'");
 const growthAgentId = await one("select id from growth_agents where name like 'SOLCART — factory%'");
+const franchiseId = await one("select id from franchise_units where lower(city) = 'pune' limit 1");
+const projectId = await one("select id from property_projects where code = 'PRJ-10001'");
 const offerAgreementId = await one("select id from commission_agreements where code = 'CA-2026-410001'");
 const EXTRA = [
   { id: 'X01', title: 'Offers for you', app: 'web', route: '/offers', access: 'verified-partner' },
@@ -101,6 +103,13 @@ const EXTRA = [
   { id: 'X31', title: 'Manufacturing', app: 'admin', route: '/workspace/manufacturing', access: 'unite-admin' },
   { id: 'X32', title: 'Retail POS', app: 'admin', route: '/workspace/pos', access: 'unite-admin' },
   { id: 'X33', title: 'Procurement', app: 'admin', route: '/workspace/procurement', access: 'unite-admin' },
+  { id: 'X34', title: 'Franchise network', app: 'admin', route: '/workspace/franchise', access: 'unite-admin' },
+  { id: 'X35', title: 'Franchise unit', app: 'admin', route: `/workspace/franchise/${franchiseId}`, access: 'unite-admin' },
+  { id: 'X36', title: 'Real estate (admin)', app: 'admin', route: '/workspace/property', access: 'unite-admin' },
+  { id: 'X37', title: 'Property project (admin)', app: 'admin', route: `/workspace/property/${projectId}`, access: 'unite-admin' },
+  { id: 'X38', title: 'Franchise (partner)', app: 'web', route: '/franchise', access: 'partner' },
+  { id: 'X39', title: 'Property sales (partner)', app: 'web', route: '/property', access: 'partner' },
+  { id: 'X40', title: 'Property project (partner)', app: 'web', route: `/property/${projectId}`, access: 'partner' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

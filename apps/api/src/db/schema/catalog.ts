@@ -21,6 +21,8 @@ export const groupCompanies = pgTable('group_companies', {
   receivesLeads: boolean('receives_leads').notNull().default(true),
   /** Shown on the public website's group-company list (off until legal names and details are confirmed). */
   listedPublicly: boolean('listed_publicly').notNull().default(true),
+  /** Accepts franchise applications from verified partners. */
+  franchiseOpen: boolean('franchise_open').notNull().default(false),
   /** Unite-first routing: first-review window and business calendar (Stage 06, screen 133). */
   slaMinutes: integer('sla_minutes').notNull().default(240),
   calendar: jsonb('calendar').notNull().default(sql`'{"timezone":"Asia/Kolkata","workdays":[1,2,3,4,5],"startHour":9,"endHour":18,"holidays":[]}'::jsonb`),

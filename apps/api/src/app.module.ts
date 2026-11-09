@@ -31,9 +31,11 @@ import { PilotModule } from './modules/pilot/pilot.controller';
 import { GrowthDeskModule } from './modules/growth-desk/growth-desk.controller';
 import { WorkspaceModule } from './modules/workspace/workspace.controller';
 import { ErpModule } from './modules/erp/erp.controller';
+import { FranchiseModule } from './modules/franchise/franchise.controller';
+import { PropertyModule } from './modules/property/property.controller';
 import { config } from './config';
 
-export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule, GrowthDeskModule, WorkspaceModule, ErpModule];
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule, GrowthDeskModule, WorkspaceModule, ErpModule, FranchiseModule, PropertyModule];
 
 @Module({
   imports: [
