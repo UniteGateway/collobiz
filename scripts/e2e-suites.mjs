@@ -1710,7 +1710,7 @@ suites.push({
     await page.locator('[data-group="companies"]').getByText('Volt EPC').waitFor();
     await page.getByRole('link', { name: 'Apps' }).first().click();
     await page.locator('[data-app="hr"]').getByText('Coming in Phase B').waitFor();
-    expect(await page.locator('[data-integration="erpnext"]').getByText('Not connected').isVisible(), 'ERPNext shown as connected');
+    await page.locator('[data-integration="erpnext"]').getByText('Not connected').waitFor();
     await page.getByRole('link', { name: 'Companies' }).first().click();
     await page.locator('[data-company="Unite Group Inc."]').waitFor();
     await page.getByRole('button', { name: /^International/ }).click();
