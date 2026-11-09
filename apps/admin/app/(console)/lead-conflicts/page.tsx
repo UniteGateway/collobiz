@@ -17,7 +17,7 @@ export default function LeadConflicts() {
   const ruleDispute = useMutation(async () => { await api.request('POST', `/admin/lead-disputes/${sel}/ruling`, dr, { idempotencyKey: newIdempotencyKey() }); dispute.reload(); q.reload(); return true; });
   const Side = ({ t, s }: { t: string; s: any }) => (
     <div><h3>{t}: <span className="cz-mono">{s.code}</span></h3>
-      <DescriptionList items={[['Introducer', s.org], ['Registered', new Date(s.registeredAt).toLocaleString()], ['Customer', s.snapshot?.customer?.legalName], ['Tax ID', s.snapshot?.customer?.taxId ?? '—'], ['Consent', `${s.consent?.method ?? '—'} · ${s.consent?.obtainedAt ? new Date(s.consent.obtainedAt).toLocaleDateString() : ''}`], ['Evidence', s.evidenceSummary]]} />
+      <DescriptionList items={[['Introducer', s.org], ['Registered', new Date(s.registeredAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })], ['Customer', s.snapshot?.customer?.legalName], ['Tax ID', s.snapshot?.customer?.taxId ?? '—'], ['Consent', `${s.consent?.method ?? '—'} · ${s.consent?.obtainedAt ? new Date(s.consent.obtainedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}`], ['Evidence', s.evidenceSummary]]} />
     </div>
   );
   if (q.loading) return <Screen id="134"><LoadingState /></Screen>;

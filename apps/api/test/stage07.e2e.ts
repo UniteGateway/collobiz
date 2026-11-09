@@ -17,7 +17,7 @@ describe('Stage 07 — CRM & pipeline (gate: sales stage transitions and activit
     expect(other.body.metrics.open).toBe(0);
   });
 
-  it('stage moves are versioned, audited and written to the activity history', async () => {
+  it('052 stage moves are versioned, audited and written to the activity history', async () => {
     const d = deal('400 kW');
     await api(app).post(`/v1/crm/deals/${d.id}/move`).set(auth(t.asha)).send({ stage: 'proposal', note: 'Sent techno-commercial offer', expectedVersion: 99 }).expect(409);
     const r = await api(app).post(`/v1/crm/deals/${d.id}/move`).set(auth(t.asha)).send({ stage: 'proposal', note: 'Sent techno-commercial offer', expectedVersion: d.version }).expect(200);
@@ -67,7 +67,7 @@ describe('Stage 07 — CRM & pipeline (gate: sales stage transitions and activit
     expect(r.body.tasks.overdue).toBeGreaterThanOrEqual(1);
   });
 
-  it('a registered lead opens a CRM deal; 054 timeline merges lead lifecycle and CRM history', async () => {
+  it('046 a registered lead opens a CRM deal; 054 timeline merges lead lifecycle and CRM history', async () => {
     const lead = await api(app).post('/v1/leads').set(auth(t.asha)).set('Idempotency-Key', 'crm-lead-0001').send({
       customer: { legalName: 'Sahyadri Dairy Co-op', taxId: '27AAASD4444D1Z4', contactName: 'R. More', city: 'Satara', country: 'IN' }, sector: 'solar', productOrProject: '300 kW rooftop solar', estimatedValue: 1_35_00_000_00,
       requirements: 'Dairy plant roof, 300 kW with export limiting.', consent: { method: 'meeting_minutes', obtainedAt: new Date(Date.now() - 86400_000).toISOString(), disclosureScope: 'unite_only' }, evidenceSummary: 'Signed minutes from board meeting.',

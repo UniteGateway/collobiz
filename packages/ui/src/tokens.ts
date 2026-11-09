@@ -72,4 +72,5 @@ export function toneForStatus(status: string): Tone {
   if (/(estimated|eligible|earned|invoiced|in_progress|progress|open|planning|shipped|issued|released)/.test(s)) return 'info';
   return 'neutral';
 }
-export const humanize = (s: string) => s.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+const ACRONYMS = /\b(nda|kyb|kyc|loi|po|gst|gstin|tds|utr|ai|sla|epc|mfa)\b/gi;
+export const humanize = (s: string) => s.replace(/_/g, ' ').replace(ACRONYMS, (m) => m.toUpperCase()).replace(/^\w/, (c) => c.toUpperCase());

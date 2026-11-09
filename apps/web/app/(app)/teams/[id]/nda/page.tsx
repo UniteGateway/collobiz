@@ -33,7 +33,7 @@ export default function Nda() {
             <Button type="submit" loading={sign.pending}>Sign NDA</Button>
           </form>
         )}
-        {st === 'nda_signed' && <Alert tone="success">Your organization signed this NDA{d.myMembership?.ndaSignedAt ? ` on ${new Date(d.myMembership.ndaSignedAt).toLocaleDateString()}` : ''}.</Alert>}
+        {st === 'nda_signed' && <Alert tone="success">Your organization signed this NDA{d.myMembership?.ndaSignedAt ? ` on ${new Date(d.myMembership.ndaSignedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}.</Alert>}
       </Card>
     </Screen>
   );

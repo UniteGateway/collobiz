@@ -58,8 +58,8 @@ export default function SecurityPage() {
         {sessions.loading ? <LoadingState /> : sessions.error ? <ApiErrorView error={sessions.error} onRetry={sessions.reload} /> : (
           <DataTable caption="Active sessions" rows={sessions.data ?? []} columns={[
             { key: 'userAgent', header: 'Device', render: (r) => r.userAgent?.slice(0, 60) ?? 'Unknown device' },
-            { key: 'createdAt', header: 'Signed in', render: (r) => new Date(r.createdAt).toLocaleString() },
-            { key: 'expiresAt', header: 'Expires', render: (r) => new Date(r.expiresAt).toLocaleDateString() },
+            { key: 'createdAt', header: 'Signed in', render: (r) => new Date(r.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) },
+            { key: 'expiresAt', header: 'Expires', render: (r) => new Date(r.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) },
             { key: 'a', header: '', render: (r) => <Button size="sm" variant="secondary" onClick={() => revoke.run(r.id)}>Sign out</Button> },
           ]} />
         )}

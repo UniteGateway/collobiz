@@ -49,7 +49,7 @@ export default function KycPage() {
         {docs.loading ? <LoadingState /> : docs.error ? <ApiErrorView error={docs.error} onRetry={docs.reload} /> : (
           <DataTable caption="Uploaded documents" rows={docs.data ?? []} empty={<EmptyState title="No documents yet" />} columns={[
             { key: 'docType', header: 'Type', render: (d) => DOC_LABEL[d.docType] ?? d.docType },
-            { key: 'fileName', header: 'File', render: (d) => <>{d.fileName}<div className="cz-muted" style={{ fontSize: 12 }}>{(d.size / 1024).toFixed(1)} KB · {new Date(d.createdAt).toLocaleDateString()}</div></> },
+            { key: 'fileName', header: 'File', render: (d) => <>{d.fileName}<div className="cz-muted" style={{ fontSize: 12 }}>{(d.size / 1024).toFixed(1)} KB · {new Date(d.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div></> },
             { key: 'status', header: 'Review', render: (d) => <><StatusBadge status={d.status} />{d.reviewNote && <div className="cz-muted" style={{ fontSize: 12 }}>{d.reviewNote}</div>}</> },
             { key: 'a', header: '', render: (d) => <div className="cz-row" style={{ gap: 4 }}><Button size="sm" variant="secondary" onClick={() => view.run(d.id)}>View</Button>{d.status !== 'accepted' && !locked && <Button size="sm" variant="ghost" onClick={() => del.run(d.id)}>Remove</Button>}</div> },
           ]} />

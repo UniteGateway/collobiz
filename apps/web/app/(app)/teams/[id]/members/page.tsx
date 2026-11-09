@@ -26,7 +26,7 @@ export default function Members() {
           { key: 'role', header: 'Role', render: (m: any) => <>{teamRoleLabel(m.role)}{m.responsibilities && <div className="cz-muted" style={{ fontSize: 12 }}>{m.responsibilities}</div>}</> },
           { key: 'share', header: `Share${latest ? ` (v${latest.version}, ${latest.status})` : ''}`, render: (m: any) => (share(m.organizationId) != null ? `${share(m.organizationId)}%` : '—') },
           { key: 'status', header: 'Status', render: (m: any) => (m.status ? <StatusBadge status={m.status} /> : '—') },
-          { key: 'nda', header: 'NDA', render: (m: any) => (m.ndaSignedAt ? `Signed ${new Date(m.ndaSignedAt).toLocaleDateString()}` : '—') },
+          { key: 'nda', header: 'NDA', render: (m: any) => (m.ndaSignedAt ? `Signed ${new Date(m.ndaSignedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : '—') },
           { key: 'x', header: '', render: (m: any) => d.isLead && m.organizationId !== d.myMembership?.organizationId && m.status && !['revoked', 'declined'].includes(m.status) && <Button size="sm" variant="ghost" onClick={() => revoke.run(m.id)}>Remove</Button> },
         ]} />
       </Card>

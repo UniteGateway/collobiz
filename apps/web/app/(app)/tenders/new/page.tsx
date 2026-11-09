@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { SECTORS } from '@collabiz/types';
+import { levelLabel, SECTORS } from '@collabiz/types';
 import { Alert, Button, Card, ChipSelect, Grid, Select, TextArea, TextInput } from '@collabiz/ui';
 import { Screen } from '@/components/Screen';
 import { api } from '@/lib/api';
@@ -40,7 +40,7 @@ export default function NewTender() {
         </Grid>
       </Card>
       <Card title="Eligibility">
-        <Select label="Minimum membership level" value={f.minLevel} onChange={set('minLevel')} options={LEVELS.map((l) => ({ value: l, label: l.replace('_', ' ') }))} />
+        <Select label="Minimum membership level" value={f.minLevel} onChange={set('minLevel')} options={LEVELS.map((l) => ({ value: l, label: `${levelLabel(l)} or higher` }))} />
         <ChipSelect legend="Bidder must work in (optional)" options={SECTORS.map((s) => ({ value: s.code, label: s.name }))} value={f.sectors} onChange={(sectors) => setF({ ...f, sectors })} />
         <TextInput label="Required certifications (comma-separated, optional)" value={f.certifications} onChange={set('certifications')} />
       </Card>

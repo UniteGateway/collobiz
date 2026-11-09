@@ -35,7 +35,7 @@ export default function Status() {
         })}
       </Card>
       <Card title="History">
-        {d.history.length === 0 ? <Text style={s.hint}>No reviews yet.</Text> : d.history.map((h: any, i: number) => <Row key={i} title={`${h.from} → ${h.to}`} subtitle={`${new Date(h.at).toLocaleString()}${h.reason ? ' · ' + h.reason : ''}`} />)}
+        {d.history.length === 0 ? <Text style={s.hint}>No reviews yet.</Text> : d.history.map((h: any, i: number) => <Row key={i} title={`${h.from} → ${h.to}`} subtitle={`${new Date(h.at).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })}${h.reason ? ' · ' + h.reason : ''}`} />)}
       </Card>
     </ScreenView>
   );

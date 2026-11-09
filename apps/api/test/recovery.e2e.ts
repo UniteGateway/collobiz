@@ -24,7 +24,7 @@ describe('Recovery — partner home and public figures', () => {
     expect(admin.body.actions).toEqual([]); expect(admin.body.figures.activeProjects).toBe(0);
   });
 
-  it('031 paged marketplace returns a page, the total, per-source counts and honours sort', async () => {
+  it('032 031 paged marketplace returns a page, the total, per-source counts and honours sort', async () => {
     const r = await api(app).get('/v1/opportunities?paged=true&limit=2').set(auth(t.asha)).expect(200);
     expect(r.body.items).toHaveLength(2);
     expect(r.body.total).toBeGreaterThan(2);

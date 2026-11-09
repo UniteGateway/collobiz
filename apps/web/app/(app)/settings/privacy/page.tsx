@@ -52,7 +52,7 @@ export default function PrivacyPage() {
       <Card title="Request history">
         <DataTable caption="Data requests" rows={reqs.data ?? []} columns={[
           { key: 'kind', header: 'Type' }, { key: 'status', header: 'Status', render: (r) => <StatusBadge status={r.status} /> },
-          { key: 'createdAt', header: 'Raised', render: (r) => new Date(r.createdAt).toLocaleDateString() }, { key: 'dueAt', header: 'Due by', render: (r) => new Date(r.dueAt).toLocaleDateString() },
+          { key: 'createdAt', header: 'Raised', render: (r) => new Date(r.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) }, { key: 'dueAt', header: 'Due by', render: (r) => new Date(r.dueAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) },
           { key: 'resolution', header: 'Outcome', render: (r) => r.resolution ?? '—' },
         ]} empty={<p className="cz-muted">No requests yet.</p>} />
       </Card>

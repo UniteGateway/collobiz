@@ -1364,3 +1364,107 @@ suites.push({
     await shot('159-dispute');
   },
 });
+
+// Screens that no stage journey opened (found by the quality gate). Each check opens the screen with an entitled
+// account and asserts real content from the API, and where the screen has an action, performs it.
+suites.push({
+  name: 'Gate · 014 023 032 033 044 045 056 060 061 072 078 104 107 110 113 115 121 124 150 155 161 163 164 partner screens',
+  run: async ({ page, WEB, shot }) => {
+    const one = async (q, p = []) => (await sqlExec(q, p)).rows[0];
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    const visit = async (path, ...texts) => { await page.goto(WEB + path); for (const t of texts) await page.getByText(t).first().waitFor(); };
+    await visit('/onboarding/individual', 'Individual Partner Registration'); // 014
+    await page.getByLabel('Name shown to partners').waitFor();
+    await page.goto(WEB + '/dashboard'); // 023
+    await page.getByRole('heading', { name: /^Good (morning|afternoon|evening), Asha$/ }).waitFor();
+    await page.getByText('Needs your attention').waitFor();
+    await visit('/marketplace/unite', 'Unite Group Opportunities', /2 MW rooftop solar EPC/); // 032
+    await visit('/marketplace/exchange', 'Approved Partner Exchange', /Originator identity is withheld/); // 033
+    await visit('/leads/new/customer', 'Customer / Company Details'); // 044
+    await page.getByLabel('Customer legal name').fill('Apex Castings Pvt Ltd');
+    await visit('/leads/new/scope', 'Select Products or Project Type'); // 045
+    await page.getByLabel('Product, service or project').waitFor();
+    await page.goto(WEB + '/partners'); // 056 — filter by business type, shown in words
+    await page.getByLabel('Business type').selectOption({ label: 'Distributor' });
+    await page.getByText('Deccan Distributors').first().waitFor();
+    await page.goto(WEB + '/teams/builder'); // 060 — choose a partner for the team
+    await page.getByRole('button', { name: 'Add to team' }).first().click();
+    await page.getByText('2. Selected partners (1)').waitFor();
+    const team = await one("select t.id from collaboration_teams t where t.code = 'TM-000001'");
+    await visit(`/teams/${team.id}/roles`, 'Responsibilities'); // 061
+    await visit(`/teams/${team.id}/members`, 'Lead partner'); // 155
+    const tender = await one("select id from tenders where code = 'TND-2026-000001'");
+    await visit(`/tenders/${tender.id}/ai-proposal`, 'Prices are never suggested.'); // 072
+    await page.getByRole('button', { name: 'Create draft' }).click();
+    await page.getByText('Draft only.').waitFor();
+    const project = await one("select id from projects where code = 'PRJ-2026-000001'");
+    await page.goto(`${WEB}/projects/${project.id}/allocation`); // 078
+    await page.getByRole('table', { name: 'Allocation' }).getByText('Sunrise Traders').waitFor();
+    await visit('/finance/disputes', 'Report a payment problem'); // 104
+    await page.goto(WEB + '/inbox'); // 107 — project chats are created for members on first visit
+    await page.getByRole('heading', { name: /Messages|Inbox/ }).first().waitFor();
+    const thread = await one("select id from message_threads where kind = 'project' order by created_at limit 1");
+    await page.goto(`${WEB}/chat/groups/${thread.id}`);
+    await page.getByText(/PRJ-2026-000001/).first().waitFor();
+    const note = `Crane booked for Thursday 8 am (${Date.now().toString().slice(-5)})`;
+    await page.getByLabel('Message', { exact: true }).fill(note);
+    await page.getByRole('button', { name: 'Send', exact: true }).click();
+    await page.getByLabel('Messages').getByText(note).waitFor();
+    await visit('/announcements', 'New solar tender window opens 15 November'); // 110
+    await visit('/resources', 'Rooftop solar for factories — one-page overview'); // 113
+    await visit('/resources/social', 'LinkedIn — we are now a verified partner'); // 115
+    await visit('/global/territory', 'My territory'); // 121
+    await visit('/consortiums', 'Consortium Formation', /does not create a legal entity/); // 124
+    await page.goto(WEB + '/help'); // 150
+    await page.getByRole('button', { name: 'When is commission earned?' }).click();
+    await page.getByRole('button', { name: 'When is commission earned?' }).and(page.locator('[aria-expanded="true"]')).waitFor();
+    await page.goto(WEB + '/ai/partners'); // 161
+    await page.getByLabel('Sector').selectOption({ label: 'Power Equipment' });
+    await page.getByRole('button', { name: 'Find partners' }).click();
+    await page.getByText(/Deccan Distributors|Sunrise Traders/).first().waitFor();
+    const deccan = await one("select id from organizations where display_name = 'Deccan Distributors'");
+    await visit(`/partners/${deccan.id}/reputation`, 'Verified record'); // 163
+    await visit('/reputation/reviews', /Clean installation and complete evidence/); // 164
+    await shot('gate-164');
+  },
+});
+
+suites.push({
+  name: 'Gate · 047 048 051 152 lead evidence and certificates (introducer)',
+  run: async ({ page, WEB }) => {
+    await webLogin(page, WEB, 'meera@consult.example');
+    const lead = (await sqlExec("select l.id from lead_claims l join users u on u.id = l.introducer_user_id where u.email = 'meera@consult.example' order by l.created_at limit 1")).rows[0];
+    const base = `${WEB}/leads/${lead.id}`;
+    await page.goto(base + '/documents'); // 047 — add supporting evidence
+    await page.getByLabel(/^File/).setInputFiles({ name: 'minutes.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\n% minutes\n%%EOF') });
+    await page.getByLabel('Description').fill('Meeting minutes with the cluster association');
+    await page.getByRole('button', { name: 'Upload' }).click();
+    await page.getByText('Meeting minutes with the cluster association').first().waitFor();
+    await page.goto(base + '/duplicates'); // 048
+    await page.getByText(/independent compliance reviewer/).waitFor();
+    await page.goto(base + '/certificate'); // 051
+    await page.getByText(/CZL-\d{4}-\d{8}/).first().waitFor();
+    await page.getByText(/Fee trigger/).waitFor();
+    await page.goto(base + '/registration-certificate'); // 152
+    await page.getByText('Sealed evidence (SHA-256)').waitFor();
+    await page.getByText(/ IST$/).first().waitFor();
+  },
+});
+
+suites.push({
+  name: 'Gate · 127 133 135 group administration',
+  only: 'desktop',
+  run: async ({ page, ADMIN }) => {
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/'); // 127
+    await page.getByText('Audit trail integrity').waitFor();
+    await page.getByText('Intact').waitFor();
+    await page.goto(ADMIN + '/sla'); // 133
+    await page.getByLabel('Review window (business hours)').waitFor();
+    await page.getByRole('button', { name: /Preview/ }).click();
+    await page.getByText('Due', { exact: true }).waitFor();
+    await page.goto(ADMIN + '/commission-policy'); // 135
+    await page.getByText(/INTRODUCER-STD v1/).first().waitFor();
+    await page.getByText(/Construction & EPC/).first().waitFor(); // sector in words
+  },
+});

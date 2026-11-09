@@ -18,7 +18,7 @@ export default function MyOpportunitiesPage() {
           { key: 'o', header: 'Opportunity', render: (a) => <><Link href={`/opportunities/${a.opportunity.id}`}>{a.opportunity.title}</Link><div className="cz-mono cz-muted">{a.opportunity.code}</div></> },
           { key: 'proposedValue', header: 'Proposed', render: (a) => <Money minor={a.proposedValue} /> },
           { key: 'status', header: 'Status', render: (a) => <><StatusBadge status={a.status} />{a.decisionReason && <div className="cz-muted" style={{ fontSize: 12 }}>{a.decisionReason}</div>}</> },
-          { key: 'createdAt', header: 'Applied', render: (a) => new Date(a.createdAt).toLocaleDateString() },
+          { key: 'createdAt', header: 'Applied', render: (a) => new Date(a.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) },
           { key: 'x', header: '', render: (a) => ['submitted', 'shortlisted'].includes(a.status) && <Button size="sm" variant="ghost" onClick={() => withdraw.run(a.opportunity.id, a.id)}>Withdraw</Button> },
         ]} />
       </Card>

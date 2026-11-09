@@ -54,7 +54,7 @@ describe('Stage 12 — commission ledger & finance (gate: no unearned payout, id
     expect(tiered.body.gst).toBe(72_000_00);
   });
 
-  it('096 agreement: created by the payer, terms frozen and hashed; every milestone becomes a projected line', async () => {
+  it('096/157 agreement: created by the payer, terms frozen and hashed; every milestone becomes a projected line', async () => {
     await api(app).post('/v1/commissions/agreements').set(auth(t.asha)).send({ projectId: project.id, beneficiaryOrgId: refs.orgs.meera, policyId: policy.id }).expect(403);
     await api(app).post('/v1/commissions/agreements').set(auth(t.uniteAdmin)).send({ projectId: project.id, beneficiaryOrgId: refs.orgs.greenbuild, policyId: policy.id }).expect(400);
     agreement = (await api(app).post('/v1/commissions/agreements').set(auth(t.uniteAdmin)).send({ projectId: project.id, beneficiaryOrgId: refs.orgs.meera, policyId: policy.id }).expect(201)).body;
@@ -99,7 +99,7 @@ describe('Stage 12 — commission ledger & finance (gate: no unearned payout, id
     expect(q.body.entries.find((e: any) => e.id === line1.id)).toBeUndefined();
   });
 
-  it('099/138 payout: bank verified, invoice number unique; settlement is idempotent and separated from approval', async () => {
+  it('027/095/158/099/138 payout: bank verified, invoice number unique; settlement is idempotent and separated from approval', async () => {
     payout1 = (await api(app).post('/v1/payouts').set(auth(t.meera)).set('Idempotency-Key', idemKey()).send({ entryIds: [line1.id], partnerInvoiceNo: 'MIC/26-27/001' }).expect(201)).body;
     expect(payout1).toMatchObject({ status: 'requested', payable: 5_22_500_00, tds: 27_500_00 });
     await api(app).post('/v1/payouts').set(auth(t.meera)).set('Idempotency-Key', idemKey()).send({ entryIds: [line2.id], partnerInvoiceNo: 'MIC/26-27/001' }).expect(409); // not earned (and invoice reused)

@@ -2,10 +2,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { Alert, Button, Card, DataTable, DescriptionList, Grid, Kpi, LoadingState, Money, Select, StatusBadge, TextArea, TextInput, Timeline } from '@collabiz/ui';
+import { Alert, Button, humanize, Card, DataTable, DescriptionList, Grid, Kpi, LoadingState, Money, Select, StatusBadge, TextArea, TextInput, Timeline } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
+
+const CONSENT_METHOD: Record<string, string> = { crm_entry: 'Recorded in CRM', written_email: 'Written email', signed_letter: 'Signed letter', meeting_minutes: 'Meeting minutes', recorded_call: 'Recorded call' };
+const CONSENT_SCOPE: Record<string, string> = { restricted: 'Not shared outside your company', unite_only: 'Shared with Unite Group only', unite_and_approved_partners: 'Unite Group and approved partners' };
 
 /** Screen 052 — Customer CRM Profile (consent-scoped relationship record). */
 export default function CustomerProfile() {
@@ -25,7 +28,7 @@ export default function CustomerProfile() {
       <Grid cols={3}><Kpi label="Open deals" value={metrics.openDeals} /><Kpi label="Open pipeline" value={<Money minor={metrics.pipelineValue} />} accent /><Kpi label="Won value" value={<Money minor={metrics.wonValue} />} /></Grid>
       <div className="cz-grid cz-grid-2" style={{ marginTop: 16, alignItems: 'start' }}>
         <div className="cz-stack">
-          <Card title="Details"><DescriptionList items={[['Contact', c.contactName], ['Email', c.contactEmail], ['Phone', c.contactPhone], ['City', c.city], ['Tax ID', c.taxId], ['Consent', c.consentProvenance ? `${c.consentProvenance.method} · ${c.consentProvenance.disclosureScope}` : '—']]} /></Card>
+          <Card title="Details"><DescriptionList items={[['Contact', c.contactName], ['Email', c.contactEmail], ['Phone', c.contactPhone], ['City', c.city], ['Tax ID', c.taxId], ['Consent', c.consentProvenance ? `${CONSENT_METHOD[c.consentProvenance.method] ?? humanize(c.consentProvenance.method)} · ${CONSENT_SCOPE[c.consentProvenance.disclosureScope] ?? humanize(c.consentProvenance.disclosureScope)}` : '—']]} /></Card>
           <Card title="Deals">
             <DataTable caption="Deals" rows={deals} columns={[{ key: 'title', header: 'Deal' }, { key: 'value', header: 'Value', render: (d: any) => <Money minor={d.value} /> }, { key: 'stage', header: 'Stage', render: (d: any) => <StatusBadge status={d.stage} /> }]} />
           </Card>
@@ -34,7 +37,7 @@ export default function CustomerProfile() {
           </Card>
           <Card title="Follow-ups">
             {addTask.error && <Alert tone="danger">{addTask.error}</Alert>}
-            {tasks.map((t: any) => <div key={t.id} className="cz-row" style={{ justifyContent: 'space-between', padding: '4px 0' }}><span>{t.status === 'done' ? '✅' : '⏰'} {t.title} · {new Date(t.dueAt).toLocaleString()}</span>{t.status === 'open' && <Button size="sm" variant="ghost" onClick={() => done.run(t.id)}>Done</Button>}</div>)}
+            {tasks.map((t: any) => <div key={t.id} className="cz-row" style={{ justifyContent: 'space-between', padding: '4px 0' }}><span>{t.status === 'done' ? '✅' : '⏰'} {t.title} · {new Date(t.dueAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>{t.status === 'open' && <Button size="sm" variant="ghost" onClick={() => done.run(t.id)}>Done</Button>}</div>)}
             <form noValidate onSubmit={(e) => { e.preventDefault(); addTask.run(); }} className="cz-grid cz-grid-3" style={{ alignItems: 'end' }}>
               <TextInput label="Follow-up" value={task.title} onChange={(e) => setTask({ ...task, title: e.target.value })} />
               <TextInput label="Due" type="datetime-local" value={task.dueAt} onChange={(e) => setTask({ ...task, dueAt: e.target.value })} />
@@ -45,11 +48,11 @@ export default function CustomerProfile() {
         <Card title="Activity history">
           {log.error && <Alert tone="danger">{log.error}</Alert>}
           <form noValidate onSubmit={(e) => { e.preventDefault(); log.run(); }}>
-            <Select label="Type" value={act.kind} onChange={(e) => setAct({ ...act, kind: e.target.value })} options={['note', 'call', 'email', 'meeting'].map((k) => ({ value: k, label: k }))} />
+            <Select label="Type" value={act.kind} onChange={(e) => setAct({ ...act, kind: e.target.value })} options={['note', 'call', 'email', 'meeting'].map((k) => ({ value: k, label: humanize(k) }))} />
             <TextArea label="Details" value={act.body} onChange={(e) => setAct({ ...act, body: e.target.value })} />
             <Button type="submit" loading={log.pending} disabled={act.body.length < 2}>Log activity</Button>
           </form>
-          <div style={{ marginTop: 16 }}><Timeline items={activities.map((a: any) => ({ id: a.id, at: a.at, title: `${a.kind.replace('_', ' ')} · ${a.subjectType}${a.actor ? ` · ${a.actor}` : ''}`, detail: a.body }))} /></div>
+          <div style={{ marginTop: 16 }}><Timeline items={activities.map((a: any) => ({ id: a.id, at: a.at, title: `${a.kind === 'system' ? 'Update' : humanize(a.kind)} on the ${a.subjectType === 'deal' ? 'deal' : 'customer'}${a.actor ? ` · ${a.actor}` : ''}`, detail: a.body }))} /></div>
         </Card>
       </div>
     </Screen>

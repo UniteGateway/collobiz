@@ -43,7 +43,7 @@ export default function Workspace() {
               <article key={p.id} style={{ borderBottom: '1px solid var(--cz-grey-100)', padding: '10px 0' }}>
                 <div className="cz-row" style={{ justifyContent: 'space-between' }}><strong>{p.title}</strong><StatusBadge status={p.kind} tone="brand" label={p.kind.replace('_', ' ')} /></div>
                 <p style={{ whiteSpace: 'pre-wrap', margin: '6px 0' }}>{p.body}</p>
-                <div className="cz-muted" style={{ fontSize: 12 }}>{p.org} · {p.author} · {new Date(p.createdAt).toLocaleString()}</div>
+                <div className="cz-muted" style={{ fontSize: 12 }}>{p.org} · {p.author} · {new Date(p.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })}</div>
                 {p.kind === 'task' && <Button size="sm" variant="ghost" onClick={() => toggle.run(p.id, p.status === 'open' ? 'done' : 'open')}>{p.status === 'open' ? 'Mark done' : 'Reopen'}</Button>}
               </article>
             ))}

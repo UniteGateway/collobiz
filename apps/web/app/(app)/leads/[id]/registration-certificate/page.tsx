@@ -32,7 +32,7 @@ export default function DigitalCertificate() {
         </div>
         <DescriptionList items={[
           ['Certificate no.', <span key="c" className="cz-mono">{claim.certificateCode}</span>], ['Tracking ID', <span key="t" className="cz-mono">{o.code}</span>],
-          ['Registered at', new Date(claim.createdAt).toISOString()], ['Sealed evidence (SHA-256)', <span key="h" className="cz-mono">{claim.evidenceHash}</span>], ['Status', <StatusBadge key="s" status={claim.status} />],
+          ['Registered at', `${new Date(claim.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Kolkata' })} IST`], ['Sealed evidence (SHA-256)', <span key="h" className="cz-mono">{claim.evidenceHash}</span>], ['Status', <StatusBadge key="s" status={claim.status} />],
         ]} />
         <p style={{ marginTop: 12 }}>Anyone can verify this certificate at <Link href={`/verify-certificate?code=${code}`}>/verify-certificate</Link>. Verification confirms the registration time, introducer and protection status; it never discloses the customer.</p>
       </section>

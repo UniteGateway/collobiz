@@ -45,7 +45,7 @@ export default function Disputes() {
           {!sel ? <p className="cz-muted">Choose a dispute to see its evidence trail.</p> : detail.loading ? <LoadingState /> : d && (
             <>
               <p>Lead <span className="cz-mono">{d.lead?.code}</span> · certificate <span className="cz-mono">{d.lead?.certificateCode}</span> · <StatusBadge status={d.status} /></p>
-              {d.outcome && <Alert tone="info" title={`Ruling: ${d.outcome}.`}>{d.rulingReason}{d.appealDeadline && ` Appeal by ${new Date(d.appealDeadline).toLocaleDateString()}.`}</Alert>}
+              {d.outcome && <Alert tone="info" title={`Ruling: ${d.outcome}.`}>{d.rulingReason}{d.appealDeadline && ` Appeal by ${new Date(d.appealDeadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}.`}</Alert>}
               <Timeline items={d.entries.map((e: any) => ({ id: e.id, at: e.createdAt, title: `${e.kind} · ${e.org ?? 'Panel'}`, detail: e.body }))} />
               {(add.error || appeal.error) && <Alert tone="danger">{add.error ?? appeal.error}</Alert>}
               {!['closed'].includes(d.status) && (

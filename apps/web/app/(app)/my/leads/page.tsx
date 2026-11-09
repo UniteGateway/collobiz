@@ -16,7 +16,7 @@ export default function MyLeads() {
             { key: 'code', header: 'Lead', render: (l) => <><Link href={`/leads/${l.id}/confirmation`}><strong>{l.title}</strong></Link><div className="cz-mono cz-muted">{l.code}</div></> },
             { key: 'customer', header: 'Customer', render: (l) => <>{l.customer}<div className="cz-muted" style={{ fontSize: 12 }}>{sectorName(l.sector)}</div></> },
             { key: 'value', header: 'Value', render: (l) => <Money minor={l.estimatedValue} /> },
-            { key: 'protection', header: 'Protection', render: (l) => <><StatusBadge status={l.claimStatus} />{l.protectedUntil && <div className="cz-muted" style={{ fontSize: 12 }}>until {new Date(l.protectedUntil).toLocaleDateString()}</div>}</> },
+            { key: 'protection', header: 'Protection', render: (l) => <><StatusBadge status={l.claimStatus} />{l.protectedUntil && <div className="cz-muted" style={{ fontSize: 12 }}>until {new Date(l.protectedUntil).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>}</> },
             { key: 'stage', header: 'Stage', render: (l) => <><StatusBadge status={l.opportunityStatus} />{l.routing && !l.routing.decision && <div className="cz-muted" style={{ fontSize: 12 }}>{l.routing.breached ? 'Review overdue' : `${Math.floor(l.routing.remainingMinutes / 60)}h left in review`}</div>}</> },
           ]} />
         )}

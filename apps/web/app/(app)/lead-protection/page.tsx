@@ -22,7 +22,7 @@ export default function LeadProtection() {
       {d.openDisputes > 0 && <Alert tone="warning">You have {d.openDisputes} open ownership dispute(s). <Link href="/lead-disputes">Respond with evidence</Link></Alert>}
       <Card title="Protection expiring within 14 days">
         {!d.expiringSoon.length ? <p className="cz-muted">Nothing expiring soon.</p> : d.expiringSoon.map((l: any) => (
-          <div key={l.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--cz-grey-100)' }}><Link href={`/leads/${l.id}/certificate`}>{l.code} — {l.title}</Link> <span className="cz-muted">expires {new Date(l.protectedUntil).toLocaleDateString()}</span></div>
+          <div key={l.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--cz-grey-100)' }}><Link href={`/leads/${l.id}/certificate`}>{l.code} — {l.title}</Link> <span className="cz-muted">expires {new Date(l.protectedUntil).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span></div>
         ))}
       </Card>
     </Screen>

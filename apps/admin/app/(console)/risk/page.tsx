@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { Alert, Button, Card, DataTable, Dialog, Grid, Kpi, LoadingState, Select, StatusBadge, Tabs, TextArea, TextInput } from '@collabiz/ui';
+import { humanize, Alert, Button, Card, DataTable, Dialog, Grid, Kpi, LoadingState, Select, StatusBadge, Tabs, TextArea, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -32,7 +32,7 @@ export default function RiskPage() {
               { key: 'kind', header: 'Flag', render: (f: any) => <>{f.kind.replace(/_/g, ' ')}<div className="cz-muted" style={{ fontSize: 12 }}>{f.source}</div></> },
               { key: 'severity', header: 'Severity', render: (f: any) => <StatusBadge status={f.severity} tone={f.severity === 'high' ? 'danger' : f.severity === 'medium' ? 'warning' : 'neutral'} /> },
               { key: 'note', header: 'Detail', render: (f: any) => <>{f.note}{f.clearNote && <div className="cz-muted" style={{ fontSize: 12 }}>Cleared: {f.clearNote}</div>}</> },
-              { key: 'createdAt', header: 'Raised', render: (f: any) => new Date(f.createdAt).toLocaleDateString() },
+              { key: 'createdAt', header: 'Raised', render: (f: any) => new Date(f.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) },
               { key: 'a', header: '', render: (f: any) => f.status === 'open' && <Button size="sm" variant="secondary" onClick={() => setClear(f)}>Clear</Button> },
             ]} />
           )}
@@ -40,7 +40,7 @@ export default function RiskPage() {
           {doRaise.error && <Alert tone="danger">{doRaise.error}</Alert>}
           <form noValidate onSubmit={(e) => { e.preventDefault(); doRaise.run(); }} className="cz-grid cz-grid-4" style={{ alignItems: 'end' }}>
             <TextInput label="Organization ID" value={raise.organizationId} onChange={(e) => setRaise({ ...raise, organizationId: e.target.value })} error={doRaise.fieldErrors.organizationId} />
-            <Select label="Kind" value={raise.kind} onChange={(e) => setRaise({ ...raise, kind: e.target.value })} options={['manual', 'sanctions_screen', 'document_mismatch', 'adverse_media', 'duplicate_tax_id'].map((k) => ({ value: k, label: k.replace(/_/g, ' ') }))} />
+            <Select label="Kind" value={raise.kind} onChange={(e) => setRaise({ ...raise, kind: e.target.value })} options={['manual', 'sanctions_screen', 'document_mismatch', 'adverse_media', 'duplicate_tax_id'].map((k) => ({ value: k, label: humanize(k) }))} />
             <Select label="Severity" value={raise.severity} onChange={(e) => setRaise({ ...raise, severity: e.target.value })} options={['low', 'medium', 'high'].map((k) => ({ value: k, label: k }))} />
             <TextInput label="Note" value={raise.note} onChange={(e) => setRaise({ ...raise, note: e.target.value })} error={doRaise.fieldErrors.note} />
             <Button type="submit" loading={doRaise.pending}>Raise flag</Button>
@@ -53,7 +53,7 @@ export default function RiskPage() {
               { key: 'fullName', header: 'Requester', render: (r: any) => <>{r.fullName}<div className="cz-muted" style={{ fontSize: 12 }}>{r.email}</div></> },
               { key: 'kind', header: 'Type' }, { key: 'details', header: 'Details', render: (r: any) => r.details ?? '—' },
               { key: 'status', header: 'Status', render: (r: any) => <StatusBadge status={r.status} /> },
-              { key: 'dueAt', header: 'Due', render: (r: any) => <span style={{ color: new Date(r.dueAt) < new Date() && r.status !== 'completed' ? 'var(--cz-danger)' : undefined }}>{new Date(r.dueAt).toLocaleDateString()}</span> },
+              { key: 'dueAt', header: 'Due', render: (r: any) => <span style={{ color: new Date(r.dueAt) < new Date() && r.status !== 'completed' ? 'var(--cz-danger)' : undefined }}>{new Date(r.dueAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span> },
               { key: 'a', header: '', render: (r: any) => !['completed', 'rejected'].includes(r.status) && <Button size="sm" variant="secondary" onClick={() => setResolve(r)}>Resolve</Button> },
             ]} />
           )}

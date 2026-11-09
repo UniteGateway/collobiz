@@ -193,7 +193,7 @@ describe('Stage 02 — identity, tenant permissions and security', () => {
       const log = await api(app).get('/v1/admin/audit?limit=500').set(auth(t.compliance)).expect(200);
       expect(JSON.stringify(log.body)).not.toMatch(/Secure123pass|Engineer123pass/);
     });
-    it('security summary reports lockouts and failed logins', async () => {
+    it('127/141 security summary reports lockouts and failed logins', async () => {
       const r = await api(app).get('/v1/admin/security/summary').set(auth(t.superadmin)).expect(200);
       expect(r.body.failed24h).toBeGreaterThanOrEqual(5);
       expect(r.body.locked).toBeGreaterThanOrEqual(1);

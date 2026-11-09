@@ -66,7 +66,7 @@ export default function SiteProgress() {
       <Card title="Site diary">
         {!updates.data?.length ? <Empty title="No site updates yet" /> : updates.data.map((u) => (
           <View key={u.id} style={{ paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#E6E9EF' }}>
-            <Text style={s.hint}>{u.org} · {new Date(u.createdAt).toLocaleString()}{u.milestone ? ` · ${u.milestone}` : ''}{u.progressPct != null ? ` · ${u.progressPct}%` : ''}</Text>
+            <Text style={s.hint}>{u.org} · {new Date(u.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })}{u.milestone ? ` · ${u.milestone}` : ''}{u.progressPct != null ? ` · ${u.progressPct}%` : ''}</Text>
             <Text style={s.p}>{u.note}</Text>
             {u.attachments.map((a: any) => <Text key={a.id} accessibilityRole="link" style={[s.p, { color: '#2E7D32' }]} onPress={() => open.run(a.id)}>{a.category === 'photo' ? 'Photo' : 'File'}: {a.fileName}</Text>)}
           </View>

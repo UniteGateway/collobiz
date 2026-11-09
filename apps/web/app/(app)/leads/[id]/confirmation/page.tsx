@@ -18,13 +18,13 @@ export default function Confirmation() {
   return (
     <Screen id="049" title={`Lead ${o.code}`}>
       <LeadTabs id={id} />
-      {claim.status === 'protected' && <Alert tone="success" title="Registered and protected.">Your introduction is protected until {new Date(claim.protectedUntil).toLocaleDateString()}.</Alert>}
+      {claim.status === 'protected' && <Alert tone="success" title="Registered and protected.">Your introduction is protected until {new Date(claim.protectedUntil).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}.</Alert>}
       {claim.status === 'pending' && <Alert tone="warning" title="Registered — protection pending.">{next}</Alert>}
       <div className="cz-grid cz-grid-2" style={{ alignItems: 'start' }}>
         <Card title="Registration record">
           <DescriptionList items={[
             ['Tracking ID', <span key="c" className="cz-mono">{o.code}</span>], ['Certificate', <span key="cc" className="cz-mono">{claim.certificateCode}</span>],
-            ['Registered', new Date(claim.createdAt).toLocaleString()], ['Evidence hash', <span key="h" className="cz-mono">{claim.evidenceHash}</span>],
+            ['Registered', new Date(claim.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })], ['Evidence hash', <span key="h" className="cz-mono">{claim.evidenceHash}</span>],
             ['Protection', <StatusBadge key="p" status={claim.status} />], ['Opportunity status', <StatusBadge key="o" status={o.status} />],
           ]} />
         </Card>

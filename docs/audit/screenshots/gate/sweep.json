@@ -1,0 +1,2972 @@
+[
+ {
+  "id": "001",
+  "title": "Website homepage",
+  "vw": "desktop",
+  "route": "/",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "002",
+  "title": "About COLLABIZ",
+  "vw": "desktop",
+  "route": "/about",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "003",
+  "title": "How Collaboration Works",
+  "vw": "desktop",
+  "route": "/how-it-works",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "004",
+  "title": "Unite Group Companies Directory",
+  "vw": "desktop",
+  "route": "/group-companies",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "005",
+  "title": "Products & Services Catalogue",
+  "vw": "desktop",
+  "route": "/catalogue",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "006",
+  "title": "Public Business Opportunities",
+  "vw": "desktop",
+  "route": "/opportunities/public",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "007",
+  "title": "Partner Benefits & Membership",
+  "vw": "desktop",
+  "route": "/membership",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "008",
+  "title": "Success Stories & Case Studies",
+  "vw": "desktop",
+  "route": "/success-stories",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "009",
+  "title": "Global Partner Locations",
+  "vw": "desktop",
+  "route": "/locations",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "010",
+  "title": "Contact, FAQs & Support",
+  "vw": "desktop",
+  "route": "/support/contact",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "011",
+  "title": "Login / Create Account",
+  "vw": "desktop",
+  "route": "/login",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "012",
+  "title": "OTP & Email Verification",
+  "vw": "desktop",
+  "route": "/verify",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "013",
+  "title": "Select Account Type",
+  "vw": "desktop",
+  "route": "/onboarding/account-type",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "014",
+  "title": "Individual Partner Registration",
+  "vw": "desktop",
+  "route": "/onboarding/individual",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "015",
+  "title": "Company Partner Registration",
+  "vw": "desktop",
+  "route": "/onboarding/company",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "016",
+  "title": "Partner Industry & Skills Selection",
+  "vw": "desktop",
+  "route": "/onboarding/industries",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "017",
+  "title": "Geographical Coverage Selection",
+  "vw": "desktop",
+  "route": "/onboarding/coverage",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "018",
+  "title": "Business Profile Builder",
+  "vw": "desktop",
+  "route": "/onboarding/profile",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "019",
+  "title": "KYC / KYB Document Upload",
+  "vw": "desktop",
+  "route": "/onboarding/kyc",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "020",
+  "title": "Bank & Tax Profile",
+  "vw": "desktop",
+  "route": "/onboarding/bank-tax",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "021",
+  "title": "Agreement Acceptance & e-Sign",
+  "vw": "desktop",
+  "route": "/onboarding/agreements",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "022",
+  "title": "Verification Status & Approval",
+  "vw": "desktop",
+  "route": "/onboarding/status",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "023",
+  "title": "Partner Home Dashboard",
+  "vw": "desktop",
+  "route": "/dashboard",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "024",
+  "title": "My Opportunities Overview",
+  "vw": "desktop",
+  "route": "/my/opportunities",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "025",
+  "title": "Recommended Business Feed",
+  "vw": "desktop",
+  "route": "/feed",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "026",
+  "title": "My Leads & Pipeline",
+  "vw": "desktop",
+  "route": "/my/leads",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "027",
+  "title": "Earnings & Settlement Summary",
+  "vw": "desktop",
+  "route": "/earnings/summary",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "028",
+  "title": "Tasks & Follow-up Calendar",
+  "vw": "desktop",
+  "route": "/tasks",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "029",
+  "title": "Partner Performance Scorecard",
+  "vw": "desktop",
+  "route": "/performance",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "030",
+  "title": "Quick Actions & Activity Center",
+  "vw": "desktop",
+  "route": "/activity",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "031",
+  "title": "All Opportunities Marketplace",
+  "vw": "desktop",
+  "route": "/marketplace",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "032",
+  "title": "Unite Group Opportunities",
+  "vw": "desktop",
+  "route": "/marketplace/unite",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "033",
+  "title": "Approved Partner Exchange",
+  "vw": "desktop",
+  "route": "/marketplace/exchange",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "034",
+  "title": "Opportunity Category Browser",
+  "vw": "desktop",
+  "route": "/marketplace/categories",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "035",
+  "title": "Advanced Search & Filter",
+  "vw": "desktop",
+  "route": "/marketplace/search",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "036",
+  "title": "Opportunity Detail Page",
+  "vw": "desktop",
+  "route": "/opportunities/fe08e47b-fe2d-4579-9387-b2f094523c36",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "037",
+  "title": "Saved Opportunities & Alerts",
+  "vw": "desktop",
+  "route": "/marketplace/saved",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "038",
+  "title": "Location-Based Opportunities Map",
+  "vw": "desktop",
+  "route": "/marketplace/map",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "039",
+  "title": "Product & Service Detail",
+  "vw": "desktop",
+  "route": "/catalogue/813adaf2-9698-4007-bb1b-a874e03d7770",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "040",
+  "title": "Submit Requirement / RFQ",
+  "vw": "desktop",
+  "route": "/rfq/new",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "041",
+  "title": "Opportunity Eligibility Checker",
+  "vw": "desktop",
+  "route": "/opportunities/fe08e47b-fe2d-4579-9387-b2f094523c36/eligibility",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "042",
+  "title": "Apply / Express Interest",
+  "vw": "desktop",
+  "route": "/opportunities/fe08e47b-fe2d-4579-9387-b2f094523c36/apply",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "043",
+  "title": "Register New Business Lead",
+  "vw": "desktop",
+  "route": "/leads/new",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "044",
+  "title": "Customer / Company Details",
+  "vw": "desktop",
+  "route": "/leads/new/customer",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "045",
+  "title": "Select Products or Project Type",
+  "vw": "desktop",
+  "route": "/leads/new/scope",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "046",
+  "title": "Opportunity Value & Requirements",
+  "vw": "desktop",
+  "route": "/leads/new/value",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "047",
+  "title": "Upload Lead Supporting Documents",
+  "vw": "desktop",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/documents",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "048",
+  "title": "Duplicate Lead Detection",
+  "vw": "desktop",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/duplicates",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "049",
+  "title": "Lead Registration Confirmation",
+  "vw": "desktop",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/confirmation",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "050",
+  "title": "Unite First-Review Status",
+  "vw": "desktop",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/review-status",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "051",
+  "title": "Protected Lead Ownership Certificate",
+  "vw": "desktop",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/certificate",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "053",
+  "title": "Sales Pipeline Kanban",
+  "vw": "desktop",
+  "route": "/crm/pipeline",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "054",
+  "title": "Lead Follow-up & Conversion Timeline",
+  "vw": "desktop",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/timeline",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "055",
+  "title": "Find Collaboration Partners",
+  "vw": "desktop",
+  "route": "/partners/find",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "056",
+  "title": "Partner Directory & Profiles",
+  "vw": "desktop",
+  "route": "/partners",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "057",
+  "title": "AI Partner Match Suggestions",
+  "vw": "desktop",
+  "route": "/partners/ai-matches",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "058",
+  "title": "Invite Partner to Collaborate",
+  "vw": "desktop",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/invite",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "059",
+  "title": "Incoming Collaboration Requests",
+  "vw": "desktop",
+  "route": "/collaboration/requests",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "060",
+  "title": "Multi-Partner Project Team Builder",
+  "vw": "desktop",
+  "route": "/teams/builder",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "061",
+  "title": "Roles & Responsibilities Allocation",
+  "vw": "desktop",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/roles",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "062",
+  "title": "Confidentiality / NDA Workspace",
+  "vw": "desktop",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/nda",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "063",
+  "title": "Commercial Sharing Proposal",
+  "vw": "desktop",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/sharing",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "064",
+  "title": "Collaboration Approval & Team Activation",
+  "vw": "desktop",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/activation",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "065",
+  "title": "Tender & RFQ Dashboard",
+  "vw": "desktop",
+  "route": "/tenders",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "066",
+  "title": "Publish Tender / Work Package",
+  "vw": "desktop",
+  "route": "/tenders/new",
+  "account": "mfa:unite.admin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "067",
+  "title": "Tender Documents & Eligibility",
+  "vw": "desktop",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/documents",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "068",
+  "title": "Partner Bid Submission",
+  "vw": "desktop",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/bid",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "069",
+  "title": "Bid Comparison Table",
+  "vw": "desktop",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/comparison",
+  "account": "mfa:unite.admin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "070",
+  "title": "Technical Evaluation",
+  "vw": "desktop",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/technical",
+  "account": "mfa:evaluator@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "071",
+  "title": "Commercial Evaluation",
+  "vw": "desktop",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/commercial",
+  "account": "mfa:unite.admin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "072",
+  "title": "AI Proposal Draft Builder",
+  "vw": "desktop",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/ai-proposal",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "073",
+  "title": "Negotiation & Revision Workspace",
+  "vw": "desktop",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/negotiation",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "074",
+  "title": "Award, LOI & Work Order",
+  "vw": "desktop",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/award",
+  "account": "mfa:unite.admin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "075",
+  "title": "Active Projects Portfolio",
+  "vw": "desktop",
+  "route": "/projects",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "076",
+  "title": "Project Overview Dashboard",
+  "vw": "desktop",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "077",
+  "title": "Milestone & Schedule Planner",
+  "vw": "desktop",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/milestones",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "078",
+  "title": "Work Allocation & Subcontractors",
+  "vw": "desktop",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/allocation",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "079",
+  "title": "Site Progress & Photo Updates",
+  "vw": "desktop",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/progress",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "080",
+  "title": "Materials & Procurement Tracker",
+  "vw": "desktop",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/materials",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "081",
+  "title": "Project Documents Repository",
+  "vw": "desktop",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/documents",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "082",
+  "title": "Quality & Safety Inspection",
+  "vw": "desktop",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/inspections",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "083",
+  "title": "Invoice / Milestone Certification",
+  "vw": "desktop",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/certification",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "084",
+  "title": "Project Closure & Completion Certificate",
+  "vw": "desktop",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/closure",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "085",
+  "title": "Trading Marketplace",
+  "vw": "desktop",
+  "route": "/trading",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "086",
+  "title": "Supplier & Manufacturer Catalogue",
+  "vw": "desktop",
+  "route": "/trading/suppliers",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "087",
+  "title": "Buyer Requirement Posting",
+  "vw": "desktop",
+  "route": "/trading/requirements/new",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "088",
+  "title": "Product Enquiry & Price Request",
+  "vw": "desktop",
+  "route": "/trading/enquiry",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "089",
+  "title": "Supplier Quotation Comparison",
+  "vw": "desktop",
+  "route": "/trading/quotations",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "090",
+  "title": "Purchase Order Creation",
+  "vw": "desktop",
+  "route": "/trading/po/new",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "091",
+  "title": "Order Fulfillment Dashboard",
+  "vw": "desktop",
+  "route": "/trading/orders",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "092",
+  "title": "Shipping & Logistics Tracking",
+  "vw": "desktop",
+  "route": "/trading/orders/f863bdaf-b66c-4864-9c66-25b8e5b1ec2f/shipping",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "093",
+  "title": "Distributor Territory Management",
+  "vw": "desktop",
+  "route": "/trading/territories",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "094",
+  "title": "Returns, Warranty & Claims",
+  "vw": "desktop",
+  "route": "/trading/claims",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "095",
+  "title": "Partner Earnings Overview",
+  "vw": "desktop",
+  "route": "/earnings",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "096",
+  "title": "Commission Agreement Detail",
+  "vw": "desktop",
+  "route": "/commissions/agreements/4b971798-6c88-40a4-a356-ccd3038634fd",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "097",
+  "title": "Commission Calculator",
+  "vw": "desktop",
+  "route": "/commissions/calculator",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "098",
+  "title": "Commission Approval Workflow",
+  "vw": "desktop",
+  "route": "/commissions/approvals",
+  "account": "mfa:finance@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "099",
+  "title": "Invoice / Payout Request",
+  "vw": "desktop",
+  "route": "/payouts/request",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "100",
+  "title": "Payment & Settlement History",
+  "vw": "desktop",
+  "route": "/payments/history",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "101",
+  "title": "Tax / TDS / GST Records",
+  "vw": "desktop",
+  "route": "/tax-records",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "102",
+  "title": "Finance & Funding Opportunities",
+  "vw": "desktop",
+  "route": "/finance/opportunities",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "103",
+  "title": "Project Finance Enquiry",
+  "vw": "desktop",
+  "route": "/finance/enquiry",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "104",
+  "title": "Payment Disputes & Reconciliation",
+  "vw": "desktop",
+  "route": "/finance/disputes",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "105",
+  "title": "Unified Business Inbox",
+  "vw": "desktop",
+  "route": "/inbox",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "106",
+  "title": "One-to-One Partner Chat",
+  "vw": "desktop",
+  "route": "/chat/e3ef249b-22f0-447b-a476-d66840558b3a",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "107",
+  "title": "Project Group Chat",
+  "vw": "desktop",
+  "route": "/chat/groups/19ae4282-f4af-4ad6-8297-939c0e701245",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "108",
+  "title": "Audio / Video Meeting Room",
+  "vw": "desktop",
+  "route": "/meetings/f4c3e511-19ca-4157-a8ae-4f4e87aee702/room",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "109",
+  "title": "Meeting Scheduling",
+  "vw": "desktop",
+  "route": "/meetings",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "110",
+  "title": "Business Announcements",
+  "vw": "desktop",
+  "route": "/announcements",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "111",
+  "title": "Notifications & Alerts Center",
+  "vw": "desktop",
+  "route": "/notifications",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "112",
+  "title": "Support Tickets & Escalation",
+  "vw": "desktop",
+  "route": "/support/tickets",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "113",
+  "title": "Marketing Resources Library",
+  "vw": "desktop",
+  "route": "/resources",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "114",
+  "title": "Co-Branded Brochure Generator",
+  "vw": "desktop",
+  "route": "/resources/brochure",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "115",
+  "title": "Approved Social Campaign Assets",
+  "vw": "desktop",
+  "route": "/resources/social",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "116",
+  "title": "Training & Learning Center",
+  "vw": "desktop",
+  "route": "/learning",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "117",
+  "title": "Certification Assessment",
+  "vw": "desktop",
+  "route": "/learning/assessments/fa1786b7-5e14-49b5-ae67-f8bcc5ac6390",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "118",
+  "title": "Partner Certificate & Badge",
+  "vw": "desktop",
+  "route": "/certificates",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "119",
+  "title": "Global Opportunities Portal",
+  "vw": "desktop",
+  "route": "/global",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "120",
+  "title": "Country Partner Registration",
+  "vw": "desktop",
+  "route": "/global/country-partner",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "121",
+  "title": "International Territory Dashboard",
+  "vw": "desktop",
+  "route": "/global/territory",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "122",
+  "title": "Import / Export Enquiry Desk",
+  "vw": "desktop",
+  "route": "/global/import-export",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "123",
+  "title": "JV & Strategic Alliance Proposals",
+  "vw": "desktop",
+  "route": "/alliances",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "124",
+  "title": "Consortium Formation",
+  "vw": "desktop",
+  "route": "/consortiums",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "125",
+  "title": "Investor Opportunity Data Room",
+  "vw": "desktop",
+  "route": "/data-room",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "126",
+  "title": "Cross-Border Compliance Checklist",
+  "vw": "desktop",
+  "route": "/global/compliance",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "127",
+  "title": "Group Admin Executive Dashboard",
+  "vw": "desktop",
+  "route": "/",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "128",
+  "title": "Group Companies & Business Units",
+  "vw": "desktop",
+  "route": "/group-companies",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "129",
+  "title": "Admin Users & Permissions",
+  "vw": "desktop",
+  "route": "/users",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "130",
+  "title": "Partner Verification Queue",
+  "vw": "desktop",
+  "route": "/verification",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "131",
+  "title": "Partner Risk & Compliance Review",
+  "vw": "desktop",
+  "route": "/risk",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "132",
+  "title": "Opportunity Approval & Routing",
+  "vw": "desktop",
+  "route": "/routing",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "133",
+  "title": "Priority Review SLA Configuration",
+  "vw": "desktop",
+  "route": "/sla",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "134",
+  "title": "Lead Ownership & Conflict Resolution",
+  "vw": "desktop",
+  "route": "/lead-conflicts",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "135",
+  "title": "Commission Policy Configuration",
+  "vw": "desktop",
+  "route": "/commission-policy",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "136",
+  "title": "Product & Catalogue Management",
+  "vw": "desktop",
+  "route": "/catalogue",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "137",
+  "title": "Project / Tender Administration",
+  "vw": "desktop",
+  "route": "/tenders",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "138",
+  "title": "Finance & Settlement Controls",
+  "vw": "desktop",
+  "route": "/finance",
+  "account": "admin:finance@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "139",
+  "title": "Performance Analytics & BI",
+  "vw": "desktop",
+  "route": "/analytics",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "140",
+  "title": "AI Monitoring & Recommendation Controls",
+  "vw": "desktop",
+  "route": "/ai",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "141",
+  "title": "Audit Logs & Security Center",
+  "vw": "desktop",
+  "route": "/audit",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "142",
+  "title": "Global Content & CMS Management",
+  "vw": "desktop",
+  "route": "/cms",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "143",
+  "title": "My Partner Profile",
+  "vw": "desktop",
+  "route": "/profile",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "144",
+  "title": "Company Team & Sub-Accounts",
+  "vw": "desktop",
+  "route": "/company/team",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "145",
+  "title": "Account Security & MFA",
+  "vw": "desktop",
+  "route": "/settings/security",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "146",
+  "title": "Languages, Currencies & Regions",
+  "vw": "desktop",
+  "route": "/settings/regional",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "147",
+  "title": "Notification Preferences",
+  "vw": "desktop",
+  "route": "/settings/notifications",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "148",
+  "title": "Documents & Agreements Vault",
+  "vw": "desktop",
+  "route": "/vault",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "149",
+  "title": "Privacy, Consent & Data Rights",
+  "vw": "desktop",
+  "route": "/settings/privacy",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "150",
+  "title": "Help, Feedback & Account Closure",
+  "vw": "desktop",
+  "route": "/help",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "151",
+  "title": "Lead Protection Dashboard",
+  "vw": "desktop",
+  "route": "/lead-protection",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "152",
+  "title": "Digital Lead Registration Certificate",
+  "vw": "desktop",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/registration-certificate",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "153",
+  "title": "Lead Ownership Dispute Center",
+  "vw": "desktop",
+  "route": "/lead-disputes",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "154",
+  "title": "Collaboration Team Creation",
+  "vw": "desktop",
+  "route": "/teams/new",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "155",
+  "title": "Consortium Member Roles & Sharing",
+  "vw": "desktop",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/members",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "156",
+  "title": "Joint Proposal & Team Workspace",
+  "vw": "desktop",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/workspace",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "157",
+  "title": "Commission Agreement & Milestones",
+  "vw": "desktop",
+  "route": "/commissions/agreements/4b971798-6c88-40a4-a356-ccd3038634fd/milestones",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "158",
+  "title": "Live Earnings & Settlement Tracker",
+  "vw": "desktop",
+  "route": "/earnings/live",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "159",
+  "title": "Commission Dispute Resolution",
+  "vw": "desktop",
+  "route": "/commissions/disputes",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "160",
+  "title": "AI Opportunity Matching Dashboard",
+  "vw": "desktop",
+  "route": "/ai/matching",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "161",
+  "title": "AI Recommended Partners",
+  "vw": "desktop",
+  "route": "/ai/partners",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "162",
+  "title": "AI Project Collaboration Builder",
+  "vw": "desktop",
+  "route": "/ai/team-builder",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "163",
+  "title": "Partner Reputation Profile",
+  "vw": "desktop",
+  "route": "/partners/9da01769-e2d7-4f1f-8832-7acb36e1b322/reputation",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "164",
+  "title": "Verified Performance & Reviews",
+  "vw": "desktop",
+  "route": "/reputation/reviews",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "165",
+  "title": "Partner Excellence & Certification",
+  "vw": "desktop",
+  "route": "/reputation/excellence",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "001",
+  "title": "Website homepage",
+  "vw": "mobile",
+  "route": "/",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "002",
+  "title": "About COLLABIZ",
+  "vw": "mobile",
+  "route": "/about",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "003",
+  "title": "How Collaboration Works",
+  "vw": "mobile",
+  "route": "/how-it-works",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "004",
+  "title": "Unite Group Companies Directory",
+  "vw": "mobile",
+  "route": "/group-companies",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "005",
+  "title": "Products & Services Catalogue",
+  "vw": "mobile",
+  "route": "/catalogue",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "006",
+  "title": "Public Business Opportunities",
+  "vw": "mobile",
+  "route": "/opportunities/public",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "007",
+  "title": "Partner Benefits & Membership",
+  "vw": "mobile",
+  "route": "/membership",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "008",
+  "title": "Success Stories & Case Studies",
+  "vw": "mobile",
+  "route": "/success-stories",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "009",
+  "title": "Global Partner Locations",
+  "vw": "mobile",
+  "route": "/locations",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "010",
+  "title": "Contact, FAQs & Support",
+  "vw": "mobile",
+  "route": "/support/contact",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "011",
+  "title": "Login / Create Account",
+  "vw": "mobile",
+  "route": "/login",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "012",
+  "title": "OTP & Email Verification",
+  "vw": "mobile",
+  "route": "/verify",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "013",
+  "title": "Select Account Type",
+  "vw": "mobile",
+  "route": "/onboarding/account-type",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "014",
+  "title": "Individual Partner Registration",
+  "vw": "mobile",
+  "route": "/onboarding/individual",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "015",
+  "title": "Company Partner Registration",
+  "vw": "mobile",
+  "route": "/onboarding/company",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "016",
+  "title": "Partner Industry & Skills Selection",
+  "vw": "mobile",
+  "route": "/onboarding/industries",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "017",
+  "title": "Geographical Coverage Selection",
+  "vw": "mobile",
+  "route": "/onboarding/coverage",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "018",
+  "title": "Business Profile Builder",
+  "vw": "mobile",
+  "route": "/onboarding/profile",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "019",
+  "title": "KYC / KYB Document Upload",
+  "vw": "mobile",
+  "route": "/onboarding/kyc",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "020",
+  "title": "Bank & Tax Profile",
+  "vw": "mobile",
+  "route": "/onboarding/bank-tax",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "021",
+  "title": "Agreement Acceptance & e-Sign",
+  "vw": "mobile",
+  "route": "/onboarding/agreements",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "022",
+  "title": "Verification Status & Approval",
+  "vw": "mobile",
+  "route": "/onboarding/status",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "023",
+  "title": "Partner Home Dashboard",
+  "vw": "mobile",
+  "route": "/dashboard",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "024",
+  "title": "My Opportunities Overview",
+  "vw": "mobile",
+  "route": "/my/opportunities",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "025",
+  "title": "Recommended Business Feed",
+  "vw": "mobile",
+  "route": "/feed",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "026",
+  "title": "My Leads & Pipeline",
+  "vw": "mobile",
+  "route": "/my/leads",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "027",
+  "title": "Earnings & Settlement Summary",
+  "vw": "mobile",
+  "route": "/earnings/summary",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "028",
+  "title": "Tasks & Follow-up Calendar",
+  "vw": "mobile",
+  "route": "/tasks",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "029",
+  "title": "Partner Performance Scorecard",
+  "vw": "mobile",
+  "route": "/performance",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "030",
+  "title": "Quick Actions & Activity Center",
+  "vw": "mobile",
+  "route": "/activity",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "031",
+  "title": "All Opportunities Marketplace",
+  "vw": "mobile",
+  "route": "/marketplace",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "032",
+  "title": "Unite Group Opportunities",
+  "vw": "mobile",
+  "route": "/marketplace/unite",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "033",
+  "title": "Approved Partner Exchange",
+  "vw": "mobile",
+  "route": "/marketplace/exchange",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "034",
+  "title": "Opportunity Category Browser",
+  "vw": "mobile",
+  "route": "/marketplace/categories",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "035",
+  "title": "Advanced Search & Filter",
+  "vw": "mobile",
+  "route": "/marketplace/search",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "036",
+  "title": "Opportunity Detail Page",
+  "vw": "mobile",
+  "route": "/opportunities/fe08e47b-fe2d-4579-9387-b2f094523c36",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "037",
+  "title": "Saved Opportunities & Alerts",
+  "vw": "mobile",
+  "route": "/marketplace/saved",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "038",
+  "title": "Location-Based Opportunities Map",
+  "vw": "mobile",
+  "route": "/marketplace/map",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "039",
+  "title": "Product & Service Detail",
+  "vw": "mobile",
+  "route": "/catalogue/813adaf2-9698-4007-bb1b-a874e03d7770",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "040",
+  "title": "Submit Requirement / RFQ",
+  "vw": "mobile",
+  "route": "/rfq/new",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "041",
+  "title": "Opportunity Eligibility Checker",
+  "vw": "mobile",
+  "route": "/opportunities/fe08e47b-fe2d-4579-9387-b2f094523c36/eligibility",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "042",
+  "title": "Apply / Express Interest",
+  "vw": "mobile",
+  "route": "/opportunities/fe08e47b-fe2d-4579-9387-b2f094523c36/apply",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "043",
+  "title": "Register New Business Lead",
+  "vw": "mobile",
+  "route": "/leads/new",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "044",
+  "title": "Customer / Company Details",
+  "vw": "mobile",
+  "route": "/leads/new/customer",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "045",
+  "title": "Select Products or Project Type",
+  "vw": "mobile",
+  "route": "/leads/new/scope",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "046",
+  "title": "Opportunity Value & Requirements",
+  "vw": "mobile",
+  "route": "/leads/new/value",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "047",
+  "title": "Upload Lead Supporting Documents",
+  "vw": "mobile",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/documents",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "048",
+  "title": "Duplicate Lead Detection",
+  "vw": "mobile",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/duplicates",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "049",
+  "title": "Lead Registration Confirmation",
+  "vw": "mobile",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/confirmation",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "050",
+  "title": "Unite First-Review Status",
+  "vw": "mobile",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/review-status",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "051",
+  "title": "Protected Lead Ownership Certificate",
+  "vw": "mobile",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/certificate",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "053",
+  "title": "Sales Pipeline Kanban",
+  "vw": "mobile",
+  "route": "/crm/pipeline",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "054",
+  "title": "Lead Follow-up & Conversion Timeline",
+  "vw": "mobile",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/timeline",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "055",
+  "title": "Find Collaboration Partners",
+  "vw": "mobile",
+  "route": "/partners/find",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "056",
+  "title": "Partner Directory & Profiles",
+  "vw": "mobile",
+  "route": "/partners",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "057",
+  "title": "AI Partner Match Suggestions",
+  "vw": "mobile",
+  "route": "/partners/ai-matches",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "058",
+  "title": "Invite Partner to Collaborate",
+  "vw": "mobile",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/invite",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "059",
+  "title": "Incoming Collaboration Requests",
+  "vw": "mobile",
+  "route": "/collaboration/requests",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "060",
+  "title": "Multi-Partner Project Team Builder",
+  "vw": "mobile",
+  "route": "/teams/builder",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "061",
+  "title": "Roles & Responsibilities Allocation",
+  "vw": "mobile",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/roles",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "062",
+  "title": "Confidentiality / NDA Workspace",
+  "vw": "mobile",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/nda",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "063",
+  "title": "Commercial Sharing Proposal",
+  "vw": "mobile",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/sharing",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "064",
+  "title": "Collaboration Approval & Team Activation",
+  "vw": "mobile",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/activation",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "065",
+  "title": "Tender & RFQ Dashboard",
+  "vw": "mobile",
+  "route": "/tenders",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "066",
+  "title": "Publish Tender / Work Package",
+  "vw": "mobile",
+  "route": "/tenders/new",
+  "account": "mfa:unite.admin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "067",
+  "title": "Tender Documents & Eligibility",
+  "vw": "mobile",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/documents",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "068",
+  "title": "Partner Bid Submission",
+  "vw": "mobile",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/bid",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "069",
+  "title": "Bid Comparison Table",
+  "vw": "mobile",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/comparison",
+  "account": "mfa:unite.admin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "070",
+  "title": "Technical Evaluation",
+  "vw": "mobile",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/technical",
+  "account": "mfa:evaluator@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "071",
+  "title": "Commercial Evaluation",
+  "vw": "mobile",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/commercial",
+  "account": "mfa:unite.admin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "072",
+  "title": "AI Proposal Draft Builder",
+  "vw": "mobile",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/ai-proposal",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "073",
+  "title": "Negotiation & Revision Workspace",
+  "vw": "mobile",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/negotiation",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "074",
+  "title": "Award, LOI & Work Order",
+  "vw": "mobile",
+  "route": "/tenders/3c0c171e-f2d1-4d7e-81fd-45742b604abe/award",
+  "account": "mfa:unite.admin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "075",
+  "title": "Active Projects Portfolio",
+  "vw": "mobile",
+  "route": "/projects",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "076",
+  "title": "Project Overview Dashboard",
+  "vw": "mobile",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "077",
+  "title": "Milestone & Schedule Planner",
+  "vw": "mobile",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/milestones",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "078",
+  "title": "Work Allocation & Subcontractors",
+  "vw": "mobile",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/allocation",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "079",
+  "title": "Site Progress & Photo Updates",
+  "vw": "mobile",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/progress",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "080",
+  "title": "Materials & Procurement Tracker",
+  "vw": "mobile",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/materials",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "081",
+  "title": "Project Documents Repository",
+  "vw": "mobile",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/documents",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "082",
+  "title": "Quality & Safety Inspection",
+  "vw": "mobile",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/inspections",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "083",
+  "title": "Invoice / Milestone Certification",
+  "vw": "mobile",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/certification",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "084",
+  "title": "Project Closure & Completion Certificate",
+  "vw": "mobile",
+  "route": "/projects/4c8a2b04-3723-4a93-a68f-1acd345f9bed/closure",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "085",
+  "title": "Trading Marketplace",
+  "vw": "mobile",
+  "route": "/trading",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "086",
+  "title": "Supplier & Manufacturer Catalogue",
+  "vw": "mobile",
+  "route": "/trading/suppliers",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "087",
+  "title": "Buyer Requirement Posting",
+  "vw": "mobile",
+  "route": "/trading/requirements/new",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "088",
+  "title": "Product Enquiry & Price Request",
+  "vw": "mobile",
+  "route": "/trading/enquiry",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "089",
+  "title": "Supplier Quotation Comparison",
+  "vw": "mobile",
+  "route": "/trading/quotations",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "090",
+  "title": "Purchase Order Creation",
+  "vw": "mobile",
+  "route": "/trading/po/new",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "091",
+  "title": "Order Fulfillment Dashboard",
+  "vw": "mobile",
+  "route": "/trading/orders",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "092",
+  "title": "Shipping & Logistics Tracking",
+  "vw": "mobile",
+  "route": "/trading/orders/f863bdaf-b66c-4864-9c66-25b8e5b1ec2f/shipping",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "093",
+  "title": "Distributor Territory Management",
+  "vw": "mobile",
+  "route": "/trading/territories",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "094",
+  "title": "Returns, Warranty & Claims",
+  "vw": "mobile",
+  "route": "/trading/claims",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "095",
+  "title": "Partner Earnings Overview",
+  "vw": "mobile",
+  "route": "/earnings",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "096",
+  "title": "Commission Agreement Detail",
+  "vw": "mobile",
+  "route": "/commissions/agreements/4b971798-6c88-40a4-a356-ccd3038634fd",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "097",
+  "title": "Commission Calculator",
+  "vw": "mobile",
+  "route": "/commissions/calculator",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "098",
+  "title": "Commission Approval Workflow",
+  "vw": "mobile",
+  "route": "/commissions/approvals",
+  "account": "mfa:finance@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "099",
+  "title": "Invoice / Payout Request",
+  "vw": "mobile",
+  "route": "/payouts/request",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "100",
+  "title": "Payment & Settlement History",
+  "vw": "mobile",
+  "route": "/payments/history",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "101",
+  "title": "Tax / TDS / GST Records",
+  "vw": "mobile",
+  "route": "/tax-records",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "102",
+  "title": "Finance & Funding Opportunities",
+  "vw": "mobile",
+  "route": "/finance/opportunities",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "103",
+  "title": "Project Finance Enquiry",
+  "vw": "mobile",
+  "route": "/finance/enquiry",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "104",
+  "title": "Payment Disputes & Reconciliation",
+  "vw": "mobile",
+  "route": "/finance/disputes",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "105",
+  "title": "Unified Business Inbox",
+  "vw": "mobile",
+  "route": "/inbox",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "106",
+  "title": "One-to-One Partner Chat",
+  "vw": "mobile",
+  "route": "/chat/e3ef249b-22f0-447b-a476-d66840558b3a",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "107",
+  "title": "Project Group Chat",
+  "vw": "mobile",
+  "route": "/chat/groups/19ae4282-f4af-4ad6-8297-939c0e701245",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "108",
+  "title": "Audio / Video Meeting Room",
+  "vw": "mobile",
+  "route": "/meetings/f4c3e511-19ca-4157-a8ae-4f4e87aee702/room",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "109",
+  "title": "Meeting Scheduling",
+  "vw": "mobile",
+  "route": "/meetings",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "110",
+  "title": "Business Announcements",
+  "vw": "mobile",
+  "route": "/announcements",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "111",
+  "title": "Notifications & Alerts Center",
+  "vw": "mobile",
+  "route": "/notifications",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "112",
+  "title": "Support Tickets & Escalation",
+  "vw": "mobile",
+  "route": "/support/tickets",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "113",
+  "title": "Marketing Resources Library",
+  "vw": "mobile",
+  "route": "/resources",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "114",
+  "title": "Co-Branded Brochure Generator",
+  "vw": "mobile",
+  "route": "/resources/brochure",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "115",
+  "title": "Approved Social Campaign Assets",
+  "vw": "mobile",
+  "route": "/resources/social",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "116",
+  "title": "Training & Learning Center",
+  "vw": "mobile",
+  "route": "/learning",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "117",
+  "title": "Certification Assessment",
+  "vw": "mobile",
+  "route": "/learning/assessments/fa1786b7-5e14-49b5-ae67-f8bcc5ac6390",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "118",
+  "title": "Partner Certificate & Badge",
+  "vw": "mobile",
+  "route": "/certificates",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "119",
+  "title": "Global Opportunities Portal",
+  "vw": "mobile",
+  "route": "/global",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "120",
+  "title": "Country Partner Registration",
+  "vw": "mobile",
+  "route": "/global/country-partner",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "121",
+  "title": "International Territory Dashboard",
+  "vw": "mobile",
+  "route": "/global/territory",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "122",
+  "title": "Import / Export Enquiry Desk",
+  "vw": "mobile",
+  "route": "/global/import-export",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "123",
+  "title": "JV & Strategic Alliance Proposals",
+  "vw": "mobile",
+  "route": "/alliances",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "124",
+  "title": "Consortium Formation",
+  "vw": "mobile",
+  "route": "/consortiums",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "125",
+  "title": "Investor Opportunity Data Room",
+  "vw": "mobile",
+  "route": "/data-room",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "126",
+  "title": "Cross-Border Compliance Checklist",
+  "vw": "mobile",
+  "route": "/global/compliance",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "127",
+  "title": "Group Admin Executive Dashboard",
+  "vw": "mobile",
+  "route": "/",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "128",
+  "title": "Group Companies & Business Units",
+  "vw": "mobile",
+  "route": "/group-companies",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "129",
+  "title": "Admin Users & Permissions",
+  "vw": "mobile",
+  "route": "/users",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "130",
+  "title": "Partner Verification Queue",
+  "vw": "mobile",
+  "route": "/verification",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "131",
+  "title": "Partner Risk & Compliance Review",
+  "vw": "mobile",
+  "route": "/risk",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "132",
+  "title": "Opportunity Approval & Routing",
+  "vw": "mobile",
+  "route": "/routing",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "133",
+  "title": "Priority Review SLA Configuration",
+  "vw": "mobile",
+  "route": "/sla",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "134",
+  "title": "Lead Ownership & Conflict Resolution",
+  "vw": "mobile",
+  "route": "/lead-conflicts",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "135",
+  "title": "Commission Policy Configuration",
+  "vw": "mobile",
+  "route": "/commission-policy",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "136",
+  "title": "Product & Catalogue Management",
+  "vw": "mobile",
+  "route": "/catalogue",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "137",
+  "title": "Project / Tender Administration",
+  "vw": "mobile",
+  "route": "/tenders",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "138",
+  "title": "Finance & Settlement Controls",
+  "vw": "mobile",
+  "route": "/finance",
+  "account": "admin:finance@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "139",
+  "title": "Performance Analytics & BI",
+  "vw": "mobile",
+  "route": "/analytics",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "140",
+  "title": "AI Monitoring & Recommendation Controls",
+  "vw": "mobile",
+  "route": "/ai",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "141",
+  "title": "Audit Logs & Security Center",
+  "vw": "mobile",
+  "route": "/audit",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "142",
+  "title": "Global Content & CMS Management",
+  "vw": "mobile",
+  "route": "/cms",
+  "account": "admin:superadmin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "143",
+  "title": "My Partner Profile",
+  "vw": "mobile",
+  "route": "/profile",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "144",
+  "title": "Company Team & Sub-Accounts",
+  "vw": "mobile",
+  "route": "/company/team",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "145",
+  "title": "Account Security & MFA",
+  "vw": "mobile",
+  "route": "/settings/security",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "146",
+  "title": "Languages, Currencies & Regions",
+  "vw": "mobile",
+  "route": "/settings/regional",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "147",
+  "title": "Notification Preferences",
+  "vw": "mobile",
+  "route": "/settings/notifications",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "148",
+  "title": "Documents & Agreements Vault",
+  "vw": "mobile",
+  "route": "/vault",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "149",
+  "title": "Privacy, Consent & Data Rights",
+  "vw": "mobile",
+  "route": "/settings/privacy",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "150",
+  "title": "Help, Feedback & Account Closure",
+  "vw": "mobile",
+  "route": "/help",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "151",
+  "title": "Lead Protection Dashboard",
+  "vw": "mobile",
+  "route": "/lead-protection",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "152",
+  "title": "Digital Lead Registration Certificate",
+  "vw": "mobile",
+  "route": "/leads/89f49880-e89d-44b4-a70e-84f9f00dc193/registration-certificate",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "153",
+  "title": "Lead Ownership Dispute Center",
+  "vw": "mobile",
+  "route": "/lead-disputes",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "154",
+  "title": "Collaboration Team Creation",
+  "vw": "mobile",
+  "route": "/teams/new",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "155",
+  "title": "Consortium Member Roles & Sharing",
+  "vw": "mobile",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/members",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "156",
+  "title": "Joint Proposal & Team Workspace",
+  "vw": "mobile",
+  "route": "/teams/2d8e3be0-aeea-478c-9736-bdd0f0e3c53b/workspace",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "157",
+  "title": "Commission Agreement & Milestones",
+  "vw": "mobile",
+  "route": "/commissions/agreements/4b971798-6c88-40a4-a356-ccd3038634fd/milestones",
+  "account": "web:meera@consult.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "158",
+  "title": "Live Earnings & Settlement Tracker",
+  "vw": "mobile",
+  "route": "/earnings/live",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "159",
+  "title": "Commission Dispute Resolution",
+  "vw": "mobile",
+  "route": "/commissions/disputes",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "160",
+  "title": "AI Opportunity Matching Dashboard",
+  "vw": "mobile",
+  "route": "/ai/matching",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "161",
+  "title": "AI Recommended Partners",
+  "vw": "mobile",
+  "route": "/ai/partners",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "162",
+  "title": "AI Project Collaboration Builder",
+  "vw": "mobile",
+  "route": "/ai/team-builder",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "163",
+  "title": "Partner Reputation Profile",
+  "vw": "mobile",
+  "route": "/partners/9da01769-e2d7-4f1f-8832-7acb36e1b322/reputation",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "164",
+  "title": "Verified Performance & Reviews",
+  "vw": "mobile",
+  "route": "/reputation/reviews",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "165",
+  "title": "Partner Excellence & Certification",
+  "vw": "mobile",
+  "route": "/reputation/excellence",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "052",
+  "title": "Customer CRM Profile",
+  "vw": "desktop",
+  "route": "/crm/customers/e1f8fca6-0a1b-4a91-885a-6482295c758e",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "052",
+  "title": "Customer CRM Profile",
+  "vw": "mobile",
+  "route": "/crm/customers/e1f8fca6-0a1b-4a91-885a-6482295c758e",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ }
+]

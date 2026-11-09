@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { SECTORS } from '@collabiz/types';
+import { SECTORS, sectorName } from '@collabiz/types';
 import { Alert, Button, Card, DataTable, EmptyState, Grid, LoadingState, Select, StatusBadge, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
@@ -30,7 +30,7 @@ export default function CommissionPolicy() {
       <Card title="Policies">
         {q.loading ? <LoadingState /> : q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : (
           <DataTable caption="Commission policies" rows={q.data ?? []} empty={<EmptyState title="No policies" />} columns={[
-            { key: 'code', header: 'Policy', render: (p: any) => <>{p.name}<div className="cz-mono cz-muted">{p.code} v{p.version}{p.sector ? ` · ${p.sector}` : ''}</div></> },
+            { key: 'code', header: 'Policy', render: (p: any) => <>{p.name}<div className="cz-mono cz-muted">{p.code} v{p.version}{p.sector ? ` · ${sectorName(p.sector)}` : ''}</div></> },
             { key: 'terms', header: 'Rate', render: terms }, { key: 'tds', header: 'TDS', render: (p: any) => `${p.tdsBps / 100}%` }, { key: 'clawback', header: 'Clawback', render: (p: any) => `${p.clawbackDays} days` },
             { key: 'status', header: 'Status', render: (p: any) => <>{<StatusBadge status={p.status} />}{p.legalReviewed !== 'approved' && <div className="cz-muted" style={{ fontSize: 12 }}>legal review pending</div>}</> },
             { key: 'a', header: 'Action', render: (p: any) => (p.status === 'draft' && canActivate ? <Button size="sm" onClick={() => act.run(p.id, 'activate')} aria-label={`Activate ${p.code} v${p.version}`}>Activate</Button> : p.status === 'active' && canDraft ? <Button size="sm" variant="ghost" onClick={() => act.run(p.id, 'retire')} aria-label={`Retire ${p.code} v${p.version}`}>Retire</Button> : null) },

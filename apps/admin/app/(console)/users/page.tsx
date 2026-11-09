@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Alert, Button, Card, DataTable, Dialog, Select, StatusBadge, TextInput, LoadingState } from '@collabiz/ui';
+import { humanize, Alert, Button, Card, DataTable, Dialog, Select, StatusBadge, TextInput, LoadingState } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -38,7 +38,7 @@ export default function UsersPage() {
             { key: 'mfa', header: 'MFA', render: (u) => (u.mfaEnabled ? '✅' : '—') },
             { key: 'memberships', header: 'Roles', render: (u) => (
               <div className="cz-stack" style={{ gap: 4 }}>{u.memberships.map((m) => (
-                <span key={m.id} style={{ fontSize: 13 }}>{m.role.replace(/_/g, ' ')} · {m.orgName}{PLATFORM.includes(m.role) && u.id !== me?.id && <Button size="sm" variant="ghost" onClick={() => doRevoke.run(m.id)}>Revoke</Button>}</span>
+                <span key={m.id} style={{ fontSize: 13 }}>{humanize(m.role)} · {m.orgName}{PLATFORM.includes(m.role) && u.id !== me?.id && <Button size="sm" variant="ghost" onClick={() => doRevoke.run(m.id)}>Revoke</Button>}</span>
               ))}</div>
             ) },
             { key: 'a', header: '', render: (u) => u.id !== me?.id && (
@@ -54,7 +54,7 @@ export default function UsersPage() {
         <form noValidate onSubmit={(e) => { e.preventDefault(); doGrant.run(); }}>
           {doGrant.error && <Alert tone="danger">{doGrant.error}</Alert>}
           <Select label="Unite Group organization" value={g.organizationId} onChange={(e) => setG({ ...g, organizationId: e.target.value })} options={unite.map((o) => ({ value: o.id, label: o.displayName }))} />
-          <Select label="Role" value={g.role} onChange={(e) => setG({ ...g, role: e.target.value })} options={PLATFORM.map((r) => ({ value: r, label: r.replace(/_/g, ' ') }))} />
+          <Select label="Role" value={g.role} onChange={(e) => setG({ ...g, role: e.target.value })} options={PLATFORM.map((r) => ({ value: r, label: humanize(r) }))} />
           <TextInput label="Reason" value={g.reason} onChange={(e) => setG({ ...g, reason: e.target.value })} error={doGrant.fieldErrors.reason} />
           <div className="cz-row"><Button type="submit" loading={doGrant.pending}>Grant</Button><Button type="button" variant="secondary" onClick={() => setGrant(null)}>Cancel</Button></div>
         </form>

@@ -23,7 +23,7 @@ describe('Stage 11a — project execution (gate: evidence-based certification an
   });
   afterAll(async () => { await pool?.end(); await app?.close(); });
 
-  it('project starts only from an executed contract, by the issuer; owner and lead are set from the contract', async () => {
+  it('075 project starts only from an executed contract, by the issuer; owner and lead are set from the contract', async () => {
     await api(app).post(`/v1/contracts/${contract.id}/project`).set(auth(t.asha)).send({ startDate: '2026-11-10', endDate: '2027-01-31' }).expect(403);
     await api(app).post(`/v1/contracts/${contract.id}/project`).set(auth(t.uniteAdmin)).send({ startDate: '2026-12-10', endDate: '2026-11-01' }).expect(400);
     const r = await api(app).post(`/v1/contracts/${contract.id}/project`).set(auth(t.uniteAdmin)).send({ startDate: '2026-11-10', endDate: '2027-01-31', site: 'Chakan MIDC Phase II, Pune' }).expect(201);
@@ -93,7 +93,7 @@ describe('Stage 11a — project execution (gate: evidence-based certification an
     expect(docs.body.filter((d: any) => d.title === 'Cable route drawing').map((d: any) => d.current).sort()).toEqual([false, true]);
   });
 
-  it('GATE (evidence): submission needs 100% progress and evidence; certification needs the owner’s passing inspection and unchanged evidence', async () => {
+  it('082 GATE (evidence): submission needs 100% progress and evidence; certification needs the owner’s passing inspection and unchanged evidence', async () => {
     let s = await api(app).post(`/v1/projects/${project.id}/milestones/${m1.id}/submit`).set(auth(t.asha)).send({ note: 'Ready for check' }).expect(400);
     expect(s.body.problems).toEqual(['Report 100% progress before submitting']);
     await api(app).post(`/v1/projects/${project.id}/updates`).set(auth(t.asha)).field('note', 'All 2 km laid and megger tested; IR > 100 MΩ on all cores.').field('progressPct', '100').field('milestoneId', m1.id)

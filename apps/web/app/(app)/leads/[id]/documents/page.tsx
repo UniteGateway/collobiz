@@ -37,7 +37,7 @@ export default function LeadDocuments() {
           <DataTable caption="Lead documents" rows={docs.data ?? []} empty={<EmptyState title="No supporting documents yet" />} columns={[
             { key: 'fileName', header: 'File', render: (d) => <>{d.fileName}<div className="cz-mono" style={{ fontSize: 11 }}>sha256 {d.sha256.slice(0, 16)}…</div></> },
             { key: 'description', header: 'Description', render: (d) => d.description ?? '—' },
-            { key: 'createdAt', header: 'Uploaded', render: (d) => new Date(d.createdAt).toLocaleString() },
+            { key: 'createdAt', header: 'Uploaded', render: (d) => new Date(d.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) },
             { key: 'a', header: '', render: (d) => <Button size="sm" variant="secondary" onClick={() => open.run(d.id)}>Open</Button> },
           ]} />
         )}

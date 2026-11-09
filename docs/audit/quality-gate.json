@@ -1,7 +1,2250 @@
 {
-  "001": { "passed": true, "date": "2026-11-08", "evidence": ["screenshots/after/001-home-desktop.png", "screenshots/after/001-home-mobile.png"], "tests": ["apps/api/test/stage05.e2e.ts (/public/stats)", "browser: Stage 05 · 006/009/040 public listings", "a11y scan"], "permissions": "public; partner-only listings excluded (journey asserts)" },
-  "023": { "passed": true, "date": "2026-11-08", "evidence": ["screenshots/after/023-dashboard-desktop.png", "screenshots/after/023-dashboard-mobile.png", "screenshots/after/mobile-native/023-home.png"], "tests": ["apps/api/test/recovery.e2e.ts (home shape, org scoping, readable activity)", "apps/mobile/test/core-partner.test.tsx"], "permissions": "RequireOrg; actions scoped to the active organization; platform org gets none" },
-  "031": { "passed": true, "date": "2026-11-08", "evidence": ["screenshots/after/031-marketplace-desktop.png", "screenshots/after/031-marketplace-mobile.png", "screenshots/after/mobile-native/031-opportunities.png"], "tests": ["apps/api/test/recovery.e2e.ts (paged list, counts, sort)", "browser: Recovery · 031 (desktop + mobile)", "apps/mobile/test/core-partner.test.tsx"], "permissions": "visibility rules of OpportunitiesService.list apply to every page and count" },
-  "036": { "passed": true, "date": "2026-11-08", "evidence": ["screenshots/after/036-opportunity-desktop.png", "screenshots/after/036-opportunity-not-eligible-desktop.png", "screenshots/after/036-opportunity-owner-desktop.png", "screenshots/after/mobile-native/036-opportunity-detail.png"], "tests": ["apps/api/test/recovery.e2e.ts (eligibility wording)", "browser: Stage 05 · 031/036/041/042 (desktop + mobile)", "apps/mobile/test/core-partner.test.tsx"], "permissions": "eligibility re-checked server-side on apply; applicants visible to the owner only" },
-  "137": { "passed": true, "date": "2026-11-08", "evidence": ["screenshots/after/137-tender-admin-desktop.png", "screenshots/after/137-tender-admin-mobile.png", "screenshots/after/137-tender-admin-inspector-desktop.png"], "tests": ["apps/api/test/recovery.e2e.ts (platform-only, search, stages)", "apps/api/test/stage09.e2e.ts", "browser: Stage 09 full sealed-bid lifecycle → 137"], "permissions": "platform roles with tender.evaluate only (partners get 403); bid content never returned" }
+ "100": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/100-desktop.jpg",
+   "screenshots/gate/100-mobile.jpg"
+  ],
+  "tests": [
+   "stage04.e2e.ts",
+   "stage05.e2e.ts",
+   "stage08.e2e.ts",
+   "stage09.e2e.ts",
+   "stage11.e2e.ts",
+   "stage11b.e2e.ts",
+   "stage12.e2e.ts",
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "101": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/101-desktop.jpg",
+   "screenshots/gate/101-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "102": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/102-desktop.jpg",
+   "screenshots/gate/102-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "103": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/103-desktop.jpg",
+   "screenshots/gate/103-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "104": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/104-desktop.jpg",
+   "screenshots/gate/104-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "105": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/105-desktop.jpg",
+   "screenshots/gate/105-mobile.jpg"
+  ],
+  "tests": [
+   "stage13.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "106": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/106-desktop.jpg",
+   "screenshots/gate/106-mobile.jpg"
+  ],
+  "tests": [
+   "stage13.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "107": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/107-desktop.jpg",
+   "screenshots/gate/107-mobile.jpg"
+  ],
+  "tests": [
+   "stage13.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "108": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/108-desktop.jpg",
+   "screenshots/gate/108-mobile.jpg"
+  ],
+  "tests": [
+   "stage13.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "109": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/109-desktop.jpg",
+   "screenshots/gate/109-mobile.jpg"
+  ],
+  "tests": [
+   "stage13.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "110": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/110-desktop.jpg",
+   "screenshots/gate/110-mobile.jpg"
+  ],
+  "tests": [
+   "stage13.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "111": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/111-desktop.jpg",
+   "screenshots/gate/111-mobile.jpg"
+  ],
+  "tests": [
+   "stage13.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "112": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/112-desktop.jpg",
+   "screenshots/gate/112-mobile.jpg"
+  ],
+  "tests": [
+   "stage13.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "113": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/113-desktop.jpg",
+   "screenshots/gate/113-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "114": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/114-desktop.jpg",
+   "screenshots/gate/114-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "115": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/115-desktop.jpg",
+   "screenshots/gate/115-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "116": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/116-desktop.jpg",
+   "screenshots/gate/116-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "117": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/117-desktop.jpg",
+   "screenshots/gate/117-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "118": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/118-desktop.jpg",
+   "screenshots/gate/118-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "119": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/119-desktop.jpg",
+   "screenshots/gate/119-mobile.jpg"
+  ],
+  "tests": [
+   "stage15.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "120": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/120-desktop.jpg",
+   "screenshots/gate/120-mobile.jpg"
+  ],
+  "tests": [
+   "stage15.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "121": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/121-desktop.jpg",
+   "screenshots/gate/121-mobile.jpg"
+  ],
+  "tests": [
+   "stage15.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "122": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/122-desktop.jpg",
+   "screenshots/gate/122-mobile.jpg"
+  ],
+  "tests": [
+   "stage15.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "123": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/123-desktop.jpg",
+   "screenshots/gate/123-mobile.jpg"
+  ],
+  "tests": [
+   "stage15.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "124": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/124-desktop.jpg",
+   "screenshots/gate/124-mobile.jpg"
+  ],
+  "tests": [
+   "stage08.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "125": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/125-desktop.jpg",
+   "screenshots/gate/125-mobile.jpg"
+  ],
+  "tests": [
+   "stage15.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "126": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/126-desktop.jpg",
+   "screenshots/gate/126-mobile.jpg"
+  ],
+  "tests": [
+   "stage15.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "127": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/127-desktop.jpg",
+   "screenshots/gate/127-mobile.jpg"
+  ],
+  "tests": [
+   "stage02.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "128": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/128-desktop.jpg",
+   "screenshots/gate/128-mobile.jpg"
+  ],
+  "tests": [
+   "stage04.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "129": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/129-desktop.jpg",
+   "screenshots/gate/129-mobile.jpg"
+  ],
+  "tests": [
+   "stage02.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "130": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/130-desktop.jpg",
+   "screenshots/gate/130-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "131": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/131-desktop.jpg",
+   "screenshots/gate/131-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "132": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/132-desktop.jpg",
+   "screenshots/gate/132-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "133": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/133-desktop.jpg",
+   "screenshots/gate/133-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "134": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/134-desktop.jpg",
+   "screenshots/gate/134-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "135": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/135-desktop.jpg",
+   "screenshots/gate/135-mobile.jpg"
+  ],
+  "tests": [
+   "gate.e2e.ts",
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "136": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/136-desktop.jpg",
+   "screenshots/gate/136-mobile.jpg"
+  ],
+  "tests": [
+   "stage04.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "137": {
+  "passed": true,
+  "date": "2026-11-08",
+  "evidence": [
+   "screenshots/after/137-tender-admin-desktop.png",
+   "screenshots/after/137-tender-admin-mobile.png",
+   "screenshots/after/137-tender-admin-inspector-desktop.png"
+  ],
+  "tests": [
+   "apps/api/test/recovery.e2e.ts (platform-only, search, stages)",
+   "apps/api/test/stage09.e2e.ts",
+   "browser: Stage 09 full sealed-bid lifecycle → 137"
+  ],
+  "permissions": "platform roles with tender.evaluate only (partners get 403); bid content never returned",
+  "sweep": {
+   "date": "2026-11-09",
+   "evidence": [
+    "screenshots/gate/137-desktop.jpg",
+    "screenshots/gate/137-mobile.jpg"
+   ]
+  }
+ },
+ "138": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/138-desktop.jpg",
+   "screenshots/gate/138-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:finance@collabiz.local"
+ },
+ "139": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/139-desktop.jpg",
+   "screenshots/gate/139-mobile.jpg"
+  ],
+  "tests": [
+   "stage15.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "140": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/140-desktop.jpg",
+   "screenshots/gate/140-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "141": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/141-desktop.jpg",
+   "screenshots/gate/141-mobile.jpg"
+  ],
+  "tests": [
+   "stage02.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "142": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/142-desktop.jpg",
+   "screenshots/gate/142-mobile.jpg"
+  ],
+  "tests": [
+   "stage15.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "admin:superadmin@collabiz.local"
+ },
+ "143": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/143-desktop.jpg",
+   "screenshots/gate/143-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "144": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/144-desktop.jpg",
+   "screenshots/gate/144-mobile.jpg"
+  ],
+  "tests": [
+   "stage02.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "145": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/145-desktop.jpg",
+   "screenshots/gate/145-mobile.jpg"
+  ],
+  "tests": [
+   "stage02.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "146": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/146-desktop.jpg",
+   "screenshots/gate/146-mobile.jpg"
+  ],
+  "tests": [
+   "stage15.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "147": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/147-desktop.jpg",
+   "screenshots/gate/147-mobile.jpg"
+  ],
+  "tests": [
+   "stage13.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "148": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/148-desktop.jpg",
+   "screenshots/gate/148-mobile.jpg"
+  ],
+  "tests": [
+   "stage10.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "149": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/149-desktop.jpg",
+   "screenshots/gate/149-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "150": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/150-desktop.jpg",
+   "screenshots/gate/150-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "stage13.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "151": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/151-desktop.jpg",
+   "screenshots/gate/151-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "152": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/152-desktop.jpg",
+   "screenshots/gate/152-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:meera@consult.example"
+ },
+ "153": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/153-desktop.jpg",
+   "screenshots/gate/153-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "154": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/154-desktop.jpg",
+   "screenshots/gate/154-mobile.jpg"
+  ],
+  "tests": [
+   "stage08.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "155": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/155-desktop.jpg",
+   "screenshots/gate/155-mobile.jpg"
+  ],
+  "tests": [
+   "stage08.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "156": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/156-desktop.jpg",
+   "screenshots/gate/156-mobile.jpg"
+  ],
+  "tests": [
+   "gate.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "157": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/157-desktop.jpg",
+   "screenshots/gate/157-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:meera@consult.example"
+ },
+ "158": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/158-desktop.jpg",
+   "screenshots/gate/158-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "159": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/159-desktop.jpg",
+   "screenshots/gate/159-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "160": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/160-desktop.jpg",
+   "screenshots/gate/160-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "161": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/161-desktop.jpg",
+   "screenshots/gate/161-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "162": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/162-desktop.jpg",
+   "screenshots/gate/162-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "163": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/163-desktop.jpg",
+   "screenshots/gate/163-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "164": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/164-desktop.jpg",
+   "screenshots/gate/164-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "165": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/165-desktop.jpg",
+   "screenshots/gate/165-mobile.jpg"
+  ],
+  "tests": [
+   "stage01.e2e.ts",
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "001": {
+  "passed": true,
+  "date": "2026-11-08",
+  "evidence": [
+   "screenshots/after/001-home-desktop.png",
+   "screenshots/after/001-home-mobile.png"
+  ],
+  "tests": [
+   "apps/api/test/stage05.e2e.ts (/public/stats)",
+   "browser: Stage 05 · 006/009/040 public listings",
+   "a11y scan"
+  ],
+  "permissions": "public; partner-only listings excluded (journey asserts)",
+  "sweep": {
+   "date": "2026-11-09",
+   "evidence": [
+    "screenshots/gate/001-desktop.jpg",
+    "screenshots/gate/001-mobile.jpg"
+   ]
+  }
+ },
+ "002": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/002-desktop.jpg",
+   "screenshots/gate/002-mobile.jpg"
+  ],
+  "tests": [
+   "stage09.e2e.ts",
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "anon"
+ },
+ "003": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/003-desktop.jpg",
+   "screenshots/gate/003-mobile.jpg"
+  ],
+  "tests": [
+   "stage09.e2e.ts",
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "anon"
+ },
+ "004": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/004-desktop.jpg",
+   "screenshots/gate/004-mobile.jpg"
+  ],
+  "tests": [
+   "stage04.e2e.ts",
+   "stage09.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "anon"
+ },
+ "005": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/005-desktop.jpg",
+   "screenshots/gate/005-mobile.jpg"
+  ],
+  "tests": [
+   "stage09.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "anon"
+ },
+ "006": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/006-desktop.jpg",
+   "screenshots/gate/006-mobile.jpg"
+  ],
+  "tests": [
+   "stage05.e2e.ts",
+   "stage09.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "anon"
+ },
+ "007": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/007-desktop.jpg",
+   "screenshots/gate/007-mobile.jpg"
+  ],
+  "tests": [
+   "stage09.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "anon"
+ },
+ "008": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/008-desktop.jpg",
+   "screenshots/gate/008-mobile.jpg"
+  ],
+  "tests": [
+   "stage04.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "anon"
+ },
+ "009": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/009-desktop.jpg",
+   "screenshots/gate/009-mobile.jpg"
+  ],
+  "tests": [
+   "stage05.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "anon"
+ },
+ "010": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/010-desktop.jpg",
+   "screenshots/gate/010-mobile.jpg"
+  ],
+  "tests": [
+   "stage01.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "anon"
+ },
+ "011": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/011-desktop.jpg",
+   "screenshots/gate/011-mobile.jpg"
+  ],
+  "tests": [
+   "stage02.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "anon"
+ },
+ "012": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/012-desktop.jpg",
+   "screenshots/gate/012-mobile.jpg"
+  ],
+  "tests": [
+   "stage02.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "013": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/013-desktop.jpg",
+   "screenshots/gate/013-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "014": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/014-desktop.jpg",
+   "screenshots/gate/014-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "015": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/015-desktop.jpg",
+   "screenshots/gate/015-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "016": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/016-desktop.jpg",
+   "screenshots/gate/016-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "017": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/017-desktop.jpg",
+   "screenshots/gate/017-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "018": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/018-desktop.jpg",
+   "screenshots/gate/018-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "019": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/019-desktop.jpg",
+   "screenshots/gate/019-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "020": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/020-desktop.jpg",
+   "screenshots/gate/020-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "021": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/021-desktop.jpg",
+   "screenshots/gate/021-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "022": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/022-desktop.jpg",
+   "screenshots/gate/022-mobile.jpg"
+  ],
+  "tests": [
+   "stage03.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "023": {
+  "passed": true,
+  "date": "2026-11-08",
+  "evidence": [
+   "screenshots/after/023-dashboard-desktop.png",
+   "screenshots/after/023-dashboard-mobile.png",
+   "screenshots/after/mobile-native/023-home.png"
+  ],
+  "tests": [
+   "apps/api/test/recovery.e2e.ts (home shape, org scoping, readable activity)",
+   "apps/mobile/test/core-partner.test.tsx"
+  ],
+  "permissions": "RequireOrg; actions scoped to the active organization; platform org gets none",
+  "sweep": {
+   "date": "2026-11-09",
+   "evidence": [
+    "screenshots/gate/023-desktop.jpg",
+    "screenshots/gate/023-mobile.jpg"
+   ]
+  }
+ },
+ "024": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/024-desktop.jpg",
+   "screenshots/gate/024-mobile.jpg"
+  ],
+  "tests": [
+   "gate.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "025": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/025-desktop.jpg",
+   "screenshots/gate/025-mobile.jpg"
+  ],
+  "tests": [
+   "stage05.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "026": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/026-desktop.jpg",
+   "screenshots/gate/026-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "027": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/027-desktop.jpg",
+   "screenshots/gate/027-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "028": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/028-desktop.jpg",
+   "screenshots/gate/028-mobile.jpg"
+  ],
+  "tests": [
+   "stage07.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "029": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/029-desktop.jpg",
+   "screenshots/gate/029-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "030": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/030-desktop.jpg",
+   "screenshots/gate/030-mobile.jpg"
+  ],
+  "tests": [
+   "stage07.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "031": {
+  "passed": true,
+  "date": "2026-11-08",
+  "evidence": [
+   "screenshots/after/031-marketplace-desktop.png",
+   "screenshots/after/031-marketplace-mobile.png",
+   "screenshots/after/mobile-native/031-opportunities.png"
+  ],
+  "tests": [
+   "apps/api/test/recovery.e2e.ts (paged list, counts, sort)",
+   "browser: Recovery · 031 (desktop + mobile)",
+   "apps/mobile/test/core-partner.test.tsx"
+  ],
+  "permissions": "visibility rules of OpportunitiesService.list apply to every page and count",
+  "sweep": {
+   "date": "2026-11-09",
+   "evidence": [
+    "screenshots/gate/031-desktop.jpg",
+    "screenshots/gate/031-mobile.jpg"
+   ]
+  }
+ },
+ "032": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/032-desktop.jpg",
+   "screenshots/gate/032-mobile.jpg"
+  ],
+  "tests": [
+   "recovery.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "033": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/033-desktop.jpg",
+   "screenshots/gate/033-mobile.jpg"
+  ],
+  "tests": [
+   "stage05.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "034": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/034-desktop.jpg",
+   "screenshots/gate/034-mobile.jpg"
+  ],
+  "tests": [
+   "stage05.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "035": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/035-desktop.jpg",
+   "screenshots/gate/035-mobile.jpg"
+  ],
+  "tests": [
+   "stage05.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "036": {
+  "passed": true,
+  "date": "2026-11-08",
+  "evidence": [
+   "screenshots/after/036-opportunity-desktop.png",
+   "screenshots/after/036-opportunity-not-eligible-desktop.png",
+   "screenshots/after/036-opportunity-owner-desktop.png",
+   "screenshots/after/mobile-native/036-opportunity-detail.png"
+  ],
+  "tests": [
+   "apps/api/test/recovery.e2e.ts (eligibility wording)",
+   "browser: Stage 05 · 031/036/041/042 (desktop + mobile)",
+   "apps/mobile/test/core-partner.test.tsx"
+  ],
+  "permissions": "eligibility re-checked server-side on apply; applicants visible to the owner only",
+  "sweep": {
+   "date": "2026-11-09",
+   "evidence": [
+    "screenshots/gate/036-desktop.jpg",
+    "screenshots/gate/036-mobile.jpg"
+   ]
+  }
+ },
+ "037": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/037-desktop.jpg",
+   "screenshots/gate/037-mobile.jpg"
+  ],
+  "tests": [
+   "stage05.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "038": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/038-desktop.jpg",
+   "screenshots/gate/038-mobile.jpg"
+  ],
+  "tests": [
+   "stage05.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "039": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/039-desktop.jpg",
+   "screenshots/gate/039-mobile.jpg"
+  ],
+  "tests": [
+   "stage04.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "anon"
+ },
+ "040": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/040-desktop.jpg",
+   "screenshots/gate/040-mobile.jpg"
+  ],
+  "tests": [
+   "stage05.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "041": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/041-desktop.jpg",
+   "screenshots/gate/041-mobile.jpg"
+  ],
+  "tests": [
+   "stage05.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "042": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/042-desktop.jpg",
+   "screenshots/gate/042-mobile.jpg"
+  ],
+  "tests": [
+   "stage05.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "043": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/043-desktop.jpg",
+   "screenshots/gate/043-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "044": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/044-desktop.jpg",
+   "screenshots/gate/044-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "045": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/045-desktop.jpg",
+   "screenshots/gate/045-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "046": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/046-desktop.jpg",
+   "screenshots/gate/046-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "stage07.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "047": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/047-desktop.jpg",
+   "screenshots/gate/047-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:meera@consult.example"
+ },
+ "048": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/048-desktop.jpg",
+   "screenshots/gate/048-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:meera@consult.example"
+ },
+ "049": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/049-desktop.jpg",
+   "screenshots/gate/049-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:meera@consult.example"
+ },
+ "050": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/050-desktop.jpg",
+   "screenshots/gate/050-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:meera@consult.example"
+ },
+ "051": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/051-desktop.jpg",
+   "screenshots/gate/051-mobile.jpg"
+  ],
+  "tests": [
+   "stage06.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:meera@consult.example"
+ },
+ "052": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/052-desktop.jpg",
+   "screenshots/gate/052-mobile.jpg"
+  ],
+  "tests": [
+   "stage07.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "053": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/053-desktop.jpg",
+   "screenshots/gate/053-mobile.jpg"
+  ],
+  "tests": [
+   "stage07.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "054": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/054-desktop.jpg",
+   "screenshots/gate/054-mobile.jpg"
+  ],
+  "tests": [
+   "stage07.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:meera@consult.example"
+ },
+ "055": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/055-desktop.jpg",
+   "screenshots/gate/055-mobile.jpg"
+  ],
+  "tests": [
+   "stage15.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "056": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/056-desktop.jpg",
+   "screenshots/gate/056-mobile.jpg"
+  ],
+  "tests": [
+   "stage08.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "057": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/057-desktop.jpg",
+   "screenshots/gate/057-mobile.jpg"
+  ],
+  "tests": [
+   "stage08.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "058": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/058-desktop.jpg",
+   "screenshots/gate/058-mobile.jpg"
+  ],
+  "tests": [
+   "stage08.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "059": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/059-desktop.jpg",
+   "screenshots/gate/059-mobile.jpg"
+  ],
+  "tests": [
+   "stage08.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "060": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/060-desktop.jpg",
+   "screenshots/gate/060-mobile.jpg"
+  ],
+  "tests": [
+   "stage08.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "061": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/061-desktop.jpg",
+   "screenshots/gate/061-mobile.jpg"
+  ],
+  "tests": [
+   "stage08.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "062": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/062-desktop.jpg",
+   "screenshots/gate/062-mobile.jpg"
+  ],
+  "tests": [
+   "stage08.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "063": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/063-desktop.jpg",
+   "screenshots/gate/063-mobile.jpg"
+  ],
+  "tests": [
+   "stage08.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "064": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/064-desktop.jpg",
+   "screenshots/gate/064-mobile.jpg"
+  ],
+  "tests": [
+   "stage08.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "065": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/065-desktop.jpg",
+   "screenshots/gate/065-mobile.jpg"
+  ],
+  "tests": [
+   "stage09.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "066": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/066-desktop.jpg",
+   "screenshots/gate/066-mobile.jpg"
+  ],
+  "tests": [
+   "stage09.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "mfa:unite.admin@collabiz.local"
+ },
+ "067": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/067-desktop.jpg",
+   "screenshots/gate/067-mobile.jpg"
+  ],
+  "tests": [
+   "stage09.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "068": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/068-desktop.jpg",
+   "screenshots/gate/068-mobile.jpg"
+  ],
+  "tests": [
+   "stage09.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "069": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/069-desktop.jpg",
+   "screenshots/gate/069-mobile.jpg"
+  ],
+  "tests": [
+   "stage09.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "mfa:unite.admin@collabiz.local"
+ },
+ "070": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/070-desktop.jpg",
+   "screenshots/gate/070-mobile.jpg"
+  ],
+  "tests": [
+   "stage09.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "mfa:evaluator@collabiz.local"
+ },
+ "071": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/071-desktop.jpg",
+   "screenshots/gate/071-mobile.jpg"
+  ],
+  "tests": [
+   "stage09.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "mfa:unite.admin@collabiz.local"
+ },
+ "072": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/072-desktop.jpg",
+   "screenshots/gate/072-mobile.jpg"
+  ],
+  "tests": [
+   "stage14.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "073": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/073-desktop.jpg",
+   "screenshots/gate/073-mobile.jpg"
+  ],
+  "tests": [
+   "stage09.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "074": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/074-desktop.jpg",
+   "screenshots/gate/074-mobile.jpg"
+  ],
+  "tests": [
+   "stage10.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "mfa:unite.admin@collabiz.local"
+ },
+ "075": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/075-desktop.jpg",
+   "screenshots/gate/075-mobile.jpg"
+  ],
+  "tests": [
+   "stage11.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "076": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/076-desktop.jpg",
+   "screenshots/gate/076-mobile.jpg"
+  ],
+  "tests": [
+   "gate.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "077": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/077-desktop.jpg",
+   "screenshots/gate/077-mobile.jpg"
+  ],
+  "tests": [
+   "stage11.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "078": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/078-desktop.jpg",
+   "screenshots/gate/078-mobile.jpg"
+  ],
+  "tests": [
+   "stage11.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "079": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/079-desktop.jpg",
+   "screenshots/gate/079-mobile.jpg"
+  ],
+  "tests": [
+   "stage11.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "080": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/080-desktop.jpg",
+   "screenshots/gate/080-mobile.jpg"
+  ],
+  "tests": [
+   "stage11.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "081": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/081-desktop.jpg",
+   "screenshots/gate/081-mobile.jpg"
+  ],
+  "tests": [
+   "stage11.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "082": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/082-desktop.jpg",
+   "screenshots/gate/082-mobile.jpg"
+  ],
+  "tests": [
+   "stage11.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "083": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/083-desktop.jpg",
+   "screenshots/gate/083-mobile.jpg"
+  ],
+  "tests": [
+   "stage11.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "084": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/084-desktop.jpg",
+   "screenshots/gate/084-mobile.jpg"
+  ],
+  "tests": [
+   "stage11.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "085": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/085-desktop.jpg",
+   "screenshots/gate/085-mobile.jpg"
+  ],
+  "tests": [
+   "stage11b.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "086": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/086-desktop.jpg",
+   "screenshots/gate/086-mobile.jpg"
+  ],
+  "tests": [
+   "stage11b.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "087": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/087-desktop.jpg",
+   "screenshots/gate/087-mobile.jpg"
+  ],
+  "tests": [
+   "stage11b.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "088": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/088-desktop.jpg",
+   "screenshots/gate/088-mobile.jpg"
+  ],
+  "tests": [
+   "stage11b.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "089": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/089-desktop.jpg",
+   "screenshots/gate/089-mobile.jpg"
+  ],
+  "tests": [
+   "stage11b.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "090": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/090-desktop.jpg",
+   "screenshots/gate/090-mobile.jpg"
+  ],
+  "tests": [
+   "stage11b.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "091": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/091-desktop.jpg",
+   "screenshots/gate/091-mobile.jpg"
+  ],
+  "tests": [
+   "stage11b.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "092": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/092-desktop.jpg",
+   "screenshots/gate/092-mobile.jpg"
+  ],
+  "tests": [
+   "stage11b.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "093": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/093-desktop.jpg",
+   "screenshots/gate/093-mobile.jpg"
+  ],
+  "tests": [
+   "stage11b.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "094": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/094-desktop.jpg",
+   "screenshots/gate/094-mobile.jpg"
+  ],
+  "tests": [
+   "stage11b.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "095": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/095-desktop.jpg",
+   "screenshots/gate/095-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)",
+   "native test (apps/mobile/test)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "096": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/096-desktop.jpg",
+   "screenshots/gate/096-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:meera@consult.example"
+ },
+ "097": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/097-desktop.jpg",
+   "screenshots/gate/097-mobile.jpg"
+  ],
+  "tests": [
+   "gate.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ },
+ "098": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/098-desktop.jpg",
+   "screenshots/gate/098-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "mfa:finance@collabiz.local"
+ },
+ "099": {
+  "passed": true,
+  "date": "2026-11-09",
+  "evidence": [
+   "screenshots/gate/099-desktop.jpg",
+   "screenshots/gate/099-mobile.jpg"
+  ],
+  "tests": [
+   "stage12.e2e.ts",
+   "browser journey (scripts/e2e-suites.mjs)"
+  ],
+  "account": "web:asha@voltepc.example"
+ }
 }

@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { SECTORS, sectorName, newIdempotencyKey } from '@collabiz/types';
-import { Alert, Button, Card, DataTable, Dialog, LoadingState, Money, PageHeader, Select, StatusBadge, Tabs, TextArea, TextInput } from '@collabiz/ui';
+import { humanize, Alert, Button, Card, DataTable, Dialog, LoadingState, Money, PageHeader, Select, StatusBadge, Tabs, TextArea, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -55,7 +55,7 @@ export default function AdminOpportunities() {
           <TextArea label="Scope summary" value={f.summary} onChange={set('summary')} error={create.fieldErrors.summary} />
           <div className="cz-grid cz-grid-2">
             <Select label="Sector" value={f.sector} onChange={set('sector')} options={SECTORS.map((s) => ({ value: s.code, label: s.name }))} />
-            <Select label="Type" value={f.kind} onChange={set('kind')} options={['project', 'product_supply', 'service', 'job', 'distributorship', 'rfq', 'tender'].map((k) => ({ value: k, label: k.replace('_', ' ') }))} />
+            <Select label="Type" value={f.kind} onChange={set('kind')} options={['project', 'product_supply', 'service', 'job', 'distributorship', 'rfq', 'tender'].map((k) => ({ value: k, label: humanize(k) }))} />
             <TextInput label="City" value={f.city} onChange={set('city')} />
             <Select label="State" value={f.region} onChange={set('region')} placeholder="—" options={INDIA_STATES.map(([v, l]) => ({ value: v, label: l }))} />
             <TextInput label="Indicative value ₹" inputMode="decimal" value={f.estimatedValue} onChange={set('estimatedValue')} />

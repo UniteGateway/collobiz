@@ -279,8 +279,10 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage03.e2e.ts"
+    ],
     "native": "apps/mobile/app/onboarding/details.tsx",
     "nativeTest": true
   },
@@ -318,7 +320,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage03.e2e.ts"
+    ],
     "native": "apps/mobile/app/onboarding/industries.tsx",
     "nativeTest": true
   },
@@ -336,7 +340,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage03.e2e.ts"
+    ],
     "native": "apps/mobile/app/onboarding/coverage.tsx",
     "nativeTest": true
   },
@@ -354,7 +360,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage03.e2e.ts"
+    ],
     "native": "apps/mobile/app/onboarding/profile.tsx",
     "nativeTest": true
   },
@@ -392,7 +400,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage03.e2e.ts"
+    ],
     "native": "apps/mobile/app/onboarding/bank-tax.tsx",
     "nativeTest": true
   },
@@ -445,11 +455,11 @@
     "mobile": "native",
     "registryStatus": "verified",
     "file": "apps/web/app/(app)/dashboard/page.tsx",
-    "lines": 153,
+    "lines": 157,
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "recovery.e2e.ts",
       "stage05.e2e.ts"
@@ -471,7 +481,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "gate.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -509,7 +521,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage06.e2e.ts"
+    ],
     "native": "apps/mobile/app/(tabs)/leads.tsx",
     "nativeTest": true
   },
@@ -527,7 +541,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage12.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -625,8 +641,10 @@
     "usesApi": false,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "recovery.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -643,7 +661,7 @@
     "usesApi": false,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage05.e2e.ts"
     ],
@@ -863,8 +881,10 @@
     "usesApi": false,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage06.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -881,8 +901,10 @@
     "usesApi": false,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage06.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -900,7 +922,10 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage06.e2e.ts",
+      "stage07.e2e.ts"
+    ],
     "native": "apps/mobile/app/leads/new.tsx",
     "nativeTest": false
   },
@@ -917,7 +942,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage06.e2e.ts"
     ],
@@ -937,7 +962,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage06.e2e.ts"
     ],
@@ -997,7 +1022,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage06.e2e.ts"
     ],
@@ -1013,12 +1038,14 @@
     "mobile": "responsive",
     "registryStatus": "verified",
     "file": "apps/web/app/(app)/crm/customers/[id]/page.tsx",
-    "lines": 58,
+    "lines": 61,
     "usesApi": true,
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage07.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -1095,7 +1122,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage08.e2e.ts"
     ],
@@ -1175,8 +1202,10 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage08.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -1193,7 +1222,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage08.e2e.ts"
     ],
@@ -1413,7 +1442,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage14.e2e.ts"
     ],
@@ -1474,7 +1503,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage11.e2e.ts"
+    ],
     "native": "apps/mobile/app/projects/index.tsx",
     "nativeTest": true
   },
@@ -1492,7 +1523,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "gate.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -1529,7 +1562,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage11.e2e.ts"
     ],
@@ -1610,7 +1643,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage11.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -1668,7 +1703,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage11b.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -1866,7 +1903,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage12.e2e.ts"
+    ],
     "native": "apps/mobile/app/earnings/index.tsx",
     "nativeTest": true
   },
@@ -1904,7 +1943,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "gate.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2048,7 +2089,7 @@
     "usesApi": false,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage12.e2e.ts"
     ],
@@ -2108,8 +2149,10 @@
     "usesApi": false,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage13.e2e.ts"
+    ],
     "native": "apps/mobile/app/chat/[id].tsx",
     "nativeTest": false
   },
@@ -2166,7 +2209,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage13.e2e.ts"
     ],
@@ -2226,7 +2269,7 @@
     "usesApi": false,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage14.e2e.ts"
     ],
@@ -2266,7 +2309,7 @@
     "usesApi": false,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage14.e2e.ts"
     ],
@@ -2386,7 +2429,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage15.e2e.ts"
     ],
@@ -2446,7 +2489,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage08.e2e.ts"
     ],
@@ -2506,8 +2549,10 @@
     "usesApi": true,
     "marker": false,
     "placeholder": false,
-    "smokeHit": false,
-    "apiTests": [],
+    "smokeHit": true,
+    "apiTests": [
+      "stage02.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2585,7 +2630,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage03.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -2622,7 +2669,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage06.e2e.ts"
     ],
@@ -2662,8 +2709,9 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
+      "gate.e2e.ts",
       "stage12.e2e.ts"
     ],
     "native": null,
@@ -2963,7 +3011,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage12.e2e.ts",
       "stage13.e2e.ts"
@@ -3004,7 +3052,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage06.e2e.ts"
     ],
@@ -3064,7 +3112,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage08.e2e.ts"
     ],
@@ -3085,7 +3133,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "gate.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -3103,7 +3153,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage12.e2e.ts"
+    ],
     "native": null,
     "nativeTest": false
   },
@@ -3121,7 +3173,9 @@
     "marker": true,
     "placeholder": false,
     "smokeHit": true,
-    "apiTests": [],
+    "apiTests": [
+      "stage12.e2e.ts"
+    ],
     "native": "apps/mobile/app/earnings/live.tsx",
     "nativeTest": true
   },
@@ -3178,7 +3232,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage14.e2e.ts"
     ],
@@ -3218,7 +3272,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage14.e2e.ts"
     ],
@@ -3238,7 +3292,7 @@
     "usesApi": true,
     "marker": true,
     "placeholder": false,
-    "smokeHit": false,
+    "smokeHit": true,
     "apiTests": [
       "stage14.e2e.ts"
     ],

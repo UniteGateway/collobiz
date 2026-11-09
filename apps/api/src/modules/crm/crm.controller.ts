@@ -13,6 +13,10 @@ const CLOSED = new Set(['won', 'lost']);
 
 /** Screens 028, 030, 052, 053, 054 — every query is scoped to the caller's organization. */
 const words = (code: string) => code.replace(/_/g, ' ');
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const ACTIVITY: Record<string, string> = { note: 'Note', call: 'Call', meeting: 'Meeting', email: 'Email', site_visit: 'Site visit', system: 'Update', stage_change: 'Stage changed' };
+const SUBJECT: Record<string, string> = { deal: 'deal', customer: 'customer', lead: 'lead', task: 'follow-up' };
+const ist = (d: Date) => `${d.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })} IST`;
 
 @ApiTags('crm')
 @Controller()
@@ -144,8 +148,8 @@ export class CrmController {
     const audit = await this.db.select({ id: auditEvents.id, at: auditEvents.at, action: auditEvents.action, objectType: auditEvents.objectType, actor: users.fullName }).from(auditEvents).leftJoin(users, eq(users.id, auditEvents.actorUserId)).where(eq(auditEvents.organizationId, ctx.orgId!)).orderBy(desc(auditEvents.seq)).limit(n);
     const notes = await this.db.select().from(notifications).where(eq(notifications.userId, ctx.userId)).orderBy(desc(notifications.createdAt)).limit(20);
     const items = [
-      ...crm.map((x) => ({ id: x.a.id, at: x.a.at, source: 'crm', title: `${x.a.kind.replace('_', ' ')} · ${x.a.subjectType}`, detail: x.a.body, actor: x.actor })),
-      ...audit.map((x) => ({ id: x.id, at: x.at, source: 'audit', title: x.action.replace(/[._]/g, ' '), detail: x.objectType, actor: x.actor })),
+      ...crm.map((x) => ({ id: x.a.id, at: x.a.at, source: 'crm', title: `${ACTIVITY[x.a.kind] ?? cap(words(x.a.kind))} on a ${SUBJECT[x.a.subjectType] ?? words(x.a.subjectType)}`, detail: x.a.body, actor: x.actor })),
+      ...audit.map((x) => ({ id: x.id, at: x.at, source: 'audit', title: cap(x.action.replace(/[._]/g, ' ')), detail: cap(words(x.objectType)), actor: x.actor })),
     ].sort((a, b) => +new Date(b.at) - +new Date(a.at)).slice(0, n);
     const [due] = await this.db.execute<{ overdue: number; today: number }>(sql`select count(*) filter (where due_at < now())::int as overdue, count(*) filter (where due_at >= now() and due_at < now() + interval '1 day')::int as today
       from crm_tasks where organization_id = ${ctx.orgId!} and status = 'open'`).then((r) => r.rows);
@@ -172,7 +176,7 @@ export class CrmController {
     const [m] = await this.db.select().from(memberships).where(and(eq(memberships.userId, assignee), eq(memberships.organizationId, ctx.orgId!), eq(memberships.status, 'active'))).limit(1);
     if (!m) throw new BadRequestException('Tasks can only be assigned to members of your organization');
     const [t] = await this.db.insert(crmTasks).values({ organizationId: ctx.orgId!, title: b.title, dueAt: new Date(b.dueAt), assigneeUserId: assignee, customerId: b.customerId, dealId: b.dealId, leadClaimId: b.leadClaimId, createdBy: ctx.userId }).returning();
-    if (assignee !== ctx.userId) await this.db.insert(notifications).values({ userId: assignee, kind: 'task', title: `New follow-up: ${b.title}`, body: `Due ${new Date(b.dueAt).toLocaleString()}`, link: '/tasks' });
+    if (assignee !== ctx.userId) await this.db.insert(notifications).values({ userId: assignee, kind: 'task', title: `New follow-up: ${b.title}`, body: `Due ${ist(new Date(b.dueAt))}`, link: '/tasks' });
     return t;
   }
 
@@ -201,7 +205,7 @@ export class CrmController {
       .where(and(eq(crmActivities.organizationId, ctx.orgId!), inArray(crmActivities.subjectId, [id, claim.customerId, ...(deal ? [deal.id] : [])])));
     const items = [
       ...ev.map((e) => ({ id: e.id, at: e.at, kind: 'status', title: e.fromStatus ? `Opportunity moved from ${words(e.fromStatus)} to ${words(e.toStatus)}` : `Opportunity created as ${words(e.toStatus)}`, detail: e.reason })),
-      ...rt.flatMap((r) => [{ id: `${r.id}-s`, at: r.startAt, kind: 'routing', title: 'Unite first review started', detail: `Due ${r.dueAt.toISOString()}` }, ...(r.decidedAt ? [{ id: `${r.id}-d`, at: r.decidedAt, kind: 'routing', title: `Unite decision: ${r.decision}`, detail: r.reason }] : [])]),
+      ...rt.flatMap((r) => [{ id: `${r.id}-s`, at: r.startAt, kind: 'routing', title: 'Unite first review started', detail: `Due ${ist(r.dueAt)}` }, ...(r.decidedAt ? [{ id: `${r.id}-d`, at: r.decidedAt, kind: 'routing', title: `Unite decision: ${r.decision}`, detail: r.reason }] : [])]),
       ...docs.map((d) => ({ id: d.id, at: d.at, kind: 'document', title: 'Evidence uploaded', detail: d.fileName })),
       ...dsp.map((d) => ({ id: d.id, at: d.createdAt, kind: 'dispute', title: `Dispute ${d.code} (${d.status})`, detail: d.outcome ?? undefined })),
       ...acts.map((x) => ({ id: x.a.id, at: x.a.at, kind: x.a.kind, title: `${x.a.kind.replace('_', ' ')}${x.actor ? ` · ${x.actor}` : ''}`, detail: x.a.body })),

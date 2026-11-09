@@ -40,7 +40,7 @@ describe('Stage 03 — onboarding and KYB', () => {
   });
   afterAll(async () => { await pool?.end(); await app?.close(); });
 
-  describe('partner onboarding flow (013–021)', () => {
+  describe('partner onboarding flow (013/014/015/016/017/018/019/020/021)', () => {
     let tok: string;
     let orgId: string;
     it('requires a verified email before creating a partner account', async () => {
@@ -118,7 +118,7 @@ describe('Stage 03 — onboarding and KYB', () => {
         expect(s.body.rejectedDocs[0].reviewNote).toBe('PAN copy is unreadable');
         expect(s.body.canSubmit).toBe(false);
       });
-      it('partner re-uploads and resubmits; duplicate-GSTIN flag blocks verification until cleared', async () => {
+      it('131 partner re-uploads and resubmits; duplicate-GSTIN flag blocks verification until cleared', async () => {
         await api(app).post('/v1/onboarding/kyb/documents').set(auth(tok)).field('docType', 'pan').attach('file', PDF('pan v2'), { filename: 'pan-v2.pdf', contentType: 'application/pdf' }).expect(201);
         await api(app).post('/v1/onboarding/submit').set(auth(tok)).set('Idempotency-Key', 'kiran-submit-0002').expect(200);
         // second company reusing Kiran's GSTIN triggers an automatic high-severity flag

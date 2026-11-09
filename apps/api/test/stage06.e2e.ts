@@ -26,7 +26,7 @@ describe('Stage 06 — lead protection & Unite-first routing (gate: priority rev
       await api(app).post('/v1/leads').set(auth(t.asha)).set(k('c')).send({ ...lead(), consent: undefined }).expect(400);
       await api(app).post('/v1/leads').set(auth(t.asha)).set(k('f')).send(lead({}, { obtainedAt: new Date(Date.now() + 86400_000).toISOString() })).expect(400);
     });
-    it('a clean lead is verified, protected for 90 days and enters the Unite first review with an SLA timer', async () => {
+    it('043/044/045/046 a clean lead (consent, customer, scope, value) is verified, protected for 90 days and enters the Unite first review with an SLA timer', async () => {
       const r = await api(app).post('/v1/leads').set(auth(t.asha)).set(k('a')).send(lead()).expect(201);
       asha = r.body;
       expect(asha.claim.status).toBe('protected');
@@ -37,7 +37,7 @@ describe('Stage 06 — lead protection & Unite-first routing (gate: priority rev
       expect(asha.routing).toMatchObject({ slaMinutes: 240, decision: null, timezone: 'Asia/Kolkata' });
       expect(asha.history.map((h: any) => h.toStatus)).toEqual(['draft', 'submitted', 'consent_check', 'duplicate_review', 'verified', 'unite_priority_review']);
     });
-    it('leads are invisible to other tenants (404) and never listed publicly before release', async () => {
+    it('026 leads are invisible to other tenants (404) and never listed publicly before release', async () => {
       await api(app).get(`/v1/leads/${asha.claim.id}`).set(auth(t.ravi)).expect(404);
       await api(app).get(`/v1/opportunities/${asha.opportunity.id}`).set(auth(t.ravi)).expect(404);
       const mine = await api(app).get('/v1/leads').set(auth(t.asha)).expect(200);

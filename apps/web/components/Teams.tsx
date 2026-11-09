@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { sectorName, TEAM_ROLE_LABELS } from '@collabiz/types';
+import { certLabel, PARTNER_TYPE_LABELS, regionLabel, sectorName, TEAM_ROLE_LABELS } from '@collabiz/types';
 import { FactorBars, Money, StatusBadge } from '@collabiz/ui';
 import { regionName } from '@/lib/regions';
 
@@ -18,11 +18,11 @@ export function PartnerCard({ p, actions }: { p: any; actions?: React.ReactNode 
   return (
     <section className="cz-card" data-partner={p.name}>
       <div className="cz-row" style={{ justifyContent: 'space-between' }}><Link href={`/partners/${p.id}`}><h2 style={{ margin: 0 }}>{p.name}</h2></Link><StatusBadge status={p.level} tone="brand" /></div>
-      <p className="cz-muted" style={{ fontSize: 13 }}>{p.partnerTypes?.join(', ')} · {[p.city, p.country].filter(Boolean).join(', ')}</p>
+      <p className="cz-muted" style={{ fontSize: 13 }}>{p.partnerTypes?.map((t: string) => PARTNER_TYPE_LABELS[t] ?? t).join(', ')} · {[p.city, p.country && p.country !== 'IN' ? regionLabel(p.country) : null].filter(Boolean).join(', ')}</p>
       {p.headline && <p style={{ fontSize: 14 }}>{p.headline}</p>}
       <p style={{ fontSize: 13, margin: 0 }}><strong>Sectors:</strong> {p.sectors.map(sectorName).join(', ')}</p>
       <p style={{ fontSize: 13, margin: 0 }}><strong>Coverage:</strong> {p.regions.map(regionName).join(', ')}</p>
-      {p.certifications?.length > 0 && <p style={{ fontSize: 13, margin: 0 }}><strong>Certifications:</strong> {p.certifications.join(', ')}</p>}
+      {p.certifications?.length > 0 && <p style={{ fontSize: 13, margin: 0 }}><strong>Certifications:</strong> {p.certifications.map(certLabel).join(', ')}</p>}
       {p.capacityMax != null && <p style={{ fontSize: 13 }}><strong>Capacity:</strong> <Money minor={p.capacityMax} /></p>}
       {actions}
     </section>

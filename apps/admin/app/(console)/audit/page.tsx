@@ -30,7 +30,7 @@ export default function AuditPage() {
         {log.loading ? <LoadingState /> : log.error ? <ApiErrorView error={log.error} onRetry={log.reload} /> : (
           <DataTable caption="Audit events" rows={(log.data ?? []).map((e) => ({ ...e, id: String(e.seq) }))} columns={[
             { key: 'seq', header: '#', render: (e) => <span className="cz-mono">{e.seq}</span> },
-            { key: 'at', header: 'Time', render: (e) => new Date(e.at).toLocaleString() },
+            { key: 'at', header: 'Time', render: (e) => new Date(e.at).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) },
             { key: 'action', header: 'Action', render: (e) => <StatusBadge status={e.action} tone="brand" label={e.action} /> },
             { key: 'object', header: 'Object', render: (e) => <span className="cz-mono">{e.objectType}{e.objectId ? `:${e.objectId.slice(0, 8)}` : ''}</span> },
             { key: 'actorEmail', header: 'Actor', render: (e) => e.actorEmail ?? 'system' },

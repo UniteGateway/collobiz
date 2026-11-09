@@ -26,7 +26,7 @@ export default function SavedPage() {
           { key: 'name', header: 'Name' },
           { key: 'query', header: 'Criteria', render: (s) => Object.entries(s.query).filter(([, v]) => v != null && v !== '').map(([k, v]) => `${k}: ${v}`).join(' · ') || 'All' },
           { key: 'alert', header: 'Alerts', render: (s) => (s.alert ? 'On' : 'Off') },
-          { key: 'lastAlertAt', header: 'Last alert', render: (s) => (s.lastAlertAt ? new Date(s.lastAlertAt).toLocaleString() : '—') },
+          { key: 'lastAlertAt', header: 'Last alert', render: (s) => (s.lastAlertAt ? new Date(s.lastAlertAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—') },
           { key: 'a', header: '', render: (s) => <Button size="sm" variant="ghost" onClick={() => del.run(s.id)}>Delete</Button> },
         ]} />
       </Card>

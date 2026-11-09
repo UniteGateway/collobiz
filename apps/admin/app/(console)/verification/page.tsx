@@ -20,7 +20,7 @@ export default function VerificationQueue() {
             { key: 'displayName', header: 'Applicant', render: (r) => <><Link href={`/verification/${r.id}`}><strong>{r.displayName}</strong></Link><div className="cz-muted" style={{ fontSize: 12 }}>{r.legalName}</div></> },
             { key: 'type', header: 'Type', render: (r) => `${r.type.replace('partner_', '')} · ${r.partnerTypes.join(', ')}` },
             { key: 'city', header: 'Location', render: (r) => [r.city, r.country].filter(Boolean).join(', ') },
-            { key: 'submittedAt', header: 'Submitted', render: (r) => (r.submittedAt ? new Date(r.submittedAt).toLocaleString() : '—') },
+            { key: 'submittedAt', header: 'Submitted', render: (r) => (r.submittedAt ? new Date(r.submittedAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—') },
             { key: 'status', header: 'Status', render: (r) => <StatusBadge status={r.verificationStatus} /> },
             { key: 'reviewer', header: 'Reviewer', render: (r) => r.reviewerName ?? 'Unassigned' },
             { key: 'flags', header: 'Risk flags', render: (r) => (r.openFlags ? <StatusBadge status="flagged" tone="danger" label={`${r.openFlags} open`} /> : '—') },

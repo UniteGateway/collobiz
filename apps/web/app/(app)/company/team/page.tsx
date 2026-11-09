@@ -49,7 +49,7 @@ export default function TeamPage() {
                 </select></label>
             ) },
             { key: 'status', header: 'Status', render: (m) => <StatusBadge status={m.status} /> },
-            { key: 'lastLoginAt', header: 'Last sign-in', render: (m) => (m.lastLoginAt ? new Date(m.lastLoginAt).toLocaleDateString() : '—') },
+            { key: 'lastLoginAt', header: 'Last sign-in', render: (m) => (m.lastLoginAt ? new Date(m.lastLoginAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—') },
             { key: 'x', header: '', render: (m) => m.userId !== me?.id && <Button size="sm" variant="ghost" onClick={() => remove.run(m.membershipId)}>Remove</Button> },
           ]} />
         )}

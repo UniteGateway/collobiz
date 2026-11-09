@@ -1,5 +1,5 @@
 'use client';
-import { sectorName } from '@collabiz/types';
+import { certLabel, levelLabel, PARTNER_TYPE_LABELS, sectorName } from '@collabiz/types';
 import { ButtonLink, Card, DescriptionList, Grid, Kpi, LoadingState, Money, StatusBadge } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { useQuery } from '@/lib/hooks';
@@ -16,7 +16,7 @@ export default function MyProfilePage() {
     <Screen id="143" title={o.displayName} actions={<ButtonLink href="/onboarding/profile" variant="secondary">Edit profile</ButtonLink>}>
       <Grid cols={4}>
         <Kpi label="Verification" value={<StatusBadge status={o.verificationStatus} />} />
-        <Kpi label="Membership level" value={o.membershipLevel.replace('_', ' ')} accent />
+        <Kpi label="Membership level" value={levelLabel(o.membershipLevel)} accent />
         <Kpi label="Sectors" value={p.sectors.length} />
         <Kpi label="Capacity" value={<Money minor={p.capacityMax} />} />
       </Grid>
@@ -25,8 +25,8 @@ export default function MyProfilePage() {
           {p.headline && <p><strong>{p.headline}</strong></p>}
           <p style={{ whiteSpace: 'pre-wrap' }}>{p.about ?? 'No description yet.'}</p>
           <DescriptionList items={[
-            ['Legal name', o.legalName], ['Location', [o.city, o.country].filter(Boolean).join(', ')], ['Business types', o.partnerTypes.join(', ')],
-            ['Sectors', p.sectors.map(sectorName).join(', ') || '—'], ['Skills', p.skills.join(', ') || '—'], ['Certifications', p.certifications.join(', ') || '—'],
+            ['Legal name', o.legalName], ['Location', [o.city, o.country && o.country !== 'IN' ? regionName(o.country) : 'India'].filter(Boolean).join(', ')], ['Business types', o.partnerTypes.map((t: string) => PARTNER_TYPE_LABELS[t] ?? t).join(', ')],
+            ['Sectors', p.sectors.map(sectorName).join(', ') || '—'], ['Skills', p.skills.join(', ') || '—'], ['Certifications', p.certifications.map(certLabel).join(', ') || '—'],
             ['Coverage', p.regions.map(regionName).join(', ') || '—'], ['Services', p.services.join(', ') || '—'], ['AI matching consent', p.consentToMatch ? 'Granted' : 'Withdrawn'],
           ]} />
         </Card>

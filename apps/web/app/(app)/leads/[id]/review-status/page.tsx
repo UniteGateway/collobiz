@@ -34,7 +34,7 @@ export default function ReviewStatus() {
           </Grid>
           {!r.decision && <div style={{ marginTop: 12 }}><ProgressBar value={(r.elapsedMinutes / r.slaMinutes) * 100} label="Review window used" /></div>}
           <Card title="Details">
-            <DescriptionList items={[['Reviewer', o.groupCompany], ['Started', `${inTz(r.startAt, r.timezone)} (${r.timezone})`], ['Urgent workflow', r.urgent ? 'Yes' : 'No'], ['Escalated', r.escalatedAt ? new Date(r.escalatedAt).toLocaleString() : 'No'], ['Status', <StatusBadge key="s" status={o.status} />]]} />
+            <DescriptionList items={[['Reviewer', o.groupCompany], ['Started', `${inTz(r.startAt, r.timezone)} (${r.timezone})`], ['Urgent workflow', r.urgent ? 'Yes' : 'No'], ['Escalated', r.escalatedAt ? new Date(r.escalatedAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'No'], ['Status', <StatusBadge key="s" status={o.status} />]]} />
             <p className="cz-muted" style={{ fontSize: 13 }}>The review window is a service target, not a guaranteed entitlement. Unite Group may accept, release (to approved partners if the buyer consented) or reject with reasons.</p>
           </Card>
         </>

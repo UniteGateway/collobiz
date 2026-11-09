@@ -13,7 +13,7 @@ export default function AdminHome() {
   const chain = useQuery<{ intact: boolean; checked: number }>(me?.capabilities.includes('audit.read') ? '/admin/audit/verify' : null);
   return (
     <div>
-      <PageHeader title="Group administration" breadcrumb="Unite Group Administration" description={`Signed in as ${me?.fullName} · ${me?.platformRoles.join(', ')}`} />
+      <PageHeader title="Group administration" breadcrumb="Unite Group Administration" description={`Signed in as ${me?.fullName} · ${(me?.platformRoles ?? []).map((r: string) => r.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase())).join(', ')}`} />
       {sec.loading ? <LoadingState /> : sec.error ? <ApiErrorView error={sec.error} onRetry={sec.reload} /> : sec.data && (
         <Grid cols={4}>
           <Kpi label="Failed sign-ins (24 h)" value={sec.data.failed24h} />

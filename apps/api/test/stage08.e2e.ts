@@ -43,7 +43,7 @@ describe('Stage 08 — partner matching & teams (gate: no private disclosure wit
     expect(team.ndaHash).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it('058/059 invitations: only verified orgs; invitee sees a teaser and the NDA, nothing private', async () => {
+  it('060 058/059 invitations: only verified orgs; invitee sees a teaser and the NDA, nothing private', async () => {
     await api(app).post(`/v1/teams/${team.id}/invitations`).set(auth(t.asha)).send({ organizationId: refs.orgs.greenbuild, role: 'execution', responsibilities: 'Civil structure for carport' }).expect(400);
     await api(app).post(`/v1/teams/${team.id}/invitations`).set(auth(t.rohit)).send({ organizationId: refs.orgs.sunrise, role: 'procurement', responsibilities: 'Electrical supply' }).expect(403); // org_member
     await api(app).post(`/v1/teams/${team.id}/invitations`).set(auth(t.asha)).send({ organizationId: refs.orgs.sunrise, role: 'procurement', responsibilities: 'Electrical supply and cabling', message: 'Join us?' }).expect(201);

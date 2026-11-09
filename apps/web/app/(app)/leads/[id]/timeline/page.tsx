@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Alert, Button, Card, DescriptionList, LoadingState, Select, StatusBadge, TextArea, Timeline } from '@collabiz/ui';
+import { Alert, Button, humanize, Card, DescriptionList, LoadingState, Select, StatusBadge, TextArea, Timeline } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { LeadTabs } from '@/components/LeadWizard';
 import { api } from '@/lib/api';
@@ -20,10 +20,10 @@ export default function LeadTimeline() {
       <LeadTabs id={id} />
       <div className="cz-grid cz-grid-2" style={{ alignItems: 'start' }}>
         <Card title="Conversion">
-          <DescriptionList items={[['Registered', new Date(q.data.conversion.registered).toLocaleString()], ['Protected from', q.data.conversion.protectedFrom ? new Date(q.data.conversion.protectedFrom).toLocaleString() : '—'], ['Pipeline stage', q.data.deal ? <StatusBadge key="s" status={q.data.deal.stage} /> : '—']]} />
+          <DescriptionList items={[['Registered', new Date(q.data.conversion.registered).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })], ['Protected from', q.data.conversion.protectedFrom ? new Date(q.data.conversion.protectedFrom).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—'], ['Pipeline stage', q.data.deal ? <StatusBadge key="s" status={q.data.deal.stage} /> : '—']]} />
           <h3 style={{ marginTop: 16 }}>Log follow-up</h3>
           {log.error && <Alert tone="danger">{log.error}</Alert>}
-          <Select label="Type" value={a.kind} onChange={(e) => setA({ ...a, kind: e.target.value })} options={['call', 'email', 'meeting', 'note'].map((k) => ({ value: k, label: k }))} />
+          <Select label="Type" value={a.kind} onChange={(e) => setA({ ...a, kind: e.target.value })} options={['call', 'email', 'meeting', 'note'].map((k) => ({ value: k, label: humanize(k) }))} />
           <TextArea label="What happened?" value={a.body} onChange={(e) => setA({ ...a, body: e.target.value })} />
           <Button onClick={() => log.run()} loading={log.pending} disabled={a.body.length < 2}>Add to timeline</Button>
         </Card>

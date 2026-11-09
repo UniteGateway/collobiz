@@ -68,7 +68,7 @@ describe('Stage 11b — trading (gate: evidence and change logs carried into pro
     expect(inbox.body.find((e: any) => e.subject === 'Mono PERC Solar Module 545 Wp')).toMatchObject({ direction: 'received', buyer: 'Volt EPC' });
   });
 
-  it('087/089 requirements reach eligible suppliers; quotations are private to each supplier and compared only by the buyer', async () => {
+  it('085 087/089 requirements reach eligible suppliers; quotations are private to each supplier and compared only by the buyer', async () => {
     const mk = await api(app).get('/v1/trading/market').set(auth(t.ravi)).expect(200);
     expect(mk.body.isSupplier).toBe(true);
     expect(mk.body.openRequirements.map((r: any) => r.code)).toContain('REQ-2026-000001');

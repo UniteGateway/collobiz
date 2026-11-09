@@ -29,7 +29,7 @@ export default function Activation() {
       <Card title="Activation checklist" actions={<StatusBadge status={d.status} />}>
         <ul style={{ listStyle: 'none', padding: 0 }}>{checks.map((c) => <li key={c.label} style={{ padding: '6px 0' }}>{c.ok ? '✅' : '⬜️'} {c.label}</li>)}</ul>
         {act.error && <Alert tone="danger">{act.error}</Alert>}
-        {d.status === 'active' ? <Alert tone="success">Team active since {new Date(d.activatedAt).toLocaleString()}.</Alert> : d.isLead && <Button variant="accent" onClick={() => act.run()} loading={act.pending} disabled={!checks.every((c) => c.ok)}>Activate team</Button>}
+        {d.status === 'active' ? <Alert tone="success">Team active since {new Date(d.activatedAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })}.</Alert> : d.isLead && <Button variant="accent" onClick={() => act.run()} loading={act.pending} disabled={!checks.every((c) => c.ok)}>Activate team</Button>}
       </Card>
     </Screen>
   );

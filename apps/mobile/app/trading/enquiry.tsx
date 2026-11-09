@@ -63,7 +63,7 @@ export default function EnquiryDesk() {
             ))}
             {sel && th.data && (
               <Card title={`${th.data.code} — ${th.data.subject}`}>
-                {th.data.messages.map((m: any) => <View key={m.id} style={{ marginBottom: 8 }}><Text style={s.hint}>{m.org} · {new Date(m.createdAt).toLocaleString()}</Text><Text style={s.p}>{m.body}</Text></View>)}
+                {th.data.messages.map((m: any) => <View key={m.id} style={{ marginBottom: 8 }}><Text style={s.hint}>{m.org} · {new Date(m.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })}</Text><Text style={s.p}>{m.body}</Text></View>)}
                 {th.data.quotations.map((qt: any) => <Notice key={qt.id} tone="success">Quotation {qt.code}: {money(qt.total)} incl. tax, {qt.deliveryDays} days</Notice>)}
                 {th.data.status !== 'closed' && (
                   <>

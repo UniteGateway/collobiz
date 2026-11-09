@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { SECTORS, sectorName, type Query } from '@collabiz/types';
-import { Button, EmptyState, LoadingState, Money, Select, StatusBadge, TextInput } from '@collabiz/ui';
+import { humanize, Button, EmptyState, LoadingState, Money, Select, StatusBadge, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from './Screen';
 import { api } from '@/lib/api';
 import { useQuery } from '@/lib/hooks';
@@ -26,7 +26,7 @@ export function OpportunityCard({ o, href = `/opportunities/${o.id}` }: { o: Opp
       <p style={{ fontSize: 14 }}>{o.summary.slice(0, 180)}{o.summary.length > 180 ? '…' : ''}</p>
       <div className="cz-row" style={{ justifyContent: 'space-between', fontSize: 14 }}>
         <strong><Money minor={o.estimatedValue} currency={o.currency} /></strong>
-        <span className="cz-muted">{o.deadline ? `Closes ${new Date(o.deadline).toLocaleDateString()}` : 'Open'}</span>
+        <span className="cz-muted">{o.deadline ? `Closes ${new Date(o.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Open'}</span>
       </div>
     </Link>
   );
@@ -44,7 +44,7 @@ export function FilterBar({ f, setF, advanced }: { f: Filters; setF: (f: Filters
       <Select label="Sector" value={f.sector} onChange={set('sector')} placeholder="All sectors" options={SECTORS.map((s) => ({ value: s.code, label: s.name }))} />
       <Select label="State / region" value={f.region} onChange={set('region')} placeholder="Anywhere" options={INDIA_STATES.map(([v, l]) => ({ value: v, label: l }))} />
       {advanced && <>
-        <Select label="Type" value={f.kind} onChange={set('kind')} placeholder="Any type" options={['project', 'product_supply', 'service', 'job', 'distributorship', 'rfq', 'tender'].map((k) => ({ value: k, label: k.replace('_', ' ') }))} />
+        <Select label="Type" value={f.kind} onChange={set('kind')} placeholder="Any type" options={['project', 'product_supply', 'service', 'job', 'distributorship', 'rfq', 'tender'].map((k) => ({ value: k, label: humanize(k) }))} />
         <TextInput label="Min value ₹" inputMode="decimal" value={f.minValue} onChange={set('minValue')} />
         <TextInput label="Max value ₹" inputMode="decimal" value={f.maxValue} onChange={set('maxValue')} />
         <TextInput label="Closing before" type="date" value={f.deadlineBefore} onChange={set('deadlineBefore')} />

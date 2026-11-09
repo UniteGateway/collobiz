@@ -139,7 +139,7 @@ async function stage07(db: Db, refs: SeedRefs) {
     { organizationId: refs.orgs.volt, customerId: b.id, title: '400 kW rooftop + battery', value: P(22), stage: 'qualified', ownerUserId: refs.users.asha },
     { organizationId: refs.orgs.volt, customerId: b.id, title: 'Carport pilot', value: P(3), stage: 'lost', lostReason: 'Customer deferred capex to next year', ownerUserId: refs.users.asha },
   ]).returning();
-  await db.insert(s.crmActivities).values(deals.map((d) => ({ organizationId: refs.orgs.volt, subjectType: 'deal', subjectId: d.id, kind: 'system', body: `Seeded in "${d.stage}"`, actorUserId: refs.users.asha })));
+  await db.insert(s.crmActivities).values(deals.map((d) => ({ organizationId: refs.orgs.volt, subjectType: 'deal', subjectId: d.id, kind: 'system', body: `Added to the pipeline at ${d.stage.charAt(0).toUpperCase() + d.stage.slice(1)}`, actorUserId: refs.users.asha })));
   const day = 86400_000;
   await db.insert(s.crmTasks).values([
     { organizationId: refs.orgs.volt, title: 'Send revised BOQ to Western Auto', dueAt: new Date(Date.now() + day), assigneeUserId: refs.users.asha, customerId: a.id, dealId: deals[0].id, createdBy: refs.users.asha },

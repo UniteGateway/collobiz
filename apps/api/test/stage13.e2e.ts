@@ -46,7 +46,7 @@ describe('Stage 13 — messaging, meetings and support', () => {
     expect((await api(app).get('/v1/inbox').set(auth(t.ravi)).expect(200)).body.find((x: any) => x.id === threadId).unread).toBe(0);
   });
 
-  it('unsend works only within 15 minutes; blocks stop direct messages', async () => {
+  it('107 unsend works only within 15 minutes; blocks stop direct messages', async () => {
     const sent = await api(app).post(`/v1/chat/threads/${threadId}/messages`).set(auth(t.asha)).send({ body: 'Wrong attachment, ignore' }).expect(201);
     await api(app).post(`/v1/chat/messages/${sent.body.id}/delete`).set(auth(t.ravi)).expect(404); // not the author
     await api(app).post(`/v1/chat/messages/${sent.body.id}/delete`).set(auth(t.asha)).expect(200);

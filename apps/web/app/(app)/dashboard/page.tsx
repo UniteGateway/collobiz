@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PIPELINE_STAGES, sectorName } from '@collabiz/types';
 import { Alert, ButtonLink, EmptyState, Icon, Skeleton, StatusBadge, type IconName } from '@collabiz/ui';
@@ -35,13 +36,16 @@ const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'Good 
 /** Screen 023 — Partner Home: what needs you today, how the business is doing, and what to pursue next. */
 export default function DashboardPage() {
   const { me } = useSession();
+  // Date and greeting depend on the viewer's clock, so they are set in the browser (the page shell is prerendered at build time).
+  const [today, setToday] = useState<{ date: string; greet: string } | null>(null);
+  useEffect(() => { setToday({ date: new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' }), greet: greeting() }); }, []);
   const org = me?.activeOrg;
   const q = useQuery<Home>(org ? '/me/home' : null);
   const d = q.data;
   const f = d?.figures ?? {};
   const maxStage = Math.max(1, ...(d?.pipeline ?? []).map((p) => p.value));
   return (
-    <Screen id="023" eyebrow={new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })} title={me ? `${greeting()}, ${me.fullName.split(' ')[0]}` : 'Welcome'}
+    <Screen id="023" eyebrow={today?.date ?? '\u00a0'} title={me && today ? `${today.greet}, ${me.fullName.split(' ')[0]}` : 'Welcome'}
       description={org ? <span className="cz-row" style={{ gap: 8 }}>{org.name}<StatusBadge status={org.verificationStatus} label={org.verificationStatus === 'verified' ? (org.membershipLevel === 'verified' ? 'Verified partner' : `Verified · ${org.membershipLevel.replace('_', ' ')} level`) : undefined} /></span> : undefined}
       actions={org && <><ButtonLink href="/marketplace" variant="secondary">Find opportunities</ButtonLink><ButtonLink href="/leads/new" variant="accent"><Icon name="leads" size={16} />Register a lead</ButtonLink></>}>
       {me && !me.emailVerified && <Alert tone="warning" title="Verify your email.">Some actions stay locked until your email is verified. <Link href="/verify">Verify now</Link></Alert>}

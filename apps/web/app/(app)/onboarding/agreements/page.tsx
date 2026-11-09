@@ -44,7 +44,7 @@ export default function AgreementsPage() {
       <Alert tone="warning">These templates are drafts pending legal review (Master Book §7.2). Accepting records your consent to the current version.</Alert>
       {accept.error && <Alert tone="danger">{accept.error}</Alert>}
       {ags.loading ? <LoadingState /> : ags.error ? <ApiErrorView error={ags.error} onRetry={ags.reload} /> : (ags.data ?? []).map((a) => (
-        <Card key={a.code} title={`${a.title} · v${a.version}`} actions={<StatusBadge status={a.accepted ? 'signed' : 'pending'} label={a.accepted ? `Signed ${new Date(a.accepted.acceptedAt).toLocaleDateString()}` : 'Not signed'} />}>
+        <Card key={a.code} title={`${a.title} · v${a.version}`} actions={<StatusBadge status={a.accepted ? 'signed' : 'pending'} label={a.accepted ? `Signed ${new Date(a.accepted.acceptedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Not signed'} />}>
           <AgreementText title={a.title} body={a.body} onRead={() => setRead((r) => ({ ...r, [a.code]: true }))} />
           <p className="cz-muted cz-mono" style={{ fontSize: 11, marginTop: 6, overflowWrap: 'anywhere' }}>Document fingerprint (SHA-256): {a.bodyHash}</p>
           {!a.accepted && (
