@@ -15,7 +15,7 @@ async function scan(url) {
   console.log(`\n${url}: ${r.violations.length} violation types`);
   for (const v of r.violations) console.log(`  [${v.impact}] ${v.id} (${v.nodes.length}) ${v.help} :: ${v.nodes[0].target.join(' ')}`);
 }
-for (const u of ['/', '/about', '/membership', '/login', '/support/contact', '/registry']) await scan(WEB + u);
+for (const u of ['/', '/about', '/membership', '/login', '/signup', '/support/contact', '/registry']) await scan(WEB + u);
 await p.goto(WEB + '/login'); await p.getByLabel('Email').fill('asha@voltepc.example'); await p.getByLabel('Password').fill('Collabiz#2026');
 await p.getByRole('button', { name: 'Sign in' }).last().click(); await p.waitForURL(/dashboard/);
 for (const u of ['/dashboard', '/company/team', '/onboarding/kyc', '/settings/privacy', '/profile', '/tenders', '/tenders/new', '/vault']) await scan(WEB + u);

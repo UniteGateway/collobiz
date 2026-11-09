@@ -53,7 +53,7 @@ export default function HomePage() {
               with protected leads, verified partners and commissions you can trace from introduction to payment.
             </p>
             <div className="cz-row" style={{ gap: 12, marginTop: 28 }}>
-              <Link href="/login?mode=register" className="cz-btn cz-btn-accent cz-btn-lg">Join as a partner<Icon name="arrow" size={17} /></Link>
+              <Link href="/signup" className="cz-btn cz-btn-accent cz-btn-lg">Join as a partner<Icon name="arrow" size={17} /></Link>
               <Link href="/opportunities/public" className="cz-btn cz-btn-secondary cz-btn-lg">Browse opportunities</Link>
             </div>
             <ul className="cz-home-assurances" aria-label="Assurances">
@@ -207,7 +207,7 @@ export default function HomePage() {
               <p>Verification takes one sitting. Your first protected lead can follow the same day.</p>
             </div>
             <div className="cz-row" style={{ gap: 12 }}>
-              <Link href="/login?mode=register" className="cz-btn cz-btn-accent cz-btn-lg">Join as a partner</Link>
+              <Link href="/signup" className="cz-btn cz-btn-accent cz-btn-lg">Join as a partner</Link>
               <Link href="/rfq/new" className="cz-btn cz-btn-lg cz-btn-onnavy">Submit a requirement</Link>
             </div>
           </div>

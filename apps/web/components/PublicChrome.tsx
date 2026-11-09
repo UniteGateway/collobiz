@@ -35,7 +35,7 @@ export function PublicHeader() {
         {me ? <Link href="/dashboard" className="cz-btn cz-btn-accent cz-btn-sm">My dashboard</Link> : (
           <>
             <Link href="/login" className="cz-btn cz-btn-ghost cz-btn-sm cz-hide-xs">Sign in</Link>
-            <Link href="/login?mode=register" className="cz-btn cz-btn-accent cz-btn-sm">Join as partner</Link>
+            <Link href="/signup" className="cz-btn cz-btn-accent cz-btn-sm">Join as partner</Link>
           </>
         )}
       </header>

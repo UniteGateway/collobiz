@@ -27,7 +27,7 @@ export default function MembershipPage() {
         COLLABIZ rewards proven delivery and credible introductions, not the volume of unqualified referrals. There are no payments for recruiting
         partners and no implied guaranteed returns.
       </div>
-      <Link href="/login?mode=register" className="cz-btn cz-btn-accent">Start free onboarding</Link>
+      <Link href="/signup" className="cz-btn cz-btn-accent">Start free onboarding</Link>
     </div>
   );
 }

@@ -117,6 +117,10 @@ All **360 products and services** published on www.unitepowertek.com were import
 - **Product page:** specifications now show in a fixed order (product line, category, models, model rows in number order, features, applications, benefits), with a link to the company website. Long values wrap on phones.
 - **Tests:** `apps/api/test/catalogue-import.e2e.ts` (3). They check that all 360 products are added and then updated in place, codes and specifications are kept, and nothing is invented. Photos are copied once, re-runs fetch only failures, non-images are rejected, photos are served with the right type, and hidden products' photos are not served.
 
+## Sign in and Create account redesign (2026-11-09)
+
+Screen 011 is now two addresses — `/login` (Sign in) and `/signup` (Create account); `/login?mode=register` still works for old links, and every "Join" button points to `/signup`. Apple-style split layout: on the left an animated brand scene drawn in code (sun with turning rays, a partner network with data flowing along its links, a solar array with a moving sheen, floating glass cards for "Lead protected", "Commission earned" and "Buy 1 get 1 — live", slow aurora light); on the right a white panel with a large title, an iOS-style Sign in / Create account switch with a sliding thumb, filled fields, show/hide password, a Caps Lock warning, a password-strength meter, the four onboarding steps, and the demo accounts as cards. Phones get a short animated banner above the form. All animation stops for people who ask for reduced motion; the scene is decorative and hidden from screen readers. No stock photos are used (no licences needed). Verified: no horizontal scroll at 390 px, axe clean on `/login` and `/signup`, 85/85 browser journeys (every journey signs in through this page).
+
 ## Unite Solar desk and BOGO promotions (added 2026-11-09)
 
 **Unite Solar desk** (partners: Unite businesses → Solar desk; admin: Workspace → Unite Solar Desk)
