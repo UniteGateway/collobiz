@@ -13,9 +13,10 @@ interface Home {
   activity: { id: string; text: string; actor: string | null; at: string }[];
 }
 
-const ACTION_ICON: Record<string, IconName> = { team: 'people', contract: 'document-text', milestone: 'flag', invoice: 'receipt', certify: 'checkmark-done', payout: 'wallet', task: 'calendar', order: 'cube', claim: 'alert-circle', tender: 'hammer' };
+const ACTION_ICON: Record<string, IconName> = { team: 'people', contract: 'document-text', milestone: 'flag', invoice: 'receipt', certify: 'checkmark-done', payout: 'wallet', task: 'calendar', order: 'cube', claim: 'alert-circle', tender: 'hammer', offer: 'briefcase' };
 /** Web routes from /me/home mapped to native screens; anything without a native screen opens the closest native area. */
 const nativeHref = (href: string) => {
+  if (href.startsWith('/offers')) return href; // the same offer screens exist natively
   if (href.startsWith('/collaboration')) return '/collaboration';
   if (href.startsWith('/projects/')) return `/projects/${href.split('/')[2]}/progress`;
   if (href.startsWith('/payouts') || href.startsWith('/earnings')) return '/earnings';

@@ -9,8 +9,8 @@ export interface Module { key: string; label: string; icon: IconName; home: stri
 
 export const MODULES: Module[] = [
   { key: 'home', label: 'Home', icon: 'home', home: '/dashboard', match: ['/dashboard'] },
-  { key: 'opportunities', label: 'Opportunities', icon: 'opportunities', home: '/marketplace', match: ['/marketplace', '/opportunities', '/my/opportunities', '/feed', '/rfq', '/ai/matching'],
-    tabs: [['/marketplace', 'Browse'], ['/ai/matching', 'AI matches'], ['/feed', 'Recommended'], ['/my/opportunities', 'My applications'], ['/marketplace/saved', 'Saved & alerts'], ['/marketplace/categories', 'Categories'], ['/marketplace/map', 'Map']] },
+  { key: 'opportunities', label: 'Opportunities', icon: 'opportunities', home: '/marketplace', match: ['/marketplace', '/opportunities', '/my/opportunities', '/feed', '/rfq', '/ai/matching', '/offers'],
+    tabs: [['/marketplace', 'Browse'], ['/offers', 'Offers for you'], ['/ai/matching', 'AI matches'], ['/feed', 'Recommended'], ['/my/opportunities', 'My applications'], ['/marketplace/saved', 'Saved & alerts'], ['/marketplace/categories', 'Categories'], ['/marketplace/map', 'Map']] },
   { key: 'leads', label: 'Leads & CRM', icon: 'leads', home: '/my/leads', match: ['/my/leads', '/leads', '/crm', '/tasks', '/activity', '/lead-protection', '/lead-disputes'],
     tabs: [['/my/leads', 'My leads'], ['/crm/pipeline', 'Pipeline'], ['/tasks', 'Tasks'], ['/activity', 'Activity'], ['/lead-protection', 'Protection'], ['/lead-disputes', 'Disputes']] },
   { key: 'collaboration', label: 'Collaboration', icon: 'teams', home: '/teams', match: ['/teams', '/partners', '/collaboration', '/consortiums', '/ai/partners', '/ai/team-builder'],
@@ -27,7 +27,7 @@ export const MODULES: Module[] = [
     tabs: [['/performance', 'Scorecard'], ['/reputation/reviews', 'Reviews'], ['/reputation/excellence', 'Next level'], ['/learning', 'Learning'], ['/certificates', 'Certificates'], ['/resources', 'Marketing'], ['/resources/social', 'Social posts'], ['/resources/brochure', 'Brochure']] },
   { key: 'documents', label: 'Documents', icon: 'documents', home: '/vault', match: ['/vault'] },
   { key: 'account', label: 'Account', icon: 'settings', home: '/profile', match: ['/profile', '/company', '/settings'],
-    tabs: [['/profile', 'Profile'], ['/company/team', 'Company & team'], ['/settings/notifications', 'Notifications'], ['/settings/regional', 'Language & region'], ['/settings/security', 'Security'], ['/settings/privacy', 'Privacy & data']] },
+    tabs: [['/profile', 'Profile'], ['/company/team', 'Company & team'], ['/settings/capacity', 'Capacity'], ['/settings/notifications', 'Notifications'], ['/settings/regional', 'Language & region'], ['/settings/security', 'Security'], ['/settings/privacy', 'Privacy & data']] },
   { key: 'help', label: 'Help & support', icon: 'help', home: '/help', match: ['/help', '/support'], tabs: [['/help', 'Help & feedback'], ['/support/tickets', 'Support tickets']] },
 ];
 

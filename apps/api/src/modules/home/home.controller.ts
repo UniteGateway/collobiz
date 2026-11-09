@@ -48,6 +48,8 @@ export class HomeController {
       (select count(*)::int from opportunity_applications where organization_id = ${org} and status in ('submitted','shortlisted')) as "openApplications"`);
     const actions: { kind: string; title: string; detail: string; href: string; due?: string | null; tone: 'urgent' | 'normal' }[] = [];
     const add = (list: Row[], f: (r: Row) => (typeof actions)[number]) => list.forEach((r) => actions.push(f(r)));
+    add(await q(sql`select o.id, o.title, o.deadline, g.display_name as issuer from direct_offer_recipients r join direct_offers o on o.id = r.offer_id join organizations g on g.id = o.issuer_org_id where r.organization_id = ${org} and r.status in ('sent','viewed') and o.status = 'open' and o.deadline > now() order by o.deadline limit 5`),
+      (r) => ({ kind: 'offer', title: `Offer from ${r.issuer}`, detail: String(r.title), href: `/offers/${r.id}`, due: new Date(String(r.deadline)).toISOString(), tone: 'normal' }));
     add(await q(sql`select t.id, t.name, l.display_name as lead from team_members m join collaboration_teams t on t.id = m.team_id join organizations l on l.id = t.lead_org_id where m.organization_id = ${org} and m.status in ('invited','accepted') and t.lead_org_id <> ${org} limit 5`),
       (r) => ({ kind: 'team', title: `Join ${r.name}`, detail: `${r.lead} invited your company — review and sign the NDA`, href: `/collaboration/requests`, tone: 'normal' }));
     add(await q(sql`select c.id, c.code, c.title from contracts c where c.status in ('approved','partially_signed') and (c.issuer_org_id = ${org} or c.counterparty_org_id = ${org})

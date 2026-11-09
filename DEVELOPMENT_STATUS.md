@@ -22,9 +22,9 @@ This file is the single place to see where the build stands. It follows the reco
 | Registry screens with a working route | **165 of 165** |
 | Covered by API tests and a browser journey | **165** |
 | Native screens required / built / with tests | 46 / 46 / **46** |
-| API tests | 197 passing (19 suites) |
-| Browser journeys (desktop + phone) | 73 passing on a fresh database; axe scan clean on 45 pages |
-| Native tests | 67 passing (13 suites) |
+| API tests | 203 passing (20 suites) |
+| Browser journeys (desktop + phone) | 75 passing on a fresh database; axe scan clean on 45 pages |
+| Native tests | 72 passing (14 suites) |
 | UI component tests | 30 passing |
 
 ## Stages 13–16 (built this round)
@@ -35,6 +35,22 @@ This file is the single place to see where the build stands. It follows the reco
 | 14 Reputation, learning, marketing, AI | 029, 072, 113–118, 140, 160–165 | Reputation only from certified milestones and reviews on shared certified projects; appeals exclude a review until compliance decides (never the reviewed company); assessments graded on the server; certificates verifiable by code; brochures for verified partners with fixed footer; every AI output a draft with sources and version, never prices, never submitted; super-admin switches, audited |
 | 15–16 International, content, analytics | 119–123, 125, 126, 139, 142, 146 | Country partnership decided by Unite staff, never for their own org; exclusive territories can’t overlap; import/export direction must match India and routes to Unite Exim; checklist labelled as guidance, not legal advice; alliances decided only by the receiving company and never binding until signed in Contracts; investor data room off pending regulatory review; display currencies need a dated rate, money stays in INR; policy pages published by super admin only; analytics aggregates only |
 
+## Direct offers (added 2026-11-09, beyond the 165-screen registry)
+
+Unite Group companies send work straight to partners instead of (or as well as) public listings and sealed tenders.
+
+| Part | What it does |
+|---|---|
+| **Send** (admin console → Direct offers) | Choose what is offered (sell products, market services, project work, manpower, local presence/office, partnership), sector and regions. Send to **all verified partners**, **chosen partners** (with their declared office and free manpower shown), or a **group filtered by capacity** — sector, region, business type, has an office, at least N people free, what they are looking for. A live count shows exactly who will receive it. |
+| **Price and reward** | **Unite sets the price** (partners accept or decline), **partners quote**, or **either**. Rewards: commission on sales, revenue share, profit share, equity, fixed fee or reseller margin — Unite chooses which ones partners may propose. Requirements: existing office, minimum people, exclusive (one partner) or several places. |
+| **Partner side** (web: Opportunities → Offers for you; app: Account → Offers for you; both: Home "Needs your attention") | See the offer and terms; accept Unite's terms or propose own price, reward and commitment (people, office, start date); change the response until the deadline; or decline with a reason. |
+| **Capacity** (web: Account → Capacity; app: Account → Your capacity) | Partners declare offices, total and idle manpower, skills of free people, and the work they want. Never shown to other partners. |
+| **Select** | Unite compares responses side by side and selects; the agreed terms are frozen with a hash and audited. When the places are filled (one if exclusive) the offer closes and everyone else is told. |
+
+Rules enforced by the API (`apps/api/test/offers.e2e.ts`, 6 tests): only Unite Group admins of the issuing company send and decide; offers reach verified partners only; a partner sees only offers sent to it and never another partner's response; a fixed-terms offer cannot be counter-quoted, a quote offer must carry a price; proposed rewards must be ones the offer allows; office and minimum-manpower requirements are checked; decisions are final and the last place closes the offer. **Profit share and equity are labelled indicative everywhere: they become binding only through an agreement drafted and signed in Contracts.** Commission paid through the existing commission ledger still needs a project and customer payment; direct-offer selection records the agreed terms but does not create ledger entries by itself.
+
+Tests: 6 API, 5 native (`apps/mobile/test/offers.test.tsx`), a browser journey on desktop and phone (capacity → filtered offer → proposal → selection → partner sees result), and the six new pages (X01–X06) in the gate sweep at both widths. Demo data: two offers from Unite Solar (one with fixed terms to all partners, one exclusive O&M desk asking for quotes, with Deccan's proposal); add them to an existing demo database with `node -r @swc-node/register src/db/seed-offers.ts`.
+
 ## Quality gate (2026-11-09)
 
 A screen passes only when **all** of these hold, and `scripts/record-gate.mjs` writes the result per screen:
@@ -43,7 +59,7 @@ A screen passes only when **all** of these hold, and `scripts/record-gate.mjs` w
 3. **API e2e test** that calls the screen's endpoints, and a **browser journey** that opens the screen and checks real content.
 4. **Native test** where the screen is native.
 
-**Result: 165 of 165 screens passed (2026-11-09).** Final sweep on a fresh seed: 0 flagged at either width; 73/73 browser journeys; 197/197 API tests; 67/67 native tests; 30/30 UI tests; lint and typecheck clean. Evidence: `docs/audit/screenshots/gate/<id>-desktop.jpg` and `-mobile.jpg` with `sweep.json` (account used, issues found); per-screen record in `docs/audit/quality-gate.json`. The five Phase C screens keep their own evidence in `screenshots/after/`.
+**Result: 165 of 165 screens passed (2026-11-09)**, plus the 6 direct-offer pages (X01–X06) swept the same way. Final sweep on a fresh seed: 171 pages, 0 flagged at either width; 75/75 browser journeys; 203/203 API tests; 72/72 native tests; 30/30 UI tests; lint and typecheck clean. Evidence: `docs/audit/screenshots/gate/<id>-desktop.jpg` and `-mobile.jpg` with `sweep.json` (account used, issues found); per-screen record in `docs/audit/quality-gate.json`. The five Phase C screens keep their own evidence in `screenshots/after/`.
 
 To close the gaps the gate found, these were added: `apps/api/test/gate.e2e.ts` (withdraw an application, owner pauses/resumes a project, commission policies, team tasks) and three “Gate ·” browser journeys covering 30 screens that no stage journey opened (each asserts real content and performs the screen's action where it has one).
 
@@ -52,6 +68,7 @@ What the gate does *not* prove: on-device native runs (B-06), load and penetrati
 ### Found and fixed during the gate
 - **Regression from Stage 14:** the public page that verifies *lead registration certificates* had been replaced by the training-certificate checker, so CZL- certificates could no longer be verified. Restored; one page now verifies both (CZL- and CZC-).
 - **Browser journeys had drifted:** 11 of 68 journeys were failing because they had only been run per stage since Phase B (card headings moved, a second “Documents” link in the sidebar, a weekday-dependent task check, a step that needed data from an earlier run). All fixed; the full suite passes on a fresh database.
+- **Content editor (142)** could lose the page's address and title if an editor typed straight after picking a page (the form was filled after the click and rebuilt from a stale copy). Found by an intermittent journey failure; the form is now filled in the same step as the selection.
 - **Partner Home (023)** threw a hydration error on any day after the build (date and greeting rendered at build time). Now set in the browser.
 - **Tasks (028)** showed only the current week, so on a Sunday a task due tomorrow was invisible. Added “Next 14 days”, a seven-day grid that fits on desktop and stacks on phones.
 - **Shipping (092)**: tracking heading collided with the details list; receipt lines restructured; file pickers styled across all 7 upload screens. A shipped demo order was added so the screen can be opened.

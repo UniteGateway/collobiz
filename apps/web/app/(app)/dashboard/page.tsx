@@ -21,7 +21,7 @@ const inr = (minor = 0) => {
   if (r >= 1e5) return `₹${(r / 1e5).toFixed(1)} L`;
   return `₹${Math.round(r).toLocaleString('en-IN')}`;
 };
-const ACTION_ICON: Record<string, IconName> = { team: 'teams', contract: 'contracts', milestone: 'projects', invoice: 'documents', certify: 'verify', payout: 'earnings', task: 'calendar', order: 'trading', claim: 'warning', tender: 'tenders' };
+const ACTION_ICON: Record<string, IconName> = { team: 'teams', contract: 'contracts', milestone: 'projects', invoice: 'documents', certify: 'verify', payout: 'earnings', task: 'calendar', order: 'trading', claim: 'warning', tender: 'tenders', offer: 'briefcase' };
 const when = (d?: string | null) => {
   if (!d) return null;
   const days = Math.round((new Date(d).getTime() - Date.now()) / 86400_000);

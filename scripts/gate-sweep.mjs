@@ -53,6 +53,7 @@ const OWNER = {
 const resourceOf = (route) => Object.entries(PARAM).filter(([p]) => route.startsWith(p)).sort((a, b) => b[0].length - a[0].length)[0]?.[1];
 const accountFor = (s) => s.route.includes('[') && OWNER[resourceOf(s.route)] ? ['web', OWNER[resourceOf(s.route)]]
   : s.id === '138' ? ['admin', 'finance@collabiz.local'] // finance approver role
+  : s.app === 'admin' && s.id.startsWith('X') ? ['admin', 'unite.admin@collabiz.local']
   : s.app === 'admin' ? ['admin', 'superadmin@collabiz.local']
   : s.access === 'public' ? null
   : s.id === '070' ? ['mfa', 'evaluator@collabiz.local'] // technical evaluator
@@ -60,6 +61,16 @@ const accountFor = (s) => s.route.includes('[') && OWNER[resourceOf(s.route)] ? 
   : s.access === 'finance' ? ['mfa', 'finance@collabiz.local']
   : ['web', 'asha@voltepc.example'];
 
+// Pages added after the 165-screen registry (direct offers). Opened and checked exactly like registry screens.
+const offerId = await one("select id from direct_offers where code = 'DO-2026-100002'");
+const EXTRA = [
+  { id: 'X01', title: 'Offers for you', app: 'web', route: '/offers', access: 'verified-partner' },
+  { id: 'X02', title: 'Offer (partner)', app: 'web', route: `/offers/${offerId}`, access: 'verified-partner' },
+  { id: 'X03', title: 'Your capacity', app: 'web', route: '/settings/capacity', access: 'partner' },
+  { id: 'X04', title: 'Direct offers (admin)', app: 'admin', route: '/offers', access: 'unite-admin' },
+  { id: 'X05', title: 'New direct offer', app: 'admin', route: '/offers/new', access: 'unite-admin' },
+  { id: 'X06', title: 'Direct offer (admin)', app: 'admin', route: `/offers/${offerId}`, access: 'unite-admin' },
+];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];
 const b = await chromium.launch();
@@ -68,7 +79,7 @@ for (const [vw, w, h] of [['desktop', 1440, 900], ['mobile', 390, 844]]) {
   const page = await ctx.newPage();
   let who = 'none', errs = [];
   page.on('pageerror', (e) => errs.push(e.message.slice(0, 160)));
-  for (const s of SCREENS) {
+  for (const s of [...SCREENS, ...(only ? EXTRA.filter((x) => only.includes(x.id)) : EXTRA)]) {
     if (only && !only.includes(s.id)) continue;
     // Project chats are created when a member first opens the inbox, so look this one up when needed.
     if (s.route.startsWith('/chat/groups/') && !ids.projectThread) ids.projectThread = await one("select id from message_threads where kind = 'project' limit 1");

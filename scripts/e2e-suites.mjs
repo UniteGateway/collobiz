@@ -1468,3 +1468,69 @@ suites.push({
     await page.getByText(/Construction & EPC/).first().waitFor(); // sector in words
   },
 });
+
+// Direct offers: Unite Group sends an offer to partners filtered by capacity; a partner proposes terms; Unite selects.
+suites.push({
+  name: 'Offers · capacity → admin sends filtered offer → partner proposes → admin selects → partner sees result',
+  run: async ({ page, WEB, ADMIN, shot, label }) => {
+    const title = `Install crew for Karnataka rooftops (${label} ${Date.now().toString().slice(-5)})`;
+    // Partner declares spare capacity
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/settings/capacity');
+    await page.getByLabel('People free now (idle)').fill('14');
+    await page.getByRole('button', { name: 'Save capacity' }).click();
+    await page.getByText(/Saved\. Unite Group will see/).waitFor();
+    // Unite Group admin sends an offer to partners with an office and at least 10 free people
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/offers/new');
+    await page.getByLabel('Title').fill(title);
+    await page.getByLabel('What you need and what the partner gets').fill('A trained installation crew with a local base for six rooftop sites. Quote a monthly price; we can also agree a share of profit.');
+    await page.getByLabel('Type of offer').selectOption({ label: 'Supply manpower' });
+    await page.getByRole('button', { name: 'Filter by capacity' }).click();
+    await page.getByLabel('Has an existing office or setup').check();
+    await page.getByLabel('At least this many people free').fill('10');
+    await page.getByText(/1 verified partner will receive this: Volt EPC/).waitFor();
+    await page.getByLabel('Pricing').selectOption('partner_quote');
+    const chips = page.getByRole('group', { name: 'Rewards partners may propose' });
+    await chips.getByText('Commission on sales').click(); // remove the default
+    await chips.getByText('Fixed fee').click();
+    await chips.getByText('Profit share').click();
+    await page.getByLabel('Partner must have an existing office or setup').check();
+    await page.getByRole('button', { name: /^Send to 1 partner$/ }).click();
+    await page.getByRole('heading', { name: title }).waitFor();
+    const offerUrl = page.url();
+    await shot('offer-admin-sent');
+    // Partner sees it on Home and in Offers, and proposes terms
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/dashboard');
+    await page.getByText(title).first().waitFor();
+    await page.goto(WEB + '/offers');
+    await page.getByRole('link', { name: new RegExp(title.replace(/[()]/g, '.')) }).click();
+    await page.getByRole('heading', { name: 'Respond' }).waitFor();
+    await page.getByLabel('Your price (₹)').fill('380000');
+    await page.getByLabel('Reward you want').selectOption({ label: 'Profit share' });
+    await page.getByLabel('Profit share (%)').fill('12');
+    await page.getByLabel(/People you will commit/).fill('10');
+    await page.getByLabel('Office location').fill('Pune');
+    await page.getByLabel(/Why your company/).fill('Ten installers from our Pune base; two crews can start within a week of confirmation.');
+    await page.getByRole('button', { name: 'Send proposal' }).click();
+    await page.getByText('Profit share · 12%').waitFor();
+    await shot('offer-partner-response');
+    // Admin compares and selects
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(offerUrl);
+    const item = page.locator('[data-response="Volt EPC"]');
+    await item.getByText('₹3,80,000 per month').waitFor();
+    await item.getByRole('button', { name: 'Decide' }).click();
+    await item.getByLabel('Note to the partner (reason)').fill('Strongest crew and a local base');
+    await item.getByRole('button', { name: 'Select Volt EPC' }).click();
+    await item.getByText(/Terms record/).waitFor();
+    // Partner sees the outcome
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/offers');
+    await page.getByRole('button', { name: /^Answered/ }).click();
+    await page.getByText(title).click();
+    await page.getByRole('heading', { name: 'You were selected' }).waitFor();
+    await shot('offer-partner-selected');
+  },
+});

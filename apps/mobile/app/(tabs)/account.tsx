@@ -45,6 +45,8 @@ export default function Account() {
       )}
       {org && (
         <Section title="Work">
+          <Row icon="briefcase" iconTint={theme.colors.green700} title="Offers for you" subtitle="Work and products Unite Group sent to you" onPress={go('/offers')} testID="offers-row" />
+          <Row icon="people" title="Your capacity" subtitle="Offices and people free for new work" onPress={go('/capacity')} />
           <Row icon="folder-open" title="Projects & site progress" onPress={go('/projects')} />
           <Row icon="calendar" title="Meetings" onPress={go('/meetings')} />
           <Row icon="megaphone" title="Announcements" onPress={go('/announcements')} />

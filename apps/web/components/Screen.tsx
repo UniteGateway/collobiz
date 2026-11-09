@@ -38,8 +38,12 @@ export function accessDenial(access: ScreenAccess, me: Me | null): { reason: str
 const SHOW_IDS = process.env.NEXT_PUBLIC_SHOW_SCREEN_IDS === 'true';
 
 /** `header={false}` lets a screen render its own hero (it must then provide the page's h1); access gating is unchanged. */
-export function Screen({ id, children, actions, description, title, eyebrow, header = true }: { id: string; children: React.ReactNode; actions?: React.ReactNode; description?: React.ReactNode; title?: string; eyebrow?: string; header?: boolean }) {
-  const def = SCREENS.find((s) => s.id === id);
+/**
+ * Page frame. `id` is a registry screen (001–165). Features added after the registry use `page` instead: a stable key
+ * plus its access rule, so the 165 registry IDs stay untouched.
+ */
+export function Screen({ id, page, children, actions, description, title, eyebrow, header = true }: { id?: string; page?: { key: string; title: string; access: ScreenAccess }; children: React.ReactNode; actions?: React.ReactNode; description?: React.ReactNode; title?: string; eyebrow?: string; header?: boolean }) {
+  const def = page ? { id: page.key, title: page.title, access: page.access, family: 0 } : SCREENS.find((s) => s.id === id);
   const { me, loading } = useSession();
   const router = useRouter();
   const path = usePathname();
@@ -48,11 +52,12 @@ export function Screen({ id, children, actions, description, title, eyebrow, hea
     if (!loading && def && def.access !== 'public' && !me) router.replace(`/login?next=${encodeURIComponent(path)}`);
   }, [loading, me, def, router, path]);
   if (!def) return <ErrorState error={`Unknown screen ${id}`} />;
+  const sid = def.id;
   const mod = moduleFor(path);
   const family = SCREEN_FAMILIES[def.family - 1]?.name;
   return (
-    <div data-screen={id}>
-      {header && <PageHeader title={title ?? def.title} screenId={id} eyebrow={eyebrow ?? mod?.label ?? (def.access === 'public' ? undefined : family)} showScreenId={SHOW_IDS} actions={!denial ? actions : undefined} description={description} />}
+    <div data-screen={sid}>
+      {header && <PageHeader title={title ?? def.title} screenId={sid} eyebrow={eyebrow ?? mod?.label ?? (def.access === 'public' ? undefined : family)} showScreenId={SHOW_IDS} actions={!denial ? actions : undefined} description={description} />}
       {mod?.tabs && !mod.ownTabs && mod.tabs.some(([h]) => h === path) && (
         <nav aria-label={`${mod.label} sections`} className="cz-tabs">{mod.tabs.map(([h, l]) => <UiLink key={h} href={h} aria-current={h === path ? 'page' : undefined}>{l}</UiLink>)}</nav>
       )}

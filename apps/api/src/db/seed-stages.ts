@@ -389,6 +389,34 @@ async function stage15(db: Db, refs: SeedRefs) {
   await db.insert(s.allianceProposals).values({ code: 'ALL-2026-30418', kind: 'strategic_alliance', proposerOrgId: refs.orgs.deccan, targetOrgId: refs.orgs.volt, title: 'Southern India rooftop alliance', rationale: 'Deccan stocks switchgear and cables across Karnataka and Tamil Nadu; Volt EPC has proven rooftop delivery. Together we can bid for C&I rooftop programmes in the south with local stock and faster mobilisation.', scope: 'Joint bids for rooftop projects above 1 MW in Karnataka and Tamil Nadu; Deccan supplies BoS materials at agreed partner pricing.', markets: ['IN'], sectors: ['solar', 'power_equipment'], proposerSharePct: 30, durationMonths: 24, createdBy: refs.users.deepak });
 }
 
+/** Direct offers: partner capacity and two offers from Unite Group companies (one with fixed terms, one asking for quotes). */
+export async function offersDemo(db: Db, refs: SeedRefs) {
+  await db.insert(s.partnerCapacity).values([
+    { organizationId: refs.orgs.volt, hasOffice: true, officeLocations: ['Pune', 'Nashik'], totalManpower: 48, idleManpower: 12, idleSkills: ['Rooftop installation', 'Electrical BoS'], lookingFor: ['project_work', 'manpower', 'sell_products'], notes: 'Two installation crews free from December.', updatedBy: refs.users.asha },
+    { organizationId: refs.orgs.sunrise, hasOffice: true, officeLocations: ['Ahmedabad', 'Dubai (Jebel Ali)'], totalManpower: 22, idleManpower: 4, idleSkills: ['Sales', 'Logistics'], lookingFor: ['sell_products', 'local_presence', 'distribution'], updatedBy: refs.users.ravi },
+    { organizationId: refs.orgs.deccan, hasOffice: true, officeLocations: ['Bengaluru', 'Hosur'], totalManpower: 30, idleManpower: 6, idleSkills: ['Warehouse', 'Field sales'], lookingFor: ['sell_products', 'distribution', 'marketing'], updatedBy: refs.users.deepak },
+    { organizationId: refs.orgs.meera, hasOffice: false, totalManpower: 3, idleManpower: 2, idleSkills: ['Energy audits', 'Procurement advisory'], lookingFor: ['marketing', 'partnership'], updatedBy: refs.users.meera },
+  ]);
+  const day = 86400_000;
+  const [sell] = await db.insert(s.directOffers).values({
+    code: 'DO-2026-100001', issuerOrgId: refs.orgs.uniteSolar, title: 'Sell rooftop solar packages to factories in your region',
+    summary: 'Unite Solar supplies 100 kW–1 MW rooftop packages (design, Tier-1 modules, installation, monitoring). Introduce and close factory customers in your region; Unite Solar prices, contracts and delivers. You earn commission when the customer pays.',
+    kind: 'sell_products', sector: 'solar', regions: ['IN-MH', 'IN-KA', 'IN-GJ', 'IN-TN'], targetMode: 'all', pricing: 'unite_price', unitePrice: 42_000_00, priceUnit: 'per kW',
+    uniteRewardModel: 'commission', uniteRewardBps: 300, rewardModels: ['commission'], maxSelections: 10, deadline: new Date(Date.now() + 21 * day), createdBy: refs.users.uniteAdmin,
+  }).returning();
+  const [setup] = await db.insert(s.directOffers).values({
+    code: 'DO-2026-100002', issuerOrgId: refs.orgs.uniteSolar, title: 'Run an O&M service desk for our Karnataka and Tamil Nadu plants',
+    summary: 'We need a partner with a local office and trained people to run module cleaning, preventive maintenance and first-response breakdown visits across 14 MW of plants. We offer a fixed monthly fee of ₹6,50,000; or quote your own monthly price and the reward model you prefer.',
+    kind: 'local_presence', sector: 'solar', regions: ['IN-KA', 'IN-TN'], targetMode: 'selected', pricing: 'either',
+    uniteRewardModel: 'fixed_fee', uniteRewardAmount: 6_50_000_00, rewardModels: ['fixed_fee', 'profit_share', 'revenue_share'], needsOffice: true, minManpower: 4, exclusive: true, maxSelections: 1,
+    deadline: new Date(Date.now() + 10 * day), createdBy: refs.users.uniteAdmin,
+  }).returning();
+  const partners = [refs.orgs.volt, refs.orgs.sunrise, refs.orgs.deccan, refs.orgs.meera];
+  await db.insert(s.directOfferRecipients).values(partners.map((o) => ({ offerId: sell.id, organizationId: o })));
+  await db.insert(s.directOfferRecipients).values([refs.orgs.volt, refs.orgs.deccan].map((o) => ({ offerId: setup.id, organizationId: o, status: o === refs.orgs.deccan ? 'responded' : 'sent' })));
+  await db.insert(s.directOfferResponses).values({ offerId: setup.id, organizationId: refs.orgs.deccan, submittedBy: refs.users.deepak, mode: 'proposal', price: 5_80_000_00, priceUnit: 'per month', rewardModel: 'profit_share', rewardBps: 1500, manpower: 6, hasOffice: true, officeLocation: 'Hosur', startDate: new Date(Date.now() + 30 * day).toISOString().slice(0, 10), message: 'Our Hosur warehouse team can cover both states with two vans; we propose a lower monthly fee plus 15% of savings from improved plant availability.' });
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
@@ -403,4 +431,5 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await stage13(db, refs);
   await stage14(db, refs);
   await stage15(db, refs);
+  await offersDemo(db, refs);
 }

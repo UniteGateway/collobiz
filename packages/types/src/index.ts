@@ -10,3 +10,4 @@ export * from './rules/reputation';
 export * from './schemas';
 export * from './taxonomy';
 export * from './client';
+export * from './offers';

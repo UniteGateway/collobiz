@@ -1175,3 +1175,24 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
   .cz-chat-tools .cz-btn { font-size: 0; gap: 0; padding: 0 8px; }
   .cz-chat-tools .cz-btn .cz-icon { font-size: initial; }
 }
+
+/* Direct offers */
+.cz-offer-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.cz-offer { display: flex; flex-direction: column; gap: 6px; color: inherit; text-decoration: none; transition: border-color .15s, box-shadow .15s; }
+.cz-offer:hover { border-color: var(--cz-grey-300); box-shadow: 0 2px 10px rgba(16, 37, 66, .06); }
+.cz-offer-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.cz-offer-head > .cz-badge { margin-left: auto; }
+.cz-offer-title { font-size: 17px; color: var(--cz-navy-900); }
+.cz-offer-terms { font-weight: 600; color: var(--cz-green-700, #2E6B24); font-size: 14px; }
+.cz-offer-foot { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; flex-wrap: wrap; }
+.cz-due-soon { color: var(--cz-warning, #B45309); font-weight: 600; }
+.cz-back { display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; }
+.cz-reward-row { display: grid; grid-template-columns: minmax(0, 1fr) 140px; gap: 12px; }
+.cz-compare td { vertical-align: top; }
+.cz-pick-list { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 2px; max-height: 420px; overflow: auto; }
+.cz-pick-list > li { padding: 8px 4px; border-bottom: 1px solid var(--cz-grey-200); }
+.cz-pick-list > li:last-child { border-bottom: 0; }
+.cz-pick-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; font-size: 12.5px; }
+.cz-audience { margin-top: 8px; padding: 12px 14px; border-radius: var(--cz-radius-md); background: var(--cz-grey-50); border: 1px solid var(--cz-grey-200); font-size: 14px; }
+.cz-offer-stats { display: flex; gap: 6px 18px; flex-wrap: wrap; font-size: 13.5px; color: var(--cz-grey-600); }
+.cz-offer-stats strong { color: var(--cz-navy-900); }

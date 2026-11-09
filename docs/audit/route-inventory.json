@@ -2847,7 +2847,7 @@
     "mobile": "desktop-admin",
     "registryStatus": "verified",
     "file": "apps/admin/app/(console)/cms/page.tsx",
-    "lines": 56,
+    "lines": 57,
     "usesApi": true,
     "marker": true,
     "placeholder": false,
