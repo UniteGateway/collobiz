@@ -66,10 +66,12 @@ export default function Shipping() {
       {s && o.side === 'buyer' && o.status === 'shipped' && (
         <Card title="Record goods receipt">
           {o.lines.map((l: any) => (
-            <div key={l.item} className="cz-row" style={{ alignItems: 'flex-end' }}>
-              <span style={{ minWidth: 240 }}>{l.item} (ordered {l.quantity} {l.unit})</span>
-              <TextInput label={`Received: ${l.item}`} inputMode="decimal" value={grn[l.item]?.received ?? ''} onChange={(e) => setGrn({ ...grn, [l.item]: { ...grn[l.item], received: e.target.value } })} />
-              <TextInput label={`Damaged: ${l.item}`} inputMode="decimal" value={grn[l.item]?.damaged ?? ''} onChange={(e) => setGrn({ ...grn, [l.item]: { ...grn[l.item], damaged: e.target.value } })} />
+            <div key={l.item} className="cz-line-item" role="group" aria-label={l.item}>
+              <div className="cz-line-item-head">{l.item}<span>Ordered {l.quantity} {l.unit}</span></div>
+              <div className="cz-grid cz-grid-2">
+                <TextInput label="Received" aria-label={`Received: ${l.item}`} inputMode="decimal" value={grn[l.item]?.received ?? ''} onChange={(e) => setGrn({ ...grn, [l.item]: { ...grn[l.item], received: e.target.value } })} />
+                <TextInput label="Damaged" aria-label={`Damaged: ${l.item}`} inputMode="decimal" value={grn[l.item]?.damaged ?? ''} onChange={(e) => setGrn({ ...grn, [l.item]: { ...grn[l.item], damaged: e.target.value } })} />
+              </div>
             </div>
           ))}
           <TextInput label="Receipt note" value={note} onChange={(e) => setNote(e.target.value)} />

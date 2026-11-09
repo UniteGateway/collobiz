@@ -20,6 +20,7 @@ import {
   assertTransition, AwardSchema, BidDraftSchema, patchOf, BidMachine, EvaluatorSchema, MEMBERSHIP_LEVELS, NegotiationSchema, ScoreSchema, ShortlistSchema, TenderCancelSchema, TenderCreateSchema, TenderMachine,
   type BidState, type TenderState,
   sectorName,
+  certLabel, levelLabel,
 } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import { auditEvents, bidScores, bids, memberships, negotiationMessages, notifications, organizations, partnerProfiles, tenderDocuments, tenderEvaluators, tenders, users } from '../../db/schema';
@@ -104,12 +105,12 @@ export class TendersService {
     const evUsers = (await this.evaluators(t.id)).map((e) => e.e.userId);
     const conflicted = evUsers.length ? await this.db.select({ id: memberships.id }).from(memberships).where(and(eq(memberships.organizationId, ctx.orgId!), inArray(memberships.userId, evUsers), eq(memberships.status, 'active'))).limit(1) : [];
     const checks = [
-      { key: 'verified', label: 'Verified partner organization', ok: o?.verificationStatus === 'verified' && (o.type === 'partner_company' || o.type === 'partner_individual'), detail: o?.verificationStatus ?? 'unknown' },
-      { key: 'not_issuer', label: 'Not the issuing organization', ok: ctx.orgId !== t.issuerOrgId, detail: ctx.orgId === t.issuerOrgId ? 'You issued this tender' : 'OK' },
-      { key: 'level', label: `Membership level ${el.minLevel ?? 'registered'} or higher`, ok: levelIdx(o?.membershipLevel) >= levelIdx(el.minLevel ?? 'registered'), detail: o?.membershipLevel ?? 'none' },
+      { key: 'verified', label: 'Verified partner organization', ok: o?.verificationStatus === 'verified' && (o.type === 'partner_company' || o.type === 'partner_individual'), detail: o?.verificationStatus === 'verified' ? 'Your company is verified' : `Verification ${(o?.verificationStatus ?? 'not started').replace(/_/g, ' ')}` },
+      { key: 'not_issuer', label: 'Not the issuing organization', ok: ctx.orgId !== t.issuerOrgId, detail: ctx.orgId === t.issuerOrgId ? 'You issued this tender' : 'Another company issued this tender' },
+      { key: 'level', label: `${levelLabel(el.minLevel ?? 'registered')} or higher`, ok: levelIdx(o?.membershipLevel) >= levelIdx(el.minLevel ?? 'registered'), detail: `Your level: ${levelLabel(o?.membershipLevel)}` },
       { key: 'sector', label: el.sectors?.length ? `Works in ${el.sectors.map(sectorName).join(', ')}` : 'Any sector', ok: !el.sectors?.length || (p?.sectors ?? []).some((s) => el.sectors!.includes(s)), detail: (p?.sectors ?? []).map(sectorName).join(', ') || 'No sectors on profile' },
-      ...(el.certifications ?? []).map((c) => ({ key: `cert:${c}`, label: `Certification: ${c}`, ok: (p?.certifications ?? []).includes(c), detail: (p?.certifications ?? []).includes(c) ? 'On profile' : 'Missing from profile' })),
-      { key: 'no_conflict', label: 'No evaluator conflict of interest', ok: conflicted.length === 0, detail: conflicted.length ? 'A member of your organization is an evaluator on this tender' : 'OK' },
+      ...(el.certifications ?? []).map((c) => ({ key: `cert:${c}`, label: `Certification: ${certLabel(c)}`, ok: (p?.certifications ?? []).includes(c), detail: (p?.certifications ?? []).includes(c) ? 'On profile' : 'Missing from profile' })),
+      { key: 'no_conflict', label: 'No evaluator conflict of interest', ok: conflicted.length === 0, detail: conflicted.length ? 'A member of your organization is an evaluator on this tender' : 'No one from your company evaluates this tender' },
     ];
     return { eligible: checks.every((c) => c.ok), checks };
   }

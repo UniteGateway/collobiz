@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { PARTNER_TYPES } from '@collabiz/types';
+import { PARTNER_TYPES, PARTNER_TYPE_LABELS } from '@collabiz/types';
 import { Alert, Button, Card, ChipSelect } from '@collabiz/ui';
 import { Screen } from '@/components/Screen';
 import { api } from '@/lib/api';
@@ -8,7 +8,7 @@ import { useMutation } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
 import { useOnboarding } from '@/lib/onboarding';
 
-const LABEL: Record<string, string> = { consultant: 'Consultant', contractor: 'Contractor / EPC', trader: 'Trader', manufacturer: 'Manufacturer', distributor: 'Distributor', developer: 'Project developer', technology: 'Technology firm', finance_associate: 'Finance associate', investor: 'Investor' };
+const LABEL = PARTNER_TYPE_LABELS;
 
 /** Screen 013 — Select Account Type. */
 export default function AccountTypePage() {

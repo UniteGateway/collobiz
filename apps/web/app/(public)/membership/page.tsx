@@ -14,7 +14,6 @@ const LEVELS = [
 export default function MembershipPage() {
   return (
     <div className="cz-container cz-section" data-screen="007">
-      <p className="cz-breadcrumb">Public Website &amp; Discovery <span className="cz-screen-id">SCREEN 007</span></p>
       <h1>Partner benefits &amp; membership</h1>
       <p style={{ maxWidth: 760 }}>Levels reflect verified capability and delivery — never payments for recruiting other partners.</p>
       <div className="cz-table-wrap" style={{ marginTop: 16 }}>

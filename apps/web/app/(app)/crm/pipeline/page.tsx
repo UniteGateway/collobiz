@@ -1,14 +1,14 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { PIPELINE_STAGES } from '@collabiz/types';
+import { PIPELINE_STAGES, PIPELINE_STAGE_LABELS } from '@collabiz/types';
 import { Alert, Button, Dialog, Grid, Kpi, LoadingState, Money, Select, TextArea, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 import { toMinor } from '@/lib/regions';
 
-const LABEL: Record<string, string> = { new: 'New', contacted: 'Contacted', qualified: 'Qualified', proposal: 'Proposal', negotiation: 'Negotiation', won: 'Won', lost: 'Lost' };
+const LABEL = PIPELINE_STAGE_LABELS;
 
 /** Screen 053 — Sales Pipeline Kanban. Moves use a keyboard-accessible stage selector (no drag-only interaction). */
 export default function Pipeline() {

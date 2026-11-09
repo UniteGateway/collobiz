@@ -38,22 +38,22 @@ export default function NewLead() {
       <Stack.Screen options={{ title: 'Register lead' }} />
       <Notice tone="info">Register only buyers who agreed to the introduction. Consent is recorded as of now.</Notice>
       {a.error && <Notice tone="danger">{a.error}</Notice>}
-      <Card title="Consent & evidence (043)">
+      <Card title="Consent & evidence">
         <Text style={s.label}>How was consent given?</Text>
         <Pick opts={METHODS} value={method} onChange={setMethod} />
         <Text style={s.label}>Buyer allows sharing with</Text>
         <Pick opts={SCOPES} value={scope} onChange={setScope} />
         <Field label="Evidence of introduction" value={f.evidence} onChangeText={set('evidence')} multiline error={e.evidenceSummary} />
       </Card>
-      <Card title="Customer (044)">
+      <Card title="Customer">
         <Field label="Customer legal name" value={f.legalName} onChangeText={set('legalName')} error={e['customer.legalName']} />
         <Field label="GSTIN (recommended)" value={f.taxId} onChangeText={(v) => setF({ ...f, taxId: v.toUpperCase() })} autoCapitalize="characters" />
         <Field label="Contact person" value={f.contactName} onChangeText={set('contactName')} error={e['customer.contactName']} />
         <Field label="Contact email" value={f.contactEmail} onChangeText={set('contactEmail')} keyboardType="email-address" autoCapitalize="none" />
         <Field label="City" value={f.city} onChangeText={set('city')} error={e['customer.city']} />
       </Card>
-      <Card title="Scope & value (045–046)">
-        <Chips value={sector} onChange={(v) => setSector(v.slice(-1))} options={SECTORS.slice(0, 8).map((x) => ({ value: x.code, label: x.name.split(' ')[0] }))} />
+      <Card title="Scope & value">
+        <Chips value={sector} onChange={(v) => setSector(v.slice(-1))} options={SECTORS.map((x) => ({ value: x.code, label: x.name }))} />
         <Field label="Product, service or project" value={f.product} onChangeText={set('product')} error={e.productOrProject} />
         <Field label="Estimated value ₹" value={f.value} onChangeText={set('value')} keyboardType="decimal-pad" />
         <Field label="Buyer requirements" value={f.requirements} onChangeText={set('requirements')} multiline error={e.requirements} />

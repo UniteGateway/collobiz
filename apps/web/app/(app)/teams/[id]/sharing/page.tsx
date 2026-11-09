@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Alert, Button, Card, DataTable, LoadingState, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
-import { TeamTabs } from '@/components/Teams';
+import { TeamTabs, teamRoleLabel } from '@/components/Teams';
 import { api } from '@/lib/api';
 import { useMutation } from '@/lib/hooks';
 import { useTeam } from '@/lib/team';
@@ -31,7 +31,7 @@ export default function Sharing() {
       {p && (
         <Card title={`Proposal v${p.version}`} actions={<StatusBadge status={p.status} />}>
           <DataTable caption="Shares" rows={p.shares.map((s: any) => ({ ...s, id: s.organizationId }))} columns={[
-            { key: 'organization', header: 'Party' }, { key: 'role', header: 'Role' }, { key: 'sharePct', header: 'Share', render: (s: any) => `${s.sharePct}%` },
+            { key: 'organization', header: 'Party' }, { key: 'role', header: 'Role', render: (s: any) => teamRoleLabel(s.role) }, { key: 'sharePct', header: 'Share', render: (s: any) => `${s.sharePct}%` },
             { key: 'approval', header: 'Decision', render: (s: any) => { const a = p.approvals.find((x: any) => x.organizationId === s.organizationId); return a ? <StatusBadge status={a.decision === 'approve' ? 'approved' : 'rejected'} /> : <StatusBadge status="pending" />; } },
           ]} />
           <p style={{ whiteSpace: 'pre-wrap', marginTop: 12 }}>{p.terms}</p>
@@ -47,7 +47,7 @@ export default function Sharing() {
       {d.isLead && d.status !== 'active' && (
         <Card title={p ? 'Propose a revision' : 'Propose commercial sharing'}>
           {active.map((m: any) => (
-            <TextInput key={m.organizationId} label={`${m.organization} (${m.role}) — share %`} inputMode="decimal" value={shares[m.organizationId] ?? ''} onChange={(e) => setShares({ ...shares, [m.organizationId]: e.target.value })} />
+            <TextInput key={m.organizationId} label={`${m.organization} (${teamRoleLabel(m.role)}) — share %`} inputMode="decimal" value={shares[m.organizationId] ?? ''} onChange={(e) => setShares({ ...shares, [m.organizationId]: e.target.value })} />
           ))}
           <p style={{ color: Math.abs(total - 100) < 0.001 ? 'var(--cz-green-800)' : 'var(--cz-danger)' }}>Total: {total}%</p>
           <TextArea label="Terms (fee method, milestones, invoicing, taxes)" value={terms} onChange={(e) => setTerms(e.target.value)} error={propose.fieldErrors.terms} />

@@ -20,11 +20,11 @@ export default function Certificate() {
         <Row title="Certificate no." subtitle={claim.certificateCode} />
         <Row title="Opportunity" subtitle={`${o.code} — ${o.title}`} />
         <Row title="Customer" subtitle={customer.legalName} />
-        <Row title="Protected until" subtitle={claim.protectedUntil ? new Date(claim.protectedUntil).toLocaleDateString() : '—'} />
+        <Row title="Protected until" subtitle={claim.protectedUntil ? new Date(claim.protectedUntil).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'} />
         <Row title="Evidence hash" subtitle={claim.evidenceHash} />
         <Text style={[s.hint, { marginTop: 8 }]}>Conditional protection; not a guarantee of award or payment.</Text>
       </Card>
-      <Button title="Share verification code" variant="secondary" onPress={() => Share.share({ message: `COLLABIZ lead certificate ${claim.certificateCode} — verify at /verify-certificate?code=${claim.certificateCode}` })} />
+      <Button title="Share verification code" variant="secondary" onPress={() => Share.share({ message: `COLLABIZ lead registration certificate ${claim.certificateCode}. Anyone can check it on the COLLABIZ website under “Verify a certificate”; the customer is never shown.` })} />
     </ScreenView>
   );
 }

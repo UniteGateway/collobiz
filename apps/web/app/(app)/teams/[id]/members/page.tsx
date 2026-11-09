@@ -1,7 +1,7 @@
 'use client';
 import { Alert, Button, Card, DataTable, LoadingState, StatusBadge } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
-import { TeamTabs } from '@/components/Teams';
+import { TeamTabs, teamRoleLabel } from '@/components/Teams';
 import { api } from '@/lib/api';
 import { useMutation } from '@/lib/hooks';
 import { useTeam } from '@/lib/team';
@@ -23,7 +23,7 @@ export default function Members() {
       <Card>
         <DataTable caption="Members" rows={d.members.map((m: any, i: number) => ({ ...m, id: m.id ?? String(i) }))} columns={[
           { key: 'organization', header: 'Party' },
-          { key: 'role', header: 'Role', render: (m: any) => <>{m.role}{m.responsibilities && <div className="cz-muted" style={{ fontSize: 12 }}>{m.responsibilities}</div>}</> },
+          { key: 'role', header: 'Role', render: (m: any) => <>{teamRoleLabel(m.role)}{m.responsibilities && <div className="cz-muted" style={{ fontSize: 12 }}>{m.responsibilities}</div>}</> },
           { key: 'share', header: `Share${latest ? ` (v${latest.version}, ${latest.status})` : ''}`, render: (m: any) => (share(m.organizationId) != null ? `${share(m.organizationId)}%` : '—') },
           { key: 'status', header: 'Status', render: (m: any) => (m.status ? <StatusBadge status={m.status} /> : '—') },
           { key: 'nda', header: 'NDA', render: (m: any) => (m.ndaSignedAt ? `Signed ${new Date(m.ndaSignedAt).toLocaleDateString()}` : '—') },

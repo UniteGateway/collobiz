@@ -4,6 +4,7 @@ import { Badge, Card, ErrorView, Kpi, Loading, Notice, Row, ScreenView, s } from
 import { useApi } from '@/hooks';
 
 const hm = (m: number) => `${Math.floor(m / 60)}h ${m % 60}m`;
+const DECISION: Record<string, string> = { accept: 'Unite Group will take this lead forward', reject: 'Not taken forward', release: 'Released to the partner exchange' };
 
 /** Screen 050 — Unite First-Review Status (native, atlas mobile-first) with links to 048/051. */
 export default function LeadStatus() {
@@ -20,7 +21,7 @@ export default function LeadStatus() {
       {r ? (
         <>
           {r.breached && <Notice tone="warning">Review window passed — escalated to the category owner.</Notice>}
-          {r.decision && <Notice tone={r.decision === 'reject' ? 'danger' : 'success'}>Decision: {r.decision} — {r.reason}</Notice>}
+          {r.decision && <Notice tone={r.decision === 'reject' ? 'danger' : 'success'}>{DECISION[r.decision] ?? r.decision} — {r.reason}</Notice>}
           <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
             <Kpi label="Window" value={hm(r.slaMinutes)} />
             <Kpi label={r.decision ? 'Decided' : 'Remaining'} value={r.decision ? '✓' : hm(r.remainingMinutes)} accent />
@@ -29,7 +30,7 @@ export default function LeadStatus() {
         </>
       ) : <Notice tone="info">First review starts once the lead is verified.</Notice>}
       <Card>
-        <Row title="Duplicate check" subtitle="Screen 048" onPress={() => router.push(`/leads/${id}/duplicates`)} />
+        <Row title="Duplicate check" subtitle="Similar registrations by others" onPress={() => router.push(`/leads/${id}/duplicates`)} />
         <Row title="Protection certificate" subtitle={claim.certificateCode} onPress={() => router.push(`/leads/${id}/certificate`)} />
       </Card>
     </ScreenView>

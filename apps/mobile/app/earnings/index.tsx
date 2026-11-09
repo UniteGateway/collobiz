@@ -23,8 +23,8 @@ export default function Earnings() {
         <Kpi label="Paid this FY" value={money(d.totals.paidThisFy)} />
         <Kpi label="TDS this FY" value={money(d.totals.tdsThisFy)} />
       </View>
-      <Row title="Live tracker" subtitle="Screen 158 — where each line is" onPress={() => router.push('/earnings/live')} />
-      <Row title="Payments" subtitle="Screen 100 — payouts and bank references" onPress={() => router.push('/payments')} />
+      <Row title="Live tracker" subtitle="Where each earning line is, from customer payment to your bank" onPress={() => router.push('/earnings/live')} />
+      <Row title="Payments" subtitle="Payouts with bank references (UTR)" onPress={() => router.push('/payments')} />
       <Card title="Commission lines">
         {!d.lines.length ? <Empty title="No commission yet" /> : d.lines.map((l: any) => (
           <View key={l.id} style={{ paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#E6E9EF' }} testID={`line-${l.id}`}>

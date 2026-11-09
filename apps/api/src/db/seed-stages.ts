@@ -45,7 +45,7 @@ async function stage03(db: Db, refs: SeedRefs) {
     for (const a of AGREEMENTS) await db.insert(s.agreementAcceptances).values({ organizationId: orgId, userId: refs.users[ownerKey], templateCode: a.code, version: 1, typedName: ownerKey, docHash: sha256(a.body) }).onConflictDoNothing();
     for (const docType of p.kind === 'company' ? ['pan', 'incorporation_certificate', 'address_proof', 'gst_certificate'] : ['pan', 'identity_proof', 'address_proof']) {
       const f = storeDemoPdf(orgId, docType);
-      await db.insert(s.kybDocuments).values({ organizationId: orgId, docType, fileName: `${docType}.pdf`, objectKey: f.key, sha256: f.sha, size: f.size, mime: 'application/pdf', status: k === 'greenbuild' ? 'pending' : 'accepted', uploadedBy: refs.users[ownerKey] });
+      await db.insert(s.kybDocuments).values({ organizationId: orgId, docType, fileName: `${docType.replace(/_/g, '-')}.pdf`, objectKey: f.key, sha256: f.sha, size: f.size, mime: 'application/pdf', status: k === 'greenbuild' ? 'pending' : 'accepted', uploadedBy: refs.users[ownerKey] });
     }
     if (k === 'greenbuild') await db.insert(s.kybReviews).values({ organizationId: orgId, fromStatus: 'not_started', toStatus: 'submitted', actorUserId: refs.users.vikram });
     else await db.insert(s.kybReviews).values({ organizationId: orgId, fromStatus: 'under_review', toStatus: 'verified', reason: 'Demo seed: documents verified', riskLevel: 'low', actorUserId: refs.users.compliance });
@@ -96,7 +96,7 @@ async function stage05(db: Db, refs: SeedRefs) {
   for (const { _ev, ...o } of list) {
     const status = _ev ?? 'qualification';
     const [row] = await db.insert(s.opportunities).values({ ...o, status, listed: true, publishedAt: new Date(), createdBy: refs.users.uniteAdmin, version: 2 }).returning();
-    await db.insert(s.opportunityEvents).values([{ opportunityId: row.id, version: 1, toStatus: 'draft', reason: 'Seeded', actorUserId: refs.users.uniteAdmin }, { opportunityId: row.id, version: 2, fromStatus: 'draft', toStatus: status, reason: 'Seeded (demo)', actorUserId: refs.users.uniteAdmin }]);
+    await db.insert(s.opportunityEvents).values([{ opportunityId: row.id, version: 1, toStatus: 'draft', reason: 'Drafted by Unite Group', actorUserId: refs.users.uniteAdmin }, { opportunityId: row.id, version: 2, fromStatus: 'draft', toStatus: status, reason: 'Reviewed by Unite Group', actorUserId: refs.users.uniteAdmin }]);
     if (o.code === 'OPP-2026-00001') await db.insert(s.opportunityApplications).values({ opportunityId: row.id, organizationId: refs.orgs.volt, applicantUserId: refs.users.asha, message: 'Volt EPC has commissioned 40 MW of C&I rooftop plants in Maharashtra and can mobilise within two weeks.', proposedValue: P(76) });
   }
   await db.execute(sql`select setval('opportunity_code_seq', 1005)`);
@@ -119,7 +119,7 @@ async function stage06(db: Db, refs: SeedRefs) {
   const now = new Date();
   const [o] = await db.insert(s.opportunities).values({ code: 'OPP-2026-00006', title: 'Rooftop solar 800 kW — Sri Ganesh Textiles, Coimbatore', summary: 'Spinning mill wants 800 kW rooftop solar under CAPEX model; roof survey done.', sector: 'solar', kind: 'project', route: 'partner_originated', source: 'partner_lead', city: 'Coimbatore', region: 'IN-TN', estimatedValue: 3_20_00_000_00, visibility: 'private', ownerOrgId: refs.orgs.meera, groupCompanyOrgId: refs.orgs.uniteSolar, buyerConfidential: true, status: 'unite_priority_review', version: 6, createdBy: refs.users.meera }).returning();
   const evs = ['draft', 'submitted', 'consent_check', 'duplicate_review', 'verified', 'unite_priority_review'];
-  await db.insert(s.opportunityEvents).values(evs.map((st, i) => ({ opportunityId: o.id, version: i + 1, fromStatus: i ? evs[i - 1] : null, toStatus: st, reason: 'Seeded (demo)', actorUserId: refs.users.meera })));
+  await db.insert(s.opportunityEvents).values(evs.map((st, i) => ({ opportunityId: o.id, version: i + 1, fromStatus: i ? evs[i - 1] : null, toStatus: st, reason: 'Updated by the publisher', actorUserId: refs.users.meera })));
   const [c] = await db.insert(s.customers).values({ organizationId: refs.orgs.meera, legalName: 'Sri Ganesh Textiles Pvt Ltd', taxId: '33AABCS2222B1Z2', city: 'Coimbatore', contactName: 'K. Ganesan', contactEmail: 'md@sriganesh.example', consentProvenance: { method: 'signed_letter', obtainedAt: now.toISOString(), disclosureScope: 'unite_only' } }).returning();
   const snap = { code: o.code, customer: { legalName: c.legalName, taxId: c.taxId, city: c.city }, sector: 'solar', seeded: true };
   await db.insert(s.leadClaims).values({ opportunityId: o.id, introducerOrgId: refs.orgs.meera, introducerUserId: refs.users.meera, customerId: c.id, evidenceSummary: 'Signed letter of authority from the managing director.', evidenceSnapshot: snap, evidenceHash: sha256(canonicalJson(snap)), consent: { method: 'signed_letter', obtainedAt: now.toISOString(), disclosureScope: 'unite_only' }, status: 'protected', protectedFrom: now, protectedUntil: new Date(now.getTime() + 90 * 86400_000), certificateCode: 'CZL-2026-00000006' });
@@ -215,6 +215,17 @@ async function stage11b(db: Db, refs: SeedRefs) {
     { supplierOrgId: refs.orgs.sunrise, name: '4C x 300 sq mm XLPE armoured cable', sector: 'power_equipment', description: '1.1 kV aluminium, XLPE insulated, steel-wire armoured, IS 7098.', sku: 'SR-CBL-4C300', unit: 'm', price: 1_450_00, moq: 100, leadTimeDays: 5, stock: 'in_stock', createdBy: refs.users.ravi },
     { supplierOrgId: refs.orgs.deccan, name: 'MCCB 250 A 4P', sector: 'power_equipment', description: '36 kA breaking capacity, thermal-magnetic release.', sku: 'DD-MCCB-250', unit: 'nos', price: 18_500_00, moq: 5, leadTimeDays: 3, stock: 'in_stock', createdBy: refs.users.deepak },
   ]);
+  // 090–092: one order Volt EPC placed with Sunrise, dispatched and on its way, so tracking and goods receipt can be seen.
+  const poLines = [{ item: 'LT panel 800 A with ACB incomer', quantity: 1, unit: 'nos', unitPrice: 4_25_000_00 }];
+  const [po] = await db.insert(s.purchaseOrders).values({ number: 'PO-2026-100001', buyerOrgId: refs.orgs.volt, supplierOrgId: refs.orgs.sunrise, lines: poLines, subtotal: 4_25_000_00, taxPct: 18, total: 5_01_500_00, deliveryAddress: 'Plot B-14, Chakan MIDC Phase II, Pune 410501', deliveryBy: new Date(Date.now() + 6 * 86400_000).toISOString().slice(0, 10), paymentTerms: '30 days from delivery', status: 'shipped', version: 1, createdBy: refs.users.asha }).returning();
+  const day = (d: number) => new Date(Date.now() - d * 86400_000);
+  await db.insert(s.poEvents).values([
+    { poId: po.id, action: 'po.issued', fromStatus: 'draft', toStatus: 'issued', userId: refs.users.asha, organizationId: refs.orgs.volt, createdAt: day(6) },
+    { poId: po.id, action: 'po.accepted', fromStatus: 'issued', toStatus: 'accepted', userId: refs.users.ravi, organizationId: refs.orgs.sunrise, createdAt: day(5) },
+    { poId: po.id, action: 'po.in_fulfilment', fromStatus: 'accepted', toStatus: 'in_fulfilment', userId: refs.users.ravi, organizationId: refs.orgs.sunrise, createdAt: day(4) },
+    { poId: po.id, action: 'po.shipped', fromStatus: 'in_fulfilment', toStatus: 'shipped', userId: refs.users.ravi, organizationId: refs.orgs.sunrise, createdAt: day(1) },
+  ]);
+  await db.insert(s.shipments).values({ poId: po.id, carrier: 'Safexpress', trackingNo: 'SFX4471029', dispatchedAt: day(1), eta: new Date(Date.now() + 2 * 86400_000).toISOString().slice(0, 10), events: [{ at: day(1).toISOString(), status: 'Picked up', location: 'Hosur', note: null }, { at: new Date(Date.now() - 6 * 3600_000).toISOString(), status: 'In transit', location: 'Belagavi hub', note: null }] });
   await db.insert(s.tradeRequirements).values({ code: 'REQ-2026-000001', buyerOrgId: refs.orgs.volt, title: 'Cabling for 2 MW Chakan rooftop', sector: 'power_equipment', description: 'Aluminium armoured cable for inverter-to-LT panel runs.', items: [{ item: '4C x 300 sq mm XLPE armoured cable', quantity: 1800, unit: 'm' }, { item: '4C x 95 sq mm XLPE armoured cable', quantity: 600, unit: 'm' }], deliveryLocation: 'Chakan MIDC, Pune', region: 'IN-MH', neededBy: '2026-12-10', closesAt: new Date(Date.now() + 10 * 86400_000), createdBy: refs.users.asha });
 }
 
@@ -360,7 +371,7 @@ async function stage15(db: Db, refs: SeedRefs) {
   ];
   for (const o of intl) {
     const [row] = await db.insert(s.opportunities).values({ ...o, kind: o.sector === 'solar' ? 'project' : 'product_supply', source: 'unite_listing', deadline: in45, visibility: 'verified_partners', minLevel: 'verified', requiredCertifications: [], ownerOrgId: refs.orgs.uniteExim, groupCompanyOrgId: refs.orgs.uniteExim, status: 'accepted', listed: true, publishedAt: new Date(), createdBy: refs.users.uniteAdmin, version: 2 }).returning();
-    await db.insert(s.opportunityEvents).values([{ opportunityId: row.id, version: 1, toStatus: 'draft', reason: 'Seeded', actorUserId: refs.users.uniteAdmin }, { opportunityId: row.id, version: 2, fromStatus: 'draft', toStatus: 'accepted', reason: 'Seeded (demo)', actorUserId: refs.users.uniteAdmin }]);
+    await db.insert(s.opportunityEvents).values([{ opportunityId: row.id, version: 1, toStatus: 'draft', reason: 'Drafted by Unite Group', actorUserId: refs.users.uniteAdmin }, { opportunityId: row.id, version: 2, fromStatus: 'draft', toStatus: 'accepted', reason: 'Reviewed by Unite Group', actorUserId: refs.users.uniteAdmin }]);
   }
   const pages = [
     { slug: 'how-lead-protection-works', title: 'How lead protection works', body: 'Register the customer with consent and evidence. Unite Group reviews within 4 business hours, and your certificate shows the protection window.' },

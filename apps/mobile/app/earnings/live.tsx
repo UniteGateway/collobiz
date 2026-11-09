@@ -6,6 +6,8 @@ import { useApi } from '@/hooks';
 
 const STEPS = ['estimated', 'eligible', 'earned', 'approved', 'invoiced', 'settled'];
 const LABEL: Record<string, string> = { estimated: 'Projected', eligible: 'Eligible', earned: 'Earned', approved: 'Approved', invoiced: 'Requested', settled: 'Paid' };
+const words = (code: string) => { const w = code.replace(/^entry\./, '').replace(/[._]/g, ' '); return LABEL[code.replace(/^entry\./, '')] ?? w.charAt(0).toUpperCase() + w.slice(1); };
+const when = (d: string) => new Date(d).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 
 /** Screen 158 (native) — Live Earnings & Settlement Tracker. */
 export default function Live() {
@@ -17,6 +19,7 @@ export default function Live() {
   return (
     <ScreenView id="158">
       <Stack.Screen options={{ title: 'Live tracker' }} />
+      {!q.data.lines.length && <Card title="No earnings yet"><Text style={s.p}>Commission lines appear here once a customer milestone you introduced is certified.</Text></Card>}
       {q.data.lines.map((l: any) => {
         const at = STEPS.indexOf(l.status);
         return (
@@ -28,7 +31,7 @@ export default function Live() {
             {at < 0 && <Badge status={l.status} />}
             {l.holdReason && <Text style={s.hint}>On hold: {l.holdReason}</Text>}
             <Pressable accessibilityRole="button" onPress={() => setSel(sel === l.id ? null : l.id)}><Text style={[s.p, { color: theme.colors.green700, fontWeight: '600' }]}>{sel === l.id ? 'Hide history' : 'Show history'}</Text></Pressable>
-            {sel === l.id && (j.data ?? []).map((x) => <Text key={x.id} style={s.hint}>{new Date(x.createdAt).toLocaleString()} · {x.action.replace('entry.', '')} · {x.who}{x.note ? ` — ${x.note}` : ''}</Text>)}
+            {sel === l.id && (j.data ?? []).map((x) => <Text key={x.id} style={s.hint}>{when(x.createdAt)} · {words(x.action)} · {x.who}{x.note ? ` — ${x.note}` : ''}</Text>)}
           </Card>
         );
       })}

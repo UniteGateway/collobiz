@@ -59,6 +59,7 @@ function LoginInner() {
       <div style={{ textAlign: 'center', marginBottom: 20 }}>
         <Link href="/"><img src="/brand/collabiz-logo.png" alt="COLLABIZ — Connect. Collaborate. Grow." width={260} /></Link>
       </div>
+      <h1 className="cz-sr-only">{mode === 'login' ? 'Sign in to COLLABIZ' : 'Create your COLLABIZ account'}</h1>
       <section className="cz-card">
         <Tabs value={mode} onChange={(v) => { setMode(v); setNeedMfa(false); }} tabs={[{ value: 'login', label: 'Sign in' }, { value: 'register', label: 'Create account' }]} />
         <form noValidate onSubmit={(e) => { e.preventDefault(); m.run(); }}>

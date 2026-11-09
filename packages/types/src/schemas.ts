@@ -240,6 +240,7 @@ export const DisputeRulingSchema = z.object({ outcome: z.enum(['upheld', 'reject
 
 // ---------- CRM (Stage 07 — 028, 052-054) ----------
 export const PIPELINE_STAGES = ['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'won', 'lost'] as const;
+export const PIPELINE_STAGE_LABELS: Record<string, string> = { new: 'New', contacted: 'Contacted', qualified: 'Qualified', proposal: 'Proposal', negotiation: 'Negotiation', won: 'Won', lost: 'Lost' };
 export const CrmMoveSchema = z.object({ stage: z.enum(PIPELINE_STAGES), note: z.string().trim().max(2000).optional(), lostReason: z.string().trim().min(5).max(1000).optional(), expectedVersion: z.number().int().optional() })
   .refine((v) => v.stage !== 'lost' || !!v.lostReason, { message: 'Record why the deal was lost', path: ['lostReason'] });
 export const CrmCustomerSchema = z.object({ legalName: z.string().trim().min(2).max(200), taxId: z.string().trim().max(30).optional(), contactName: z.string().trim().min(2).max(120).optional(), contactEmail: z.string().email().optional(), contactPhone: z.string().max(20).optional(), city: z.string().trim().max(80).optional(), country: z.string().length(2).toUpperCase().default('IN') });
@@ -253,6 +254,9 @@ export const OPEN_OPPORTUNITY_STATES = ['accepted', 'released', 'qualification',
 
 // ---------- Teams & consortiums (Stage 08 — 055–064, 124, 154–156) ----------
 export const TEAM_ROLES = ['lead', 'origination', 'execution', 'procurement', 'finance', 'management', 'specialist'] as const;
+export const TEAM_ROLE_LABELS: Record<string, string> = { lead: 'Lead partner', origination: 'Origination', execution: 'Execution', procurement: 'Procurement', finance: 'Finance', management: 'Management', specialist: 'Specialist' };
+/** A company's part in a project. */
+export const PROJECT_ROLE_LABELS: Record<string, string> = { owner: 'Client', lead: 'Lead contractor', subcontractor: 'Subcontractor' };
 export const TeamCreateSchema = z.object({ name: z.string().trim().min(3).max(120), purpose: z.string().trim().min(20).max(4000), kind: z.enum(['team', 'consortium']).default('team'), opportunityId: id.optional(), leadRole: z.enum(TEAM_ROLES).default('lead') });
 export const TeamInviteSchema = z.object({ organizationId: id, role: z.enum(TEAM_ROLES), responsibilities: z.string().trim().min(5).max(2000), message: z.string().trim().max(2000).optional(), matchScore: z.number().min(0).max(100).optional() });
 export const TeamRespondSchema = z.object({ decision: z.enum(['accept', 'decline']) });

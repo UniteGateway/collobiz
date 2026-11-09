@@ -110,6 +110,17 @@ p { margin: 0 0 12px; }
 .cz-card-head h2 { margin: 0; }
 .cz-card-head p { margin: 2px 0 0; font-size: 13px; color: var(--cz-grey-600); }
 .cz-card-flush { padding: 0; overflow: hidden; }
+/* A sub-heading that follows other content inside a card gets its own space. */
+.cz-card > :not(.cz-card-head) + h3, .cz-card > :not(.cz-card-head) + h4 { margin-top: 22px; }
+.cz-card h3 { font-size: 14.5px; }
+.cz-dl + p, .cz-dl + div, .cz-dl + .cz-alert { margin-top: 16px; }
+/* File pickers: native control, styled like a secondary button. */
+input[type="file"] { font: inherit; font-size: 13.5px; color: var(--cz-grey-600); max-width: 100%; }
+input[type="file"]::file-selector-button { font: inherit; font-weight: 600; font-size: 13.5px; color: var(--cz-navy-900); background: var(--cz-white); border: 1px solid var(--cz-grey-300, #cfd6e0); border-radius: 10px; padding: 8px 14px; margin-right: 12px; cursor: pointer; }
+input[type="file"]::file-selector-button:hover { background: var(--cz-grey-50, #f6f8fb); }
+.cz-line-item { border: 1px solid var(--cz-grey-200); border-radius: var(--cz-radius, 12px); padding: 14px 16px 2px; margin-bottom: 16px; }
+.cz-line-item-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; font-weight: 600; }
+.cz-line-item-head span { font-weight: 400; color: var(--cz-grey-600); font-size: 13.5px; }
 .cz-card-flush > .cz-card-head { padding: 20px 24px 0; }
 .cz-inset { background: var(--cz-grey-50); border: 1px solid var(--cz-grey-200); border-radius: var(--cz-radius-md); padding: 16px; }
 .cz-grid { display: grid; gap: 20px; }
@@ -225,6 +236,23 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
 .cz-kanban { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(230px, 1fr); gap: 12px; overflow-x: auto; padding-bottom: 8px; }
 .cz-kanban-col { background: var(--cz-grey-50); border: 1px solid var(--cz-grey-200); border-radius: var(--cz-radius-md); padding: 10px; min-height: 200px; }
 .cz-kanban-col h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--cz-grey-600); display: flex; justify-content: space-between; }
+.cz-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.cz-week-day { background: var(--cz-grey-50); border: 1px solid var(--cz-grey-200); border-radius: var(--cz-radius-md); padding: 10px; min-height: 150px; min-width: 0; }
+.cz-week-day[data-today] { border-color: var(--cz-green-600, #2e7d32); box-shadow: inset 0 3px 0 var(--cz-green-600, #2e7d32); }
+.cz-week-day h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--cz-grey-600); display: flex; justify-content: space-between; margin: 0 0 8px; }
+.cz-week-day .cz-kanban-card { padding: 8px; font-size: 13px; overflow-wrap: anywhere; }
+.cz-task-list { list-style: none; margin: 0; padding: 0; }
+.cz-task-list li { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--cz-grey-200); }
+.cz-task-list li:first-child { border-top: 0; padding-top: 0; }
+.cz-task-when, .cz-task-what { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; min-width: 0; }
+.cz-task-when span, .cz-task-what span { font-size: 12.5px; color: var(--cz-grey-600); }
+@media (max-width: 900px) {
+  .cz-week { grid-template-columns: minmax(0, 1fr); }
+  .cz-week-day { min-height: 0; }
+  .cz-week-day[data-empty] h3 { margin: 0; }
+  .cz-task-list li { grid-template-columns: minmax(0, 1fr) auto; }
+  .cz-task-when { grid-column: 1 / -1; flex-direction: row; gap: 8px; }
+}
 .cz-kanban-card { background: #fff; border: 1px solid var(--cz-grey-200); border-radius: 10px; padding: 12px; margin-bottom: 8px; font-size: 14px; }
 .cz-dialog { border: 0; border-radius: 20px; padding: 28px; max-width: 560px; width: calc(100% - 32px); box-shadow: var(--cz-shadow-lg); }
 .cz-dialog::backdrop { background: rgba(1, 30, 72, .35); backdrop-filter: blur(2px); }
@@ -239,7 +267,7 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
 .cz-hero h1 { color: #fff; font-size: 44px; max-width: 760px; }
 .cz-hero p { font-size: 18px; max-width: 680px; opacity: .9; }
 .cz-container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-.cz-section { padding: 64px 0; }
+.cz-section { padding-top: 64px; padding-bottom: 64px; }
 .cz-footer { background: var(--cz-grey-50); color: var(--cz-grey-700); padding: 48px 0 32px; font-size: 14px; border-top: 1px solid var(--cz-grey-200); }
 .cz-footer a { color: var(--cz-navy-900); }
 
@@ -273,7 +301,7 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
   .cz-public-menu { display: block; }
   .cz-topbar { gap: 10px; padding: 0 14px; }
   .cz-brand small { display: none; }
-  .cz-grid-2, .cz-grid-3 { grid-template-columns: 1fr; }
+  .cz-grid-2, .cz-grid-3 { grid-template-columns: minmax(0, 1fr); }
   .cz-main { padding: 22px 18px 56px; }
   .cz-hero h1 { font-size: 32px; }
 }
@@ -738,19 +766,19 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
   .cz-ta-attention button { grid-template-columns: minmax(0, 1fr) 16px; }
   .cz-ta-issue { grid-column: 1; grid-row: 2; }
   .cz-ta-attention button > .cz-icon { grid-row: 1 / span 2; grid-column: 2; }
-  /* The register becomes a list of cards on phones. */
-  .cz-ta-table thead { display: none; }
-  .cz-ta-table, .cz-ta-table tbody, .cz-ta-table tr, .cz-ta-table td { display: block; }
-  .cz-ta-table tr { padding: 14px 16px; border-bottom: 1px solid var(--cz-grey-200); }
-  .cz-ta-table tbody tr:last-child { border-bottom: 0; }
-  .cz-ta-table td { padding: 0; border: 0; }
-  .cz-ta-table td + td { margin-top: 6px; }
+  /* The tender register (137) becomes a list of cards on phones (opt-in: .cz-ta-cards). Other tables scroll. */
+  .cz-ta-cards thead { display: none; }
+  .cz-ta-cards, .cz-ta-cards tbody, .cz-ta-cards tr, .cz-ta-cards td { display: block; }
+  .cz-ta-cards tr { padding: 14px 16px; border-bottom: 1px solid var(--cz-grey-200); }
+  .cz-ta-cards tbody tr:last-child { border-bottom: 0; }
+  .cz-ta-cards td { padding: 0; border: 0; }
+  .cz-ta-cards td + td { margin-top: 6px; }
   .cz-ta-tender, .cz-ta-issuer { min-width: 0; max-width: none; }
   .cz-ta-issuer { font-size: 13px; }
   .cz-ta-date span { display: inline; margin-right: 6px; }
-  .cz-ta-table td.cz-num { text-align: left; }
-  .cz-ta-table td.cz-num::before { content: 'Sealed bids: '; color: var(--cz-grey-600); }
-  .cz-ta-table tbody tr[data-selected="true"] td:first-child { box-shadow: none; }
+  .cz-ta-cards td.cz-num { text-align: left; }
+  .cz-ta-cards td.cz-ta-bids::before { content: 'Sealed bids: '; color: var(--cz-grey-600); }
+  .cz-ta-cards tbody tr[data-selected="true"] td:first-child { box-shadow: none; }
   .cz-sheet-head, .cz-sheet-body { padding-left: 18px; padding-right: 18px; }
 }
 @media (prefers-reduced-motion: reduce) { .cz-sheet, .cz-sheet-scrim { animation: none; } }
@@ -1131,3 +1159,19 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
 .cz-cms-list strong { font-size: 14px; color: var(--cz-navy-900); }
 .cz-cms-list .cz-muted { font-size: 12px; }
 @media (max-width: 900px) { .cz-cms { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 480px) { .cz-hide-xs { display: none !important; } }
+/* Segmented controls never push the page wider than the screen; they scroll within their own width. */
+.cz-segment { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.cz-segment::-webkit-scrollbar { display: none; }
+.cz-segment button, .cz-segment a { white-space: nowrap; flex: none; }
+.cz-card-head { flex-wrap: wrap; gap: 10px; }
+.cz-card-head > * { min-width: 0; max-width: 100%; }
+/* Tables keep readable columns on phones and scroll within their card instead of squeezing to one word per line. */
+@media (max-width: 720px) {
+  .cz-table { min-width: 600px; }
+  .cz-ta-table:not(.cz-ta-cards) { min-width: 600px; }
+  .cz-prefs { min-width: 0; }
+  .cz-chat-title p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cz-chat-tools .cz-btn { font-size: 0; gap: 0; padding: 0 8px; }
+  .cz-chat-tools .cz-btn .cz-icon { font-size: initial; }
+}

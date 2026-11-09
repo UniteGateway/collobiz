@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { SCREENS, SCREEN_FAMILIES, type ScreenAccess } from '@collabiz/types';
-import { PageHeader, LoadingState, PermissionDenied, Alert, ButtonLink, ErrorState, UiLink } from '@collabiz/ui';
+import { ApiError, SCREENS, SCREEN_FAMILIES, type ScreenAccess } from '@collabiz/types';
+import { PageHeader, LoadingState, PermissionDenied, Alert, ButtonLink, ErrorState, EmptyState, UiLink } from '@collabiz/ui';
 import { moduleFor } from '@/lib/navigation';
 import { useSession, type Me } from '@/lib/session';
 import { isForbidden } from '@/lib/hooks';
@@ -69,6 +69,8 @@ export function Screen({ id, children, actions, description, title, eyebrow, hea
 /** Renders API errors with the correct state: 403 → permission denied, otherwise retryable error. */
 export function ApiErrorView({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   if (isForbidden(error)) return <PermissionDenied reason={(error as Error).message} />;
+  // 409 means "not at this stage yet" (e.g. sealed bids before opening): explain it, don't present it as a failure.
+  if (error instanceof ApiError && error.status === 409) return <div className="cz-card"><EmptyState icon="lock" title="Not available at this stage">{error.message}</EmptyState></div>;
   return <ErrorState error={error} onRetry={onRetry} />;
 }
 

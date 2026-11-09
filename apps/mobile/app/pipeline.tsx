@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Stack } from 'expo-router';
-import { PIPELINE_STAGES } from '@collabiz/types';
+import { PIPELINE_STAGES, PIPELINE_STAGE_LABELS as STAGE } from '@collabiz/types';
 import { Badge, Button, Card, ErrorView, Field, Kpi, Loading, Notice, ScreenView, money, s, theme } from '@/components/ui';
 import { api } from '@/api';
 import { useAction, useApi } from '@/hooks';
@@ -24,23 +24,24 @@ export default function Pipeline() {
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
         {q.data.columns.map((c: any) => (
           <Pressable key={c.stage} accessibilityRole="tab" accessibilityState={{ selected: stage === c.stage }} onPress={() => setStage(c.stage)} style={[s.chip, stage === c.stage && { backgroundColor: theme.colors.navy700 }]}>
-            <Text style={{ color: stage === c.stage ? '#fff' : theme.colors.navy900 }}>{c.stage} ({c.deals.length})</Text>
+            <Text style={{ color: stage === c.stage ? '#fff' : theme.colors.navy900 }}>{STAGE[c.stage] ?? c.stage} ({c.deals.length})</Text>
           </Pressable>
         ))}
       </View>
       {move.error && <Notice tone="danger">{move.error}</Notice>}
-      {col.deals.map((d: any) => (
+      {!col?.deals.length && <Notice tone="info">No deals at this stage.</Notice>}
+      {(col?.deals ?? []).map((d: any) => (
         <Card key={d.id} title={d.title}>
           <Text style={s.hint}>{d.customer} · {money(d.value)}</Text>
           {sel?.id === d.id ? (
             <>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginVertical: 8 }}>
-                {PIPELINE_STAGES.filter((x) => x !== d.stage).map((x) => <Pressable key={x} onPress={() => setTo(x)} accessibilityRole="radio" accessibilityState={{ checked: to === x }} style={[s.chip, to === x && { backgroundColor: theme.colors.green700 }]}><Text style={{ color: to === x ? '#fff' : theme.colors.navy900 }}>{x}</Text></Pressable>)}
+                {PIPELINE_STAGES.filter((x) => x !== d.stage).map((x) => <Pressable key={x} onPress={() => setTo(x)} accessibilityRole="radio" accessibilityState={{ checked: to === x }} style={[s.chip, to === x && { backgroundColor: theme.colors.green700 }]}><Text style={{ color: to === x ? '#fff' : theme.colors.navy900 }}>{STAGE[x]}</Text></Pressable>)}
               </View>
               {to === 'lost' && <Field label="Why lost?" value={reason} onChangeText={setReason} error={move.fieldErrors.lostReason} />}
               <Button title="Move" onPress={() => move.run()} loading={move.busy} disabled={!to} />
             </>
-          ) : !['won', 'lost'].includes(d.stage) ? <Button title="Move stage" variant="secondary" onPress={() => { setSel(d); setTo(''); }} /> : <Badge status={d.stage} />}
+          ) : !['won', 'lost'].includes(d.stage) ? <Button title="Move stage" variant="secondary" onPress={() => { setSel(d); setTo(''); }} /> : <Badge status={d.stage} label={STAGE[d.stage]} />}
         </Card>
       ))}
     </ScreenView>

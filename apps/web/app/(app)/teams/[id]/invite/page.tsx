@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Alert, Button, Card, LoadingState, Select, TextArea, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
-import { TEAM_ROLES, TeamTabs } from '@/components/Teams';
+import { TEAM_ROLES, TeamTabs, teamRoleLabel } from '@/components/Teams';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 import { useTeam } from '@/lib/team';
@@ -27,7 +27,7 @@ export default function Invite() {
           <form noValidate onSubmit={(e) => { e.preventDefault(); setOk(null); m.run(); }}>
             <Select label="Partner" value={f.organizationId} onChange={(e) => setF({ ...f, organizationId: e.target.value })} placeholder="Choose a verified partner" options={(partners.data ?? []).filter((p) => !p.isMe && !taken.has(p.id)).map((p) => ({ value: p.id, label: `${p.name} · ${p.level}` }))} />
             <div className="cz-grid cz-grid-2">
-              <Select label="Role" value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })} options={TEAM_ROLES.filter((r) => r !== 'lead').map((r) => ({ value: r, label: r }))} />
+              <Select label="Role" value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })} options={TEAM_ROLES.filter((r) => r !== 'lead').map((r) => ({ value: r, label: teamRoleLabel(r) }))} />
               <TextInput label="Responsibilities" value={f.responsibilities} onChange={(e) => setF({ ...f, responsibilities: e.target.value })} error={m.fieldErrors.responsibilities} />
             </div>
             <TextArea label="Message (optional — no confidential buyer details before NDA)" value={f.message} onChange={(e) => setF({ ...f, message: e.target.value })} />

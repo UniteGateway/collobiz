@@ -32,7 +32,7 @@ export default function Help() {
       </Section>
       {(tickets.data?.tickets ?? []).length > 0 && (
         <Section title="Your requests">
-          {tickets.data!.tickets.map((t) => <View key={t.id} style={{ padding: 14, backgroundColor: '#fff' }}><Text style={s.rowTitle}>{t.subject}</Text><Text style={s.rowSub}>{t.code} · {t.status.replace('_', ' ')}{t.overdue ? ' · response overdue' : ''}</Text></View>)}
+          {tickets.data!.tickets.map((t) => <View key={t.id} style={{ padding: 14, backgroundColor: '#fff' }}><Text style={s.rowTitle}>{t.subject}</Text><Text style={s.rowSub}>{t.code} · {t.status.charAt(0).toUpperCase() + t.status.slice(1).replace(/_/g, ' ')}{t.overdue ? ' · response overdue' : ''}</Text></View>)}
         </Section>
       )}
       <Text style={s.sectionTitle}>Contact support</Text>

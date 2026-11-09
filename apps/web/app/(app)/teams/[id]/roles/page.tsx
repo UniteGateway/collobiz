@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Alert, Button, Card, LoadingState, Select, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
-import { TEAM_ROLES, TeamTabs } from '@/components/Teams';
+import { TEAM_ROLES, TeamTabs, teamRoleLabel } from '@/components/Teams';
 import { api } from '@/lib/api';
 import { useMutation } from '@/lib/hooks';
 import { useTeam } from '@/lib/team';
@@ -26,7 +26,7 @@ export default function Roles() {
         return (
           <Card key={m.id ?? m.organization} title={m.organization}>
             <div className="cz-grid cz-grid-3" style={{ alignItems: 'end' }}>
-              <Select label="Role" value={e.role} disabled={!d.isLead} onChange={(ev) => setEdits({ ...edits, [m.id]: { ...e, role: ev.target.value } })} options={TEAM_ROLES.map((r) => ({ value: r, label: r }))} />
+              <Select label="Role" value={e.role} disabled={!d.isLead} onChange={(ev) => setEdits({ ...edits, [m.id]: { ...e, role: ev.target.value } })} options={TEAM_ROLES.map((r) => ({ value: r, label: teamRoleLabel(r) }))} />
               <TextInput label="Responsibilities" value={e.responsibilities} disabled={!d.isLead} onChange={(ev) => setEdits({ ...edits, [m.id]: { ...e, responsibilities: ev.target.value } })} />
               {d.isLead && m.id && <Button onClick={() => save.run(m.id)} disabled={!edits[m.id]}>Save</Button>}
             </div>

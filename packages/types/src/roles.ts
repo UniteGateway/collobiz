@@ -32,6 +32,8 @@ export const PARTNER_TYPES = [
   'finance_associate',
   'investor',
 ] as const;
+/** Business types in words, for every client. */
+export const PARTNER_TYPE_LABELS: Record<string, string> = { consultant: 'Consultant', contractor: 'Contractor / EPC', trader: 'Trader', manufacturer: 'Manufacturer', distributor: 'Distributor', developer: 'Project developer', technology: 'Technology firm', finance_associate: 'Finance associate', investor: 'Investor' };
 export type PartnerType = (typeof PARTNER_TYPES)[number];
 
 /** Partner membership levels — §2.4 */

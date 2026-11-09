@@ -12,6 +12,8 @@ import { AuditService } from '../../common/audit.service';
 const CLOSED = new Set(['won', 'lost']);
 
 /** Screens 028, 030, 052, 053, 054 — every query is scoped to the caller's organization. */
+const words = (code: string) => code.replace(/_/g, ' ');
+
 @ApiTags('crm')
 @Controller()
 @RequireOrg()
@@ -198,7 +200,7 @@ export class CrmController {
     const acts = await this.db.select({ a: crmActivities, actor: users.fullName }).from(crmActivities).leftJoin(users, eq(users.id, crmActivities.actorUserId))
       .where(and(eq(crmActivities.organizationId, ctx.orgId!), inArray(crmActivities.subjectId, [id, claim.customerId, ...(deal ? [deal.id] : [])])));
     const items = [
-      ...ev.map((e) => ({ id: e.id, at: e.at, kind: 'status', title: `Opportunity v${e.version}: ${e.fromStatus ?? '—'} → ${e.toStatus}`, detail: e.reason })),
+      ...ev.map((e) => ({ id: e.id, at: e.at, kind: 'status', title: e.fromStatus ? `Opportunity moved from ${words(e.fromStatus)} to ${words(e.toStatus)}` : `Opportunity created as ${words(e.toStatus)}`, detail: e.reason })),
       ...rt.flatMap((r) => [{ id: `${r.id}-s`, at: r.startAt, kind: 'routing', title: 'Unite first review started', detail: `Due ${r.dueAt.toISOString()}` }, ...(r.decidedAt ? [{ id: `${r.id}-d`, at: r.decidedAt, kind: 'routing', title: `Unite decision: ${r.decision}`, detail: r.reason }] : [])]),
       ...docs.map((d) => ({ id: d.id, at: d.at, kind: 'document', title: 'Evidence uploaded', detail: d.fileName })),
       ...dsp.map((d) => ({ id: d.id, at: d.createdAt, kind: 'dispute', title: `Dispute ${d.code} (${d.status})`, detail: d.outcome ?? undefined })),

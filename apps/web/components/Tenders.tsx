@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
-import { sectorName } from '@collabiz/types';
+import { certLabel, levelLabel, sectorName } from '@collabiz/types';
 import { Button, DescriptionList, Money, StatusBadge, TextInput } from '@collabiz/ui';
 import { useQuery } from '@/lib/hooks';
 
@@ -42,7 +42,7 @@ export function TenderSummary({ t }: { t: any }) {
       ['Indicative budget', t.budget != null ? <Money minor={t.budget} currency={t.currency} /> : 'Not disclosed' ],
       ['Bids close', fmt(t.closesAt) ],
       ['Evaluation', `${t.techWeight}% technical / ${100 - t.techWeight}% commercial · technical pass mark ${t.minTechScore}` ],
-      ['Eligibility', [`${el.minLevel ?? 'registered'} level or higher`, el.sectors?.length ? `sectors: ${el.sectors.map(sectorName).join(', ')}` : null, el.certifications?.length ? `certifications: ${el.certifications.join(', ')}` : null].filter(Boolean).join(' · ') ],
+      ['Eligibility', [`${levelLabel(el.minLevel ?? 'registered')} or higher`, el.sectors?.length ? `Sectors: ${el.sectors.map(sectorName).join(', ')}` : null, el.certifications?.length ? `Certifications: ${el.certifications.map(certLabel).join(', ')}` : null].filter(Boolean).join(' · ') ],
       ['Sealed bids received', String(t.bidCount ?? 0) ],
     ]} />
   );

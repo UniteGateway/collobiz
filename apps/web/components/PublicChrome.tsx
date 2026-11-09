@@ -23,7 +23,7 @@ export function PublicHeader() {
       <header className="cz-topbar">
         <details className="cz-public-menu">
           <summary aria-label="Open menu">Menu</summary>
-          <nav aria-label="Mobile">{NAV.map((n) => <Link key={n.href} href={n.href}>{n.label}</Link>)}</nav>
+          <nav aria-label="Mobile">{NAV.map((n) => <Link key={n.href} href={n.href}>{n.label}</Link>)}{!me && <Link href="/login">Sign in</Link>}</nav>
         </details>
         <Link href="/" className="cz-brand" aria-label="COLLABIZ home"><img src="/brand/collabiz-mark.png" alt="" width={30} height={30} /><span>collabiz</span></Link>
         <nav aria-label="Primary">
@@ -32,7 +32,7 @@ export function PublicHeader() {
         <div className="cz-spacer" />
         {me ? <Link href="/dashboard" className="cz-btn cz-btn-accent cz-btn-sm">My dashboard</Link> : (
           <>
-            <Link href="/login" className="cz-btn cz-btn-ghost cz-btn-sm">Sign in</Link>
+            <Link href="/login" className="cz-btn cz-btn-ghost cz-btn-sm cz-hide-xs">Sign in</Link>
             <Link href="/login?mode=register" className="cz-btn cz-btn-accent cz-btn-sm">Join as partner</Link>
           </>
         )}

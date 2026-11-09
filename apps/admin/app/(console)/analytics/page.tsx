@@ -48,8 +48,8 @@ export default function Analytics() {
           <div className="cz-perf">
             <section className="cz-card" aria-labelledby="led-h">
               <h2 id="led-h" className="cz-help-h">Commission ledger</h2>
-              <table className="cz-ta-table"><caption className="cz-sr-only">Commission by state</caption><thead><tr><th scope="col">State</th><th scope="col" className="cz-num">Lines</th><th scope="col" className="cz-num">Amount</th></tr></thead>
-                <tbody>{[...d.ledger].sort((a, b) => LEDGER.indexOf(a.status) - LEDGER.indexOf(b.status)).map((l) => <tr key={l.status} style={{ cursor: 'default' }}><td>{l.status.replace('_', ' ').replace(/^./, (c) => c.toUpperCase())}</td><td className="cz-num">{l.count}</td><td className="cz-num">{inr(l.amount)}</td></tr>)}</tbody></table>
+              <div className="cz-ta-table-wrap"><table className="cz-ta-table"><caption className="cz-sr-only">Commission by state</caption><thead><tr><th scope="col">State</th><th scope="col" className="cz-num">Lines</th><th scope="col" className="cz-num">Amount</th></tr></thead>
+                <tbody>{[...d.ledger].sort((a, b) => LEDGER.indexOf(a.status) - LEDGER.indexOf(b.status)).map((l) => <tr key={l.status} style={{ cursor: 'default' }}><td>{l.status.replace('_', ' ').replace(/^./, (c) => c.toUpperCase())}</td><td className="cz-num">{l.count}</td><td className="cz-num">{inr(l.amount)}</td></tr>)}</tbody></table></div>
             </section>
             <section className="cz-card" aria-labelledby="fn-h">
               <h2 id="fn-h" className="cz-help-h">Partner funnel & activity</h2>

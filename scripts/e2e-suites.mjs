@@ -642,7 +642,7 @@ suites.push({
     await webLogin(page, WEB, 'ravi@sunrise.example');
     await page.goto(teamUrl + '/sharing');
     await page.getByRole('button', { name: 'Approve' }).click();
-    await page.getByRole('heading', { name: 'Proposal v1' }).locator('..').getByText('Approved').first().waitFor();
+    await page.getByRole('heading', { name: 'Proposal v1' }).locator('xpath=ancestor::div[contains(@class,"cz-card-head")][1]').getByText('Approved').first().waitFor();
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.goto(teamUrl + '/activation');
     await page.getByRole('button', { name: 'Activate team' }).click();
@@ -1034,7 +1034,7 @@ suites.push({
     await page.getByLabel(/I am authorised to sign/).check();
     await page.getByRole('button', { name: 'Sign document' }).click();
     await page.getByRole('table', { name: 'Signatures' }).getByText('Sanjay Kulkarni').waitFor();
-    await page.getByRole('heading', { name: new RegExp(code) }).locator('..').getByText('Executed').waitFor();
+    await page.getByRole('heading', { name: new RegExp(code) }).locator('xpath=ancestor::div[contains(@class,"cz-card-head")][1]').getByText('Executed').waitFor();
     lastExecutedContract = { base, code };
     expect(await page.getByRole('region', { name: 'Edit draft' }).count() === 0, 'approved contract still editable');
     await shot('074-executed');
@@ -1064,7 +1064,7 @@ suites.push({
     await page.getByRole('list', { name: 'Site updates' }).getByText(note).waitFor();
     await shot('079-site-progress');
     for (const [tab, marker] of [['Materials', 'Mono PERC 545 Wp modules'], ['Documents', null], ['Inspections', null], ['Allocation', 'Sunrise Traders']]) {
-      await page.getByRole('link', { name: tab, exact: true }).click();
+      await page.getByRole('navigation', { name: 'Project sections' }).getByRole('link', { name: tab, exact: true }).click();
       if (marker) await page.getByText(marker).first().waitFor(); else await page.getByRole('heading', { level: 1 }).waitFor();
     }
   },
@@ -1219,7 +1219,7 @@ suites.push({
     await page.waitForURL(/\/trading\/orders\?id=/);
     const orderUrl = page.url();
     await page.getByRole('button', { name: 'Issue order' }).click();
-    await page.getByRole('heading', { name: /^Order PO-/ }).locator('..').getByText('Issued').waitFor();
+    await page.getByRole('heading', { name: /^Order PO-/ }).locator('xpath=ancestor::div[contains(@class,"cz-card-head")][1]').getByText('Issued').waitFor();
     // 091/092 — supplier accepts, starts, dispatches
     await webLogin(page, WEB, 'ravi@sunrise.example');
     await page.goto(orderUrl);
@@ -1256,21 +1256,22 @@ suites.push({
     await page.getByRole('button', { name: `Open ${claimCode}` }).click();
     await page.getByLabel('Response').fill('Replacement 20 m dispatched with the next load');
     await page.getByRole('button', { name: 'Accept claim' }).click();
-    await page.getByRole('heading', { name: new RegExp(claimCode) }).locator('..').getByText('Accepted').waitFor();
+    await page.getByRole('heading', { name: new RegExp(claimCode) }).locator('xpath=ancestor::div[contains(@class,"cz-card-head")][1]').getByText('Accepted').waitFor();
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.goto(WEB + '/trading/claims');
     await page.getByRole('button', { name: `Open ${claimCode}` }).click();
     await page.getByLabel('Note', { exact: true }).fill('Replacement received in good order');
     await page.getByRole('button', { name: 'Confirm resolved' }).click();
-    await page.getByRole('heading', { name: new RegExp(claimCode) }).locator('..').getByText('Resolved').waitFor();
+    await page.getByRole('heading', { name: new RegExp(claimCode) }).locator('xpath=ancestor::div[contains(@class,"cz-card-head")][1]').getByText('Resolved').waitFor();
     await shot('094-claim');
     await page.goto(orderUrl);
     await page.getByRole('button', { name: 'Close order' }).click();
-    await page.getByRole('heading', { name: /^Order PO-/ }).locator('..').getByText('Closed').waitFor();
+    await page.getByRole('heading', { name: /^Order PO-/ }).locator('xpath=ancestor::div[contains(@class,"cz-card-head")][1]').getByText('Closed').waitFor();
     // 093 — territory → 088 routed enquiry
     await webLogin(page, WEB, 'ravi@sunrise.example');
     await page.goto(WEB + '/trading/territories');
-    await page.getByRole('table', { name: 'Territories' }).getByRole('row').first().waitFor(); // table loaded
+    await page.getByRole('heading', { name: 'Appoint a distributor' }).waitFor();
+    await page.getByRole('table', { name: 'Territories' }).or(page.getByText('No territories')).first().waitFor(); // list loaded (empty on a fresh seed)
     if (!(await page.getByRole('table', { name: 'Territories' }).getByRole('row').filter({ hasText: 'Deccan Distributors (your distributor)' }).filter({ hasText: 'Active' }).count())) {
       await page.getByLabel('Distributor', { exact: true }).selectOption({ label: 'Deccan Distributors' });
       await page.getByLabel('Region', { exact: true }).selectOption('IN-KA');

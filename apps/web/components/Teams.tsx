@@ -1,11 +1,12 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { sectorName } from '@collabiz/types';
+import { sectorName, TEAM_ROLE_LABELS } from '@collabiz/types';
 import { FactorBars, Money, StatusBadge } from '@collabiz/ui';
 import { regionName } from '@/lib/regions';
 
 export const TEAM_ROLES = ['lead', 'origination', 'execution', 'procurement', 'finance', 'management', 'specialist'];
+export const teamRoleLabel = (r: string) => TEAM_ROLE_LABELS[r] ?? r;
 
 export function TeamTabs({ id }: { id: string }) {
   const path = usePathname();

@@ -92,7 +92,7 @@ export default function TenderAdmin() {
           </div>
           {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : (
             <div className="cz-ta-table-wrap">
-              <table className="cz-ta-table">
+              <table className="cz-ta-table cz-ta-cards">
                 <caption className="cz-sr-only">Tenders</caption>
                 <thead><tr><th scope="col">Tender</th><th scope="col">Issuer</th><th scope="col">Stage</th><th scope="col">Closes</th><th scope="col" className="cz-num">Sealed bids</th><th scope="col">Panel</th></tr></thead>
                 <tbody>
@@ -110,7 +110,7 @@ export default function TenderAdmin() {
                         {t.overdueToClose && <span className="cz-ta-flag"><Icon name="warning" size={12} />Past closing</span>}
                       </td>
                       <td className="cz-ta-date"><span>{dt(t.closesAt)}</span><span className="cz-muted">{rel(t.closesAt)}</span></td>
-                      <td className="cz-num">{t.submitted}{t.withdrawn > 0 && <span className="cz-muted cz-ta-withdrawn"> +{t.withdrawn} withdrawn</span>}</td>
+                      <td className="cz-num cz-ta-bids">{t.submitted}{t.withdrawn > 0 && <span className="cz-muted cz-ta-withdrawn"> +{t.withdrawn} withdrawn</span>}</td>
                       <td className="cz-ta-panel-cell">{t.evaluators ? <span className="cz-ta-panel"><Icon name="users" size={14} />{t.evaluators}<span className="cz-ta-sm"> evaluator{t.evaluators === 1 ? "" : "s"}</span></span> : t.status === 'draft' || t.status === 'cancelled' ? <span className="cz-muted">—</span> : <StatusBadge status="missing" tone="danger" label="None" />}</td>
                     </tr>
                   ))}

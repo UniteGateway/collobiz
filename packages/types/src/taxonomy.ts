@@ -39,3 +39,7 @@ export const INDIA_STATES: [string, string][] = [
 export const COUNTRIES: [string, string][] = [['IN', 'India'], ['AE', 'United Arab Emirates'], ['SA', 'Saudi Arabia'], ['BD', 'Bangladesh'], ['NP', 'Nepal'], ['LK', 'Sri Lanka'], ['KE', 'Kenya'], ['NG', 'Nigeria'], ['GB', 'United Kingdom'], ['US', 'United States'], ['SG', 'Singapore']];
 export const regionLabel = (c: string) => INDIA_STATES.find(([k]) => k === c)?.[1] ?? COUNTRIES.find(([k]) => k === c)?.[1] ?? c;
 export const certLabel = (c: string) => c.replace(/^ISO(\d+)/, 'ISO $1');
+
+/** Membership levels in words ("verified" → "Verified partner"). */
+export const LEVEL_LABELS: Record<string, string> = { registered: 'Registered member', verified: 'Verified partner', certified: 'Certified partner', strategic: 'Strategic partner', country_partner: 'Country partner' };
+export const levelLabel = (l?: string | null) => (l ? LEVEL_LABELS[l] ?? l.replace(/_/g, ' ') : 'None');

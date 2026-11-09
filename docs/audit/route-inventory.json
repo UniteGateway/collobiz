@@ -31,7 +31,7 @@
     "mobile": "responsive",
     "registryStatus": "verified",
     "file": "apps/web/app/(public)/about/page.tsx",
-    "lines": 41,
+    "lines": 40,
     "usesApi": false,
     "marker": false,
     "placeholder": false,
@@ -52,7 +52,7 @@
     "mobile": "responsive",
     "registryStatus": "verified",
     "file": "apps/web/app/(public)/how-it-works/page.tsx",
-    "lines": 39,
+    "lines": 38,
     "usesApi": false,
     "marker": false,
     "placeholder": false,
@@ -135,7 +135,7 @@
     "mobile": "responsive",
     "registryStatus": "verified",
     "file": "apps/web/app/(public)/membership/page.tsx",
-    "lines": 35,
+    "lines": 34,
     "usesApi": false,
     "marker": false,
     "placeholder": false,
@@ -195,7 +195,7 @@
     "mobile": "responsive",
     "registryStatus": "verified",
     "file": "apps/web/app/(public)/support/contact/page.tsx",
-    "lines": 60,
+    "lines": 59,
     "usesApi": true,
     "marker": false,
     "placeholder": false,
@@ -215,7 +215,7 @@
     "mobile": "native",
     "registryStatus": "verified",
     "file": "apps/web/app/(auth)/login/page.tsx",
-    "lines": 111,
+    "lines": 112,
     "usesApi": true,
     "marker": false,
     "placeholder": false,
@@ -235,7 +235,7 @@
     "mobile": "native",
     "registryStatus": "verified",
     "file": "apps/web/app/(auth)/verify/page.tsx",
-    "lines": 68,
+    "lines": 67,
     "usesApi": true,
     "marker": false,
     "placeholder": false,
@@ -244,7 +244,7 @@
       "stage02.e2e.ts"
     ],
     "native": "apps/mobile/app/verify.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "013",
@@ -264,7 +264,7 @@
       "stage03.e2e.ts"
     ],
     "native": "apps/mobile/app/onboarding/account-type.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "014",
@@ -282,7 +282,7 @@
     "smokeHit": false,
     "apiTests": [],
     "native": "apps/mobile/app/onboarding/details.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "015",
@@ -302,7 +302,7 @@
       "stage03.e2e.ts"
     ],
     "native": "apps/mobile/app/onboarding/details.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "016",
@@ -320,7 +320,7 @@
     "smokeHit": true,
     "apiTests": [],
     "native": "apps/mobile/app/onboarding/industries.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "017",
@@ -338,7 +338,7 @@
     "smokeHit": true,
     "apiTests": [],
     "native": "apps/mobile/app/onboarding/coverage.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "018",
@@ -356,7 +356,7 @@
     "smokeHit": true,
     "apiTests": [],
     "native": "apps/mobile/app/onboarding/profile.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "019",
@@ -376,7 +376,7 @@
       "stage03.e2e.ts"
     ],
     "native": "apps/mobile/app/onboarding/kyc.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "020",
@@ -394,7 +394,7 @@
     "smokeHit": true,
     "apiTests": [],
     "native": "apps/mobile/app/onboarding/bank-tax.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "021",
@@ -414,7 +414,7 @@
       "stage03.e2e.ts"
     ],
     "native": "apps/mobile/app/onboarding/agreements.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "022",
@@ -511,7 +511,7 @@
     "smokeHit": true,
     "apiTests": [],
     "native": "apps/mobile/app/(tabs)/leads.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "027",
@@ -540,7 +540,7 @@
     "mobile": "responsive",
     "registryStatus": "verified",
     "file": "apps/web/app/(app)/tasks/page.tsx",
-    "lines": 55,
+    "lines": 72,
     "usesApi": true,
     "marker": true,
     "placeholder": false,
@@ -589,7 +589,7 @@
       "stage07.e2e.ts"
     ],
     "native": "apps/mobile/app/activity.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "031",
@@ -828,7 +828,7 @@
       "stage05.e2e.ts"
     ],
     "native": "apps/mobile/app/opportunities/[id]/apply.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "043",
@@ -848,7 +848,7 @@
       "stage06.e2e.ts"
     ],
     "native": "apps/mobile/app/leads/new.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "044",
@@ -942,7 +942,7 @@
       "stage06.e2e.ts"
     ],
     "native": "apps/mobile/app/leads/[id]/duplicates.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "049",
@@ -982,7 +982,7 @@
       "stage06.e2e.ts"
     ],
     "native": "apps/mobile/app/leads/[id]/index.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "051",
@@ -1002,7 +1002,7 @@
       "stage06.e2e.ts"
     ],
     "native": "apps/mobile/app/leads/[id]/certificate.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "052",
@@ -1040,7 +1040,7 @@
       "stage07.e2e.ts"
     ],
     "native": "apps/mobile/app/pipeline.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "054",
@@ -1160,7 +1160,7 @@
       "stage08.e2e.ts"
     ],
     "native": "apps/mobile/app/collaboration.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "060",
@@ -1476,7 +1476,7 @@
     "smokeHit": true,
     "apiTests": [],
     "native": "apps/mobile/app/projects/index.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "076",
@@ -1801,7 +1801,7 @@
     "mobile": "responsive",
     "registryStatus": "verified",
     "file": "apps/web/app/(app)/trading/orders/[id]/shipping/page.tsx",
-    "lines": 83,
+    "lines": 85,
     "usesApi": true,
     "marker": true,
     "placeholder": false,
@@ -2171,7 +2171,7 @@
       "stage13.e2e.ts"
     ],
     "native": "apps/mobile/app/announcements.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "111",
@@ -2291,7 +2291,7 @@
       "stage14.e2e.ts"
     ],
     "native": "apps/mobile/app/learning/index.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "117",
@@ -2828,7 +2828,7 @@
       "stage03.e2e.ts"
     ],
     "native": "apps/mobile/app/profile.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "144",
@@ -2868,7 +2868,7 @@
       "stage02.e2e.ts"
     ],
     "native": "apps/mobile/app/security.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "146",
@@ -2969,7 +2969,7 @@
       "stage13.e2e.ts"
     ],
     "native": "apps/mobile/app/help.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "151",
@@ -2989,7 +2989,7 @@
       "stage06.e2e.ts"
     ],
     "native": "apps/mobile/app/lead-protection.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "152",
@@ -3123,7 +3123,7 @@
     "smokeHit": true,
     "apiTests": [],
     "native": "apps/mobile/app/earnings/live.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "159",
@@ -3243,7 +3243,7 @@
       "stage14.e2e.ts"
     ],
     "native": "apps/mobile/app/reputation/reviews.tsx",
-    "nativeTest": false
+    "nativeTest": true
   },
   {
     "id": "165",
@@ -3264,6 +3264,6 @@
       "stage14.e2e.ts"
     ],
     "native": "apps/mobile/app/reputation/excellence.tsx",
-    "nativeTest": false
+    "nativeTest": true
   }
 ]

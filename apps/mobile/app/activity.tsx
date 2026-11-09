@@ -18,7 +18,7 @@ export default function Activity() {
         <View style={{ flex: 1 }}><Button title="Opportunities" variant="secondary" onPress={() => router.push('/marketplace')} /></View>
       </View>
       <View style={{ flexDirection: 'row', gap: 8, marginVertical: 12 }}><Kpi label="Overdue" value={q.data.tasks.overdue} /><Kpi label="Due 24 h" value={q.data.tasks.today} accent /></View>
-      <Card title="Recent activity">{q.data.items.map((i: any) => <Row key={i.id} title={i.title} subtitle={`${new Date(i.at).toLocaleString()}${i.detail ? ' · ' + i.detail : ''}`} />)}</Card>
+      <Card title="Recent activity">{!q.data.items.length && <Row title="Nothing yet" subtitle="Leads, deals and tasks you work on appear here" />}{q.data.items.map((i: any) => <Row key={i.id} title={i.title} subtitle={`${new Date(i.at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}${i.detail ? ' · ' + i.detail : ''}`} />)}</Card>
     </ScreenView>
   );
 }

@@ -8,7 +8,6 @@ const LIFECYCLE = ['Draft', 'Submitted', 'Consent check', 'Duplicate review', 'V
 export default function HowItWorksPage() {
   return (
     <div className="cz-container cz-section" data-screen="003">
-      <p className="cz-breadcrumb">Public Website &amp; Discovery <span className="cz-screen-id">SCREEN 003</span></p>
       <h1>How collaboration works</h1>
       <p style={{ maxWidth: 780 }}>From verified registration to settled commission, every step is recorded with identity, consent, timestamps and approvals.</p>
       <section className="cz-card" style={{ marginTop: 16, overflowX: 'auto' }}>

@@ -5,7 +5,6 @@ export const metadata: Metadata = { title: 'About COLLABIZ' };
 export default function AboutPage() {
   return (
     <div className="cz-container cz-section" data-screen="002">
-      <p className="cz-breadcrumb">Public Website &amp; Discovery <span className="cz-screen-id">SCREEN 002</span></p>
       <h1>About COLLABIZ</h1>
       <p style={{ maxWidth: 820, fontSize: 17 }}>
         COLLABIZ is a global B2B collaboration ecosystem that connects individual consultants, construction and EPC contractors, product

@@ -20,7 +20,6 @@ export default function ContactPage() {
   const set = (k: keyof typeof form) => (e: { target: { value: string } }) => setForm({ ...form, [k]: e.target.value });
   return (
     <div className="cz-container cz-section" data-screen="010">
-      <p className="cz-breadcrumb">Public Website &amp; Discovery <span className="cz-screen-id">SCREEN 010</span></p>
       <h1>Contact, FAQs &amp; support</h1>
       <div className="cz-grid cz-grid-2" style={{ marginTop: 16, alignItems: 'start' }}>
         <section className="cz-card">

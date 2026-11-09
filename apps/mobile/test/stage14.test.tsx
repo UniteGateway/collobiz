@@ -51,7 +51,7 @@ describe('Stage 14 (native)', () => {
     expect(mockPost).toHaveBeenCalledWith('/ai/matching/o1/feedback', { useful: false, reason: 'Not relevant' });
   });
 
-  it('Screen 163 — shows the score with its verified record; 165 lists the next-level criteria', async () => {
+  it('Screens 163/165 — show the score with its verified record and list the next-level criteria', async () => {
     mockGet.mockResolvedValueOnce({ score: { score: 73, tier: 'trusted', outcomes: 3, onTimeOutcomes: 2, publishedReviews: 1, excludedReviews: 0, components: { onTimeRate: 0.67, reviews: 4.7 } }, outcomes: [{ id: 'm1', title: 'Electrical BoS', projectCode: 'PRJ-2025-000014', certifiedAt: '2025-08-06', onTime: false }], tips: [] });
     const r = render(<Reputation />);
     await waitFor(() => screen.getByText('73'));

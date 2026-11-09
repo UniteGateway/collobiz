@@ -15,8 +15,8 @@ export default function LeadProtection() {
       <Stack.Screen options={{ title: 'Lead protection' }} />
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}><Kpi label="Protected" value={d.protected} accent /><Kpi label="In review" value={d.inUniteReview} /></View>
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}><Kpi label="Contested" value={d.contested} /><Kpi label="Disputes" value={d.openDisputes} /></View>
-      {d.openDisputes > 0 && <Notice tone="warning">You have open ownership disputes — respond on the web dispute centre (screen 153).</Notice>}
-      <Card title="Expiring within 14 days">{d.expiringSoon.length ? d.expiringSoon.map((l: any) => <Row key={l.id} title={l.code} subtitle={`expires ${new Date(l.protectedUntil).toLocaleDateString()}`} onPress={() => router.push(`/leads/${l.id}/certificate`)} />) : <Row title="Nothing expiring soon" />}</Card>
+      {d.openDisputes > 0 && <Notice tone="warning">You have open ownership disputes — respond in the dispute centre on the COLLABIZ website.</Notice>}
+      <Card title="Expiring within 14 days">{d.expiringSoon.length ? d.expiringSoon.map((l: any) => <Row key={l.id} title={l.code} subtitle={`Expires ${new Date(l.protectedUntil).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`} onPress={() => router.push(`/leads/${l.id}/certificate`)} />) : <Row title="Nothing expiring soon" />}</Card>
       <Button title="All leads" variant="secondary" onPress={() => router.push('/leads')} />
     </ScreenView>
   );

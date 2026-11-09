@@ -33,7 +33,6 @@ export default function VerifyPage() {
   return (
     <main id="main" className="cz-container" style={{ maxWidth: 480, paddingTop: 40 }} data-screen="012">
       <section className="cz-card">
-        <p className="cz-breadcrumb">Registration &amp; Verification <span className="cz-screen-id">SCREEN 012</span></p>
         <h1>Verify your account</h1>
         <p className="cz-muted">We sent a 6-digit code to <strong>{me.email}</strong>. Codes expire after 10 minutes.</p>
         <div className="cz-row" style={{ marginBottom: 12 }}>

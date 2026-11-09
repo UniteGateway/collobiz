@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, Text } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
-import { PARTNER_TYPES } from '@collabiz/types';
+import { PARTNER_TYPES, PARTNER_TYPE_LABELS } from '@collabiz/types';
 import { Button, Card, Chips, Notice, ScreenView, s, theme } from '@/components/ui';
 import { api, tokens } from '@/api';
 import { useAction, nextRoute } from '@/hooks';
@@ -33,7 +33,7 @@ export default function AccountType() {
         </Pressable>
       ))}
       <Text style={s.label}>Business types</Text>
-      <Chips value={types} onChange={setTypes} options={PARTNER_TYPES.map((p) => ({ value: p, label: p.replace('_', ' ') }))} />
+      <Chips value={types} onChange={setTypes} options={PARTNER_TYPES.map((p) => ({ value: p, label: PARTNER_TYPE_LABELS[p] ?? p }))} />
       {a.fieldErrors.partnerTypes && <Text style={s.error}>{a.fieldErrors.partnerTypes}</Text>}
     </ScreenView>
   );

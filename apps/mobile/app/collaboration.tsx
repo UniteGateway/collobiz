@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Text } from 'react-native';
 import { Stack } from 'expo-router';
+import { TEAM_ROLE_LABELS } from '@collabiz/types';
 import { Badge, Button, Card, Empty, ErrorView, Field, Loading, Notice, ScreenView, s } from '@/components/ui';
 import { api } from '@/api';
 import { useAction, useApi } from '@/hooks';
@@ -23,11 +24,11 @@ export default function Requests() {
         <Card key={r.memberId} title={`${r.team} — ${r.lead}`}>
           <Badge status={r.status} />
           <Text style={[s.p, { marginTop: 8 }]}>{r.purpose}</Text>
-          <Text style={s.hint}>Your role: {r.role} — {r.responsibilities}</Text>
+          <Text style={s.hint}>Your role: {TEAM_ROLE_LABELS[r.role] ?? r.role}{r.responsibilities ? ` — ${r.responsibilities}` : ''}</Text>
           {r.status === 'invited' && <><Button title="Accept" onPress={() => respond.run(r.teamId, 'accept')} loading={respond.busy} /><Button title="Decline" variant="secondary" onPress={() => respond.run(r.teamId, 'decline')} /></>}
           {r.status === 'accepted' && (
             <>
-              <Notice tone="info">Sign the team NDA to unlock the workspace (screen 062).</Notice>
+              <Notice tone="info">Sign the team NDA to unlock the workspace.</Notice>
               <Field label={`Type "${me?.fullName}" to sign`} value={names[r.teamId]} onChangeText={(v) => setNames({ ...names, [r.teamId]: v })} error={sign.fieldErrors.typedName} />
               <Button title="Sign NDA" variant="accent" onPress={() => sign.run(r.teamId)} loading={sign.busy} />
             </>
