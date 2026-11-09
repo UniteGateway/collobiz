@@ -1614,3 +1614,33 @@ suites.push({
     await shot('venture-offer');
   },
 });
+
+// Pilot feedback: a partner sends a weekly check-in; Unite reads it.
+suites.push({
+  name: 'Pilot · partner sends a weekly check-in on the web → Unite reads it in pilot feedback; a second one the same day is held back',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot, expect }) => {
+    await webLogin(page, WEB, 'meera@consult.example');
+    await page.goto(WEB + '/help');
+    await page.getByRole('link', { name: 'Open pilot check-in' }).click();
+    await page.getByRole('heading', { name: 'Pilot check-in', level: 1 }).waitFor();
+    expect(await page.getByRole('button', { name: 'Send check-in' }).isDisabled(), 'send enabled before required answers');
+    await page.getByRole('radiogroup', { name: 'Usefulness' }).getByRole('radio', { name: /^4 of 5/ }).click();
+    await page.getByRole('radiogroup', { name: 'Ease of use' }).getByRole('radio', { name: /^3 of 5/ }).click();
+    await page.getByRole('radiogroup', { name: 'Likelihood to recommend, 0 to 10' }).getByRole('radio', { name: '8', exact: true }).click();
+    await page.getByText('Lead protection', { exact: true }).click();
+    await page.getByLabel(/What stopped you, confused you/).fill('The lead certificate PDF opened in a new tab on my phone and I lost my place.');
+    await page.getByText('Not sure yet', { exact: true }).click();
+    await page.getByLabel('The pilot team may contact me about my answers.').check();
+    await page.getByRole('button', { name: 'Send check-in' }).click();
+    await page.getByText('Thank you — your check-in reached the Unite Group pilot team').waitFor();
+    await shot('pilot-sent');
+    await page.goto(WEB + '/help/pilot');
+    await page.getByText('You’ve already checked in today').waitFor();
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/pilot');
+    await page.getByText('lost my place').waitFor();
+    await page.getByRole('link', { name: 'meera@consult.example' }).waitFor();
+    await shot('pilot-results');
+  },
+});

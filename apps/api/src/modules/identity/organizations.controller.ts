@@ -51,7 +51,7 @@ export class OrganizationsController {
     if (existing.some((m) => m.status !== 'removed')) throw new BadRequestException('This person is already a member of your organization');
     const [m] = await this.db.insert(memberships).values({ userId: user.id, organizationId: ctx.orgId!, role: b.role, status: token ? 'invited' : 'active', invitedBy: ctx.userId })
       .onConflictDoUpdate({ target: [memberships.userId, memberships.organizationId, memberships.role], set: { status: token ? 'invited' : 'active', invitedBy: ctx.userId } }).returning();
-    await this.mail.send('email', b.email, 'You have been invited to COLLABIZ', token ? `Accept your invitation: /invite?token=${token}` : 'You were added to an organization on COLLABIZ.');
+    await this.mail.send('email', b.email, 'You have been invited to COLLABIZ', token ? `Accept your invitation: ${config().WEB_BASE_URL}/invite?token=${token}` : 'You were added to an organization on COLLABIZ.');
     await this.audit.record(ctx, { action: 'membership.invited', objectType: 'membership', objectId: m.id, after: { email: b.email, role: b.role } });
     return { membershipId: m.id, status: m.status, ...(token && (config().DEV_EXPOSE_OTP || config().NODE_ENV === 'test') ? { devInviteToken: token } : {}) };
   }

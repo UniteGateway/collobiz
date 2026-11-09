@@ -1,0 +1,66 @@
+# COLLABIZ pilot stack — ONE Linux server (4 vCPU / 8 GB RAM / 80 GB SSD is plenty for 10–50 partners).
+# Provider-agnostic: any VPS or cloud VM with Docker (DigitalOcean, AWS Lightsail/EC2, Azure, GCP, Hetzner, E2E Networks…).
+#
+#   cp infra/pilot/pilot.env.example infra/pilot/pilot.env   # fill in real values (never commit pilot.env)
+#   docker compose -f infra/pilot/docker-compose.pilot.yml --env-file infra/pilot/pilot.env up -d --build
+#
+# Caddy terminates HTTPS with automatic Let's Encrypt certificates for WEB_DOMAIN and ADMIN_DOMAIN and sets
+# X-Forwarded-For (required by the API's rate limiting). The API, PostgreSQL and Redis are NOT exposed to the internet.
+# For a larger rollout move PostgreSQL to a managed service (set DATABASE_URL and remove the postgres service).
+name: collabiz-pilot
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: collabiz
+      POSTGRES_USER: collabiz_app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in pilot.env}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ['CMD-SHELL', 'pg_isready -U collabiz_app -d collabiz'], interval: 10s, retries: 10 }
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes: [redisdata:/data]
+  api:
+    build: { context: ../.., dockerfile: infra/docker/api.Dockerfile }
+    restart: unless-stopped
+    env_file: pilot.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://collabiz_app:${POSTGRES_PASSWORD}@postgres:5432/collabiz
+      REDIS_URL: redis://redis:6379
+      STORAGE_DRIVER: local
+      STORAGE_LOCAL_DIR: /data/storage
+      CORS_ORIGINS: https://${WEB_DOMAIN},https://${ADMIN_DOMAIN}
+      WEB_BASE_URL: https://${WEB_DOMAIN}
+    volumes: [storage:/data/storage]
+    depends_on: { postgres: { condition: service_healthy }, redis: { condition: service_started } }
+  web:
+    build: { context: ../.., dockerfile: infra/docker/next.Dockerfile, args: { APP: web, PORT: '3000' } }
+    restart: unless-stopped
+    environment: { API_INTERNAL_URL: 'http://api:4000' }
+    depends_on: [api]
+  admin:
+    build: { context: ../.., dockerfile: infra/docker/next.Dockerfile, args: { APP: admin, PORT: '3001' } }
+    restart: unless-stopped
+    environment: { API_INTERNAL_URL: 'http://api:4000' }
+    depends_on: [api]
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    ports: ['80:80', '443:443']
+    environment:
+      WEB_DOMAIN: ${WEB_DOMAIN:?set WEB_DOMAIN in pilot.env}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN:?set ADMIN_DOMAIN in pilot.env}
+      ADMIN_ALLOW_IPS: ${ADMIN_ALLOW_IPS:-0.0.0.0/0 ::/0}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in pilot.env}
+    volumes: ['./Caddyfile:/etc/caddy/Caddyfile:ro', 'caddydata:/data', 'caddyconfig:/config']
+    depends_on: [web, admin]
+volumes:
+  pgdata:
+  redisdata:
+  storage:
+  caddydata:
+  caddyconfig:

@@ -1232,3 +1232,25 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
 .cz-check-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .cz-check-list li { display: flex; gap: 8px; align-items: center; font-size: 14px; }
 .cz-check-list .cz-icon { color: var(--cz-green-600); }
+
+/* Pilot feedback survey */
+.cz-pilot { max-width: 760px; }
+.cz-pilot-q { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+.cz-pilot-q legend { font-size: 14px; font-weight: 600; color: var(--cz-navy-900); padding: 0; margin-bottom: 8px; }
+.cz-pilot-q .cz-rate { border-top: 0; padding-top: 0; justify-content: flex-start; }
+.cz-scale { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; }
+.cz-scale button { min-height: 40px; border-radius: 8px; border: 1px solid var(--cz-grey-200); background: #fff; font: inherit; font-size: 14px; cursor: pointer; color: var(--cz-grey-900, #1b2430); }
+.cz-scale button[aria-checked="true"] { background: var(--cz-navy-700); border-color: var(--cz-navy-700); color: #fff; }
+.cz-scale button:focus-visible { outline: 2px solid var(--cz-navy-500); outline-offset: 2px; }
+.cz-scale-ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--cz-grey-600, #5b6675); }
+.cz-pilot-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.cz-pilot-kpis > .cz-card { padding: 14px 16px; margin: 0; }
+.cz-pilot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+.cz-pilot-grid > .cz-card { margin: 0; }
+.cz-pilot-kpis strong { display: block; font-size: 26px; color: var(--cz-navy-900); line-height: 1.2; }
+.cz-pilot-bar { display: grid; grid-template-columns: minmax(120px, 180px) 1fr 36px; gap: 10px; align-items: center; font-size: 13px; }
+.cz-pilot-bar > span:nth-child(2) { height: 10px; border-radius: 999px; background: var(--cz-grey-100); overflow: hidden; }
+.cz-pilot-bar i { display: block; height: 100%; background: var(--cz-green-600); border-radius: 999px; }
+.cz-pilot-comment { padding: 14px 16px; display: grid; gap: 6px; font-size: 14px; }
+.cz-pilot-comment p { margin: 0; }
+@media (max-width: 520px) { .cz-scale { grid-template-columns: repeat(6, minmax(0, 1fr)); } .cz-pilot-bar { grid-template-columns: 110px 1fr 30px; } }

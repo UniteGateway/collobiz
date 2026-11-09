@@ -487,3 +487,18 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await offerSalesDemo(db, refs);
   await venturesDemo(db, refs);
 }
+
+/** Demo pilot check-ins (spread over three weeks) so the admin results page has something to show. Not part of the test seed. */
+export async function pilotDemo(db: Db, refs: SeedRefs) {
+  const [any] = await db.select({ id: s.pilotFeedback.id }).from(s.pilotFeedback).limit(1);
+  if (any) return;
+  const ago = (d: number) => new Date(Date.now() - d * 86400_000);
+  const rows: (typeof s.pilotFeedback.$inferInsert)[] = [
+    { userId: refs.users.asha, organizationId: refs.orgs.volt, usefulness: 4, ease: 3, recommend: 8, used: ['offers', 'ventures', 'contracts'], mostValuable: 'Getting the SOLCART offer straight in our dashboard instead of chasing it on WhatsApp.', blockers: 'It took us a while to find where to register a sale under the offer.', wishlist: 'Show the commission we will earn on the sale form itself.', continueUse: 'yes', contactOk: true, platform: 'web', createdAt: ago(16) },
+    { userId: refs.users.ravi, organizationId: refs.orgs.sunrise, usefulness: 3, ease: 4, recommend: 6, used: ['offers', 'opportunities'], wishlist: 'Gujarati and Hindi language.', continueUse: 'maybe', contactOk: false, platform: 'mobile', createdAt: ago(14) },
+    { userId: refs.users.meera, organizationId: refs.orgs.meera, usefulness: 5, ease: 4, recommend: 9, used: ['leads', 'ventures'], mostValuable: 'Lead certificates — finally proof that I introduced the customer first.', continueUse: 'yes', contactOk: true, platform: 'web', createdAt: ago(9) },
+    { userId: refs.users.deepak, organizationId: refs.orgs.deccan, usefulness: 4, ease: 3, recommend: 9, used: ['offers', 'mobile', 'messages'], blockers: 'Two-factor code on a new phone was confusing.', continueUse: 'yes', contactOk: true, platform: 'mobile', createdAt: ago(7) },
+    { userId: refs.users.asha, organizationId: refs.orgs.volt, usefulness: 5, ease: 4, recommend: 10, used: ['offers', 'commissions', 'contracts'], mostValuable: 'Saw our commission move to Earned the day the customer paid.', continueUse: 'yes', contactOk: true, platform: 'web', createdAt: ago(2) },
+  ];
+  await db.insert(s.pilotFeedback).values(rows.filter((r) => r.userId && r.organizationId));
+}

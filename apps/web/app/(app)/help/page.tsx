@@ -42,6 +42,11 @@ export default function Help() {
           </div>
         </section>
         <div className="cz-stack" style={{ gap: 20 }}>
+          <section className="cz-card" aria-labelledby="pilot-h">
+            <h2 id="pilot-h" className="cz-help-h" style={{ marginTop: 0 }}>Taking part in the pilot?</h2>
+            <p className="cz-muted" style={{ marginTop: 0 }}>Send your weekly two-minute check-in: what helped, what got in your way and what to build next.</p>
+            <Link href="/help/pilot" className="cz-btn cz-btn-secondary">Open pilot check-in</Link>
+          </section>
           <Feedback />
           {me && <CloseAccount email={me.email} />}
         </div>

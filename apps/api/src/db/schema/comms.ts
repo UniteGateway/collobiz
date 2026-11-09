@@ -1,5 +1,5 @@
 /** Stage 13 — messaging (encrypted, retention-bound), meetings, announcements, notification preferences, support tickets, feedback. */
-import { pgTable, uuid, text, timestamp, jsonb, integer, index, uniqueIndex, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, jsonb, integer, index, uniqueIndex, boolean, check } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { id, createdAt, updatedAt, organizations, users } from './core';
 import { projects } from './projects';
@@ -149,3 +149,24 @@ export const feedback = pgTable('feedback', {
   comment: text('comment'),
   createdAt: createdAt(),
 });
+
+/** Pilot feedback survey — structured check-ins from pilot partners (usefulness, ease, NPS, blockers). */
+export const pilotFeedback = pgTable('pilot_feedback', {
+  id: id(),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  organizationId: uuid('organization_id').references(() => organizations.id),
+  usefulness: integer('usefulness').notNull(),
+  ease: integer('ease').notNull(),
+  recommend: integer('recommend').notNull(),
+  used: text('used').array().notNull().default(sql`'{}'::text[]`),
+  mostValuable: text('most_valuable'),
+  blockers: text('blockers'),
+  wishlist: text('wishlist'),
+  continueUse: text('continue_use').notNull(),
+  contactOk: boolean('contact_ok').notNull().default(false),
+  platform: text('platform').notNull().default('web'),
+  createdAt: createdAt(),
+}, (t) => [
+  index('pilot_feedback_created_idx').on(t.createdAt),
+  check('pilot_feedback_ranges', sql`${t.usefulness} between 1 and 5 and ${t.ease} between 1 and 5 and ${t.recommend} between 0 and 10`),
+]);

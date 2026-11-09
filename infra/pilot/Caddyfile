@@ -1,0 +1,28 @@
+# HTTPS front door for the COLLABIZ pilot. Certificates are issued and renewed automatically.
+{
+	email {$ACME_EMAIL}
+}
+
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}
+
+{$WEB_DOMAIN} {
+	import security_headers
+	encode gzip
+	reverse_proxy web:3000
+}
+
+# Administration: restrict to office / VPN addresses with ADMIN_ALLOW_IPS (space-separated CIDRs).
+{$ADMIN_DOMAIN} {
+	import security_headers
+	encode gzip
+	@blocked not remote_ip {$ADMIN_ALLOW_IPS}
+	respond @blocked "Not available from this network" 403
+	reverse_proxy admin:3001
+}

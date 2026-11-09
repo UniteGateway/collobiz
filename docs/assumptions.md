@@ -45,7 +45,7 @@ Running log of engineering decisions and assumptions made without asking (per in
 | B-01 | Operating legal entity for COLLABIZ not confirmed (App. E). | Contract templates/invoices cannot name the real principal. | Configurable `group_companies` with placeholder legal entity codes. |
 | B-02 | Trademark/domain `collabiz.co` not verified/acquired. | Production URLs, email sender domain. | Env-configurable URLs; no purchase made (instruction 15). |
 | B-03 | No S3-compatible storage credentials. | Production document storage. | Private local-disk adapter with magic-byte validation, scan hook and signed URLs; S3 driver stub refuses to run without config. |
-| B-04 | No SMTP/SMS provider credentials. | Real OTP/email delivery. | Transactional outbox table + log adapter; `DEV_EXPOSE_OTP` for local testing only (refused in production). |
+| B-04 | No SMTP/SMS provider credentials. | Real OTP/email delivery. | Transactional outbox table + log adapter; `DEV_EXPOSE_OTP` for local testing only (refused in production). **Update 2026-11-09:** SMTP delivery implemented and tested (`MAIL_DRIVER=smtp`, works with any provider), so only an SMTP account is needed. SMS still needs a DLT-registered provider. |
 | B-05 | No OIDC/Keycloak tenant. | Federated SSO. | Local identity adapter; OIDC config documented. |
 | B-06 | No Expo/EAS account, Apple Developer or Google Play accounts. | Signed iOS/Android binaries and store submission. | `expo export` produces verified Android/iOS JS bundles; native projects generated via `expo prebuild`; EAS config documented. |
 | B-07 | Unite Group OS / SOLBID / SUNITE / LeadDNA / Powertek / Unite Exim / Socpost API contracts unavailable. | Live integrations (Stage 15). | Mock adapters with contract tests. |

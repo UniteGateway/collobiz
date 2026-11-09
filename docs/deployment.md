@@ -2,6 +2,8 @@
 
 > Status (2026-11-06): **not deployed anywhere.** Production deployment requires explicit human approval (instruction 15) and the integrations listed in `docs/launch-readiness-report.md`. The steps below were verified in a sandbox up to the point marked.
 
+> **Pilot:** for a small pilot on one server, follow `docs/pilot/go-live-checklist.md` and use `infra/pilot/` (single-server compose with HTTPS). A fresh database is set up with the bootstrap command (`node dist/db/bootstrap.js`), never with the demo seed.
+
 ## 1. Architecture to deploy
 
 | Component | Image / artefact | Port | Notes |
@@ -43,7 +45,7 @@ Verified: API and web images built; API ran with `NODE_ENV=production` and gener
 3. Deploy API (migrations run automatically on start; they are forward-only — roll back by restoring the pre-release backup).
 4. Deploy Web/Admin with `API_INTERNAL_URL` pointing at the API service.
 5. Smoke test: `WEB_URL=https://staging… ADMIN_URL=https://admin.staging… node scripts/e2e-smoke.mjs` (uses demo accounts → staging only), `node scripts/a11y-scan.mjs`.
-6. Create the first Unite Group super admin (no demo seed): register via the web app, then grant `super_admin` in the `platform` organization with SQL by a DBA under change control; that admin enrols MFA at `/mfa` before any admin action works.
+6. First release only: `node dist/db/bootstrap.js --platform-name "<operating company>"`, then the first Unite Group super admin registers on the web app, then `node dist/db/bootstrap.js --super-admin <email>` (audited). That admin enrols MFA at `/mfa` before any admin action works. Never run the demo seed.
 
 ## 5. Android build (EAS — requires Expo account, Google Play Console; blocker B-06)
 

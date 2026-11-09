@@ -82,6 +82,8 @@ const EXTRA = [
   { id: 'X13', title: 'Unite businesses (admin)', app: 'admin', route: '/ventures', access: 'unite-admin' },
   { id: 'X14', title: 'Unite business (admin)', app: 'admin', route: `/ventures/${ventureId}`, access: 'unite-admin' },
   { id: 'X15', title: 'New offer for a business', app: 'admin', route: `/offers/new?venture=${ventureId}`, access: 'unite-admin' },
+  { id: 'X16', title: 'Pilot check-in', app: 'web', route: '/help/pilot', access: 'authenticated' },
+  { id: 'X17', title: 'Pilot feedback (admin)', app: 'admin', route: '/pilot', access: 'unite-admin' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

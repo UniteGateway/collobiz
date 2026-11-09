@@ -41,7 +41,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const initials = me.fullName.split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
   return (
     <AppShell product="Administration"
-      sections={[{ items: [{ href: '/', label: 'Overview', icon: 'home' }, { href: '/opportunities', label: 'Opportunity publishing', icon: 'opportunities' }, { href: '/ventures', label: 'Unite businesses', icon: 'building' }, { href: '/offers', label: 'Direct offers', icon: 'briefcase' }] }, ...sections]} currentPath={path}
+      sections={[{ items: [{ href: '/', label: 'Overview', icon: 'home' }, { href: '/opportunities', label: 'Opportunity publishing', icon: 'opportunities' }, { href: '/ventures', label: 'Unite businesses', icon: 'building' }, { href: '/offers', label: 'Direct offers', icon: 'briefcase' }, { href: '/pilot', label: 'Pilot feedback', icon: 'messages' }] }, ...sections]} currentPath={path}
       userMenu={
         <div className="cz-row" style={{ gap: 10, flexWrap: 'nowrap' }}>
           <div className="cz-user"><div className="cz-user-text"><strong>{me.fullName}</strong><span>{me.platformRoles.map((r) => r.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase())).join(', ') || 'No platform role'}</span></div><span className="cz-avatar" aria-hidden>{initials}</span></div>

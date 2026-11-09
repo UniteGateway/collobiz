@@ -22,9 +22,9 @@ This file is the single place to see where the build stands. It follows the reco
 | Registry screens with a working route | **165 of 165** |
 | Covered by API tests and a browser journey | **165** |
 | Native screens required / built / with tests | 46 / 46 / **46** |
-| API tests | 213 passing (22 suites) |
+| API tests | 223 passing (25 suites) |
 | Browser journeys (desktop + phone) | 78 passing on a fresh database; axe scan clean on 45 pages |
-| Native tests | 75 passing (15 suites) |
+| Native tests | 77 passing (16 suites) |
 | UI component tests | 30 passing |
 
 ## Stages 13–16 (built this round)
@@ -78,6 +78,21 @@ All **47 businesses** from the Unite Master Concept Portfolio (1 Nov 2026) are i
 | **Offers per business** | A direct offer can belong to a business; its audience can be “approved promoters of this business”. Partners see which business each offer is for; agreements, buyer registration and commission then work exactly as for other offers. Admin sees promoters, requests, offers, buyers and won value per business. |
 
 Tests: `apps/api/test/ventures.e2e.ts` (5), `apps/mobile/test/ventures.test.tsx` (2), browser journey (public directory → request → approval → promoter offer → partner sees it), six more pages in the gate sweep. Existing databases get the businesses with `node -r @swc-node/register src/db/seed-offers.ts` (safe to repeat).
+
+## Pilot pack (added 2026-11-09)
+
+Everything needed to run a small, controlled pilot, without buying or registering anything. All of it is in `docs/pilot/`.
+
+| Part | What it is |
+|---|---|
+| **Go-live checklist** (`docs/pilot/go-live-checklist.md`) | Provider-agnostic, step by step: decisions and accounts needed from Unite; server, DNS and e-mail records; install; first admin; backups and monitoring; legal sign-off; launch day; rollback. Each step is marked [You] or [IT]. |
+| **Single-server pilot stack** (`infra/pilot/`) | `docker-compose.pilot.yml` runs PostgreSQL, Redis, API, web, admin and a Caddy HTTPS front door (automatic certificates, security headers, admin restricted to office IPs). Also `pilot.env.example`. The filled-in `pilot.env` is git-ignored. Compose config verified; the Caddyfile could not be validated in the sandbox, so the checklist validates it on the server. |
+| **Production bootstrap** (`apps/api/src/db/bootstrap.ts`) | Sets up a clean database without demo data. It creates the platform organization, loads the agreement texts, loads the 47 businesses (all closed), and grants the first super admin to someone who has already registered (audited). It also publishes lawyer-approved agreement texts as new versions and retires the drafts. Before this, a real server could not be set up, because the platform organization and agreements existed only in the demo seed. Safe to repeat. Tests: `test/bootstrap.e2e.ts` (3). |
+| **E-mail delivery** (`MAIL_DRIVER=smtp`) | Before this, `smtp` mode only queued messages, so sign-in codes were never sent. E-mail now goes out through any SMTP provider (`SMTP_URL`, `MAIL_FROM`). Failures are retried every minute and marked failed after 5 attempts. Internal routing addresses are skipped. Invitation links are absolute (`WEB_BASE_URL`). Tests: `test/mail-smtp.e2e.ts` (4), using a local test SMTP server, including a real sign-in code request. SMS still has no provider (B-04). |
+| **Pilot plan** (`docs/pilot/pilot-plan.md`) | One page: goals, one business (SOLCART recommended, optional non-solar business from week 5), 10–20 partners, 8-week timeline, metrics with targets, go/adjust/stop rule, weekly rhythm, risks, invitation letter. |
+| **Legal review pack** (`docs/pilot/legal-review-pack.docx` + `.md`) | Every legal text the app shows or generates, compiled for counsel's tracked-changes markup, with 21 questions and an answer table. It covers partner terms, lead registration, privacy notice, team NDA, the offer agreement and work order, commission terms, the tender contract and LOI, buyer consent, and the regulated businesses. Rebuild it with `scripts/legal-pack/build.mjs`. |
+| **Pilot check-in** (web: Help & support → Pilot check-in; app: Account → Pilot check-in) | A two-minute weekly survey: usefulness 1–5, ease 1–5, recommend 0–10, features used, most valuable, blockers, wish, would keep using, may we contact you. One answer per person per 20 hours. |
+| **Pilot feedback results** (admin → Pilot feedback) | Check-ins, usefulness, ease, recommendation score (NPS) and would-keep-using against the pilot targets. Also features used, a week-by-week table, comments (contact details only with consent), CSV download, and **Send reminder** (in-app reminder to verified partner contacts who haven't checked in for 6 days; at most once a day). Visible to `analytics.read` roles only. Tests: `test/pilot.e2e.ts` (3), `apps/mobile/test/pilot.test.tsx` (2), browser journey (partner sends a check-in, a second one the same day is held back, Unite reads it). The admin page is checked by the gate sweep (X16, X17). |
 
 ## Quality gate (2026-11-09)
 
@@ -145,7 +160,8 @@ Quality-gate status per screen is recorded in `docs/audit/quality-gate.json` and
 | B-06 | No native binaries: Android SDK download blocked, no Xcode/EAS here | EAS account or a build machine; approval to register |
 | B-09 | Investor data room and finance introductions are regulated activities | Regulatory/legal review before switching on |
 | — | Video provider for meeting rooms; language-model provider for AI drafts | Choice of provider, credentials, data-processing review |
-| — | Production hosting, domains, email/SMS providers, payment rails, KYC providers | Commercial approval and credentials (not requested; nothing has been registered or purchased) |
+| — | Pilot: hosting server, two DNS names, SMTP e-mail account, operating legal entity (B-01), approved commission rates (B-10), legal review of the pack, pilot partner list | Unite Group decisions and accounts. Everything else is ready (`docs/pilot/go-live-checklist.md` §1). Nothing has been registered or purchased. |
+| — | Full launch: managed database, S3 storage (B-03), SMS with DLT (B-04), e-signature provider (B-08), payment rails, KYC providers | Commercial approval and credentials |
 
 ## How to verify locally
 ```

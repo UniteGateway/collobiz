@@ -61,6 +61,7 @@ export default function Account() {
         <Row icon="notifications" title="Notifications" onPress={go('/settings/notifications')} />
         <Row icon="lock-closed" title="Sign-in & two-factor" onPress={go('/security')} />
         <Row icon="help-buoy" title="Help & support" onPress={go('/help')} />
+        <Row icon="chatbubbles" title="Pilot check-in" subtitle="Two-minute weekly feedback for Unite Group" onPress={go('/pilot')} testID="pilot-row" />
       </Section>
       <Section>
         <Row title="Sign out" icon="log-out-outline" iconTint={theme.colors.danger} chevron={false} onPress={confirmSignOut} testID="sign-out" />

@@ -16,6 +16,12 @@ const Env = z.object({
   STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
   STORAGE_LOCAL_DIR: z.string().default('./storage'),
   MAIL_DRIVER: z.enum(['outbox', 'smtp']).default('outbox'),
+  /** smtp(s)://user:pass@host:port — any provider (Zoho, Google Workspace, Amazon SES, SendGrid, Brevo…). Required when MAIL_DRIVER=smtp. */
+  SMTP_URL: z.string().optional(),
+  /** Sender shown on e-mails, e.g. "COLLABIZ <no-reply@your-domain>". Must be a domain the SMTP provider has verified. */
+  MAIL_FROM: z.string().default('COLLABIZ <no-reply@localhost>'),
+  /** Public address of the partner web app; used to build absolute links in e-mails. */
+  WEB_BASE_URL: z.string().url().default('http://localhost:3000'),
   IDENTITY_PROVIDER: z.enum(['local', 'oidc']).default('local'),
   AI_PROVIDER: z.enum(['rules', 'anthropic']).default('rules'),
   ESIGN_PROVIDER: z.string().default('local'),
@@ -51,6 +57,7 @@ export function config(): AppConfig {
     }
     if (/^0+$/.test(parsed.FIELD_ENCRYPTION_KEY)) throw new Error('FIELD_ENCRYPTION_KEY must be set in production');
     if (parsed.DEV_EXPOSE_OTP) throw new Error('DEV_EXPOSE_OTP cannot be enabled in production');
+    if (parsed.MAIL_DRIVER === 'smtp' && !parsed.SMTP_URL) throw new Error('SMTP_URL must be set when MAIL_DRIVER=smtp');
   }
   cached = parsed;
   return parsed;

@@ -27,9 +27,10 @@ import { TendersModule } from './modules/tenders/tenders.controller';
 import { TeamsModule } from './modules/teams/teams.controller';
 import { OffersModule } from './modules/offers/offers.controller';
 import { VenturesModule } from './modules/ventures/ventures.controller';
+import { PilotModule } from './modules/pilot/pilot.controller';
 import { config } from './config';
 
-export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule];
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule];
 
 @Module({
   imports: [
