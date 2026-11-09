@@ -329,6 +329,7 @@ export function ChipSelect({ legend, options, value, onChange, max }: { legend: 
 // ---------------- Dialog ----------------
 export function Dialog({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
@@ -336,8 +337,8 @@ export function Dialog({ open, onClose, title, children }: { open: boolean; onCl
     if (!open && d.open) d.close?.();
   }, [open]);
   return (
-    <dialog ref={ref} className="cz-dialog" onClose={onClose} aria-labelledby="cz-dialog-title">
-      <h2 id="cz-dialog-title">{title}</h2>
+    <dialog ref={ref} className="cz-dialog" onClose={onClose} aria-labelledby={titleId}>
+      <h2 id={titleId}>{title}</h2>
       {children}
     </dialog>
   );
