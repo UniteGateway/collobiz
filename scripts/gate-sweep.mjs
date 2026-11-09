@@ -94,6 +94,9 @@ const EXTRA = [
   { id: 'X24', title: 'Group companies (workspace)', app: 'admin', route: '/workspace/companies', access: 'unite-admin' },
   { id: 'X25', title: 'Meet', app: 'admin', route: '/workspace/meet', access: 'unite-admin' },
   { id: 'X26', title: 'Workspace search', app: 'admin', route: '/workspace/search?q=solar', access: 'unite-admin' },
+  { id: 'X27', title: 'Human Resources', app: 'admin', route: '/workspace/hr', access: 'unite-admin' },
+  { id: 'X28', title: 'Payroll', app: 'admin', route: '/workspace/payroll', access: 'finance' },
+  { id: 'X29', title: 'Finance and Accounting', app: 'admin', route: '/workspace/finance', access: 'finance' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

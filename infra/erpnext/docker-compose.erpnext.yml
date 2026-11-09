@@ -1,0 +1,42 @@
+# ERPNext + Frappe HR + India Payroll — runs BESIDE COLLABIZ as a separate service with its own database.
+# COLLABIZ talks to it only through its REST API (ERPNEXT_URL / ERPNEXT_API_KEY / ERPNEXT_API_SECRET).
+# Based on the official frappe_docker "pwd.yml" layout. See infra/erpnext/README.md for building the image and first-time setup.
+#
+#   docker compose -f infra/erpnext/docker-compose.erpnext.yml --env-file infra/erpnext/erpnext.env up -d
+name: unite-erpnext
+x-erp: &erp
+  image: ${ERP_IMAGE:?set ERP_IMAGE in erpnext.env (the image you built with apps.json)}
+  restart: unless-stopped
+  volumes: [sites:/home/frappe/frappe-bench/sites, logs:/home/frappe/frappe-bench/logs]
+  depends_on: { db: { condition: service_healthy }, redis-cache: { condition: service_started }, redis-queue: { condition: service_started } }
+services:
+  db:
+    image: mariadb:10.6
+    restart: unless-stopped
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci', '--skip-character-set-client-handshake', '--skip-innodb-read-only-compressed']
+    environment: { MYSQL_ROOT_PASSWORD: '${DB_ROOT_PASSWORD:?set DB_ROOT_PASSWORD}', MARIADB_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}' }
+    healthcheck: { test: ['CMD-SHELL', 'mysqladmin ping -h localhost --password=$$MYSQL_ROOT_PASSWORD'], interval: 5s, retries: 20 }
+    volumes: [db:/var/lib/mysql]
+  redis-cache: { image: 'redis:6.2-alpine', restart: unless-stopped }
+  redis-queue: { image: 'redis:6.2-alpine', restart: unless-stopped, volumes: [redis-queue:/data] }
+  configurator:
+    <<: *erp
+    restart: 'no'
+    entrypoint: ['bash', '-c']
+    command:
+      - >
+        ls -1 apps > sites/apps.txt;
+        bench set-config -g db_host db; bench set-config -gp db_port 3306;
+        bench set-config -g redis_cache "redis://redis-cache:6379"; bench set-config -g redis_queue "redis://redis-queue:6379"; bench set-config -g redis_socketio "redis://redis-queue:6379";
+        bench set-config -gp socketio_port 9000;
+  backend: { <<: *erp }
+  websocket: { <<: *erp, command: ['node', '/home/frappe/frappe-bench/apps/frappe/socketio.js'] }
+  scheduler: { <<: *erp, command: ['bench', 'schedule'] }
+  queue-short: { <<: *erp, command: ['bench', 'worker', '--queue', 'short,default'] }
+  queue-long: { <<: *erp, command: ['bench', 'worker', '--queue', 'long,default,short'] }
+  frontend:
+    <<: *erp
+    command: ['nginx-entrypoint.sh']
+    environment: { BACKEND: 'backend:8000', SOCKETIO: 'websocket:9000', FRAPPE_SITE_NAME_HEADER: '${ERP_SITE:?set ERP_SITE}', UPSTREAM_REAL_IP_ADDRESS: '127.0.0.1', UPSTREAM_REAL_IP_HEADER: 'X-Forwarded-For', UPSTREAM_REAL_IP_RECURSIVE: 'off', PROXY_READ_TIMEOUT: '120', CLIENT_MAX_BODY_SIZE: '50m' }
+    ports: ['127.0.0.1:${ERP_PORT:-8080}:8080'] # loopback only; expose through Caddy (see README) or a VPN
+volumes: { db: {}, redis-queue: {}, sites: {}, logs: {} }

@@ -15,3 +15,4 @@ export * from './growth';
 export * from './global';
 export * from './offers';
 export * from './growth-desk';
+export * from './erp';

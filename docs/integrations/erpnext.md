@@ -1,6 +1,6 @@
 # ERPNext connection: HR, payroll and accounting (Phases B and C)
 
-**Status (9 Nov 2026): not connected.** The workspace shows ERPNext as "Not connected" until the settings below are filled in. Nothing has been bought or registered.
+**Status (9 Nov 2026): connector, HR, Payroll and Finance screens built and tested against a simulated ERPNext; real site not connected.** Setup files are in `infra/erpnext/` (see its README). The workspace shows ERPNext as "Not connected" until the settings below are filled in. Nothing has been bought or registered.
 
 ## Why connect ERPNext instead of building from scratch
 ERPNext (open source, by Frappe) already covers, and is used in production in India for:

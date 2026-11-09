@@ -22,8 +22,8 @@ This file is the single place to see where the build stands. It follows the reco
 | Registry screens with a working route | **165 of 165** |
 | Covered by API tests and a browser journey | **165** |
 | Native screens required / built / with tests | 46 / 46 / **46** |
-| API tests | 236 passing (27 suites) |
-| Browser journeys (desktop + phone) | 81 passing on a fresh database; axe scan clean on all 50 pages (2026-11-09: fixed low-contrast header "Join as partner" button and home-page step numbers) |
+| API tests | 243 passing (28 suites) |
+| Browser journeys (desktop + phone) | 82 passing on a fresh database; axe scan clean on all 50 pages (2026-11-09: fixed low-contrast header "Join as partner" button and home-page step numbers) |
 | Native tests | 77 passing (16 suites) |
 | UI component tests | 30 passing |
 
@@ -93,6 +93,20 @@ Everything needed to run a small, controlled pilot, without buying or registerin
 | **Legal review pack** (`docs/pilot/legal-review-pack.docx` + `.md`) | Every legal text the app shows or generates, compiled for counsel's tracked-changes markup, with 24 questions and an answer table. It covers partner terms, lead registration, privacy notice, team NDA, the offer agreement and work order, commission terms, the tender contract and LOI, buyer consent, and the regulated businesses. Rebuild it with `scripts/legal-pack/build.mjs`. |
 | **Pilot check-in** (web: Help & support → Pilot check-in; app: Account → Pilot check-in) | A two-minute weekly survey: usefulness 1–5, ease 1–5, recommend 0–10, features used, most valuable, blockers, wish, would keep using, may we contact you. One answer per person per 20 hours. |
 | **Pilot feedback results** (admin → Pilot feedback) | Check-ins, usefulness, ease, recommendation score (NPS) and would-keep-using against the pilot targets. Also features used, a week-by-week table, comments (contact details only with consent), CSV download, and **Send reminder** (in-app reminder to verified partner contacts who haven't checked in for 6 days; at most once a day). Visible to `analytics.read` roles only. Tests: `test/pilot.e2e.ts` (3), `apps/mobile/test/pilot.test.tsx` (2), browser journey (partner sends a check-in, a second one the same day is held back, Unite reads it). The admin page is checked by the gate sweep (X16, X17). |
+
+## HR, Payroll and Finance through ERPNext (added 2026-11-09)
+
+The open-source **ERPNext + Frappe HR + India Payroll + India Compliance** stack (all GPL-3.0, all on the `version-16` branches, checked with `git ls-remote`) runs as a **separate service** beside COLLABIZ, in `infra/erpnext/`. COLLABIZ talks to it only over its REST API, so no GPL code enters COLLABIZ and existing modules are unchanged.
+
+| Part | What it does |
+|---|---|
+| **ERPNext service** (`infra/erpnext/`) | Docker Compose stack (MariaDB, Redis, backend, workers, scheduler, websocket, nginx on loopback), `apps.json` for building the image, and a README with build, site creation, app install, Caddy exposure and connecting COLLABIZ. Compose config was verified; the image was not built here (the sandbox cannot run containers). |
+| **Connector** (`apps/api/src/modules/erp/`) | Token-authenticated REST client with timeouts and clear "ERPNext unavailable" errors. It never requests personal fields (no PAN, bank, birth date or address). The data source is live ERPNext when `ERPNEXT_URL`/`KEY`/`SECRET` are set; otherwise clearly labelled **sample data** in demo mode only. |
+| **Human Resources** (Workspace → HR; Unite admins, super admins) | Headcount, joiners, attendance today, departments by company, employee directory with search, leave approvals (sets the decision and submits it in ERPNext; audited). |
+| **Payroll** (finance, super admins only) | Latest submitted pay run: gross, deductions and net; PF, ESI, PT, LWF and TDS totals from salary-slip components; slips by employee and totals by company. |
+| **Finance & Accounting** (finance, super admins) | Receivables, payables, sales and purchases this month, and overdue invoices per company. **Commission posting**: finance-approved lines post once each as balanced Journal Entries (commission expense + input GST against partner payable + TDS payable). It needs the CA's accounts configured and is never duplicated: a local record per line, plus a check in ERPNext by reference. Refused on sample data. |
+
+Tests: `apps/api/test/erp.e2e.ts` (7) against a fake Frappe REST server (token, field list, leave PUT→GET→submit, payroll buckets, books, balanced journal entries, idempotency and recovery, ERPNext down). Also a browser journey (leave approval; payroll hidden from Unite admin; finance sees payroll and books, no posting on sample data) and the gate sweep X27–X29.
 
 ## Unite Group workspace, Phase A (added 2026-11-09)
 
@@ -212,7 +226,7 @@ Quality-gate status per screen is recorded in `docs/audit/quality-gate.json` and
 | B-09 | Investor data room and finance introductions are regulated activities | Regulatory/legal review before switching on |
 | — | Video provider for meeting rooms; language-model provider for AI drafts | Choice of provider, credentials, data-processing review |
 | — | Pilot: hosting server, two DNS names, SMTP e-mail account, operating legal entity (B-01), approved commission rates (B-10), legal review of the pack, pilot partner list | Unite Group decisions and accounts. Everything else is ready (`docs/pilot/go-live-checklist.md` §1). Nothing has been registered or purchased. |
-| — | Workspace phases B/C: an ERPNext site (Frappe Cloud or self-hosted), integration user API key, CA set-up of accounts and GST/TDS; legal names and codes for the 12 newly listed group companies | Unite Group decisions and accounts |
+| — | ERPNext: a server or Frappe Cloud site running `infra/erpnext`, integration user API key and secret, CA set-up of chart of accounts, GST/TDS, salary structures and commission accounts, one parallel payroll month; legal names and codes for the 12 newly listed group companies | Unite Group decisions and accounts |
 | — | Growth Desk: Claude API key (Phase 2), separate marketing e-mail domain and service (Phase 3), licences for any trade-data sources, legal answers to Q22–24 | Unite Group decisions and accounts |
 | — | Full launch: managed database, S3 storage (B-03), SMS with DLT (B-04), e-signature provider (B-08), payment rails, KYC providers | Commercial approval and credentials |
 

@@ -1349,7 +1349,8 @@ a.cz-app-tile:hover { border-color: var(--cz-navy-500); box-shadow: 0 6px 18px r
 .cz-ws-action:first-child strong, .cz-ws-action:first-child span { color: #fff; }
 .cz-ws-action strong { display: block; color: var(--cz-navy-900); }
 .cz-ws-action span { font-size: 12.5px; color: var(--cz-grey-600); }
-@media (max-width: 1100px) { .cz-ws-cols { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .cz-ws-cols { grid-template-columns: minmax(0, 1fr); } }
+.cz-ws-cols > * { min-width: 0; }
 @media (max-width: 640px) { .cz-ws-hero { padding: 22px 20px; } .cz-ws-hero-mark { display: none; } .cz-ws-nav form { flex: 1 1 100%; } }
 
 .cz-ws-scroll { max-width: 100%; overflow-x: auto; min-width: 0; }

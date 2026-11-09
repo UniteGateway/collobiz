@@ -167,7 +167,7 @@ export class WorkspaceController {
     const c = config();
     return [
       { key: 'email', name: 'E-mail delivery (SMTP)', purpose: 'Sign-in codes, invitations, notices', connected: c.MAIL_DRIVER === 'smtp' && !!c.SMTP_URL, needs: 'An SMTP account (Zoho, Google Workspace, SES, Brevo…)' },
-      { key: 'erpnext', name: 'ERPNext', purpose: 'HR, payroll and accounting (Phases B and C)', connected: !!c.ERPNEXT_URL && !!c.ERPNEXT_API_KEY, needs: 'An ERPNext site (self-hosted or Frappe Cloud) and an API key for a dedicated integration user' },
+      { key: 'erpnext', name: 'ERPNext', purpose: 'HR, payroll and accounting (Phases B and C)', connected: !!c.ERPNEXT_URL && !!c.ERPNEXT_API_KEY && !!c.ERPNEXT_API_SECRET, needs: 'An ERPNext site (self-hosted or Frappe Cloud) and an API key for a dedicated integration user' },
       { key: 'ai', name: 'AI provider (Claude)', purpose: 'Personal drafts, research and answers in words', connected: c.AI_PROVIDER !== 'rules', needs: 'An Anthropic API key' },
       { key: 'video', name: 'Video meetings', purpose: 'Live video in Meet', connected: c.MEETING_PROVIDER !== 'local', needs: 'A video provider (Jitsi or similar)' },
       { key: 'marketing', name: 'Marketing e-mail', purpose: 'Growth Desk outreach sending', connected: c.GROWTH_SENDING_ENABLED, needs: 'A separate marketing domain and bulk e-mail service' },

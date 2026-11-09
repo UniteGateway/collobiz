@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Icon, type IconName } from '@collabiz/ui';
+import { Alert, Icon, type IconName } from '@collabiz/ui';
 import type { WorkspaceApp } from '@collabiz/types';
 
 /** Address of the partner web app (same site, without the "admin." prefix; port 3000 locally). */
@@ -75,3 +75,11 @@ export function AppTile({ app, compact }: { app: WorkspaceApp; compact?: boolean
     ? <a className="cz-app-tile" data-app={app.key} data-status={app.status} href={href} title={title}>{body}</a>
     : <Link className="cz-app-tile" data-app={app.key} data-status={app.status} href={href} title={title}>{body}</Link>;
 }
+
+/** Says where HR / payroll / accounting figures come from. */
+export function SourceBanner({ source }: { source: 'erpnext' | 'sample' }) {
+  return source === 'erpnext'
+    ? <Alert tone="success" title="Live from ERPNext.">Changes made here are saved in ERPNext.</Alert>
+    : <Alert tone="warning" title="Sample data — ERPNext is not connected yet.">These people and figures are illustrative so you can review the screens. Connect ERPNext to see your real records (Apps → Integrations).</Alert>;
+}
+export const rupees = (r: number) => `₹${Math.round(r).toLocaleString('en-IN')}`;

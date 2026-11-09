@@ -1730,3 +1730,30 @@ suites.push({
     await shot('workspace-meet');
   },
 });
+
+// HR, Payroll and Finance (ERPNext sample data in demo): leave approval by a Unite admin; payroll and books for finance only.
+suites.push({
+  name: 'HR & Payroll · Unite admin approves leave; payroll hidden from them; finance sees payroll and books',
+  only: 'desktop',
+  run: async ({ page, ADMIN, shot, expect }) => {
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/workspace/hr');
+    await page.getByText('Sample data — ERPNext is not connected yet.').waitFor();
+    const first = page.locator('[data-leave]').first();
+    const who = await first.getAttribute('data-leave');
+    await first.getByRole('button', { name: 'Approve' }).click();
+    await page.getByText('Recently decided').waitFor();
+    await page.locator('.cz-ws-list').getByText(who ?? '', { exact: false }).first().waitFor();
+    await shot('hr-leave');
+    await page.goto(ADMIN + '/workspace/payroll');
+    await page.getByText(/Payroll is for finance and super admins/).waitFor();
+    await adminLogin(page, ADMIN, 'finance@collabiz.local');
+    await page.goto(ADMIN + '/workspace/payroll');
+    await page.getByText('Statutory deductions').waitFor();
+    await page.getByText('Provident Fund (employee)').waitFor();
+    await page.goto(ADMIN + '/workspace/finance');
+    await page.getByText('Partner commission → books').waitFor();
+    expect(await page.getByRole('button', { name: 'Post approved commission to ERPNext' }).count() === 0, 'posting offered on sample data');
+    await shot('finance-books');
+  },
+});
