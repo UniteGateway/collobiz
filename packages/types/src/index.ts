@@ -11,3 +11,4 @@ export * from './schemas';
 export * from './taxonomy';
 export * from './client';
 export * from './offers';
+export * from './ventures';

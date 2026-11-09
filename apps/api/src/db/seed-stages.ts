@@ -8,6 +8,7 @@ import type { SeedRefs } from './seed';
 import * as s from './schema';
 import { canonicalJson, encryptField, sha256 } from '../common/crypto';
 import { config } from '../config';
+import { VENTURES } from './ventures-data';
 
 export const AGREEMENTS = [
   { code: 'partner_terms', title: 'COLLABIZ Partner Terms', body: 'DRAFT — subject to legal review (Master Book §7.2).\n\n1. Eligible partner actions: register leads with buyer consent, apply to opportunities, collaborate in approved teams.\n2. Prohibited: undisclosed side deals, misrepresenting capability, sharing confidential buyer data, recruiting-based fees.\n3. Responsibilities: accurate KYC/KYB information, timely updates, compliance with applicable law.\n4. Termination: either party with notice; immediate suspension for fraud or confidentiality breach.\n5. No earnings are guaranteed. Commissions are payable only on defined contractual triggers.' },
@@ -446,6 +447,28 @@ export async function offerSalesDemo(db: Db, refs: SeedRefs) {
   }
 }
 
+/** Unite Group businesses from the Master Concept Portfolio; skips any already present (safe on existing databases). */
+export async function venturesDemo(db: Db, refs: SeedRefs) {
+  const have = new Set((await db.select({ slug: s.uniteVentures.slug }).from(s.uniteVentures)).map((r) => r.slug));
+  const rows = VENTURES.filter((v) => !have.has(v.slug)).map((v) => ({
+    num: v.num, slug: v.slug, name: v.name, category: v.category, sector: v.sector, tagline: v.tagline, summary: v.summary, stage: v.stage, roles: v.roles,
+    open: v.open && !v.regulated, regulatedReason: v.regulated ?? null, groupCompanyOrgId: v.company ? refs.orgs[v.company] ?? null : null,
+    rewardNote: 'Rewards are set in each offer from this business: commission, revenue share, fixed fee or reseller margin.',
+  }));
+  if (rows.length) await db.insert(s.uniteVentures).values(rows);
+  // Demo: Volt EPC promotes SOLCART (approved) and has asked to promote WAKIN; the rooftop sales offer belongs to SOLCART.
+  const [solcart] = await db.select().from(s.uniteVentures).where(eq(s.uniteVentures.slug, 'solcart')).limit(1);
+  const [wakin] = await db.select().from(s.uniteVentures).where(eq(s.uniteVentures.slug, 'wakin')).limit(1);
+  const [already] = await db.select({ id: s.ventureInterests.id }).from(s.ventureInterests).limit(1);
+  if (solcart && wakin && !already && refs.orgs.volt) {
+    await db.insert(s.ventureInterests).values([
+      { ventureId: solcart.id, organizationId: refs.orgs.volt, roles: ['sell_products', 'deliver_services'], regions: ['IN-MH'], message: 'We install rooftop systems across Pune and Nashik and can sell SOLCART kits with installation.', status: 'approved', decidedBy: refs.users.uniteAdmin, decisionNote: 'Approved for Maharashtra', decidedAt: new Date(), createdBy: refs.users.asha },
+      { ventureId: wakin.id, organizationId: refs.orgs.volt, roles: ['recruit_members'], regions: ['IN-MH'], message: 'We hire installers and electricians every quarter and can bring other EPC employers to WAKIN hiring drives.', status: 'pending', createdBy: refs.users.asha },
+    ]);
+    await db.update(s.directOffers).set({ ventureId: solcart.id }).where(eq(s.directOffers.code, 'DO-2026-100001'));
+  }
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
@@ -462,4 +485,5 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await stage15(db, refs);
   await offersDemo(db, refs);
   await offerSalesDemo(db, refs);
+  await venturesDemo(db, refs);
 }

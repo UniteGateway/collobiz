@@ -12,6 +12,12 @@ export const SECTORS = [
   { code: 'logistics', name: 'Logistics', priority: false },
   { code: 'ev', name: 'Electric Vehicles', priority: false },
   { code: 'agri_food', name: 'Agriculture & Food Distribution', priority: false },
+  { code: 'education', name: 'Education & Training', priority: false },
+  { code: 'media', name: 'Media & Entertainment', priority: false },
+  { code: 'employment', name: 'Jobs & Workforce', priority: false },
+  { code: 'local_commerce', name: 'Retail & Local Commerce', priority: false },
+  { code: 'social_impact', name: 'Social Impact & Community', priority: false },
+  { code: 'financial_services', name: 'Financial Services', priority: false },
 ] as const;
 export type SectorCode = (typeof SECTORS)[number]['code'];
 export const SECTOR_CODES = SECTORS.map((s) => s.code) as unknown as [SectorCode, ...SectorCode[]];

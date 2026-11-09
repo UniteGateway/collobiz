@@ -19,7 +19,7 @@ import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { AGREEMENT_REWARDS, LOOKING_FOR, OFFER_KIND_LABELS, OFFER_KINDS, OFFER_PRICING, PARTNER_TYPES, PERCENT_REWARDS, PRICE_UNITS, REWARD_MODELS, SECTOR_CODES, rewardText } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
-import { bankProfiles, commissionAgreements, commissionEntries, commissionPolicies, contractVersions, contracts, directOfferRecipients, directOfferResponses, directOffers, memberships, notifications, offerSales, organizations, partnerCapacity, partnerProfiles } from '../../db/schema';
+import { uniteVentures, ventureInterests, bankProfiles, commissionAgreements, commissionEntries, commissionPolicies, contractVersions, contracts, directOfferRecipients, directOfferResponses, directOffers, memberships, notifications, offerSales, organizations, partnerCapacity, partnerProfiles } from '../../db/schema';
 import { CommissionsModule, CommissionsService, lineAmounts } from '../commissions/commissions.controller';
 import { body } from '../../common/http';
 import { Ctx, RequireCaps, RequireOrg, type RequestContext } from '../../common/context';
@@ -36,6 +36,7 @@ const RewardSchema = z.object({ model: z.enum(REWARD_MODELS), bps: z.number().in
 type Reward = z.infer<typeof RewardSchema>;
 const TargetSchema = z.discriminatedUnion('mode', [
   z.object({ mode: z.literal('all') }),
+  z.object({ mode: z.literal('promoters') }), // partners approved to promote the offer's Unite business
   z.object({ mode: z.literal('selected'), organizationIds: z.array(z.string().uuid()).min(1).max(500) }),
   z.object({
     mode: z.literal('filtered'), sectors: z.array(z.enum(SECTOR_CODES)).max(12).default([]), regions: z.array(place).max(40).default([]),
@@ -46,6 +47,7 @@ const TargetSchema = z.discriminatedUnion('mode', [
 type Target = z.infer<typeof TargetSchema>;
 const OfferSchema = z.object({
   groupCompanyId: z.string().uuid().optional(),
+  ventureId: z.string().uuid().optional(),
   title: z.string().trim().min(5).max(200), summary: z.string().trim().min(30).max(5000),
   kind: z.enum(OFFER_KINDS), sector: z.enum(SECTOR_CODES), regions: z.array(place).max(40).default([]),
   target: TargetSchema,
@@ -100,8 +102,14 @@ export class OffersService {
   isVerifiedPartner(o?: { type: string; verificationStatus: string } | null) { return !!o && PARTNER_ORG.includes(o.type) && o.verificationStatus === 'verified'; }
 
   /** Organizations an offer would reach. Every path returns verified partners only. */
-  async audience(t: Target): Promise<{ ids: string[]; refused: string[] }> {
+  async audience(t: Target, ventureId?: string): Promise<{ ids: string[]; refused: string[] }> {
     const base = and(inArray(organizations.type, PARTNER_ORG), eq(organizations.verificationStatus, 'verified'));
+    if (t.mode === 'promoters') {
+      if (!ventureId) throw new BadRequestException({ message: 'Choose the Unite business whose promoters should receive this', issues: [{ path: 'ventureId', message: 'Choose a Unite business' }] });
+      const rows = await this.db.select({ id: organizations.id }).from(ventureInterests).innerJoin(organizations, eq(organizations.id, ventureInterests.organizationId))
+        .where(and(base, eq(ventureInterests.ventureId, ventureId), eq(ventureInterests.status, 'approved')));
+      return { ids: rows.map((x) => x.id), refused: [] };
+    }
     if (t.mode === 'all') return { ids: (await this.db.select({ id: organizations.id }).from(organizations).where(base)).map((r) => r.id), refused: [] };
     if (t.mode === 'selected') {
       const ok = (await this.db.select({ id: organizations.id }).from(organizations).where(and(base, inArray(organizations.id, t.organizationIds)))).map((r) => r.id);
@@ -211,9 +219,17 @@ export class OffersService {
     return earned;
   }
 
-  publicOffer(o: Offer, issuer: string) {
+  /** Names of the Unite businesses offers belong to, for lists. */
+  async ventureMap(ids: (string | null)[]) {
+    const v = [...new Set(ids.filter(Boolean))] as string[];
+    if (!v.length) return new Map<string, { slug: string; name: string }>();
+    const rows = await this.db.select({ id: uniteVentures.id, slug: uniteVentures.slug, name: uniteVentures.name }).from(uniteVentures).where(inArray(uniteVentures.id, v));
+    return new Map(rows.map((x) => [x.id, { slug: x.slug, name: x.name }]));
+  }
+
+  publicOffer(o: Offer, issuer: string, venture?: { slug: string; name: string } | null) {
     return {
-      id: o.id, code: o.code, title: o.title, summary: o.summary, kind: o.kind, sector: o.sector, regions: o.regions, issuer,
+      id: o.id, code: o.code, title: o.title, summary: o.summary, kind: o.kind, sector: o.sector, regions: o.regions, issuer, venture: venture ?? null,
       pricing: o.pricing, unitePrice: o.unitePrice, priceUnit: o.priceUnit,
       uniteReward: o.uniteRewardModel ? { model: o.uniteRewardModel, bps: o.uniteRewardBps, amount: o.uniteRewardAmount, text: rewardText(o.uniteRewardModel, o.uniteRewardBps, o.uniteRewardAmount) } : null,
       rewardModels: o.rewardModels, needsOffice: o.needsOffice, minManpower: o.minManpower, exclusive: o.exclusive, places: o.maxSelections,
@@ -255,7 +271,8 @@ export class OffersController {
       .innerJoin(directOffers, eq(directOffers.id, directOfferRecipients.offerId)).innerJoin(organizations, eq(organizations.id, directOffers.issuerOrgId))
       .leftJoin(directOfferResponses, and(eq(directOfferResponses.offerId, directOffers.id), eq(directOfferResponses.organizationId, ctx.orgId!)))
       .where(and(eq(directOfferRecipients.organizationId, ctx.orgId!), sql`${directOffers.status} <> 'withdrawn'`)).orderBy(desc(directOffers.createdAt)).limit(200);
-    return rows.map((r) => ({ ...this.svc.publicOffer(r.o, r.issuer), myStatus: r.rec.status, myResponse: r.resp ? { status: r.resp.status, mode: r.resp.mode, reward: rewardText(r.resp.rewardModel, r.resp.rewardBps, r.resp.rewardAmount), price: r.resp.price } : null }));
+    const vm = await this.svc.ventureMap(rows.map((r) => r.o.ventureId));
+    return rows.map((r) => ({ ...this.svc.publicOffer(r.o, r.issuer, r.o.ventureId ? vm.get(r.o.ventureId) : null), myStatus: r.rec.status, myResponse: r.resp ? { status: r.resp.status, mode: r.resp.mode, reward: rewardText(r.resp.rewardModel, r.resp.rewardBps, r.resp.rewardAmount), price: r.resp.price } : null }));
   }
 
   @Get('offers/:id')
@@ -266,7 +283,7 @@ export class OffersController {
     const [resp] = await this.db.select().from(directOfferResponses).where(and(eq(directOfferResponses.offerId, id), eq(directOfferResponses.organizationId, ctx.orgId!))).limit(1);
     const [cap] = await this.db.select().from(partnerCapacity).where(eq(partnerCapacity.organizationId, ctx.orgId!)).limit(1);
     return {
-      ...this.svc.publicOffer(r.o, r.issuer), myStatus: r.rec.status === 'sent' ? 'viewed' : r.rec.status, declineReason: r.rec.declineReason,
+      ...this.svc.publicOffer(r.o, r.issuer, r.o.ventureId ? (await this.svc.ventureMap([r.o.ventureId])).get(r.o.ventureId) : null), myStatus: r.rec.status === 'sent' ? 'viewed' : r.rec.status, declineReason: r.rec.declineReason,
       myResponse: resp ? { ...resp, rewardText: rewardText(resp.rewardModel, resp.rewardBps, resp.rewardAmount) } : null,
       myCapacity: cap ? { hasOffice: cap.hasOffice, officeLocations: cap.officeLocations, idleManpower: cap.idleManpower } : null,
       papers: resp?.status === 'selected' ? await this.svc.papersOf(resp.id).then(({ contract, agreement }) => ({ contract, agreement })) : null,
@@ -334,8 +351,8 @@ export class OffersController {
   @Post('admin/offers/audience')
   @RequireCaps('opportunity.publish')
   @HttpCode(200)
-  async preview(@Body(body(z.object({ target: TargetSchema }))) b: { target: Target }) {
-    const a = await this.svc.audience(b.target);
+  async preview(@Body(body(z.object({ target: TargetSchema, ventureId: z.string().uuid().optional() }))) b: { target: Target; ventureId?: string }) {
+    const a = await this.svc.audience(b.target, b.ventureId);
     const names = a.ids.length ? await this.db.select({ id: organizations.id, name: organizations.displayName }).from(organizations).where(inArray(organizations.id, a.ids.slice(0, 50))) : [];
     return { count: a.ids.length, partners: names, refused: a.refused.length };
   }
@@ -367,7 +384,8 @@ export class OffersController {
       leads: sql<number>`(select count(*)::int from offer_sales x where x.offer_id = ${directOffers.id} and x.status <> 'withdrawn')`,
       wonValue: sql<number>`(select coalesce(sum(x.sale_value), 0)::bigint from offer_sales x where x.offer_id = ${directOffers.id} and x.status in ('won', 'paid'))`,
     }).from(directOffers).innerJoin(organizations, eq(organizations.id, directOffers.issuerOrgId)).where(scope).orderBy(desc(directOffers.createdAt)).limit(200);
-    return rows.map((r) => ({ ...this.svc.publicOffer(r.o, r.issuer), targetMode: r.o.targetMode, sent: r.sent, viewed: r.viewed, responses: r.responses, selected: r.selected, leads: r.leads, wonValue: Number(r.wonValue) }));
+    const vm = await this.svc.ventureMap(rows.map((r) => r.o.ventureId));
+    return rows.map((r) => ({ ...this.svc.publicOffer(r.o, r.issuer, r.o.ventureId ? vm.get(r.o.ventureId) : null), targetMode: r.o.targetMode, sent: r.sent, viewed: r.viewed, responses: r.responses, selected: r.selected, leads: r.leads, wonValue: Number(r.wonValue) }));
   }
 
   @Post('admin/offers')
@@ -380,13 +398,20 @@ export class OffersController {
     const [gc] = await this.db.select().from(organizations).where(eq(organizations.id, issuer)).limit(1);
     if (!gc || gc.type !== 'group_company') throw new BadRequestException('Offers are sent by a Unite Group company');
     if (!ctx.platformRoles.includes('super_admin') && !ctx.memberships.some((m) => m.organizationId === issuer)) throw new ForbiddenException('You can only send offers for your own group company');
-    const a = await this.svc.audience(b.target);
+    let venture: typeof uniteVentures.$inferSelect | undefined;
+    if (b.ventureId) {
+      [venture] = await this.db.select().from(uniteVentures).where(eq(uniteVentures.id, b.ventureId)).limit(1);
+      if (!venture) throw new BadRequestException({ message: 'Unknown Unite business', issues: [{ path: 'ventureId', message: 'Choose a Unite business' }] });
+      if (venture.regulatedReason && !venture.clearedAt) throw new ConflictException(`${venture.name} is awaiting regulatory review and cannot be promoted yet`);
+      if (!venture.open) throw new ConflictException(`${venture.name} is not open to partners yet`);
+    }
+    const a = await this.svc.audience(b.target, b.ventureId);
     if (a.refused.length) throw new BadRequestException({ message: 'Offers go to verified partners only', issues: [{ path: 'target', message: `${a.refused.length} selected organization(s) are not verified partners` }] });
     if (!a.ids.length) throw new BadRequestException({ message: 'No verified partner matches this audience', issues: [{ path: 'target', message: 'Widen the filter or choose partners' }] });
     const code = `DO-${new Date().getUTCFullYear()}-${randomDigits(6)}`;
     const o = await this.db.transaction(async (tx) => {
       const [o] = await tx.insert(directOffers).values({
-        code, issuerOrgId: issuer, title: b.title, summary: b.summary, kind: b.kind, sector: b.sector, regions: b.regions,
+        code, issuerOrgId: issuer, ventureId: venture?.id ?? null, title: b.title, summary: b.summary, kind: b.kind, sector: b.sector, regions: b.regions,
         targetMode: b.target.mode, targetFilter: b.target.mode === 'filtered' ? b.target : null, pricing: b.pricing,
         unitePrice: b.pricing === 'partner_quote' ? null : b.unitePrice ?? null, priceUnit: b.pricing === 'partner_quote' ? null : b.priceUnit ?? null,
         uniteRewardModel: b.uniteReward?.model ?? null, uniteRewardBps: b.uniteReward && PERCENT_REWARDS.has(b.uniteReward.model) ? b.uniteReward.bps ?? null : null,
@@ -399,7 +424,7 @@ export class OffersController {
       await this.svc.notifyOrgs(a.ids, `New offer from ${gc.displayName}`, b.title, `/offers/${o.id}`, tx as unknown as Db);
       return o;
     });
-    return { ...this.svc.publicOffer(o, gc.displayName), recipients: a.ids.length };
+    return { ...this.svc.publicOffer(o, gc.displayName, venture ? { slug: venture.slug, name: venture.name } : null), recipients: a.ids.length };
   }
 
   @Get('admin/offers/:id')
@@ -414,7 +439,7 @@ export class OffersController {
       .innerJoin(organizations, eq(organizations.id, directOfferResponses.organizationId)).leftJoin(partnerCapacity, eq(partnerCapacity.organizationId, directOfferResponses.organizationId))
       .where(and(eq(directOfferResponses.offerId, id), sql`${directOfferResponses.status} <> 'withdrawn'`)).orderBy(directOfferResponses.createdAt);
     return {
-      ...this.svc.publicOffer(o, issuer.name), targetMode: o.targetMode, targetFilter: o.targetFilter,
+      ...this.svc.publicOffer(o, issuer.name, o.ventureId ? (await this.svc.ventureMap([o.ventureId])).get(o.ventureId) : null), targetMode: o.targetMode, targetFilter: o.targetFilter,
       recipients: recipients.map((r) => ({ organizationId: r.r.organizationId, name: r.name, status: r.r.status, declineReason: r.r.declineReason, viewedAt: r.r.viewedAt })),
       responses: responses.map((r) => ({
         id: r.x.id, organizationId: r.org.id, partner: r.org.displayName, city: r.org.city, country: r.org.country, level: r.org.membershipLevel,

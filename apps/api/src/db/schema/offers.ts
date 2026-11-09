@@ -7,7 +7,7 @@
  *  - Partners only see offers addressed to them and never see other partners' responses.
  * Money is stored in paise; percentages in basis points (1% = 100).
  */
-import { pgTable, uuid, text, timestamp, jsonb, integer, bigint, boolean, index, uniqueIndex, date } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, jsonb, integer, bigint, boolean, index, uniqueIndex, date, type AnyPgColumn } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { id, createdAt, updatedAt, organizations, users } from './core';
 
@@ -30,6 +30,7 @@ export const directOffers = pgTable('direct_offers', {
   id: id(),
   code: text('code').notNull(),
   issuerOrgId: uuid('issuer_org_id').notNull().references(() => organizations.id),
+  ventureId: uuid('venture_id').references((): AnyPgColumn => uniteVentures.id), // the Unite business this offer promotes
   title: text('title').notNull(),
   summary: text('summary').notNull(),
   kind: text('kind').notNull(), // sell_products | marketing | project_work | manpower | local_presence | partnership
@@ -124,3 +125,47 @@ export const offerSales = pgTable('offer_sales', {
   updatedAt: updatedAt(),
 }, (t) => [uniqueIndex('offer_sales_code_uq').on(t.code), index('offer_sales_offer_idx').on(t.offerId, t.status), index('offer_sales_partner_idx').on(t.partnerOrgId),
   uniqueIndex('offer_sales_buyer_uq').on(t.offerId, t.buyerKey).where(sql`status not in ('lost', 'withdrawn')`)]);
+
+/**
+ * Unite Group businesses (ventures) partners can promote. Regulated ventures stay closed until a super admin records
+ * regulatory clearance; partners and the public never see them before that.
+ */
+export const uniteVentures = pgTable('unite_ventures', {
+  id: id(),
+  num: integer('num').notNull(),
+  slug: text('slug').notNull(),
+  name: text('name').notNull(),
+  category: text('category').notNull(),
+  sector: text('sector').notNull(),
+  tagline: text('tagline').notNull(),
+  summary: text('summary').notNull(),
+  stage: text('stage').notNull(), // concept | pilot | building | live
+  roles: text('roles').array().notNull().default(sql`'{}'::text[]`),
+  open: boolean('open').notNull().default(false),
+  regulatedReason: text('regulated_reason'),
+  clearedAt: timestamp('cleared_at', { withTimezone: true }),
+  clearedBy: uuid('cleared_by').references(() => users.id),
+  clearanceNote: text('clearance_note'),
+  groupCompanyOrgId: uuid('group_company_org_id').references(() => organizations.id),
+  rewardNote: text('reward_note'),
+  updatedBy: uuid('updated_by').references(() => users.id),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (t) => [uniqueIndex('unite_ventures_slug_uq').on(t.slug)]);
+
+/** A partner asks to promote a venture; Unite approves or declines. Approved partners are the venture's promoters. */
+export const ventureInterests = pgTable('venture_interests', {
+  id: id(),
+  ventureId: uuid('venture_id').notNull().references(() => uniteVentures.id),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id),
+  roles: text('roles').array().notNull(),
+  regions: text('regions').array().notNull().default(sql`'{}'::text[]`),
+  message: text('message').notNull(),
+  status: text('status').notNull().default('pending'), // pending | approved | declined | withdrawn
+  decidedBy: uuid('decided_by').references(() => users.id),
+  decisionNote: text('decision_note'),
+  decidedAt: timestamp('decided_at', { withTimezone: true }),
+  createdBy: uuid('created_by').notNull().references(() => users.id),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (t) => [uniqueIndex('venture_interests_uq').on(t.ventureId, t.organizationId)]);
