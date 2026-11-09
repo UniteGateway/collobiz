@@ -39,7 +39,7 @@ export default function OffersPage() {
                 <Link href={`/offers/${o.id}`} className="cz-card cz-offer" data-offer={o.code}>
                   <div className="cz-offer-head"><span className="cz-tag">{kindLabel(o.kind)}</span>{o.exclusive && <span className="cz-tag">Exclusive</span>}<StatusBadge status={o.myStatus} tone={tone} label={label} /></div>
                   <strong className="cz-offer-title">{o.title}</strong>
-                  <span className="cz-muted">{o.issuer} · {placesText(o)}</span>
+                  <span className="cz-muted">{o.venture ? `${o.venture.name} · ` : ''}{o.issuer} · {placesText(o)}</span>
                   <span className="cz-offer-terms">{termsLine(o)}</span>
                   <span className="cz-offer-foot"><span className="cz-mono cz-muted">{o.code}</span><span className={o.open && new Date(o.deadline).getTime() - Date.now() < 3 * 86400_000 ? 'cz-due-soon' : 'cz-muted'}>{o.open ? dueText(o.deadline) : 'Closed'}</span></span>
                 </Link>

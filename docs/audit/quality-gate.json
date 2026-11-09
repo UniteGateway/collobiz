@@ -258,6 +258,7 @@
   ],
   "tests": [
    "stage14.e2e.ts",
+   "ventures.e2e.ts",
    "browser journey (scripts/e2e-suites.mjs)"
   ],
   "account": "web:asha@voltepc.example"

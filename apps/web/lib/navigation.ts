@@ -15,6 +15,7 @@ export const MODULES: Module[] = [
     tabs: [['/my/leads', 'My leads'], ['/crm/pipeline', 'Pipeline'], ['/tasks', 'Tasks'], ['/activity', 'Activity'], ['/lead-protection', 'Protection'], ['/lead-disputes', 'Disputes']] },
   { key: 'collaboration', label: 'Collaboration', icon: 'teams', home: '/teams', match: ['/teams', '/partners', '/collaboration', '/consortiums', '/ai/partners', '/ai/team-builder'],
     tabs: [['/teams', 'My teams'], ['/collaboration/requests', 'Requests'], ['/partners/find', 'Find partners'], ['/ai/partners', 'Recommended partners'], ['/ai/team-builder', 'Team builder'], ['/partners', 'Directory'], ['/consortiums', 'Consortiums']] },
+  { key: 'ventures', label: 'Unite businesses', icon: 'building', home: '/ventures', match: ['/ventures'] },
   { key: 'messages', label: 'Messages', icon: 'messages', home: '/inbox', match: ['/inbox', '/chat', '/meetings', '/announcements', '/notifications'],
     tabs: [['/inbox', 'Inbox'], ['/meetings', 'Meetings'], ['/announcements', 'Announcements'], ['/notifications', 'Notifications']] },
   { key: 'tenders', label: 'Tenders', icon: 'tenders', home: '/tenders', match: ['/tenders'], ownTabs: true },

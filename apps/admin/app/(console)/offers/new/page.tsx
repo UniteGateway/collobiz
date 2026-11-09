@@ -1,6 +1,6 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { COUNTRIES, LOOKING_FOR, LOOKING_FOR_LABELS, OFFER_KINDS, OFFER_KIND_LABELS, OFFER_PRICING, OFFER_PRICING_LABELS, PARTNER_TYPES, PARTNER_TYPE_LABELS, PERCENT_REWARDS, PRICE_UNITS, REWARD_LABELS, REWARD_MODELS, SECTORS, newIdempotencyKey, regionLabel } from '@collabiz/types';
 import { Alert, Button, Card, Checkbox, ChipSelect, PageHeader, SearchInput, Segmented, Select, Tag, TextArea, TextInput } from '@collabiz/ui';
 import { api } from '@/lib/api';
@@ -14,9 +14,14 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const inTwoWeeks = () => { const d = new Date(Date.now() + 14 * 86400_000); d.setHours(18, 0, 0, 0); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
 
 /** New direct offer: what, who receives it, price and reward, requirements. */
-export default function NewOffer() {
+function NewOfferForm() {
   const router = useRouter();
   const { me } = useSession();
+  const params = useSearchParams();
+  const ventures = useQuery<{ id: string; name: string; sector: string; open: boolean; promoters: number }[]>('/admin/ventures');
+  const openVentures = (ventures.data ?? []).filter((v) => v.open);
+  const [ventureId, setVentureId] = useState(params.get('venture') ?? '');
+  const venture = openVentures.find((v) => v.id === ventureId);
   const companies = (me?.memberships ?? []).filter((m) => m.orgType === 'group_company');
   const [gc, setGc] = useState('');
   const [f, setF] = useState({ title: '', summary: '', kind: 'sell_products', sector: 'solar', states: [] as string[], countries: [] as string[], pricing: 'unite_price', price: '', priceUnit: 'per unit', model: 'commission', value: '', allowed: ['commission'] as string[], needsOffice: false, minManpower: '', exclusive: false, places: '1', deadline: inTwoWeeks() });
@@ -25,11 +30,11 @@ export default function NewOffer() {
   const [flt, setFlt] = useState({ sectors: [] as string[], states: [] as string[], types: [] as string[], hasOffice: false, minIdle: '', lookingFor: [] as string[] });
   const [search, setSearch] = useState('');
   const partners = useQuery<Partner[]>(mode === 'selected' ? '/admin/offers/partners' : null);
-  const target = useMemo(() => (mode === 'all' ? { mode } : mode === 'selected' ? { mode, organizationIds: chosen } : { mode, sectors: flt.sectors, regions: flt.states, partnerTypes: flt.types, hasOffice: flt.hasOffice || undefined, minIdleManpower: flt.minIdle ? Number(flt.minIdle) : undefined, lookingFor: flt.lookingFor }), [mode, chosen, flt]);
+  const target = useMemo(() => (mode === 'all' || mode === 'promoters' ? { mode } : mode === 'selected' ? { mode, organizationIds: chosen } : { mode, sectors: flt.sectors, regions: flt.states, partnerTypes: flt.types, hasOffice: flt.hasOffice || undefined, minIdleManpower: flt.minIdle ? Number(flt.minIdle) : undefined, lookingFor: flt.lookingFor }), [mode, chosen, flt]);
   const [aud, setAud] = useState<{ count: number; partners: { id: string; name: string }[] } | null>(null);
   useEffect(() => {
     if (mode === 'selected' && !chosen.length) { setAud({ count: 0, partners: [] }); return; }
-    const t = setTimeout(() => { api.post<{ count: number; partners: { id: string; name: string }[] }>('/admin/offers/audience', { target }).then(setAud).catch(() => setAud(null)); }, 250);
+    const t = setTimeout(() => { api.post<{ count: number; partners: { id: string; name: string }[] }>('/admin/offers/audience', { target, ventureId: ventureId || undefined }).then(setAud).catch(() => setAud(null)); }, 250);
     return () => clearTimeout(t);
   }, [target, mode, chosen.length]);
   useEffect(() => { if (f.pricing !== 'partner_quote' && !f.allowed.includes(f.model)) setF((x) => ({ ...x, allowed: [...x.allowed, x.model] })); }, [f.model, f.pricing]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -37,7 +42,7 @@ export default function NewOffer() {
   const pct = PERCENT_REWARDS.has(f.model);
   const create = useMutation(async () => {
     const o = await api.request<{ id: string }>('POST', '/admin/offers', {
-      groupCompanyId: gc || companies[0]?.organizationId, title: f.title, summary: f.summary, kind: f.kind, sector: f.sector, regions: [...f.states, ...f.countries], target,
+      groupCompanyId: gc || companies[0]?.organizationId, ventureId: ventureId || undefined, title: f.title, summary: f.summary, kind: f.kind, sector: f.sector, regions: [...f.states, ...f.countries], target,
       pricing: f.pricing, ...(f.pricing !== 'partner_quote' ? { unitePrice: toMinor(f.price), priceUnit: f.price ? f.priceUnit : undefined, uniteReward: { model: f.model, ...(pct ? { bps: Math.round(Number(f.value) * 100) } : { amount: toMinor(f.value) }) } } : {}),
       rewardModels: f.allowed, needsOffice: f.needsOffice, minManpower: f.minManpower ? Number(f.minManpower) : undefined, exclusive: f.exclusive, maxSelections: f.exclusive ? 1 : Number(f.places || 1),
       deadline: new Date(f.deadline).toISOString(),
@@ -52,6 +57,7 @@ export default function NewOffer() {
       <form noValidate onSubmit={(ev) => { ev.preventDefault(); create.run(); }} className="cz-stack">
         {create.error && <Alert tone="danger">{create.error}</Alert>}
         <Card title="1. What you are offering">
+          <Select label="Unite business (optional)" value={ventureId} onChange={(ev) => { setVentureId(ev.target.value); const v = openVentures.find((x) => x.id === ev.target.value); if (v) setF((x) => ({ ...x, sector: v.sector })); }} placeholder="Not for a specific business" options={openVentures.map((v) => ({ value: v.id, label: v.name }))} hint="Partners see which Unite business the offer is for; its approved promoters can receive it directly." />
           {companies.length > 1 && <Select label="Sent by" value={gc} onChange={(ev) => setGc(ev.target.value)} options={companies.map((c) => ({ value: c.organizationId, label: c.orgName }))} />}
           <TextInput label="Title" value={f.title} onChange={(ev) => setF({ ...f, title: ev.target.value })} error={e.title} hint="e.g. Sell rooftop solar packages to factories in your region" />
           <TextArea label="What you need and what the partner gets" value={f.summary} onChange={(ev) => setF({ ...f, summary: ev.target.value })} error={e.summary} hint="At least 30 characters" />
@@ -64,7 +70,7 @@ export default function NewOffer() {
         </Card>
 
         <Card title="2. Who receives it">
-          <div style={{ marginBottom: 14 }}><Segmented label="Audience" value={mode} onChange={setMode} options={[{ value: 'all', label: 'All verified partners' }, { value: 'selected', label: 'Choose partners' }, { value: 'filtered', label: 'Filter by capacity' }]} /></div>
+          <div style={{ marginBottom: 14 }}><Segmented label="Audience" value={mode} onChange={setMode} options={[...(venture ? [{ value: 'promoters', label: `${venture.name} promoters (${venture.promoters})` }] : []), { value: 'all', label: 'All verified partners' }, { value: 'selected', label: 'Choose partners' }, { value: 'filtered', label: 'Filter by capacity' }]} /></div>
           {mode === 'selected' && (
             <>
               <SearchInput label="Search partners" value={search} onChange={(ev) => setSearch(ev.target.value)} placeholder="Company name" />
@@ -126,4 +132,8 @@ export default function NewOffer() {
       </form>
     </div>
   );
+}
+
+export default function NewOffer() {
+  return <Suspense><NewOfferForm /></Suspense>;
 }

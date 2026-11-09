@@ -1211,3 +1211,24 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
   .cz-papers > div { grid-template-columns: 90px minmax(0, 1fr); }
   .cz-papers > div > span:last-child { grid-column: 2; }
 }
+
+/* Unite businesses */
+.cz-venture-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.cz-venture { display: flex; flex-direction: column; gap: 8px; height: 100%; color: inherit; text-decoration: none; transition: border-color .15s, box-shadow .15s; }
+.cz-venture:hover { border-color: var(--cz-grey-300); box-shadow: 0 2px 10px rgba(16, 37, 66, .06); }
+.cz-venture-head { display: flex; gap: 12px; align-items: center; }
+.cz-venture-head > div { display: flex; flex-direction: column; min-width: 0; }
+.cz-venture-head strong { color: var(--cz-navy-900); font-size: 16px; }
+.cz-venture-head .cz-muted { font-size: 12.5px; }
+.cz-venture-tag { font-weight: 600; color: var(--cz-navy-900); font-size: 14px; }
+.cz-venture-sum { margin: 0; font-size: 13.5px; color: var(--cz-grey-700, #3E4C5E); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.cz-venture-foot { margin-top: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12.5px; }
+.cz-venture-foot > .cz-badge { margin-left: auto; }
+.cz-vmark { flex: none; display: inline-grid; place-items: center; border-radius: 12px; font-weight: 700; letter-spacing: .02em; color: #fff; background: var(--cz-navy-700, #1F3A64); }
+.cz-vmark-solar, .cz-vmark-power_equipment { background: #3F8A31; } .cz-vmark-real_estate, .cz-vmark-infrastructure { background: #8A5A2B; }
+.cz-vmark-local_commerce { background: #B45309; } .cz-vmark-employment { background: #0F6E8C; } .cz-vmark-education { background: #5B4BB7; }
+.cz-vmark-media { background: #B23A6B; } .cz-vmark-social_impact { background: #2F7F7A; } .cz-vmark-financial_services { background: #445069; }
+.cz-vmark-ev { background: #1E7FB8; } .cz-vmark-agri_food { background: #5E7F2A; } .cz-vmark-technology, .cz-vmark-consulting { background: #1F3A64; }
+.cz-check-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.cz-check-list li { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.cz-check-list .cz-icon { color: var(--cz-green-600); }

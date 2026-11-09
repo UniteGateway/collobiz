@@ -25,7 +25,7 @@ export default function OfferDetail() {
   const [label, tone] = MY_STATUS[o.myStatus] ?? [o.myStatus, 'neutral'];
   const decided = ['selected', 'not_selected'].includes(o.myStatus);
   return (
-    <Screen page={{ ...PAGE, title: o.title }} eyebrow={`Offer from ${o.issuer}`} actions={<StatusBadge status={o.myStatus} tone={tone} label={label} />}>
+    <Screen page={{ ...PAGE, title: o.title }} eyebrow={o.venture ? `${o.venture.name} · offer from ${o.issuer}` : `Offer from ${o.issuer}`} actions={<StatusBadge status={o.myStatus} tone={tone} label={label} />}>
       <p style={{ marginTop: -6 }}><Link href="/offers" className="cz-back"><Icon name="prev" size={14} />All offers</Link></p>
       <dl className="cz-od-facts" style={{ marginBottom: 20 }}>
         <div><dt>What</dt><dd>{kindLabel(o.kind)}</dd></div>

@@ -2372,7 +2372,8 @@
     "placeholder": false,
     "smokeHit": true,
     "apiTests": [
-      "stage14.e2e.ts"
+      "stage14.e2e.ts",
+      "ventures.e2e.ts"
     ],
     "native": null,
     "nativeTest": false

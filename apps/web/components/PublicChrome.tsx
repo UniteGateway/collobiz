@@ -8,6 +8,7 @@ const NAV = [
   { href: '/about', label: 'About' },
   { href: '/how-it-works', label: 'How it works' },
   { href: '/group-companies', label: 'Unite Group' },
+  { href: '/businesses', label: 'Businesses' },
   { href: '/catalogue', label: 'Catalogue' },
   { href: '/opportunities/public', label: 'Opportunities' },
   { href: '/membership', label: 'Membership' },
@@ -51,7 +52,7 @@ export function PublicFooter() {
             <p className="cz-muted" style={{ marginTop: 14, maxWidth: 320 }}>The Unite-first B2B collaboration network. Powered by Unite Group.</p>
           </div>
           <nav aria-label="Platform"><h4>Platform</h4><Link href="/how-it-works">How it works</Link><Link href="/opportunities/public">Opportunities</Link><Link href="/catalogue">Catalogue</Link><Link href="/membership">Membership</Link></nav>
-          <nav aria-label="Company"><h4>Company</h4><Link href="/about">About</Link><Link href="/group-companies">Unite Group</Link><Link href="/success-stories">Success stories</Link><Link href="/locations">Partner locations</Link></nav>
+          <nav aria-label="Company"><h4>Company</h4><Link href="/about">About</Link><Link href="/group-companies">Unite Group</Link><Link href="/businesses">Unite businesses</Link><Link href="/success-stories">Success stories</Link><Link href="/locations">Partner locations</Link></nav>
           <nav aria-label="Support"><h4>Support</h4><Link href="/support/contact">Contact &amp; FAQs</Link><Link href="/verify-certificate">Verify a certificate</Link><Link href="/settings/privacy">Privacy &amp; data rights</Link></nav>
         </div>
         <p className="cz-footer-legal">

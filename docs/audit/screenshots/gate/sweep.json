@@ -318,7 +318,7 @@
   "id": "036",
   "title": "Opportunity Detail Page",
   "vw": "desktop",
-  "route": "/opportunities/fb59b33c-d09e-42e5-a062-caaa1d30d87a",
+  "route": "/opportunities/1d70f446-5630-406f-957f-f75de21c4fab",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -345,7 +345,7 @@
   "id": "039",
   "title": "Product & Service Detail",
   "vw": "desktop",
-  "route": "/catalogue/c2200175-b296-417a-bafa-4a053fcca9a7",
+  "route": "/catalogue/2976f6d7-0916-4f18-b8aa-5343e8515157",
   "account": "anon",
   "denied": false,
   "issues": []
@@ -363,7 +363,7 @@
   "id": "041",
   "title": "Opportunity Eligibility Checker",
   "vw": "desktop",
-  "route": "/opportunities/fb59b33c-d09e-42e5-a062-caaa1d30d87a/eligibility",
+  "route": "/opportunities/1d70f446-5630-406f-957f-f75de21c4fab/eligibility",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -372,7 +372,7 @@
   "id": "042",
   "title": "Apply / Express Interest",
   "vw": "desktop",
-  "route": "/opportunities/fb59b33c-d09e-42e5-a062-caaa1d30d87a/apply",
+  "route": "/opportunities/1d70f446-5630-406f-957f-f75de21c4fab/apply",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -417,7 +417,7 @@
   "id": "047",
   "title": "Upload Lead Supporting Documents",
   "vw": "desktop",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/documents",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/documents",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -426,7 +426,7 @@
   "id": "048",
   "title": "Duplicate Lead Detection",
   "vw": "desktop",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/duplicates",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/duplicates",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -435,7 +435,7 @@
   "id": "049",
   "title": "Lead Registration Confirmation",
   "vw": "desktop",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/confirmation",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/confirmation",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -444,7 +444,7 @@
   "id": "050",
   "title": "Unite First-Review Status",
   "vw": "desktop",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/review-status",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/review-status",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -453,7 +453,7 @@
   "id": "051",
   "title": "Protected Lead Ownership Certificate",
   "vw": "desktop",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/certificate",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/certificate",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -462,7 +462,7 @@
   "id": "052",
   "title": "Customer CRM Profile",
   "vw": "desktop",
-  "route": "/crm/customers/05077419-2977-4a52-93ad-7fd7890c122e",
+  "route": "/crm/customers/24b17e1f-bf91-4e3c-8231-264477af0ba4",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -480,7 +480,7 @@
   "id": "054",
   "title": "Lead Follow-up & Conversion Timeline",
   "vw": "desktop",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/timeline",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/timeline",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -516,7 +516,7 @@
   "id": "058",
   "title": "Invite Partner to Collaborate",
   "vw": "desktop",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/invite",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/invite",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -543,7 +543,7 @@
   "id": "061",
   "title": "Roles & Responsibilities Allocation",
   "vw": "desktop",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/roles",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/roles",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -552,7 +552,7 @@
   "id": "062",
   "title": "Confidentiality / NDA Workspace",
   "vw": "desktop",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/nda",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/nda",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -561,7 +561,7 @@
   "id": "063",
   "title": "Commercial Sharing Proposal",
   "vw": "desktop",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/sharing",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/sharing",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -570,7 +570,7 @@
   "id": "064",
   "title": "Collaboration Approval & Team Activation",
   "vw": "desktop",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/activation",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/activation",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -597,7 +597,7 @@
   "id": "067",
   "title": "Tender Documents & Eligibility",
   "vw": "desktop",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/documents",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/documents",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -606,7 +606,7 @@
   "id": "068",
   "title": "Partner Bid Submission",
   "vw": "desktop",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/bid",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/bid",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -615,7 +615,7 @@
   "id": "069",
   "title": "Bid Comparison Table",
   "vw": "desktop",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/comparison",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/comparison",
   "account": "mfa:unite.admin@collabiz.local",
   "denied": false,
   "issues": []
@@ -624,7 +624,7 @@
   "id": "070",
   "title": "Technical Evaluation",
   "vw": "desktop",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/technical",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/technical",
   "account": "mfa:evaluator@collabiz.local",
   "denied": false,
   "issues": []
@@ -633,7 +633,7 @@
   "id": "071",
   "title": "Commercial Evaluation",
   "vw": "desktop",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/commercial",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/commercial",
   "account": "mfa:unite.admin@collabiz.local",
   "denied": false,
   "issues": []
@@ -642,7 +642,7 @@
   "id": "072",
   "title": "AI Proposal Draft Builder",
   "vw": "desktop",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/ai-proposal",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/ai-proposal",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -651,7 +651,7 @@
   "id": "073",
   "title": "Negotiation & Revision Workspace",
   "vw": "desktop",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/negotiation",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/negotiation",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -660,7 +660,7 @@
   "id": "074",
   "title": "Award, LOI & Work Order",
   "vw": "desktop",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/award",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/award",
   "account": "mfa:unite.admin@collabiz.local",
   "denied": false,
   "issues": []
@@ -678,7 +678,7 @@
   "id": "076",
   "title": "Project Overview Dashboard",
   "vw": "desktop",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -687,7 +687,7 @@
   "id": "077",
   "title": "Milestone & Schedule Planner",
   "vw": "desktop",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/milestones",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/milestones",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -696,7 +696,7 @@
   "id": "078",
   "title": "Work Allocation & Subcontractors",
   "vw": "desktop",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/allocation",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/allocation",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -705,7 +705,7 @@
   "id": "079",
   "title": "Site Progress & Photo Updates",
   "vw": "desktop",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/progress",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/progress",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -714,7 +714,7 @@
   "id": "080",
   "title": "Materials & Procurement Tracker",
   "vw": "desktop",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/materials",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/materials",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -723,7 +723,7 @@
   "id": "081",
   "title": "Project Documents Repository",
   "vw": "desktop",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/documents",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/documents",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -732,7 +732,7 @@
   "id": "082",
   "title": "Quality & Safety Inspection",
   "vw": "desktop",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/inspections",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/inspections",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -741,7 +741,7 @@
   "id": "083",
   "title": "Invoice / Milestone Certification",
   "vw": "desktop",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/certification",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/certification",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -750,7 +750,7 @@
   "id": "084",
   "title": "Project Closure & Completion Certificate",
   "vw": "desktop",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/closure",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/closure",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -822,7 +822,7 @@
   "id": "092",
   "title": "Shipping & Logistics Tracking",
   "vw": "desktop",
-  "route": "/trading/orders/b1a4e908-54c0-497d-9527-8a733726378b/shipping",
+  "route": "/trading/orders/97161493-f81f-48e8-ae98-03f916aa8bb6/shipping",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -858,7 +858,7 @@
   "id": "096",
   "title": "Commission Agreement Detail",
   "vw": "desktop",
-  "route": "/commissions/agreements/0e1ced08-a7a7-40ce-8fd9-2bacad3aab48",
+  "route": "/commissions/agreements/a9afa513-8302-4d4d-8d84-5475cb9aec7a",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -948,7 +948,7 @@
   "id": "106",
   "title": "One-to-One Partner Chat",
   "vw": "desktop",
-  "route": "/chat/9d7dcfb0-0bc0-4e8b-ab5e-62c4e1ccde2f",
+  "route": "/chat/baf52928-0000-4a03-8947-b51cdfbe5a3b",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -957,7 +957,7 @@
   "id": "107",
   "title": "Project Group Chat",
   "vw": "desktop",
-  "route": "/chat/groups/eb3aaa69-39a7-4a77-a201-58503a9bf175",
+  "route": "/chat/groups/a7cd17d3-26dd-4996-ba71-6780703c9595",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -966,7 +966,7 @@
   "id": "108",
   "title": "Audio / Video Meeting Room",
   "vw": "desktop",
-  "route": "/meetings/50813e0d-533e-4196-af0a-b0474bef0661/room",
+  "route": "/meetings/c36be674-0474-44f5-8e67-cc5fd6e42178/room",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -1047,7 +1047,7 @@
   "id": "117",
   "title": "Certification Assessment",
   "vw": "desktop",
-  "route": "/learning/assessments/7bbcede2-463a-4e14-b75e-d61d863276a9",
+  "route": "/learning/assessments/cb5a9cb4-59c2-401b-9057-4d99be9033fc",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -1362,7 +1362,7 @@
   "id": "152",
   "title": "Digital Lead Registration Certificate",
   "vw": "desktop",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/registration-certificate",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/registration-certificate",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -1389,7 +1389,7 @@
   "id": "155",
   "title": "Consortium Member Roles & Sharing",
   "vw": "desktop",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/members",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/members",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -1398,7 +1398,7 @@
   "id": "156",
   "title": "Joint Proposal & Team Workspace",
   "vw": "desktop",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/workspace",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/workspace",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -1407,7 +1407,7 @@
   "id": "157",
   "title": "Commission Agreement & Milestones",
   "vw": "desktop",
-  "route": "/commissions/agreements/0e1ced08-a7a7-40ce-8fd9-2bacad3aab48/milestones",
+  "route": "/commissions/agreements/a9afa513-8302-4d4d-8d84-5475cb9aec7a/milestones",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -1461,7 +1461,7 @@
   "id": "163",
   "title": "Partner Reputation Profile",
   "vw": "desktop",
-  "route": "/partners/795bdb99-cb36-4a52-9bb2-6973561381b9/reputation",
+  "route": "/partners/7ad00b2b-7fd0-4045-b812-46d287be07a1/reputation",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -1497,7 +1497,7 @@
   "id": "X02",
   "title": "Offer (partner)",
   "vw": "desktop",
-  "route": "/offers/301058d1-4d6a-43ab-ba0d-62179ccdfcae",
+  "route": "/offers/950098ae-4c53-4ce8-af27-ba75cdfa8138",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -1533,7 +1533,7 @@
   "id": "X06",
   "title": "Direct offer (admin)",
   "vw": "desktop",
-  "route": "/offers/301058d1-4d6a-43ab-ba0d-62179ccdfcae",
+  "route": "/offers/950098ae-4c53-4ce8-af27-ba75cdfa8138",
   "account": "admin:unite.admin@collabiz.local",
   "denied": false,
   "issues": []
@@ -1542,8 +1542,17 @@
   "id": "X07",
   "title": "Offer with sales (partner)",
   "vw": "desktop",
-  "route": "/offers/d4141978-c27c-4121-96d3-b77f60fd8178",
+  "route": "/offers/9011d002-67c8-4baa-aab0-466c315c51e4",
   "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "X08",
+  "title": "Offer with sales (admin)",
+  "vw": "desktop",
+  "route": "/offers/9011d002-67c8-4baa-aab0-466c315c51e4",
+  "account": "admin:unite.admin@collabiz.local",
   "denied": false,
   "issues": []
  },
@@ -1551,8 +1560,53 @@
   "id": "X09",
   "title": "Offer commission schedule",
   "vw": "desktop",
-  "route": "/commissions/agreements/f225cb83-ac3b-4102-9d30-fe76414a2ae7/milestones",
+  "route": "/commissions/agreements/4107074a-2d25-4d73-bb5d-f022a77bebcc/milestones",
   "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "X10",
+  "title": "Unite businesses",
+  "vw": "desktop",
+  "route": "/ventures",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "X11",
+  "title": "Unite business (partner)",
+  "vw": "desktop",
+  "route": "/ventures/solcart",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "X12",
+  "title": "Unite businesses (public)",
+  "vw": "desktop",
+  "route": "/businesses",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "X14",
+  "title": "Unite business (admin)",
+  "vw": "desktop",
+  "route": "/ventures/9a6bb204-f7ff-4a0b-82f3-2e9400178bf5",
+  "account": "admin:unite.admin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "X15",
+  "title": "New offer for a business",
+  "vw": "desktop",
+  "route": "/offers/new?venture=9a6bb204-f7ff-4a0b-82f3-2e9400178bf5",
+  "account": "admin:unite.admin@collabiz.local",
   "denied": false,
   "issues": []
  },
@@ -1875,7 +1929,7 @@
   "id": "036",
   "title": "Opportunity Detail Page",
   "vw": "mobile",
-  "route": "/opportunities/fb59b33c-d09e-42e5-a062-caaa1d30d87a",
+  "route": "/opportunities/1d70f446-5630-406f-957f-f75de21c4fab",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -1902,7 +1956,7 @@
   "id": "039",
   "title": "Product & Service Detail",
   "vw": "mobile",
-  "route": "/catalogue/c2200175-b296-417a-bafa-4a053fcca9a7",
+  "route": "/catalogue/2976f6d7-0916-4f18-b8aa-5343e8515157",
   "account": "anon",
   "denied": false,
   "issues": []
@@ -1920,7 +1974,7 @@
   "id": "041",
   "title": "Opportunity Eligibility Checker",
   "vw": "mobile",
-  "route": "/opportunities/fb59b33c-d09e-42e5-a062-caaa1d30d87a/eligibility",
+  "route": "/opportunities/1d70f446-5630-406f-957f-f75de21c4fab/eligibility",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -1929,7 +1983,7 @@
   "id": "042",
   "title": "Apply / Express Interest",
   "vw": "mobile",
-  "route": "/opportunities/fb59b33c-d09e-42e5-a062-caaa1d30d87a/apply",
+  "route": "/opportunities/1d70f446-5630-406f-957f-f75de21c4fab/apply",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -1974,7 +2028,7 @@
   "id": "047",
   "title": "Upload Lead Supporting Documents",
   "vw": "mobile",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/documents",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/documents",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -1983,7 +2037,7 @@
   "id": "048",
   "title": "Duplicate Lead Detection",
   "vw": "mobile",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/duplicates",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/duplicates",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -1992,7 +2046,7 @@
   "id": "049",
   "title": "Lead Registration Confirmation",
   "vw": "mobile",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/confirmation",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/confirmation",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -2001,7 +2055,7 @@
   "id": "050",
   "title": "Unite First-Review Status",
   "vw": "mobile",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/review-status",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/review-status",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -2010,7 +2064,7 @@
   "id": "051",
   "title": "Protected Lead Ownership Certificate",
   "vw": "mobile",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/certificate",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/certificate",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -2019,7 +2073,7 @@
   "id": "052",
   "title": "Customer CRM Profile",
   "vw": "mobile",
-  "route": "/crm/customers/05077419-2977-4a52-93ad-7fd7890c122e",
+  "route": "/crm/customers/24b17e1f-bf91-4e3c-8231-264477af0ba4",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2037,7 +2091,7 @@
   "id": "054",
   "title": "Lead Follow-up & Conversion Timeline",
   "vw": "mobile",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/timeline",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/timeline",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -2073,7 +2127,7 @@
   "id": "058",
   "title": "Invite Partner to Collaborate",
   "vw": "mobile",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/invite",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/invite",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2100,7 +2154,7 @@
   "id": "061",
   "title": "Roles & Responsibilities Allocation",
   "vw": "mobile",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/roles",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/roles",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2109,7 +2163,7 @@
   "id": "062",
   "title": "Confidentiality / NDA Workspace",
   "vw": "mobile",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/nda",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/nda",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2118,7 +2172,7 @@
   "id": "063",
   "title": "Commercial Sharing Proposal",
   "vw": "mobile",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/sharing",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/sharing",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2127,7 +2181,7 @@
   "id": "064",
   "title": "Collaboration Approval & Team Activation",
   "vw": "mobile",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/activation",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/activation",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2154,7 +2208,7 @@
   "id": "067",
   "title": "Tender Documents & Eligibility",
   "vw": "mobile",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/documents",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/documents",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2163,7 +2217,7 @@
   "id": "068",
   "title": "Partner Bid Submission",
   "vw": "mobile",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/bid",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/bid",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2172,7 +2226,7 @@
   "id": "069",
   "title": "Bid Comparison Table",
   "vw": "mobile",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/comparison",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/comparison",
   "account": "mfa:unite.admin@collabiz.local",
   "denied": false,
   "issues": []
@@ -2181,7 +2235,7 @@
   "id": "070",
   "title": "Technical Evaluation",
   "vw": "mobile",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/technical",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/technical",
   "account": "mfa:evaluator@collabiz.local",
   "denied": false,
   "issues": []
@@ -2190,7 +2244,7 @@
   "id": "071",
   "title": "Commercial Evaluation",
   "vw": "mobile",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/commercial",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/commercial",
   "account": "mfa:unite.admin@collabiz.local",
   "denied": false,
   "issues": []
@@ -2199,7 +2253,7 @@
   "id": "072",
   "title": "AI Proposal Draft Builder",
   "vw": "mobile",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/ai-proposal",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/ai-proposal",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2208,7 +2262,7 @@
   "id": "073",
   "title": "Negotiation & Revision Workspace",
   "vw": "mobile",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/negotiation",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/negotiation",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2217,7 +2271,7 @@
   "id": "074",
   "title": "Award, LOI & Work Order",
   "vw": "mobile",
-  "route": "/tenders/b5e1481f-4b78-470c-acb8-f0df384c34f3/award",
+  "route": "/tenders/5c72e5da-b0d8-43ed-926b-04f80ca28912/award",
   "account": "mfa:unite.admin@collabiz.local",
   "denied": false,
   "issues": []
@@ -2235,7 +2289,7 @@
   "id": "076",
   "title": "Project Overview Dashboard",
   "vw": "mobile",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2244,7 +2298,7 @@
   "id": "077",
   "title": "Milestone & Schedule Planner",
   "vw": "mobile",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/milestones",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/milestones",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2253,7 +2307,7 @@
   "id": "078",
   "title": "Work Allocation & Subcontractors",
   "vw": "mobile",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/allocation",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/allocation",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2262,7 +2316,7 @@
   "id": "079",
   "title": "Site Progress & Photo Updates",
   "vw": "mobile",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/progress",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/progress",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2271,7 +2325,7 @@
   "id": "080",
   "title": "Materials & Procurement Tracker",
   "vw": "mobile",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/materials",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/materials",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2280,7 +2334,7 @@
   "id": "081",
   "title": "Project Documents Repository",
   "vw": "mobile",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/documents",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/documents",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2289,7 +2343,7 @@
   "id": "082",
   "title": "Quality & Safety Inspection",
   "vw": "mobile",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/inspections",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/inspections",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2298,7 +2352,7 @@
   "id": "083",
   "title": "Invoice / Milestone Certification",
   "vw": "mobile",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/certification",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/certification",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2307,7 +2361,7 @@
   "id": "084",
   "title": "Project Closure & Completion Certificate",
   "vw": "mobile",
-  "route": "/projects/1a834792-ffe3-4c0e-abfd-e45282cb21db/closure",
+  "route": "/projects/0af1db68-2fb9-4300-9d1b-71cf63cecabb/closure",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2379,7 +2433,7 @@
   "id": "092",
   "title": "Shipping & Logistics Tracking",
   "vw": "mobile",
-  "route": "/trading/orders/b1a4e908-54c0-497d-9527-8a733726378b/shipping",
+  "route": "/trading/orders/97161493-f81f-48e8-ae98-03f916aa8bb6/shipping",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2415,7 +2469,7 @@
   "id": "096",
   "title": "Commission Agreement Detail",
   "vw": "mobile",
-  "route": "/commissions/agreements/0e1ced08-a7a7-40ce-8fd9-2bacad3aab48",
+  "route": "/commissions/agreements/a9afa513-8302-4d4d-8d84-5475cb9aec7a",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -2505,7 +2559,7 @@
   "id": "106",
   "title": "One-to-One Partner Chat",
   "vw": "mobile",
-  "route": "/chat/9d7dcfb0-0bc0-4e8b-ab5e-62c4e1ccde2f",
+  "route": "/chat/baf52928-0000-4a03-8947-b51cdfbe5a3b",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2514,7 +2568,7 @@
   "id": "107",
   "title": "Project Group Chat",
   "vw": "mobile",
-  "route": "/chat/groups/eb3aaa69-39a7-4a77-a201-58503a9bf175",
+  "route": "/chat/groups/a7cd17d3-26dd-4996-ba71-6780703c9595",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2523,7 +2577,7 @@
   "id": "108",
   "title": "Audio / Video Meeting Room",
   "vw": "mobile",
-  "route": "/meetings/50813e0d-533e-4196-af0a-b0474bef0661/room",
+  "route": "/meetings/c36be674-0474-44f5-8e67-cc5fd6e42178/room",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2604,7 +2658,7 @@
   "id": "117",
   "title": "Certification Assessment",
   "vw": "mobile",
-  "route": "/learning/assessments/7bbcede2-463a-4e14-b75e-d61d863276a9",
+  "route": "/learning/assessments/cb5a9cb4-59c2-401b-9057-4d99be9033fc",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2919,7 +2973,7 @@
   "id": "152",
   "title": "Digital Lead Registration Certificate",
   "vw": "mobile",
-  "route": "/leads/bc27278b-eac3-466f-b2d5-0513b1170b6d/registration-certificate",
+  "route": "/leads/c5f627de-d249-4f28-a7c0-b96b71dba18b/registration-certificate",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -2946,7 +3000,7 @@
   "id": "155",
   "title": "Consortium Member Roles & Sharing",
   "vw": "mobile",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/members",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/members",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2955,7 +3009,7 @@
   "id": "156",
   "title": "Joint Proposal & Team Workspace",
   "vw": "mobile",
-  "route": "/teams/b15c6a98-815c-4bf9-9c2d-de7c8ecbadc8/workspace",
+  "route": "/teams/74464ad6-b6c6-44bd-9ea8-af09eb96bb48/workspace",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -2964,7 +3018,7 @@
   "id": "157",
   "title": "Commission Agreement & Milestones",
   "vw": "mobile",
-  "route": "/commissions/agreements/0e1ced08-a7a7-40ce-8fd9-2bacad3aab48/milestones",
+  "route": "/commissions/agreements/a9afa513-8302-4d4d-8d84-5475cb9aec7a/milestones",
   "account": "web:meera@consult.example",
   "denied": false,
   "issues": []
@@ -3018,7 +3072,7 @@
   "id": "163",
   "title": "Partner Reputation Profile",
   "vw": "mobile",
-  "route": "/partners/795bdb99-cb36-4a52-9bb2-6973561381b9/reputation",
+  "route": "/partners/7ad00b2b-7fd0-4045-b812-46d287be07a1/reputation",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -3054,7 +3108,7 @@
   "id": "X02",
   "title": "Offer (partner)",
   "vw": "mobile",
-  "route": "/offers/301058d1-4d6a-43ab-ba0d-62179ccdfcae",
+  "route": "/offers/950098ae-4c53-4ce8-af27-ba75cdfa8138",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
@@ -3090,7 +3144,7 @@
   "id": "X06",
   "title": "Direct offer (admin)",
   "vw": "mobile",
-  "route": "/offers/301058d1-4d6a-43ab-ba0d-62179ccdfcae",
+  "route": "/offers/950098ae-4c53-4ce8-af27-ba75cdfa8138",
   "account": "admin:unite.admin@collabiz.local",
   "denied": false,
   "issues": []
@@ -3099,8 +3153,17 @@
   "id": "X07",
   "title": "Offer with sales (partner)",
   "vw": "mobile",
-  "route": "/offers/d4141978-c27c-4121-96d3-b77f60fd8178",
+  "route": "/offers/9011d002-67c8-4baa-aab0-466c315c51e4",
   "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "X08",
+  "title": "Offer with sales (admin)",
+  "vw": "mobile",
+  "route": "/offers/9011d002-67c8-4baa-aab0-466c315c51e4",
+  "account": "admin:unite.admin@collabiz.local",
   "denied": false,
   "issues": []
  },
@@ -3108,25 +3171,70 @@
   "id": "X09",
   "title": "Offer commission schedule",
   "vw": "mobile",
-  "route": "/commissions/agreements/f225cb83-ac3b-4102-9d30-fe76414a2ae7/milestones",
+  "route": "/commissions/agreements/4107074a-2d25-4d73-bb5d-f022a77bebcc/milestones",
   "account": "web:asha@voltepc.example",
   "denied": false,
   "issues": []
  },
  {
-  "id": "X08",
-  "title": "Offer with sales (admin)",
-  "vw": "desktop",
-  "route": "/offers/d4141978-c27c-4121-96d3-b77f60fd8178",
+  "id": "X10",
+  "title": "Unite businesses",
+  "vw": "mobile",
+  "route": "/ventures",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "X11",
+  "title": "Unite business (partner)",
+  "vw": "mobile",
+  "route": "/ventures/solcart",
+  "account": "web:asha@voltepc.example",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "X12",
+  "title": "Unite businesses (public)",
+  "vw": "mobile",
+  "route": "/businesses",
+  "account": "anon",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "X14",
+  "title": "Unite business (admin)",
+  "vw": "mobile",
+  "route": "/ventures/9a6bb204-f7ff-4a0b-82f3-2e9400178bf5",
   "account": "admin:unite.admin@collabiz.local",
   "denied": false,
   "issues": []
  },
  {
-  "id": "X08",
-  "title": "Offer with sales (admin)",
+  "id": "X15",
+  "title": "New offer for a business",
   "vw": "mobile",
-  "route": "/offers/d4141978-c27c-4121-96d3-b77f60fd8178",
+  "route": "/offers/new?venture=9a6bb204-f7ff-4a0b-82f3-2e9400178bf5",
+  "account": "admin:unite.admin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "X13",
+  "title": "Unite businesses (admin)",
+  "vw": "desktop",
+  "route": "/ventures",
+  "account": "admin:unite.admin@collabiz.local",
+  "denied": false,
+  "issues": []
+ },
+ {
+  "id": "X13",
+  "title": "Unite businesses (admin)",
+  "vw": "mobile",
+  "route": "/ventures",
   "account": "admin:unite.admin@collabiz.local",
   "denied": false,
   "issues": []

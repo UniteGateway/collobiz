@@ -64,6 +64,7 @@ const accountFor = (s) => s.route.includes('[') && OWNER[resourceOf(s.route)] ? 
 // Pages added after the 165-screen registry (direct offers). Opened and checked exactly like registry screens.
 const offerId = await one("select id from direct_offers where code = 'DO-2026-100002'");
 const salesOfferId = await one("select id from direct_offers where code = 'DO-2026-100001'");
+const ventureId = await one("select id from unite_ventures where slug = 'solcart'");
 const offerAgreementId = await one("select id from commission_agreements where code = 'CA-2026-410001'");
 const EXTRA = [
   { id: 'X01', title: 'Offers for you', app: 'web', route: '/offers', access: 'verified-partner' },
@@ -75,6 +76,12 @@ const EXTRA = [
   { id: 'X07', title: 'Offer with sales (partner)', app: 'web', route: `/offers/${salesOfferId}`, access: 'verified-partner' },
   { id: 'X08', title: 'Offer with sales (admin)', app: 'admin', route: `/offers/${salesOfferId}`, access: 'unite-admin' },
   { id: 'X09', title: 'Offer commission schedule', app: 'web', route: `/commissions/agreements/${offerAgreementId}/milestones`, access: 'verified-partner' },
+  { id: 'X10', title: 'Unite businesses', app: 'web', route: '/ventures', access: 'partner' },
+  { id: 'X11', title: 'Unite business (partner)', app: 'web', route: '/ventures/solcart', access: 'partner' },
+  { id: 'X12', title: 'Unite businesses (public)', app: 'web', route: '/businesses', access: 'public' },
+  { id: 'X13', title: 'Unite businesses (admin)', app: 'admin', route: '/ventures', access: 'unite-admin' },
+  { id: 'X14', title: 'Unite business (admin)', app: 'admin', route: `/ventures/${ventureId}`, access: 'unite-admin' },
+  { id: 'X15', title: 'New offer for a business', app: 'admin', route: `/offers/new?venture=${ventureId}`, access: 'unite-admin' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

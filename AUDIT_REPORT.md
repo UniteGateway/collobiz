@@ -267,7 +267,7 @@ npx expo export --platform web      → Exported (used only to render native lay
 | 115 | Approved Social Campaign Assets | web · `/resources/social` | Functional — API e2e + browser journey (stage14.e2e.ts) | **Passed quality gate** (2026-11-09) | Responsive web only | Maintain |
 | 116 | Training & Learning Center | web · `/learning` | Functional — API e2e + browser journey (stage14.e2e.ts) | **Passed quality gate** (2026-11-09) | Native + test | Maintain |
 | 117 | Certification Assessment | web · `/learning/assessments/[id]` | Functional — API e2e + browser journey (stage14.e2e.ts) | **Passed quality gate** (2026-11-09) | Responsive web only | Maintain |
-| 118 | Partner Certificate & Badge | web · `/certificates` | Functional — API e2e + browser journey (stage14.e2e.ts) | **Passed quality gate** (2026-11-09) | Responsive web only | Maintain |
+| 118 | Partner Certificate & Badge | web · `/certificates` | Functional — API e2e + browser journey (stage14.e2e.ts, ventures.e2e.ts) | **Passed quality gate** (2026-11-09) | Responsive web only | Maintain |
 | 119 | Global Opportunities Portal | web · `/global` | Functional — API e2e + browser journey (stage15.e2e.ts) | **Passed quality gate** (2026-11-09) | Responsive web only | Maintain |
 | 120 | Country Partner Registration | web · `/global/country-partner` | Functional — API e2e + browser journey (stage15.e2e.ts) | **Passed quality gate** (2026-11-09) | Native + test | Maintain |
 | 121 | International Territory Dashboard | web · `/global/territory` | Functional — API e2e + browser journey (stage15.e2e.ts) | **Passed quality gate** (2026-11-09) | Responsive web only | Maintain |

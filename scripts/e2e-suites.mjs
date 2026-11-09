@@ -1570,3 +1570,47 @@ suites.push({
     await shot('offer-sales-partner');
   },
 });
+
+// Unite businesses: a partner asks to promote Nano Bazar; Unite approves; an offer to its promoters reaches the partner.
+suites.push({
+  name: 'Ventures · partner asks to promote Nano Bazar → Unite approves → offer to promoters reaches the partner; public directory',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot, expect }) => {
+    await page.context().clearCookies();
+    await page.goto(WEB + '/businesses');
+    await page.getByRole('region', { name: 'Nano Bazar' }).waitFor();
+    await page.getByRole('region', { name: 'WAKIN' }).waitFor();
+    expect((await page.content()).includes('Universal Trade Coin') === false, 'regulated business shown publicly');
+    await webLogin(page, WEB, 'deepak@deccan.example');
+    await page.goto(WEB + '/ventures');
+    await page.locator('[data-venture="nano-bazar"]').click();
+    await page.getByRole('group', { name: 'How you will help' }).getByText('Bring merchants and sellers').click();
+    await page.getByLabel('Your network and plan').fill('Our distribution network reaches 400 electrical shops in Bengaluru and Hosur; we can bring them onto Nano Bazar.');
+    await page.getByRole('button', { name: 'Ask to promote Nano Bazar' }).click();
+    await page.getByText('Request sent').first().waitFor();
+    await shot('venture-request');
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/ventures');
+    await page.locator('[data-venture="nano-bazar"]').getByRole('link', { name: 'Nano Bazar' }).click();
+    const item = page.locator('[data-interest="Deccan Distributors"]');
+    await item.getByLabel('Note to Deccan Distributors').fill('Approved for Karnataka');
+    await item.getByRole('button', { name: 'Approve as promoter' }).click();
+    await item.getByText('Promoter').waitFor();
+    await page.getByRole('link', { name: 'New offer' }).click();
+    await page.getByLabel('Title').fill('Onboard electrical shops to Nano Bazar in Bengaluru');
+    await page.getByLabel('What you need and what the partner gets').fill('Bring local electrical shops onto Nano Bazar. A fixed fee is paid for each shop that publishes its first ten products.');
+    await page.getByLabel('Type of offer').selectOption({ label: 'Market our services' });
+    await page.getByRole('button', { name: /^Nano Bazar promoters/ }).click();
+    await page.getByText(/1 verified partner will receive this: Deccan Distributors/).waitFor();
+    await page.getByLabel('Partner reward').selectOption({ label: 'Fixed fee' });
+    await page.getByLabel('Reward (₹)').fill('500');
+    await page.getByRole('button', { name: /^Send to 1 partner$/ }).click();
+    await page.getByText(/Nano Bazar/).first().waitFor();
+    await webLogin(page, WEB, 'deepak@deccan.example');
+    await page.goto(WEB + '/ventures/nano-bazar');
+    await page.getByText('You are an approved promoter of Nano Bazar.', { exact: false }).waitFor();
+    await page.getByRole('link', { name: 'Onboard electrical shops to Nano Bazar in Bengaluru' }).click();
+    await page.getByText('Nano Bazar · offer from Unite Solar').waitFor();
+    await shot('venture-offer');
+  },
+});

@@ -6,7 +6,7 @@ export interface Offer {
   id: string; code: string; title: string; summary: string; kind: string; sector: string; regions: string[]; issuer: string;
   pricing: string; unitePrice: number | null; priceUnit: string | null; uniteReward: OfferReward | null; rewardModels: string[];
   needsOffice: boolean; minManpower: number | null; exclusive: boolean; places: number; deadline: string; status: string; open: boolean; createdAt: string;
-  agreementNote: string | null;
+  agreementNote: string | null; venture?: { slug: string; name: string } | null;
 }
 
 export const kindLabel = (k: string) => OFFER_KIND_LABELS[k] ?? k;

@@ -22,9 +22,9 @@ This file is the single place to see where the build stands. It follows the reco
 | Registry screens with a working route | **165 of 165** |
 | Covered by API tests and a browser journey | **165** |
 | Native screens required / built / with tests | 46 / 46 / **46** |
-| API tests | 208 passing (21 suites) |
-| Browser journeys (desktop + phone) | 77 passing on a fresh database; axe scan clean on 45 pages |
-| Native tests | 73 passing (14 suites) |
+| API tests | 213 passing (22 suites) |
+| Browser journeys (desktop + phone) | 78 passing on a fresh database; axe scan clean on 45 pages |
+| Native tests | 75 passing (15 suites) |
 | UI component tests | 30 passing |
 
 ## Stages 13–16 (built this round)
@@ -65,6 +65,20 @@ Selecting a partner now produces the paperwork and the money trail, so a direct 
 
 Ledger change: a commission agreement now belongs to a project **or** an offer, and a ledger line to a milestone **or** an offer sale (database checks enforce one of each); the existing payout guards apply unchanged. Tests: `apps/api/test/offer-sales.e2e.ts` (5), native test for sales, and a browser journey (register buyer → won → projected commission) on desktop and phone. Demo: Volt EPC is selected on DO-2026-100001 with agreement CTR-2026-410001 (draft), commission agreement CA-2026-410001 and two buyers (one quoted, one won with ₹3,55,950 projected commission).
 
+## Unite businesses — every Unite venture, not only solar (added 2026-11-09)
+
+All **47 businesses** from the Unite Master Concept Portfolio (1 Nov 2026) are in the platform — ROOFZ, SUNITE, WAKIN, Nano Bazar, LeadDNA, XPERT, Real Bricks, SOLCART, ELWIN, Unite Powertek, Unite Learning, Unite Biofix and the rest — across energy, property, commerce, jobs, education, media, mobility, social impact, agriculture and finance. Six sectors were added (Education & Training, Media & Entertainment, Jobs & Workforce, Retail & Local Commerce, Social Impact & Community, Financial Services). Descriptions are partner-facing rewrites; the portfolio's internal ratings, history notes and financial assumptions are not stored.
+
+| Part | What it does |
+|---|---|
+| **Catalogue** (partner web → Unite businesses; app → Account → Unite businesses; public → /businesses) | Each business with sector, stage (early stage / pilot / in development / operating), operating company, and what partners can do (refer customers, sell or supply products, deliver services, bring merchants, bring users/candidates, create content, community programmes). Public site lists only businesses open to partners. |
+| **Open / coming soon** (admin → Unite businesses) | Unite admins of the operating company (or super admin) open a business to partners and set its stage. Demo: 14 open, the rest “coming soon”. |
+| **Regulatory lock** | 10 finance/investment businesses (UGROW, GREEN WALLET, HNW Club, FreeTicket.app, Payslip.app, Power Partner, PowerBank, Unite Digital Bank, Bestpe, Universal Trade Coin) are hidden from partners and the public, cannot be opened and cannot be used in offers until a super admin records regulatory clearance (licence, legal opinion or regulated-partner reference). |
+| **Promoters** | A verified partner asks to promote an open business (roles + regions + plan); Unite approves or declines with a note; approved partners are that business's promoters. |
+| **Offers per business** | A direct offer can belong to a business; its audience can be “approved promoters of this business”. Partners see which business each offer is for; agreements, buyer registration and commission then work exactly as for other offers. Admin sees promoters, requests, offers, buyers and won value per business. |
+
+Tests: `apps/api/test/ventures.e2e.ts` (5), `apps/mobile/test/ventures.test.tsx` (2), browser journey (public directory → request → approval → promoter offer → partner sees it), six more pages in the gate sweep. Existing databases get the businesses with `node -r @swc-node/register src/db/seed-offers.ts` (safe to repeat).
+
 ## Quality gate (2026-11-09)
 
 A screen passes only when **all** of these hold, and `scripts/record-gate.mjs` writes the result per screen:
@@ -73,7 +87,7 @@ A screen passes only when **all** of these hold, and `scripts/record-gate.mjs` w
 3. **API e2e test** that calls the screen's endpoints, and a **browser journey** that opens the screen and checks real content.
 4. **Native test** where the screen is native.
 
-**Result: 165 of 165 screens passed (2026-11-09)**, plus 9 direct-offer pages (X01–X09) swept the same way. Final sweep on a fresh seed: 174 pages, 0 flagged at either width; 77/77 browser journeys; 208/208 API tests; 73/73 native tests; 30/30 UI tests; lint and typecheck clean. Evidence: `docs/audit/screenshots/gate/<id>-desktop.jpg` and `-mobile.jpg` with `sweep.json` (account used, issues found); per-screen record in `docs/audit/quality-gate.json`. The five Phase C screens keep their own evidence in `screenshots/after/`.
+**Result: 165 of 165 screens passed (2026-11-09)**, plus 15 later pages (X01–X15: direct offers and Unite businesses) swept the same way. Final sweep on a fresh seed: 180 pages, 0 flagged at either width; 78/78 browser journeys; 213/213 API tests; 75/75 native tests; 30/30 UI tests; lint and typecheck clean. Evidence: `docs/audit/screenshots/gate/<id>-desktop.jpg` and `-mobile.jpg` with `sweep.json` (account used, issues found); per-screen record in `docs/audit/quality-gate.json`. The five Phase C screens keep their own evidence in `screenshots/after/`.
 
 To close the gaps the gate found, these were added: `apps/api/test/gate.e2e.ts` (withdraw an application, owner pauses/resumes a project, commission policies, team tasks) and three “Gate ·” browser journeys covering 30 screens that no stage journey opened (each asserts real content and performs the screen's action where it has one).
 
