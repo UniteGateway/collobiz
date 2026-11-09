@@ -18,3 +18,4 @@ export * from './workspace';
 export * from './franchise-property';
 export * from './solar';
 export * from './promotions';
+export * from './v2';

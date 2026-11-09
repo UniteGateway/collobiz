@@ -18,3 +18,4 @@ export * from './growth-desk';
 export * from './erp';
 export * from './franchise-property';
 export * from './solar';
+export * from './v2';

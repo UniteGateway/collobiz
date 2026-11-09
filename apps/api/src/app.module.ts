@@ -37,7 +37,8 @@ import { config } from './config';
 
 import { SolarModule } from './modules/solar/solar.controller';
 import { PromotionsModule } from './modules/promotions/promotions.controller';
-export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule, GrowthDeskModule, WorkspaceModule, ErpModule, FranchiseModule, PropertyModule, SolarModule, PromotionsModule];
+import { V2Module } from './modules/v2/delivery.controller';
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule, GrowthDeskModule, WorkspaceModule, ErpModule, FranchiseModule, PropertyModule, SolarModule, PromotionsModule, V2Module];
 
 @Module({
   imports: [

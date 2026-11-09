@@ -183,6 +183,13 @@
       "when": 1794247619966,
       "tag": "0025_solar_promotions",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1794251633333,
+      "tag": "0026_v2_phase1",
+      "breakpoints": true
     }
   ]
 }
