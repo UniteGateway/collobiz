@@ -9,6 +9,15 @@ import { api } from '@/lib/api';
 import { useMutation, useQuery, isNotFound } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
 
+const FIRST = ['Product line', 'Category', 'Models'];
+const LAST = ['Specifications', 'Key features', 'Applications', 'Benefits', 'Product page'];
+/** Specs are stored as a JSON object (key order is not kept), so show them in a fixed, readable order. */
+function orderedSpecs(specs: Record<string, unknown>) {
+  const rank = (k: string) => (FIRST.includes(k) ? FIRST.indexOf(k) : LAST.includes(k) ? 100 + LAST.indexOf(k) : 50);
+  return Object.entries(specs).sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b, 'en', { numeric: true }))
+    .map(([k, v]): [string, React.ReactNode] => [k, typeof v === 'string' && /^https:\/\//.test(v) ? <a key={k} href={v} target="_blank" rel="noopener noreferrer">View on the company website</a> : String(v)]);
+}
+
 /** Screen 039 — Product & Service Detail with price request. */
 export default function ItemPage() {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +34,7 @@ export default function ItemPage() {
       <div className="cz-grid cz-grid-2" style={{ alignItems: 'start' }}>
         <Card title="Description">
           <p style={{ whiteSpace: 'pre-wrap' }}>{i.description}</p>
-          {Object.keys(i.specs ?? {}).length > 0 && <DescriptionList items={Object.entries(i.specs).map(([k, v]) => [k, String(v)])} />}
+          {Object.keys(i.specs ?? {}).length > 0 && <DescriptionList items={orderedSpecs(i.specs)} />}
         </Card>
         <Card title="Commercial">
           <p style={{ fontSize: 24, fontWeight: 700 }}>{i.listPrice != null ? <><Money minor={i.listPrice} currency={i.currency} />{i.unit ? <span className="cz-muted" style={{ fontSize: 14 }}> / {i.unit}</span> : null}</> : <span className="cz-muted" style={{ fontSize: 16 }}>{i.priceNote}</span>}</p>

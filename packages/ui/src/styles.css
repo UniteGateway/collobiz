@@ -139,7 +139,7 @@ input[type="file"]::file-selector-button:hover { background: var(--cz-grey-50, #
 .cz-kpi-hint { font-size: 12.5px; color: var(--cz-grey-600); }
 .cz-kpi-hint.cz-up { color: var(--cz-green-700); }
 .cz-dl { display: grid; grid-template-columns: max-content 1fr; gap: 10px 20px; margin: 0; }
-.cz-dl dt { color: var(--cz-grey-600); font-size: 13.5px; } .cz-dl dd { margin: 0; font-weight: 500; font-size: 14px; }
+.cz-dl dt { color: var(--cz-grey-600); font-size: 13.5px; } .cz-dl dd { margin: 0; font-weight: 500; font-size: 14px; overflow-wrap: anywhere; min-width: 0; }
 
 /* ---------------- Buttons & forms ---------------- */
 .cz-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 8px 18px; border-radius: 10px; border: 1px solid transparent; font: inherit; font-weight: 600; font-size: 14px; letter-spacing: -0.005em; cursor: pointer; text-decoration: none; white-space: nowrap; transition: background .15s var(--cz-ease), border-color .15s, box-shadow .15s, transform .05s; }

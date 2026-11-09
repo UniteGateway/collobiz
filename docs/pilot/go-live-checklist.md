@@ -103,6 +103,10 @@ $C exec api node dist/db/bootstrap.js --platform-name "<registered name of the o
   $C exec api node dist/db/bootstrap.js --agreements /tmp/agreements --legal-reviewed
   ```
   A changed text becomes a new version and replaces the draft. Partners who accepted the draft are asked to accept the new version.
+- ☐ 5.2b Load the Unite Powertek product catalogue: 360 products taken from www.unitepowertek.com, published in the COLLABIZ catalogue. It is safe to repeat; products are matched by PT code. Add `--draft` to import them for review instead of publishing.
+  ```bash
+  $C exec api node dist/db/import-catalogue.js powertek
+  ```
 - ☐ 5.3 The super admin signs in to the admin console and enrols two-factor authentication. Admin actions are blocked until this is done.
 - ☐ 5.4 In the admin console:
   1. Create the Unite Group company records you will use (Group companies). Give each its real legal entity name (B-01).

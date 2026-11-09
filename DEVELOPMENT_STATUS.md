@@ -22,7 +22,7 @@ This file is the single place to see where the build stands. It follows the reco
 | Registry screens with a working route | **165 of 165** |
 | Covered by API tests and a browser journey | **165** |
 | Native screens required / built / with tests | 46 / 46 / **46** |
-| API tests | 243 passing (28 suites) |
+| API tests | 245 passing (29 suites) |
 | Browser journeys (desktop + phone) | 82 passing on a fresh database; axe scan clean on all 50 pages (2026-11-09: fixed low-contrast header "Join as partner" button and home-page step numbers) |
 | Native tests | 77 passing (16 suites) |
 | UI component tests | 30 passing |
@@ -93,6 +93,17 @@ Everything needed to run a small, controlled pilot, without buying or registerin
 | **Legal review pack** (`docs/pilot/legal-review-pack.docx` + `.md`) | Every legal text the app shows or generates, compiled for counsel's tracked-changes markup, with 24 questions and an answer table. It covers partner terms, lead registration, privacy notice, team NDA, the offer agreement and work order, commission terms, the tender contract and LOI, buyer consent, and the regulated businesses. Rebuild it with `scripts/legal-pack/build.mjs`. |
 | **Pilot check-in** (web: Help & support → Pilot check-in; app: Account → Pilot check-in) | A two-minute weekly survey: usefulness 1–5, ease 1–5, recommend 0–10, features used, most valuable, blockers, wish, would keep using, may we contact you. One answer per person per 20 hours. |
 | **Pilot feedback results** (admin → Pilot feedback) | Check-ins, usefulness, ease, recommendation score (NPS) and would-keep-using against the pilot targets. Also features used, a week-by-week table, comments (contact details only with consent), CSV download, and **Send reminder** (in-app reminder to verified partner contacts who haven't checked in for 6 days; at most once a day). Visible to `analytics.read` roles only. Tests: `test/pilot.e2e.ts` (3), `apps/mobile/test/pilot.test.tsx` (2), browser journey (partner sends a check-in, a second one the same day is held back, Unite reads it). The admin page is checked by the gate sweep (X16, X17). |
+
+## Unite Powertek product catalogue (added 2026-11-09)
+
+All **360 products and services** published on www.unitepowertek.com were imported from its sitemap (robots.txt allows it), one page at a time, on 9 Nov 2026. They are in the COLLABIZ catalogue under Powertek, across 15 product lines: Solar 57, Electrical 43, Agri 40, Smart Energy 39, Agro-processing 38, Livestock 27, Aqua 20, Storage 15, EPC & Lifecycle Services 15, Water 13, Cold Chain 12, EV 12, Industrial 10, Circular 10, Wind 9.
+
+- **What was kept:** each product's PT code (stored as the SKU), product line, sub-category, models, the site's own description, key features, applications, benefits, the specification table (one row per model), its image address, and a link back to its page.
+- **Nothing invented:** 193 products have no description on the website, and most have no published specifications ("available on request"). COLLABIZ shows them the same way.
+- **Prices:** none are published; partners request a quotation, as on the website.
+- **Re-import:** `node dist/db/import-catalogue.js powertek` (`--draft` to review first) updates products by PT code and never deletes. The data is in `apps/api/src/db/data/powertek-catalogue.ts`.
+- **Product page:** specifications now show in a fixed order (product line, category, models, model rows in number order, features, applications, benefits), with a link to the company website. Long values wrap on phones.
+- **Tests:** `apps/api/test/catalogue-import.e2e.ts` (2): all 360 added then updated in place, codes and specifications kept, nothing invented, and products found in the public catalogue search.
 
 ## HR, Payroll and Finance through ERPNext (added 2026-11-09)
 
