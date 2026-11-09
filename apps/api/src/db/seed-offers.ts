@@ -6,7 +6,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { createPool } from './client';
 import * as s from './schema';
-import { franchiseDemo, groupCompaniesDemo, growthDemo, propertyDemo, offerSalesDemo, offersDemo, pilotDemo, venturesDemo } from './seed-stages';
+import { franchiseDemo, groupCompaniesDemo, growthDemo, propertyDemo, solarDemo, offerSalesDemo, offersDemo, pilotDemo, venturesDemo } from './seed-stages';
 
 async function main() {
   const pool = createPool();
@@ -35,6 +35,8 @@ async function main() {
   await franchiseDemo(db, refs);
   await propertyDemo(db, refs);
   console.log('Franchise and property demo in place');
+  await solarDemo(db, refs);
+  console.log('Unite Solar desk and promotions demo in place');
   await pool.end();
 }
 main().catch((e) => { console.error(e); process.exit(1); });

@@ -68,6 +68,7 @@ const ventureId = await one("select id from unite_ventures where slug = 'solcart
 const growthAgentId = await one("select id from growth_agents where name like 'SOLCART — factory%'");
 const franchiseId = await one("select id from franchise_units where lower(city) = 'pune' limit 1");
 const projectId = await one("select id from property_projects where code = 'PRJ-10001'");
+const solarQuoteId = await one("select id from solar_quotes where model = 'epc' and partner_org_id is not null limit 1");
 const offerAgreementId = await one("select id from commission_agreements where code = 'CA-2026-410001'");
 const EXTRA = [
   { id: 'X01', title: 'Offers for you', app: 'web', route: '/offers', access: 'verified-partner' },
@@ -110,6 +111,20 @@ const EXTRA = [
   { id: 'X38', title: 'Franchise (partner)', app: 'web', route: '/franchise', access: 'partner' },
   { id: 'X39', title: 'Property sales (partner)', app: 'web', route: '/property', access: 'partner' },
   { id: 'X40', title: 'Property project (partner)', app: 'web', route: `/property/${projectId}`, access: 'partner' },
+  { id: 'X41', title: 'Unite Solar desk', app: 'web', route: '/solar', access: 'partner' },
+  { id: 'X42', title: 'New solar quote', app: 'web', route: '/solar/new', access: 'partner' },
+  { id: 'X43', title: 'Solar proposal', app: 'web', route: `/solar/quotes/${solarQuoteId}`, access: 'partner' },
+  { id: 'X44', title: 'Solar kits', app: 'web', route: '/solar/kits', access: 'partner' },
+  { id: 'X45', title: 'Solar commission structure', app: 'web', route: '/solar/commission', access: 'partner' },
+  { id: 'X46', title: 'Solar referrals', app: 'web', route: '/solar/referrals', access: 'partner' },
+  { id: 'X47', title: 'Redeem a store voucher', app: 'web', route: '/store/redeem', access: 'partner' },
+  { id: 'X48', title: 'Solar referral link (public)', app: 'web', route: '/refer/ASHA2026', access: 'public' },
+  { id: 'X49', title: 'Online store (public)', app: 'web', route: '/store', access: 'public' },
+  { id: 'X50', title: 'In-store offers (public)', app: 'web', route: '/store/offers', access: 'public' },
+  { id: 'X51', title: 'Unite Solar desk (admin)', app: 'admin', route: '/workspace/solar', access: 'unite-admin' },
+  { id: 'X52', title: 'Solar quote (admin)', app: 'admin', route: `/workspace/solar/quotes/${solarQuoteId}`, access: 'unite-admin' },
+  { id: 'X53', title: 'Promotions (BOGO)', app: 'admin', route: '/workspace/promotions', access: 'unite-admin' },
+  { id: 'X54', title: 'Online store (admin)', app: 'admin', route: '/workspace/store', access: 'unite-admin' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

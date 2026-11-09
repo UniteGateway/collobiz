@@ -10,6 +10,7 @@ const NAV = [
   { href: '/group-companies', label: 'Unite Group' },
   { href: '/businesses', label: 'Businesses' },
   { href: '/catalogue', label: 'Catalogue' },
+  { href: '/store', label: 'Store' },
   { href: '/opportunities/public', label: 'Opportunities' },
   { href: '/membership', label: 'Membership' },
   { href: '/support/contact', label: 'Contact' },

@@ -36,6 +36,7 @@ export const commissionAgreements = pgTable('commission_agreements', {
   payerOrgId: uuid('payer_org_id').notNull().references(() => organizations.id),
   projectId: uuid('project_id').references(() => projects.id), // a project agreement…
   offerId: uuid('offer_id').references(() => directOffers.id), // …or a direct-offer agreement (commission on sales)
+  solarQuoteId: uuid('solar_quote_id'), // …or a Unite Solar quote won by the partner
   offerResponseId: uuid('offer_response_id').references(() => directOfferResponses.id),
   leadClaimId: uuid('lead_claim_id').references(() => leadClaims.id),
   policyId: uuid('policy_id').notNull().references(() => commissionPolicies.id),
@@ -46,7 +47,7 @@ export const commissionAgreements = pgTable('commission_agreements', {
   createdBy: uuid('created_by').notNull().references(() => users.id),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex('commission_agreements_code_uq').on(t.code), uniqueIndex('commission_agreements_project_beneficiary_uq').on(t.projectId, t.beneficiaryOrgId), uniqueIndex('commission_agreements_offer_response_uq').on(t.offerResponseId),
-  check('commission_agreements_source_ck', sql`project_id is not null or offer_id is not null`)]);
+  check('commission_agreements_source_ck', sql`project_id is not null or offer_id is not null or solar_quote_id is not null`)]);
 
 /** Ledger entries — one per project milestone. Amounts are recomputed only by the server from frozen terms. */
 export const commissionEntries = pgTable('commission_entries', {
@@ -55,6 +56,7 @@ export const commissionEntries = pgTable('commission_entries', {
   beneficiaryOrgId: uuid('beneficiary_org_id').notNull().references(() => organizations.id),
   milestoneId: uuid('milestone_id').references(() => milestones.id), // a project milestone…
   offerSaleId: uuid('offer_sale_id').references(() => offerSales.id), // …or a sale registered under a direct offer
+  solarQuoteId: uuid('solar_quote_id'), // …or a won Unite Solar quote
   projectInvoiceId: uuid('project_invoice_id').references(() => projectInvoices.id),
   description: text('description').notNull(),
   baseAmount: bigint('base_amount', { mode: 'number' }).notNull(),
@@ -75,7 +77,7 @@ export const commissionEntries = pgTable('commission_entries', {
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (t) => [uniqueIndex('commission_entries_agreement_milestone_uq').on(t.agreementId, t.milestoneId), index('commission_entries_beneficiary_idx').on(t.beneficiaryOrgId, t.status), uniqueIndex('commission_entries_agreement_sale_uq').on(t.agreementId, t.offerSaleId),
-  check('commission_entries_source_ck', sql`milestone_id is not null or offer_sale_id is not null`)]);
+  check('commission_entries_source_ck', sql`milestone_id is not null or offer_sale_id is not null or solar_quote_id is not null`)]);
 
 /** Append-only journal of every ledger movement (gate). */
 export const commissionJournal = pgTable('commission_journal', {

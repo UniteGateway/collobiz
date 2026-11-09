@@ -16,3 +16,5 @@ export * from './pilot';
 export * from './growth-desk';
 export * from './workspace';
 export * from './franchise-property';
+export * from './solar';
+export * from './promotions';

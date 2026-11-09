@@ -79,10 +79,10 @@ describe('Stage 04 — Unite company catalogue (gate: controlled public/private 
       const c = await api(app).post('/v1/admin/catalog').set(auth(t.uniteAdmin)).send({ ownerOrgId: refs.orgs.uniteSolar, kind: 'product', name: 'Solar Inverter 100 kW', sector: 'solar', description: 'Three-phase string inverter for C&I plants.', listPrice: 350000_00, priceVisibility: 'verified_partners', visibility: 'public' }).expect(201);
       expect(c.body.status).toBe('draft');
       let pub = await api(app).get('/v1/catalog?q=inverter').expect(200);
-      expect(pub.body).toHaveLength(0); // drafts are not public
+      expect(pub.body.map((i: any) => i.id)).not.toContain(c.body.id); // drafts are not public
       await api(app).patch(`/v1/admin/catalog/${c.body.id}`).set(auth(t.uniteAdmin)).send({ status: 'published' }).expect(200);
       pub = await api(app).get('/v1/catalog?q=inverter').expect(200);
-      expect(pub.body).toHaveLength(1);
+      expect(pub.body.map((i: any) => i.id)).toContain(c.body.id);
       const a = await api(app).get(`/v1/admin/audit?objectId=${c.body.id}`).set(auth(t.compliance)).expect(200);
       expect(a.body.map((e: any) => e.action)).toEqual(expect.arrayContaining(['catalog.item_created', 'catalog.item_published']));
     });

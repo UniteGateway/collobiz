@@ -15,6 +15,9 @@ export const WORKSPACE_APPS: WorkspaceApp[] = [
   // Business suite
   { key: 'partners', name: 'Partner Network', category: 'business', description: 'Verified partners, onboarding and partner performance', icon: 'teams', tint: 'navy', status: 'live', app: 'admin', href: '/' },
   { key: 'ventures', name: 'Unite Businesses', category: 'business', description: 'All 47 Unite businesses and their promoters', icon: 'building', tint: 'green', status: 'live', app: 'admin', href: '/ventures' },
+  { key: 'solar', name: 'Unite Solar Desk', category: 'business', description: 'Kit, EPC and PPA quotes from power bills; commission and referrals', icon: 'value', tint: 'amber', status: 'live', app: 'admin', href: '/workspace/solar' },
+  { key: 'promotions', name: 'Promotions & BOGO', category: 'business', description: 'Buy-one-get-one offers online and in every store', icon: 'award', tint: 'green', status: 'live', app: 'admin', href: '/workspace/promotions' },
+  { key: 'store', name: 'Online Store', category: 'business', description: 'Public COLLABIZ store orders and products sold online', icon: 'package', tint: 'blue', status: 'live', app: 'admin', href: '/workspace/store' },
   { key: 'offers', name: 'Direct Offers', category: 'business', description: 'Work, products and markets offered to partners', icon: 'briefcase', tint: 'navy', status: 'live', app: 'admin', href: '/offers' },
   { key: 'crm', name: 'Sales & CRM', category: 'business', description: 'Leads, pipeline and protected introductions', icon: 'crm', tint: 'violet', status: 'live', app: 'web', href: '/crm/pipeline' },
   { key: 'projects', name: 'Projects & EPC', category: 'business', description: 'Solar EPC and infrastructure projects, milestones', icon: 'projects', tint: 'blue', status: 'live', app: 'web', href: '/projects' },

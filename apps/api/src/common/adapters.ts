@@ -5,7 +5,7 @@
 import { Global, Injectable, Logger, Module, BadRequestException, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { and, asc, eq, lt } from 'drizzle-orm';
 import { createTransport, type Transporter } from 'nodemailer';
-import { mkdir, readFile, writeFile, stat } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, stat, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { InjectDb, type Db } from '../db/client';
@@ -52,6 +52,12 @@ export class StorageService {
     const p = join(this.root, key);
     await stat(p);
     return readFile(p);
+  }
+
+  /** Deletes a stored file (used when personal documents reach their keep date). */
+  async remove(key: string) {
+    if (key.includes('..')) throw new BadRequestException('Invalid key');
+    await rm(join(this.root, key), { force: true });
   }
 
   /** Malware-scan hook. Local adapter rejects the EICAR test signature; production should call ClamAV/vendor. */

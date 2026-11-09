@@ -490,6 +490,7 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await groupCompaniesDemo(db, refs);
   await franchiseDemo(db, refs);
   await propertyDemo(db, refs);
+  await solarDemo(db, refs);
 }
 
 /** Demo pilot check-ins (spread over three weeks) so the admin results page has something to show. Not part of the test seed. */
@@ -670,4 +671,71 @@ export async function propertyDemo(db: Db, refs: SeedRefs) {
     await db.update(s.propertyUnits).set({ status: 'held', heldByOrgId: refs.orgs.volt, heldByUserId: refs.users.asha, heldUntil: new Date(Date.now() + 30 * 3600_000), buyerName: 'Shree Ganesh Polymers', buyerCity: 'Pune', consentMethod: 'meeting_minutes' })
       .where(and(eq(s.propertyUnits.projectId, park.id), eq(s.propertyUnits.unitNo, 'P-04')));
   }
+}
+
+/** Unite Solar sales desk and BOGO demo: kit range, online-store products, promotions, quotes, a partner referral code with referrals. */
+export async function solarDemo(db: Db, refs: SeedRefs) {
+  const [any] = await db.select({ id: s.solarKits.id }).from(s.solarKits).limit(1);
+  const owner = refs.orgs.uniteSolar;
+  const by = refs.users.uniteAdmin;
+  if (any || !owner || !by) return;
+  const K = (system: 'on_grid' | 'hybrid' | 'off_grid', kw: number, price: number, battery?: number) => {
+    const sys = { on_grid: 'OG', hybrid: 'HY', off_grid: 'OF' }[system];
+    const label = { on_grid: 'On-grid', hybrid: 'Hybrid', off_grid: 'Off-grid' }[system];
+    return {
+      code: `USK-${sys}-${String(kw).padStart(2, '0')}`, ownerOrgId: owner, name: `Unite Solar ${kw} kW ${label} kit`, system, capacityW: kw * 1000, panelW: 550, inverterW: kw * 1000, batteryWh: battery ?? null, phase: kw > 5 ? 3 : 1,
+      price, warrantyYears: 25, createdBy: by,
+      includes: ['ALMM-listed 550 Wp mono PERC panels', `${kw} kW ${system === 'off_grid' ? 'off-grid' : system === 'hybrid' ? 'hybrid' : 'grid-tied'} inverter`, 'Galvanised mounting structure', 'DC/AC cables, ACDB/DCDB, earthing and lightning arrester', ...(battery ? [`${battery / 1000} kWh lithium battery`] : []), system === 'on_grid' ? 'Net-meter application support' : 'Battery backup during power cuts', 'Installation and 5-year service'],
+      description: system === 'on_grid' ? `Rooftop solar for homes and shops using up to about ${Math.round(kw * 120)} units a month. Eligible for PM Surya Ghar subsidy for homes, subject to DISCOM approval.`
+        : system === 'hybrid' ? `Solar with battery backup: saves on the bill like on-grid and keeps essential loads running during power cuts.` : `Stand-alone solar with battery for places with no or unreliable grid supply — farms, shops and remote homes.`,
+    };
+  };
+  await db.insert(s.solarKits).values([
+    K('on_grid', 1, 72_000_00), K('on_grid', 2, 1_30_000_00), K('on_grid', 3, 1_85_000_00), K('on_grid', 4, 2_40_000_00), K('on_grid', 5, 2_90_000_00), K('on_grid', 6, 3_45_000_00), K('on_grid', 8, 4_50_000_00), K('on_grid', 10, 5_50_000_00),
+    K('hybrid', 3, 3_10_000_00, 5000), K('hybrid', 5, 4_60_000_00, 10000), K('hybrid', 8, 6_80_000_00, 15000),
+    K('off_grid', 1, 95_000_00, 2500), K('off_grid', 2, 1_65_000_00, 5000), K('off_grid', 3, 2_40_000_00, 7500),
+  ]);
+  // Retail products for the online store (generic, unbranded).
+  const retail: [string, string, number, string][] = [
+    ['Solar LED lantern with mobile charging', 'Solar accessories', 1_499_00, '5 W panel, 3 brightness levels, USB phone charging, up to 10 hours of light.'],
+    ['Solar home-lighting kit — 3 lights and a fan', 'Solar accessories', 8_999_00, '40 W panel, 3 LED lights, 12 V DC fan and phone charging for homes with frequent power cuts.'],
+    ['All-in-one solar street light 30 W', 'Solar accessories', 6_499_00, 'Integrated panel, lithium battery and motion sensor; dusk-to-dawn operation for gates, lanes and farms.'],
+    ['Solar water heater 100 litres per day', 'Solar water heating', 22_500_00, 'Evacuated-tube collector for a family of 3–4; saves electric geyser use through the year.'],
+    ['BLDC ceiling fan 28 W with remote', 'Energy-efficient appliances', 3_299_00, 'Uses about 60% less power than a regular fan; ideal with solar and inverter backup.'],
+    ['LED bulb 9 W — pack of 4', 'Energy-efficient appliances', 399_00, '900 lumen cool-white bulbs, 2-year warranty.'],
+    ['Solar power bank 20,000 mAh', 'Solar accessories', 1_899_00, 'Fast-charging power bank with a built-in solar panel and torch for travel and outages.'],
+    ['Lithium inverter battery 1.5 kWh', 'Batteries and storage', 38_000_00, 'Wall-mounted lithium battery for home inverters; 3,000+ cycles and 5-year warranty.'],
+  ];
+  const items = await db.insert(s.catalogItems).values(retail.map(([name, sector, price, description]) => ({ ownerOrgId: owner, kind: 'product', name, sector, description, unit: 'piece', listPrice: price, storePrice: price, priceVisibility: 'public', visibility: 'public', status: 'published', createdBy: by, sku: `US-RT-${name.replace(/[^A-Z0-9]/gi, '').slice(0, 10).toUpperCase()}` }))).returning();
+  const day = 86400_000;
+  await db.insert(s.promotions).values([
+    { code: 'PRM-2026-0001', ownerOrgId: owner, name: 'Festive solar lights', buyQty: 1, getQty: 1, scope: 'sectors', sectors: ['Solar accessories'], channel: 'both', maxFreePerOrder: 2, budgetUnits: 200, budgetValue: 3_00_000_00, startsAt: new Date(Date.now() - 3 * day), endsAt: new Date(Date.now() + 30 * day), status: 'active', createdBy: by, approvedBy: refs.users.finance ?? refs.users.superadmin, approvedAt: new Date(Date.now() - 3 * day),
+      terms: 'Buy any solar light, lantern, home-lighting kit or power bank and get one more of the same free. Up to 2 free items per order or bill. While the 200-item offer budget lasts, until the end date. Not combinable with other offers.' },
+    { code: 'PRM-2026-0002', ownerOrgId: owner, name: 'Buy one get one — all products', buyQty: 1, getQty: 1, scope: 'all', channel: 'both', maxFreePerOrder: 1, budgetValue: 5_00_000_00, startsAt: new Date(Date.now() + day), endsAt: new Date(Date.now() + 15 * day), status: 'draft', createdBy: by,
+      terms: 'Buy any product online or in a participating store and get one more of the same free. One free item per order or bill, while the ₹5 lakh offer budget lasts. Draft — to be approved by finance.' },
+  ]);
+  if (refs.orgs.volt && refs.users.asha) {
+    const [code] = await db.insert(s.solarReferralCodes).values({ code: 'ASHA2026', ownerUserId: refs.users.asha, ownerOrgId: refs.orgs.volt, ownerName: 'Asha Patil' }).returning();
+    await db.insert(s.solarReferrals).values([
+      { codeId: code.id, name: 'Sunil Joshi', phone10: '9822001122', city: 'Pune', region: 'IN-MH', segment: 'residential', monthlyBill: 4_200_00 },
+      { codeId: code.id, name: 'Kaveri Textiles', phone10: '9822003344', city: 'Ichalkaranji', region: 'IN-MH', segment: 'industrial', monthlyBill: 3_80_000_00, status: 'quoted' },
+    ]);
+    const kits = await db.select().from(s.solarKits);
+    const k3 = kits.find((k) => k.code === 'USK-OG-03')!;
+    const { quoteSolar, DEFAULT_SOLAR_CONFIG } = await import('@collabiz/types');
+    const Q = (customer: { name: string; phone: string; city: string }, site: { segment: 'residential' | 'commercial' | 'industrial'; region: string; monthlyUnits: number; tariff: number; sanctionedLoadKw?: number }, model: 'kit' | 'epc' | 'ppa', status: string, kw?: number, partner = true) => {
+      const kit = model === 'kit' ? { id: k3.id, code: k3.code, name: k3.name, system: k3.system, capacityKw: k3.capacityW / 1000, price: k3.price } : null;
+      const calc = quoteSolar(DEFAULT_SOLAR_CONFIG, { site, model, system: 'on_grid', capacityKw: kw }, kit);
+      return { code: `QT-SOL-2026-${Math.floor(10000 + Math.random() * 89999)}`, ownerOrgId: owner, partnerOrgId: partner ? refs.orgs.volt : null, createdBy: partner ? refs.users.asha : by, customer, phone10: customer.phone.slice(-10), consentMethod: 'meeting_minutes', site, model, system: 'on_grid', kitId: kit?.id ?? null, capacityW: Math.round(calc.capacityKw * 1000), calc, total: calc.total, net: calc.net, commission: partner ? calc.commission : 0, status, validUntil: new Date(Date.now() + 15 * day).toISOString().slice(0, 10) };
+    };
+    await db.insert(s.solarQuotes).values([
+      Q({ name: 'Anand Kulkarni', phone: '9850012345', city: 'Pune' }, { segment: 'residential', region: 'IN-MH', monthlyUnits: 360, tariff: 950, sanctionedLoadKw: 5 }, 'kit', 'sent'),
+      Q({ name: 'Shree Ganesh Polymers', phone: '9850054321', city: 'Chakan' }, { segment: 'industrial', region: 'IN-MH', monthlyUnits: 18000, tariff: 1050 }, 'epc', 'accepted', 120),
+      Q({ name: 'Deccan Cold Storage', phone: '9850098765', city: 'Nashik' }, { segment: 'commercial', region: 'IN-MH', monthlyUnits: 26000, tariff: 1100 }, 'ppa', 'sent', 180, false),
+    ]);
+  }
+  await db.insert(s.storeOrders).values({
+    code: 'STO-2026-100001', customer: { name: 'Meena Shah', phone: '9820456789', address: '12 Lake View Society, Baner Road', city: 'Pune', region: 'IN-MH', pincode: '411045' }, phone10: '9820456789',
+    lines: [{ ref: `item:${items[0].id}`, name: items[0].name, sector: items[0].sector, unitPrice: items[0].storePrice, qty: 1, freeQty: 0, freeValue: 0, promotionId: null, promotionName: null, lineTotal: items[0].storePrice }], subtotal: items[0].storePrice!, freeValue: 0,
+  });
 }

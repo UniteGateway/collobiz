@@ -212,8 +212,13 @@ export const BLOCKS = [
   { t: 'q', n: 25, x: 'Franchising: please provide or review a franchise agreement, and advise on disclosure to applicants, trademark licensing, GST on the fee and royalty, and any state-specific rules.' },
   { t: 'q', n: 26, x: 'Property channel partners: must every partner be a registered agent in the project\'s state; are the 48-hour hold and our consent record acceptable; please provide a channel-partner agreement. Industrial-park plots are treated as not needing project RERA registration — please confirm per state.' },
 
+  { t: 'h1', x: 'Unite Solar quotes, referrals and buy-one-get-one offers' },
+  { t: 'p', x: 'Partners quote solar from a customer\'s electricity bill. The bill (name, address, consumer number, usage) is stored privately, read for its numbers and deleted after 90 days. Quotes show estimated savings and payback and the PM Surya Ghar subsidy for homes, labelled as estimates and "subject to eligibility and DISCOM approval". Anyone with a referral link can introduce a friend; the referrer earns a fixed reward when the friend\'s system is installed. Separately, Unite can run "buy X, get Y free" offers online and in stores, with dates, terms and a budget, approved by finance.' },
+  { t: 'q', n: 27, x: 'Buy-one-get-one: are the offer texts and the "free" wording compliant with the Consumer Protection Act 2019 and the CCPA guidelines on misleading advertisements; what must the terms include; and please confirm with a CA how GST applies to the free item (we assume the price paid covers both items and no separate tax is charged on the free one).' },
+  { t: 'q', n: 28, x: 'Solar quotes and referrals: are the savings, payback and subsidy statements on the quote adequately qualified; is a 90-day retention of uploaded bills appropriate under the DPDP Act; do referral rewards paid to individuals need TDS (e.g. section 194R) or other reporting; and may a customer\'s referral link be shared on WhatsApp by the customer without further consent steps?' },
+
   { t: 'h1', x: 'Checklist for counsel' },
-  { t: 'p', x: 'Please answer or mark "not for pilot". Items 1, 4, 5, 10, 11 and 14 must be resolved before partners are invited; items 22–24 before any Growth Desk message is sent; items 25–26 before franchises or property are offered to partners.' },
+  { t: 'p', x: 'Please answer or mark "not for pilot". Items 1, 4, 5, 10, 11 and 14 must be resolved before partners are invited; items 22–24 before any Growth Desk message is sent; items 25–26 before franchises or property are offered to partners; items 27–28 before offers or solar referrals go live.' },
   { t: 'qtable' },
   { t: 'p', x: 'Return the marked-up document to the pilot owner. Approved texts are loaded with the bootstrap command (go-live checklist 5.2a) and the "DRAFT" wording is removed only from approved documents.' },
 ];

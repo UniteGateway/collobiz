@@ -176,6 +176,13 @@
       "when": 1794242640946,
       "tag": "0024_franchise_property",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1794247619966,
+      "tag": "0025_solar_promotions",
+      "breakpoints": true
     }
   ]
 }

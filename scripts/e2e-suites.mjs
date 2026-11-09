@@ -1828,3 +1828,64 @@ suites.push({
     await shot('property-admin');
   },
 });
+
+// Unite Solar desk and BOGO: partner quotes from an uploaded bill; a shopper orders online with buy-one-get-one; Unite wins the order; finance approves an offer.
+suites.push({
+  name: 'Solar & BOGO · partner auto-quotes from a bill; shopper gets BOGO online; Unite wins the order; finance approves an offer',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/solar/new');
+    await page.getByLabel('Electricity bill file').setInputFiles('apps/api/test/fixtures/sample-bill.pdf');
+    await page.getByText(/Read units, amount/).waitFor();
+    await page.getByLabel('Units used per month (kWh)').and(page.locator('[value="412"]')).waitFor();
+    await page.getByText('Your commission').waitFor();
+    await page.getByLabel('Customer or company name').fill('Prakash Jadhav');
+    await page.getByLabel('Mobile number').fill('98901 23456');
+    await page.getByLabel('City', { exact: true }).fill('Pune');
+    await page.getByLabel(/The customer asked for this quote/).check();
+    await shot('solar-new-quote');
+    await page.getByRole('button', { name: 'Save quote' }).click();
+    await page.getByRole('heading', { name: 'Solar proposal for Prakash Jadhav' }).waitFor();
+    await page.getByText('PM Surya Ghar ₹78,000').waitFor();
+    await page.getByRole('button', { name: 'Mark as sent to customer' }).click();
+    await page.getByRole('button', { name: 'Customer accepted' }).click();
+    await page.getByText('Unite Solar confirms the order once the advance is received.').waitFor();
+    await shot('solar-proposal');
+
+    await page.goto(WEB + '/store');
+    const lantern = page.locator('[data-product="Solar LED lantern with mobile charging"]');
+    await lantern.getByText('Buy 1 get 1 free').waitFor();
+    await lantern.getByRole('button', { name: /Add .* to cart/ }).click();
+    await page.locator('[data-cart-line="Solar LED lantern with mobile charging"]').getByText(/\+ 1 free/).waitFor();
+    await shot('store-cart');
+    await page.getByRole('button', { name: 'Place order' }).click();
+    const dlg = page.locator('dialog[open]');
+    await dlg.getByLabel('Name').fill('Meena Shah');
+    await dlg.getByLabel('Mobile number').fill('9820456789');
+    await dlg.getByLabel('Delivery address').fill('12 Lake View Society, Baner Road');
+    await dlg.getByLabel('City', { exact: true }).fill('Pune');
+    await dlg.getByLabel('PIN code').fill('411045');
+    await dlg.getByLabel(/I agree to be contacted/).check();
+    await dlg.getByRole('button', { name: 'Confirm order' }).click();
+    await page.getByRole('heading', { name: /Order STO-\d{4}-\d{6} received/ }).waitFor();
+
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/workspace/solar');
+    await page.locator('[data-quote="Prakash Jadhav"]').getByRole('link').click();
+    await page.getByRole('button', { name: 'Order won' }).click();
+    await page.getByText(/estimated · ₹[\d,]+ payable/).waitFor();
+    await page.getByRole('button', { name: 'Customer paid' }).click();
+    await page.getByText(/earned · ₹[\d,]+ payable/).waitFor();
+    await shot('solar-admin-quote');
+    await page.goto(ADMIN + '/workspace/store');
+    await page.locator('[data-order^="STO-"]').filter({ hasText: 'Meena Shah' }).filter({ hasText: '+1 free' }).first().waitFor();
+
+    await adminLogin(page, ADMIN, 'finance@collabiz.local');
+    await page.goto(ADMIN + '/workspace/promotions');
+    const all = page.locator('[data-promotion="Buy one get one — all products"]');
+    await all.getByRole('button', { name: 'Approve and go live' }).click();
+    await all.getByText('Live').waitFor();
+    await shot('promotions');
+  },
+});

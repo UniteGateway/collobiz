@@ -35,7 +35,9 @@ import { FranchiseModule } from './modules/franchise/franchise.controller';
 import { PropertyModule } from './modules/property/property.controller';
 import { config } from './config';
 
-export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule, GrowthDeskModule, WorkspaceModule, ErpModule, FranchiseModule, PropertyModule];
+import { SolarModule } from './modules/solar/solar.controller';
+import { PromotionsModule } from './modules/promotions/promotions.controller';
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule, GrowthDeskModule, WorkspaceModule, ErpModule, FranchiseModule, PropertyModule, SolarModule, PromotionsModule];
 
 @Module({
   imports: [

@@ -58,6 +58,8 @@ export const catalogItems = pgTable('catalog_items', {
   imageKey: text('image_key'),
   /** Where the photo was copied from (the company's own website), so re-imports only fetch changed images. */
   imageSource: text('image_source'),
+  /** Listed in the public COLLABIZ online store at this retail price (incl. GST), when set. */
+  storePrice: bigint('store_price', { mode: 'number' }),
   status: text('status').notNull().default('draft'), // draft | published | archived
   createdBy: uuid('created_by').references(() => users.id),
   createdAt: createdAt(),
