@@ -1766,7 +1766,7 @@ suites.push({
   run: async ({ page, ADMIN, shot, expect }) => {
     await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
     await page.goto(ADMIN + '/workspace/inventory');
-    await page.getByText('Needs reordering').waitFor();
+    await page.getByText('Needs reordering').first().waitFor();
     await page.getByRole('table', { name: 'Items to reorder' }).getByText('AC EV Chargers').waitFor();
     await page.getByText('Deccan Roadways').waitFor();
     expect(await page.getByRole('button', { name: 'Send catalogue to ERPNext' }).count() === 0, 'catalogue send offered on sample data');
