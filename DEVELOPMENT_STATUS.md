@@ -117,6 +117,12 @@ All **360 products and services** published on www.unitepowertek.com were import
 - **Product page:** specifications now show in a fixed order (product line, category, models, model rows in number order, features, applications, benefits), with a link to the company website. Long values wrap on phones.
 - **Tests:** `apps/api/test/catalogue-import.e2e.ts` (3). They check that all 360 products are added and then updated in place, codes and specifications are kept, and nothing is invented. Photos are copied once, re-runs fetch only failures, non-images are rejected, photos are served with the right type, and hidden products' photos are not served.
 
+## Design system v3 — Apple-style refresh (2026-11-09)
+
+The whole interface (public site, partner web, admin, native app) moved to an Apple-style look while keeping the COLLABIZ navy and green: a soft grey canvas with borderless white cards and soft shadows, the device's own system font (SF on Apple, Segoe UI on Windows, Roboto on Android), larger and tighter headings, pill buttons with a press effect, filled input fields, iOS segmented controls and switches, frosted top bar, menu and dialogs with a gentle entrance, and quieter tables. Motion is switched off for people who ask for reduced motion.
+
+It is one layer at the end of `packages/ui/src/styles.css` plus the native component styles in `apps/mobile/src/components/ui.tsx`; no page logic, screen IDs or class names changed, so it can be reverted in one step. New token: `canvas` (#F4F5F7) in `tokens.ts` and CSS, parity-tested. Contrast stays AA: muted text 5.4:1 and action green 4.7:1 on the canvas.
+
 ## Franchise Management and Real Estate (added 2026-11-09)
 
 Built natively in COLLABIZ (ERPNext has no franchise or channel-partner property module). Both share the platform's companies, users, roles, notifications and audit trail.

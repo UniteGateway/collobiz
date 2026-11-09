@@ -13,6 +13,6 @@ psql "$E2E_DB" -c "drop schema if exists public cascade; drop schema if exists d
 DB_OVERRIDE="$E2E_DB" scripts/dev-restart.sh
 status=0
 DATABASE_URL="$E2E_DB" node scripts/e2e-smoke.mjs "$@" || status=$?   # direct SQL in journeys must hit the e2e database too
-[ -z "${SUITE:-}" ] && { node scripts/a11y-scan.mjs > "${LOG_DIR:-/tmp}/a11y.txt" 2>&1 || status=$?; grep -c ": 0 violation" "${LOG_DIR:-/tmp}/a11y.txt" | sed 's/^/a11y pages clean: /'; grep -cE ": [1-9][0-9]* violation" "${LOG_DIR:-/tmp}/a11y.txt" | sed 's/^/a11y pages WITH VIOLATIONS: /'; }
+[ -z "${SUITE:-}" ] && { node scripts/a11y-scan.mjs > "${LOG_DIR:-/tmp}/a11y.txt" 2>&1 || status=$?; grep -c ": 0 violation" "${LOG_DIR:-/tmp}/a11y.txt" | sed 's/^/a11y pages clean: /' || true; grep -cE ": [1-9][0-9]* violation" "${LOG_DIR:-/tmp}/a11y.txt" | sed 's/^/a11y pages WITH VIOLATIONS: /' || true; }   # grep -c exits 1 on a zero count
 scripts/dev-restart.sh >/dev/null   # back to the demo database
 exit $status

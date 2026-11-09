@@ -21,6 +21,7 @@ export const colors = {
   grey100: '#EEF1F5',
   grey50: '#F7F8FA', // quiet surface (sidebar, table header, inset panels)
   white: '#FFFFFF',
+  canvas: '#F4F5F7', // v3 app background behind white cards (Apple-style grouped surfaces)
   danger: '#B42318',
   dangerBg: '#FDECEA',
   warning: '#B54708',
@@ -42,9 +43,9 @@ export const semantic = {
 } as const;
 
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 } as const;
-export const radius = { sm: 6, md: 10, lg: 16, pill: 999 } as const;
+export const radius = { sm: 10, md: 14, lg: 20, pill: 999 } as const;
 export const font = {
-  family: "'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif",
+  family: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI', Roboto, 'Helvetica Neue', Inter, Arial, sans-serif",
   size: { xs: 12, sm: 14, md: 16, lg: 20, xl: 24, xxl: 32, display: 52 },
   weight: { regular: '400', medium: '500', semibold: '600', bold: '700' },
 } as const;

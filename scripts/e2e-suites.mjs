@@ -1709,7 +1709,7 @@ suites.push({
     await page.getByRole('heading', { name: 'Results for “Volt”' }).waitFor();
     await page.locator('[data-group="companies"]').getByText('Volt EPC').waitFor();
     await page.getByRole('navigation', { name: 'Workspace' }).getByRole('link', { name: 'Apps', exact: true }).click();
-    await page.locator('[data-app="franchise"]').getByText('Coming in Phase E').waitFor();
+    await page.locator('[data-app="franchise"][data-status="live"]').waitFor(); // went live with the Franchise app
     expect(await page.locator('[data-app="hr"][data-status="live"]').count() === 1, 'HR not shown as live');
     await page.locator('[data-integration="erpnext"]').getByText('Not connected').waitFor();
     await page.getByRole('navigation', { name: 'Workspace' }).getByRole('link', { name: 'Companies', exact: true }).click();
