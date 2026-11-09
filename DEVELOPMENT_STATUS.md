@@ -22,9 +22,9 @@ This file is the single place to see where the build stands. It follows the reco
 | Registry screens with a working route | **165 of 165** |
 | Covered by API tests and a browser journey | **165** |
 | Native screens required / built / with tests | 46 / 46 / **46** |
-| API tests | 203 passing (20 suites) |
-| Browser journeys (desktop + phone) | 75 passing on a fresh database; axe scan clean on 45 pages |
-| Native tests | 72 passing (14 suites) |
+| API tests | 208 passing (21 suites) |
+| Browser journeys (desktop + phone) | 77 passing on a fresh database; axe scan clean on 45 pages |
+| Native tests | 73 passing (14 suites) |
 | UI component tests | 30 passing |
 
 ## Stages 13–16 (built this round)
@@ -51,6 +51,20 @@ Rules enforced by the API (`apps/api/test/offers.e2e.ts`, 6 tests): only Unite G
 
 Tests: 6 API, 5 native (`apps/mobile/test/offers.test.tsx`), a browser journey on desktop and phone (capacity → filtered offer → proposal → selection → partner sees result), and the six new pages (X01–X06) in the gate sweep at both widths. Demo data: two offers from Unite Solar (one with fixed terms to all partners, one exclusive O&M desk asking for quotes, with Deccan's proposal); add them to an existing demo database with `node -r @swc-node/register src/db/seed-offers.ts`.
 
+### Direct offers — agreements, sales and commission (added 2026-11-09)
+
+Selecting a partner now produces the paperwork and the money trail, so a direct offer runs from offer to payout without retyping:
+
+| Step | What happens |
+|---|---|
+| **Select** | The agreement is drafted in Contracts (work order for project work and manpower, agreement otherwise) from the frozen terms, linked to the offer. For **commission on sales** and **revenue share**, a commission agreement is opened on the ledger at the agreed rate; TDS and clawback follow the active standard introducer policy, GST follows the partner's registration. Fixed fee, profit share and equity get the agreement only (paid or settled under it; profit share and equity need an annex before signature). |
+| **Sign** | Normal contract flow: submit → approval by a second person → both sides sign. |
+| **Sell** | The selected partner registers buyers under the offer (buyer consent required; the same buyer can't be registered twice under an offer — "Apex Castings Pvt Ltd" and "APEX CASTINGS PRIVATE LIMITED" are the same). Unite moves each sale: in discussion → quoted → won (with the sale value) or lost (with a reason). |
+| **Earn** | A won sale creates a projected commission line. Recording the customer payment (UTR) makes it earned — **refused until the agreement is signed by both sides** — and it then goes through the existing finance approval, payout request and settlement. |
+| **Track** | Admin: agreements per selected partner, sales list with actions, results per partner (buyers, open, won, won value, paid value, commission). Partner (web and app): agreement status, own buyers with value and commission status. Offer agreements appear in Earnings, the live tracker and the finance approval queue labelled with the offer. |
+
+Ledger change: a commission agreement now belongs to a project **or** an offer, and a ledger line to a milestone **or** an offer sale (database checks enforce one of each); the existing payout guards apply unchanged. Tests: `apps/api/test/offer-sales.e2e.ts` (5), native test for sales, and a browser journey (register buyer → won → projected commission) on desktop and phone. Demo: Volt EPC is selected on DO-2026-100001 with agreement CTR-2026-410001 (draft), commission agreement CA-2026-410001 and two buyers (one quoted, one won with ₹3,55,950 projected commission).
+
 ## Quality gate (2026-11-09)
 
 A screen passes only when **all** of these hold, and `scripts/record-gate.mjs` writes the result per screen:
@@ -59,7 +73,7 @@ A screen passes only when **all** of these hold, and `scripts/record-gate.mjs` w
 3. **API e2e test** that calls the screen's endpoints, and a **browser journey** that opens the screen and checks real content.
 4. **Native test** where the screen is native.
 
-**Result: 165 of 165 screens passed (2026-11-09)**, plus the 6 direct-offer pages (X01–X06) swept the same way. Final sweep on a fresh seed: 171 pages, 0 flagged at either width; 75/75 browser journeys; 203/203 API tests; 72/72 native tests; 30/30 UI tests; lint and typecheck clean. Evidence: `docs/audit/screenshots/gate/<id>-desktop.jpg` and `-mobile.jpg` with `sweep.json` (account used, issues found); per-screen record in `docs/audit/quality-gate.json`. The five Phase C screens keep their own evidence in `screenshots/after/`.
+**Result: 165 of 165 screens passed (2026-11-09)**, plus 9 direct-offer pages (X01–X09) swept the same way. Final sweep on a fresh seed: 174 pages, 0 flagged at either width; 77/77 browser journeys; 208/208 API tests; 73/73 native tests; 30/30 UI tests; lint and typecheck clean. Evidence: `docs/audit/screenshots/gate/<id>-desktop.jpg` and `-mobile.jpg` with `sweep.json` (account used, issues found); per-screen record in `docs/audit/quality-gate.json`. The five Phase C screens keep their own evidence in `screenshots/after/`.
 
 To close the gaps the gate found, these were added: `apps/api/test/gate.e2e.ts` (withdraw an application, owner pauses/resumes a project, commission policies, team tasks) and three “Gate ·” browser journeys covering 30 screens that no stage journey opened (each asserts real content and performs the screen's action where it has one).
 

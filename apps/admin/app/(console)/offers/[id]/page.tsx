@@ -2,14 +2,19 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { OFFER_KIND_LABELS, OFFER_PRICING_LABELS, REWARD_LABELS, levelLabel, regionLabel, sectorName } from '@collabiz/types';
+import { COMMISSION_STATE_LABELS, OFFER_KIND_LABELS, OFFER_PRICING_LABELS, REWARD_LABELS, levelLabel, regionLabel, sectorName } from '@collabiz/types';
 import { Alert, Button, Card, DescriptionList, EmptyState, Icon, Kpi, LoadingState, PageHeader, StatusBadge, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
 interface Resp { id: string; partner: string; city: string | null; level: string; mode: string; price: number | null; priceUnit: string | null; rewardText: string; manpower: number | null; hasOffice: boolean; officeLocation: string | null; startDate: string | null; message: string; status: string; version: number; termsHash: string | null; decisionNote: string | null; idleManpower: number | null; submittedAt: string }
-interface Detail { id: string; code: string; title: string; summary: string; issuer: string; kind: string; sector: string; regions: string[]; pricing: string; unitePrice: number | null; priceUnit: string | null; uniteReward: { text: string } | null; rewardModels: string[]; needsOffice: boolean; minManpower: number | null; exclusive: boolean; places: number; deadline: string; status: string; open: boolean; agreementNote: string | null; targetMode: string; recipients: { organizationId: string; name: string; status: string; declineReason: string | null }[]; responses: Resp[] }
+interface Detail { id: string; code: string; title: string; summary: string; issuer: string; kind: string; sector: string; regions: string[]; pricing: string; unitePrice: number | null; priceUnit: string | null; uniteReward: { text: string } | null; rewardModels: string[]; needsOffice: boolean; minManpower: number | null; exclusive: boolean; places: number; deadline: string; status: string; open: boolean; agreementNote: string | null; targetMode: string; recipients: { organizationId: string; name: string; status: string; declineReason: string | null }[]; responses: Resp[];
+  papers: { responseId: string; partner: string; contract: { id: string; code: string; status: string } | null; agreement: { id: string; code: string } | null }[];
+  sales: Sale[]; results: { partner: string; leads: number; open: number; won: number; paid: number; lost: number; wonValue: number; paidValue: number; commission: number }[] }
+interface Sale { id: string; code: string; partner: string; buyerName: string; buyerCity: string; contactName: string | null; contactPhone: string | null; contactEmail: string | null; description: string; estimatedValue: number | null; status: string; saleValue: number | null; paymentReference: string | null; lostReason: string | null; createdAt: string; commission: { status: string; payable: number } | null }
+const SALE: Record<string, [string, 'info' | 'success' | 'warning' | 'neutral']> = { registered: ['Registered', 'info'], in_discussion: ['In discussion', 'info'], quoted: ['Quoted', 'warning'], won: ['Won — awaiting payment', 'success'], paid: ['Customer paid', 'success'], lost: ['Lost', 'neutral'], withdrawn: ['Withdrawn', 'neutral'] };
+const CONTRACT: Record<string, string> = { draft: 'Draft — submit for approval', in_review: 'Awaiting second approver', approved: 'Ready for signatures', partially_signed: 'Partly signed', executed: 'Signed by both sides', terminated: 'Terminated' };
 const rupees = (p: number | null, unit?: string | null) => (p == null ? '—' : `₹${Math.round(p / 100).toLocaleString('en-IN')}${unit ? ` ${unit}` : ''}`);
 const REC: Record<string, string> = { sent: 'Not opened', viewed: 'Opened', responded: 'Responded', declined: 'Declined', selected: 'Selected', not_selected: 'Not selected' };
 
@@ -56,6 +61,19 @@ export default function OfferAdmin() {
         ]} />
         {o.agreementNote && <Alert tone="info">{o.agreementNote}</Alert>}
       </Card>
+      {o.papers.length > 0 && (
+        <Card title="Agreements" subtitle="Drafted automatically when you select a partner. Open it on the partner portal under Documents → Contracts to submit, have a second person approve, and sign.">
+          <ul className="cz-pick-list" aria-label="Agreements">
+            {o.papers.map((p) => (
+              <li key={p.responseId} className="cz-row" style={{ justifyContent: 'space-between' }}>
+                <span><strong>{p.partner}</strong> · <span className="cz-mono">{p.contract?.code}</span>{p.agreement ? <> · commission <span className="cz-mono">{p.agreement.code}</span></> : null}</span>
+                <StatusBadge status={p.contract?.status ?? 'draft'} label={CONTRACT[p.contract?.status ?? 'draft']} />
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+      {(o.sales.length > 0 || o.papers.length > 0) && <SalesCard o={o} onDone={q.reload} />}
       <Card title={`Responses${live.length ? ` · ${live.length} to decide` : ''}`} subtitle="Only you see these. Partners never see each other's responses.">
         {!o.responses.length ? <EmptyState icon="inbox" title="No responses yet" /> : (
           <ul className="cz-review-list">{o.responses.map((r) => <ResponseItem key={r.id} r={r} offerId={o.id} canSelect={o.status === 'open' && selected < o.places} onDone={q.reload} />)}</ul>
@@ -103,5 +121,61 @@ function ResponseItem({ r, offerId, canSelect, onDone }: { r: Resp; offerId: str
         </div>
       ) : <div><Button size="sm" onClick={() => setDeciding(true)}>Decide</Button></div>)}
     </li>
+  );
+}
+
+function SalesCard({ o, onDone }: { o: Detail; onDone: () => void }) {
+  const [act, setAct] = useState<{ id: string; kind: 'won' | 'lost' | 'paid' } | null>(null);
+  const [v, setV] = useState({ value: '', reason: '', utr: '', invoice: '' });
+  const move = useMutation(async (x: { id: string; status: string }) => {
+    await api.post(`/admin/offers/${o.id}/sales/${x.id}/status`, { status: x.status, saleValue: x.status === 'won' ? Math.round(Number(v.value.replace(/,/g, '')) * 100) : undefined, lostReason: x.status === 'lost' ? v.reason : undefined });
+    setAct(null); setV({ value: '', reason: '', utr: '', invoice: '' }); onDone(); return true;
+  });
+  const paid = useMutation(async (id: string) => { await api.post(`/admin/offers/${o.id}/sales/${id}/paid`, { paymentReference: v.utr, invoiceNumber: v.invoice || undefined }); setAct(null); setV({ value: '', reason: '', utr: '', invoice: '' }); onDone(); return true; });
+  const err = move.error ?? paid.error;
+  return (
+    <Card title="Sales under this offer" subtitle="Buyers registered by selected partners. Move each one on; recording the customer payment makes any commission earned.">
+      {o.results.length > 0 && (
+        <div className="cz-ta-table-wrap" style={{ marginBottom: 16 }}><table className="cz-ta-table"><caption className="cz-sr-only">Results by partner</caption>
+          <thead><tr><th>Partner</th><th className="cz-num">Buyers</th><th className="cz-num">Open</th><th className="cz-num">Won</th><th className="cz-num">Won value</th><th className="cz-num">Paid value</th><th className="cz-num">Commission</th></tr></thead>
+          <tbody>{o.results.map((r) => <tr key={r.partner}><td>{r.partner}</td><td className="cz-num">{r.leads}</td><td className="cz-num">{r.open}</td><td className="cz-num">{r.won}</td><td className="cz-num">{rupees(r.wonValue)}</td><td className="cz-num">{rupees(r.paidValue)}</td><td className="cz-num">{rupees(r.commission)}</td></tr>)}</tbody>
+        </table></div>
+      )}
+      {err && <Alert tone="danger">{err}</Alert>}
+      {!o.sales.length ? <EmptyState icon="leads" title="No buyers registered yet" /> : (
+        <ul className="cz-sale-list" aria-label="Sales">
+          {o.sales.map((s) => {
+            const [label, tone] = SALE[s.status] ?? [s.status, 'neutral'];
+            const next = ({ registered: ['in_discussion', 'quoted'], in_discussion: ['quoted'] } as Record<string, string[]>)[s.status] ?? [];
+            return (
+              <li key={s.id} data-sale={s.buyerName}>
+                <div className="cz-sale-main"><strong>{s.buyerName}</strong><span className="cz-muted">{s.buyerCity} · {s.partner} · <span className="cz-mono">{s.code}</span></span>
+                  <span className="cz-muted">{s.description}{s.contactName ? ` · ${s.contactName}` : ''}{s.contactPhone ? ` · ${s.contactPhone}` : ''}</span>{s.lostReason && <span className="cz-muted">Lost: {s.lostReason}</span>}</div>
+                <div className="cz-sale-figs"><span>{s.saleValue != null ? rupees(s.saleValue) : s.estimatedValue != null ? `~${rupees(s.estimatedValue)}` : '—'}</span>{s.commission && <span className="cz-muted">Commission {rupees(s.commission.payable)} · {COMMISSION_STATE_LABELS[s.commission.status as keyof typeof COMMISSION_STATE_LABELS] ?? s.commission.status}</span>}{s.paymentReference && <span className="cz-muted">UTR {s.paymentReference}</span>}</div>
+                <div className="cz-sale-act">
+                  <StatusBadge status={s.status} tone={tone} label={label} />
+                  {['registered', 'in_discussion', 'quoted'].includes(s.status) && act?.id !== s.id && (
+                    <div className="cz-row" style={{ gap: 6, justifyContent: 'flex-end' }}>
+                      {next.map((n) => <Button key={n} size="sm" variant="secondary" onClick={() => move.run({ id: s.id, status: n })}>{n === 'quoted' ? 'Quoted' : 'In discussion'}</Button>)}
+                      <Button size="sm" variant="accent" onClick={() => setAct({ id: s.id, kind: 'won' })}>Won</Button>
+                      <Button size="sm" variant="ghost" onClick={() => setAct({ id: s.id, kind: 'lost' })}>Lost</Button>
+                    </div>
+                  )}
+                  {s.status === 'won' && act?.id !== s.id && <Button size="sm" variant="accent" onClick={() => setAct({ id: s.id, kind: 'paid' })}>Customer paid</Button>}
+                </div>
+                {act?.id === s.id && (
+                  <div className="cz-inset" style={{ gridColumn: '1 / -1' }}>
+                    {act.kind === 'won' && <><TextInput label={`Sale value ₹ — ${s.buyerName}`} inputMode="decimal" value={v.value} onChange={(e) => setV({ ...v, value: e.target.value })} /><div className="cz-row"><Button variant="accent" loading={move.pending} disabled={!Number(v.value.replace(/,/g, ''))} onClick={() => move.run({ id: s.id, status: 'won' })}>Mark won</Button><Button variant="secondary" onClick={() => setAct(null)}>Cancel</Button></div></>}
+                    {act.kind === 'lost' && <><TextInput label={`Why was ${s.buyerName} lost?`} value={v.reason} onChange={(e) => setV({ ...v, reason: e.target.value })} /><div className="cz-row"><Button variant="danger" loading={move.pending} disabled={v.reason.trim().length < 5} onClick={() => move.run({ id: s.id, status: 'lost' })}>Mark lost</Button><Button variant="secondary" onClick={() => setAct(null)}>Cancel</Button></div></>}
+                    {act.kind === 'paid' && <><div className="cz-grid cz-grid-2"><TextInput label="Payment reference (UTR)" value={v.utr} onChange={(e) => setV({ ...v, utr: e.target.value })} /><TextInput label="Invoice number (optional)" value={v.invoice} onChange={(e) => setV({ ...v, invoice: e.target.value })} /></div>
+                      <div className="cz-row"><Button variant="accent" loading={paid.pending} disabled={v.utr.trim().length < 4} onClick={() => paid.run(s.id)}>Record customer payment</Button><Button variant="secondary" onClick={() => setAct(null)}>Cancel</Button></div></>}
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </Card>
   );
 }

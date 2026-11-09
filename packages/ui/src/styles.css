@@ -1196,3 +1196,18 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
 .cz-audience { margin-top: 8px; padding: 12px 14px; border-radius: var(--cz-radius-md); background: var(--cz-grey-50); border: 1px solid var(--cz-grey-200); font-size: 14px; }
 .cz-offer-stats { display: flex; gap: 6px 18px; flex-wrap: wrap; font-size: 13.5px; color: var(--cz-grey-600); }
 .cz-offer-stats strong { color: var(--cz-navy-900); }
+.cz-papers { display: grid; gap: 8px; margin: 12px 0; }
+.cz-papers > div { display: grid; grid-template-columns: 110px auto minmax(0, 1fr); gap: 10px; align-items: baseline; font-size: 14px; }
+.cz-sale-list { list-style: none; margin: 0; padding: 0; }
+.cz-sale-list > li { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 0; border-top: 1px solid var(--cz-grey-200); }
+.cz-sale-list > li:first-child { border-top: 0; }
+.cz-sale-main, .cz-sale-figs { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 14px; }
+.cz-sale-figs span:first-child { font-weight: 600; }
+.cz-sale-act { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+@media (max-width: 720px) {
+  .cz-sale-list > li { grid-template-columns: minmax(0, 1fr) auto; }
+  .cz-sale-figs { grid-column: 1; }
+  .cz-sale-act { grid-row: 1 / span 2; grid-column: 2; }
+  .cz-papers > div { grid-template-columns: 90px minmax(0, 1fr); }
+  .cz-papers > div > span:last-child { grid-column: 2; }
+}

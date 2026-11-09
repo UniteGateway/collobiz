@@ -263,7 +263,7 @@ npx expo export --platform web      → Exported (used only to render native lay
 | 111 | Notifications & Alerts Center | web · `/notifications` | Functional — API e2e + browser journey (stage13.e2e.ts) | **Passed quality gate** (2026-11-09) | Native + test | Maintain |
 | 112 | Support Tickets & Escalation | web · `/support/tickets` | Functional — API e2e + browser journey (stage13.e2e.ts) | **Passed quality gate** (2026-11-09) | Responsive web only | Maintain |
 | 113 | Marketing Resources Library | web · `/resources` | Functional — API e2e + browser journey (stage14.e2e.ts) | **Passed quality gate** (2026-11-09) | Responsive web only | Maintain |
-| 114 | Co-Branded Brochure Generator | web · `/resources/brochure` | Functional — API e2e + browser journey (stage14.e2e.ts) | **Passed quality gate** (2026-11-09) | Responsive web only | Maintain |
+| 114 | Co-Branded Brochure Generator | web · `/resources/brochure` | Functional — API e2e + browser journey (offer-sales.e2e.ts, stage14.e2e.ts) | **Passed quality gate** (2026-11-09) | Responsive web only | Maintain |
 | 115 | Approved Social Campaign Assets | web · `/resources/social` | Functional — API e2e + browser journey (stage14.e2e.ts) | **Passed quality gate** (2026-11-09) | Responsive web only | Maintain |
 | 116 | Training & Learning Center | web · `/learning` | Functional — API e2e + browser journey (stage14.e2e.ts) | **Passed quality gate** (2026-11-09) | Native + test | Maintain |
 | 117 | Certification Assessment | web · `/learning/assessments/[id]` | Functional — API e2e + browser journey (stage14.e2e.ts) | **Passed quality gate** (2026-11-09) | Responsive web only | Maintain |

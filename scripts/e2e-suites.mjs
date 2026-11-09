@@ -1534,3 +1534,39 @@ suites.push({
     await shot('offer-partner-selected');
   },
 });
+
+// Sales under a direct offer: the selected partner registers a buyer; Unite marks it won; projected commission appears.
+suites.push({
+  name: 'Offers · selected partner registers a buyer → Unite marks it won → partner sees projected commission and the agreement',
+  run: async ({ page, WEB, ADMIN, shot, label }) => {
+    const buyer = `Nashik Auto Parts ${label} ${Date.now().toString().slice(-4)}`;
+    const offerId = (await sqlExec("select id from direct_offers where code = 'DO-2026-100001'")).rows[0].id;
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(`${WEB}/offers/${offerId}`);
+    await page.getByText('CTR-2026-410001').waitFor(); // agreement drafted at selection
+    await page.getByRole('button', { name: 'Register a buyer' }).click();
+    await page.getByLabel('Buyer (company name)').fill(buyer);
+    await page.getByLabel('City', { exact: true }).fill('Nashik');
+    await page.getByLabel('What the buyer needs').fill('300 kW rooftop on the press shop');
+    await page.getByLabel('Expected order value ₹ (optional)').fill('12000000');
+    await page.getByLabel('The buyer agreed to be introduced to Unite Group for this').check();
+    await page.getByRole('button', { name: 'Register buyer' }).click();
+    await page.locator(`[data-sale="${buyer}"]`).getByText('Registered').waitFor();
+    // Unite marks it won
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(`${ADMIN}/offers/${offerId}`);
+    const row = page.locator(`[data-sale="${buyer}"]`);
+    await row.getByRole('button', { name: 'Won' }).click();
+    await row.getByLabel(new RegExp(`Sale value ₹ — ${buyer}`)).fill('11500000');
+    await row.getByRole('button', { name: 'Mark won' }).click();
+    await row.getByText('Won — awaiting payment').waitFor();
+    await page.getByRole('table', { name: 'Results by partner' }).getByText('Volt EPC').waitFor();
+    await shot('offer-sales-admin');
+    // Partner sees projected commission: 3% of ₹1,15,00,000 = ₹3,45,000 + 18% GST − 5% TDS = ₹3,89,850
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(`${WEB}/offers/${offerId}`);
+    await page.locator(`[data-sale="${buyer}"]`).getByText('Commission ₹3,89,850 · Projected').waitFor();
+    await page.getByText('Commission can be earned once the agreement is signed by both sides.').waitFor();
+    await shot('offer-sales-partner');
+  },
+});

@@ -5,7 +5,7 @@ import { ButtonLink, Card, EmptyState, Icon, LoadingState, PageHeader, StatusBad
 import { ApiErrorView } from '@/components/Screen';
 import { useQuery } from '@/lib/hooks';
 
-interface Row { id: string; code: string; title: string; issuer: string; kind: string; pricing: string; targetMode: string; places: number; exclusive: boolean; deadline: string; status: string; open: boolean; sent: number; viewed: number; responses: number; selected: number }
+interface Row { id: string; code: string; title: string; issuer: string; kind: string; pricing: string; targetMode: string; places: number; exclusive: boolean; deadline: string; status: string; open: boolean; sent: number; viewed: number; responses: number; selected: number; leads: number; wonValue: number }
 const AUDIENCE: Record<string, string> = { all: 'All verified partners', selected: 'Chosen partners', filtered: 'Filtered group' };
 
 /** Direct offers — work, products and markets sent straight to partners, with their responses. */
@@ -26,7 +26,7 @@ export default function OffersAdmin() {
                 <strong className="cz-offer-title">{o.title}</strong>
                 <span className="cz-muted">{o.issuer} · {AUDIENCE[o.targetMode]} · {OFFER_PRICING_LABELS[o.pricing]}</span>
                 <div className="cz-offer-stats">
-                  <span><strong>{o.sent}</strong> sent</span><span><strong>{o.viewed}</strong> opened</span><span><strong>{o.responses}</strong> response{o.responses === 1 ? '' : 's'}</span><span><strong>{o.selected} of {o.places}</strong> selected</span>
+                  <span><strong>{o.sent}</strong> sent</span><span><strong>{o.viewed}</strong> opened</span><span><strong>{o.responses}</strong> response{o.responses === 1 ? '' : 's'}</span><span><strong>{o.selected} of {o.places}</strong> selected</span>{o.leads > 0 && <><span><strong>{o.leads}</strong> buyers</span><span><strong>₹{Math.round(o.wonValue / 100).toLocaleString('en-IN')}</strong> won</span></>}
                 </div>
                 <span className="cz-mono cz-muted" style={{ fontSize: 12.5 }}>{o.code}</span>
               </Link>

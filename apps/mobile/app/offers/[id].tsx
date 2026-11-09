@@ -8,7 +8,11 @@ import { toMinor, useAction, useApi } from '@/hooks';
 import { MY_STATUS, dueText, rupees } from '@/offers';
 
 interface Resp { mode: string; price: number | null; priceUnit: string | null; rewardModel: string; rewardBps: number | null; rewardAmount: number | null; rewardText: string; manpower: number | null; hasOffice: boolean; officeLocation: string | null; message: string; status: string; version: number; decisionNote: string | null }
-interface Detail { id: string; code: string; title: string; summary: string; issuer: string; kind: string; sector: string; regions: string[]; pricing: string; unitePrice: number | null; priceUnit: string | null; uniteReward: { text: string } | null; rewardModels: string[]; needsOffice: boolean; minManpower: number | null; exclusive: boolean; places: number; deadline: string; open: boolean; agreementNote: string | null; myStatus: string; declineReason: string | null; myResponse: Resp | null; myCapacity: { hasOffice: boolean; officeLocations: string[]; idleManpower: number } | null }
+interface Detail { id: string; code: string; title: string; summary: string; issuer: string; kind: string; sector: string; regions: string[]; pricing: string; unitePrice: number | null; priceUnit: string | null; uniteReward: { text: string } | null; rewardModels: string[]; needsOffice: boolean; minManpower: number | null; exclusive: boolean; places: number; deadline: string; open: boolean; agreementNote: string | null; myStatus: string; declineReason: string | null; myResponse: Resp | null; myCapacity: { hasOffice: boolean; officeLocations: string[]; idleManpower: number } | null; papers: { contract: { id: string; code: string; status: string } | null; agreement: { id: string; code: string } | null } | null; sales: Sale[] }
+interface Sale { id: string; code: string; buyerName: string; buyerCity: string; status: string; saleValue: number | null; estimatedValue: number | null; lostReason: string | null; commission: { status: string; payable: number } | null }
+const SALE: Record<string, [string, 'info' | 'success' | 'warning' | 'neutral']> = { registered: ['Registered', 'info'], in_discussion: ['In discussion', 'info'], quoted: ['Quoted', 'warning'], won: ['Won', 'success'], paid: ['Customer paid', 'success'], lost: ['Lost', 'neutral'], withdrawn: ['Withdrawn', 'neutral'] };
+const CONTRACT: Record<string, string> = { draft: 'Being prepared by Unite Group', in_review: 'Awaiting Unite Group approval', approved: 'Ready for your signature', partially_signed: 'Partly signed', executed: 'Signed by both sides', terminated: 'Terminated' };
+const COMMISSION: Record<string, string> = { estimated: 'Projected', eligible: 'Eligible', earned: 'Earned', approved: 'Approved', invoiced: 'Requested', settled: 'Paid to you', on_hold: 'On hold' };
 
 /** One direct offer (native): terms, requirements and your response. */
 export default function OfferDetail() {
@@ -35,6 +39,13 @@ export default function OfferDetail() {
       <Card title="About this offer"><Text style={[s.p, { marginBottom: 0 }]}>{o.summary}</Text></Card>
       {o.agreementNote && <Notice tone="info" title="Profit share and equity">{o.agreementNote}</Notice>}
       {o.myStatus === 'selected' && o.myResponse && <Notice tone="success" title="You were selected">Agreed terms: {o.myResponse.rewardText}{o.myResponse.price != null ? ` · ${rupees(o.myResponse.price, o.myResponse.priceUnit)}` : ''}. {o.myResponse.decisionNote ?? ''}</Notice>}
+      {o.myStatus === 'selected' && o.papers?.contract && (
+        <Card title="Agreement">
+          <Row title={o.papers.contract.code} subtitle={CONTRACT[o.papers.contract.status] ?? o.papers.contract.status} />
+          {o.papers.agreement && <Row title={`Commission ${o.papers.agreement.code}`} subtitle="Paid through Earnings once customers pay" />}
+        </Card>
+      )}
+      {o.myStatus === 'selected' && <Sales offerId={o.id} sales={o.sales ?? []} hasCommission={!!o.papers?.agreement} signed={o.papers?.contract?.status === 'executed'} onDone={q.reload} />}
       {o.myStatus === 'not_selected' && <Notice tone="info" title="Not selected">{o.myResponse?.decisionNote ?? 'Another partner was chosen.'}</Notice>}
       {o.myStatus === 'declined' && <Notice tone="info" title="You declined">{o.declineReason ?? ''}</Notice>}
       {!['selected', 'not_selected', 'declined'].includes(o.myStatus) && (o.open ? <Respond o={o} onDone={q.reload} /> : <Notice tone="info">This offer is no longer taking responses.</Notice>)}
@@ -104,6 +115,45 @@ function Respond({ o, onDone }: { o: Detail; onDone: () => void }) {
           <Button title="Decline offer" variant="danger" onPress={() => decline.run()} loading={decline.busy} disabled={reason.trim().length < 5} testID="confirm-decline" />
         </>
       )}
+    </Card>
+  );
+}
+
+function Sales({ offerId, sales, hasCommission, signed, onDone }: { offerId: string; sales: Sale[]; hasCommission: boolean; signed: boolean; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const empty = { buyerName: '', buyerCity: '', contactName: '', contactPhone: '', description: '', value: '', consent: false };
+  const [f, setF] = useState(empty);
+  const key = useMemo(newIdempotencyKey, [open]);
+  const add = useAction(async () => {
+    await api.request('POST', `/offers/${offerId}/sales`, { buyerName: f.buyerName, buyerCity: f.buyerCity, contactName: f.contactName || undefined, contactPhone: f.contactPhone || undefined, description: f.description, estimatedValue: toMinor(f.value), consentMethod: 'meeting_minutes', consent: f.consent }, { idempotencyKey: key });
+    setF(empty); setOpen(false); onDone();
+  });
+  const e = add.fieldErrors;
+  return (
+    <Card title="Your sales under this offer">
+      {hasCommission && !signed && <Notice tone="info">Commission can be earned once the agreement is signed by both sides.</Notice>}
+      {!sales.length && !open && <Text style={s.hint}>Register buyers you introduce. Nobody else can register the same buyer under this offer.</Text>}
+      {sales.map((x) => {
+        const [label, tone] = SALE[x.status] ?? [x.status, 'neutral'];
+        const value = x.saleValue ?? x.estimatedValue;
+        return <Row key={x.id} testID={`sale-${x.code}`} title={x.buyerName} subtitle={[x.buyerCity, value != null ? `${x.saleValue == null ? '~' : ''}${rupees(value)}` : null, x.commission ? `Commission ${rupees(x.commission.payable)} · ${COMMISSION[x.commission.status] ?? x.commission.status}` : null, x.lostReason ? `Lost: ${x.lostReason}` : null].filter(Boolean).join(' · ')} right={<Badge status={x.status} tone={tone} label={label} />} />;
+      })}
+      {open ? (
+        <View style={{ marginTop: 12 }}>
+          {add.error && <Notice tone="danger">{add.error}</Notice>}
+          <Field label="Buyer (company name)" value={f.buyerName} onChangeText={(v) => setF({ ...f, buyerName: v })} error={e.buyerName} />
+          <Field label="City" value={f.buyerCity} onChangeText={(v) => setF({ ...f, buyerCity: v })} error={e.buyerCity} />
+          <Field label="Contact person (optional)" value={f.contactName} onChangeText={(v) => setF({ ...f, contactName: v })} />
+          <Field label="Phone (optional)" value={f.contactPhone} onChangeText={(v) => setF({ ...f, contactPhone: v })} keyboardType="phone-pad" error={e.contactPhone} />
+          <Field label="What the buyer needs" value={f.description} onChangeText={(v) => setF({ ...f, description: v })} multiline error={e.description} />
+          <Field label="Expected order value ₹ (optional)" value={f.value} onChangeText={(v) => setF({ ...f, value: v })} keyboardType="decimal-pad" />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48 }}>
+            <Switch value={f.consent} onValueChange={(v) => setF({ ...f, consent: v })} trackColor={{ true: theme.colors.green500, false: theme.colors.grey300 }} accessibilityLabel="Buyer agreed to be introduced" />
+            <Text style={[s.p, { flex: 1, marginBottom: 0 }]}>The buyer agreed to be introduced to Unite Group</Text>
+          </View>
+          <Button title="Register buyer" variant="accent" onPress={() => add.run()} loading={add.busy} disabled={!f.consent || !f.buyerName || !f.buyerCity || f.description.trim().length < 10} testID="register-sale" />
+        </View>
+      ) : <Button title="Register a buyer" variant="secondary" onPress={() => setOpen(true)} testID="open-sale" />}
     </Card>
   );
 }

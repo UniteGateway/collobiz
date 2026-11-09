@@ -91,3 +91,36 @@ export const directOfferResponses = pgTable('direct_offer_responses', {
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (t) => [uniqueIndex('direct_offer_responses_uq').on(t.offerId, t.organizationId), index('direct_offer_responses_offer_idx').on(t.offerId, t.status)]);
+
+/**
+ * Sales registered by a selected partner under a direct offer (buyer introductions). The buyer must have agreed to be
+ * introduced; a buyer can be registered once per offer. Unite Group moves the sale on; "paid" is the customer payment that
+ * makes any commission earned.
+ */
+export const offerSales = pgTable('offer_sales', {
+  id: id(),
+  code: text('code').notNull(),
+  offerId: uuid('offer_id').notNull().references(() => directOffers.id),
+  responseId: uuid('response_id').notNull().references(() => directOfferResponses.id),
+  partnerOrgId: uuid('partner_org_id').notNull().references(() => organizations.id),
+  buyerName: text('buyer_name').notNull(),
+  buyerKey: text('buyer_key').notNull(), // normalised name + city, for duplicate detection
+  buyerCity: text('buyer_city').notNull(),
+  contactName: text('contact_name'),
+  contactPhone: text('contact_phone'),
+  contactEmail: text('contact_email'),
+  description: text('description').notNull(),
+  estimatedValue: bigint('estimated_value', { mode: 'number' }),
+  consentMethod: text('consent_method').notNull(),
+  status: text('status').notNull().default('registered'), // registered | in_discussion | quoted | won | paid | lost | withdrawn
+  saleValue: bigint('sale_value', { mode: 'number' }),
+  invoiceNumber: text('invoice_number'),
+  paymentReference: text('payment_reference'),
+  paidAt: timestamp('paid_at', { withTimezone: true }),
+  lostReason: text('lost_reason'),
+  history: jsonb('history').notNull().default(sql`'[]'::jsonb`), // [{ at, status, note, by }]
+  createdBy: uuid('created_by').notNull().references(() => users.id),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (t) => [uniqueIndex('offer_sales_code_uq').on(t.code), index('offer_sales_offer_idx').on(t.offerId, t.status), index('offer_sales_partner_idx').on(t.partnerOrgId),
+  uniqueIndex('offer_sales_buyer_uq').on(t.offerId, t.buyerKey).where(sql`status not in ('lost', 'withdrawn')`)]);

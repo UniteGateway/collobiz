@@ -22,7 +22,7 @@ export default function AgreementDetail() {
       {!a.termsIntact && <Alert tone="danger">Integrity check failed: the stored terms do not match their hash. Contact COLLABIZ finance.</Alert>}
       <Card title="Terms (frozen when the agreement was created)">
         <DescriptionList items={[
-          ['Beneficiary', a.beneficiary], ['Payer', a.payer], ['Project', <Link key="p" href={`/projects/${a.project.id}`}>{a.project.code} — {a.project.title}</Link>],
+          ['Beneficiary', a.beneficiary], ['Payer', a.payer], a.project ? ['Project', <Link key="p" href={`/projects/${a.project.id}`}>{a.project.code} — {a.project.title}</Link>] : ['Direct offer', <Link key="o" href={`/offers/${a.offer.id}`}>{a.offer.code} — {a.offer.title}</Link>],
           ['Policy', `${p.name} (${p.code} v${p.version})`], ['Rate', rate], ['Your share', `${a.shareBps / 100}%`],
           ['Earned when', 'The customer’s payment for each certified milestone is recorded'], ['TDS', `${p.tdsBps / 100}% withheld at source`], ['GST', a.terms.gstRegistered ? '18% added (GST-registered)' : 'Not applicable (not GST-registered)'],
           ['Clawback window', `${p.clawbackDays} days after payment`], ['Created', when(a.createdAt)],

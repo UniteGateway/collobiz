@@ -417,6 +417,35 @@ export async function offersDemo(db: Db, refs: SeedRefs) {
   await db.insert(s.directOfferResponses).values({ offerId: setup.id, organizationId: refs.orgs.deccan, submittedBy: refs.users.deepak, mode: 'proposal', price: 5_80_000_00, priceUnit: 'per month', rewardModel: 'profit_share', rewardBps: 1500, manpower: 6, hasOffice: true, officeLocation: 'Hosur', startDate: new Date(Date.now() + 30 * day).toISOString().slice(0, 10), message: 'Our Hosur warehouse team can cover both states with two vans; we propose a lower monthly fee plus 15% of savings from improved plant availability.' });
 }
 
+/** Direct-offer follow-through: Volt EPC selected on the rooftop sales offer, its agreement drafted, two buyers registered. */
+export async function offerSalesDemo(db: Db, refs: SeedRefs) {
+  const [o] = await db.select().from(s.directOffers).where(eq(s.directOffers.code, 'DO-2026-100001')).limit(1);
+  if (!o) return;
+  const [exists] = await db.select({ id: s.offerSales.id }).from(s.offerSales).where(eq(s.offerSales.offerId, o.id)).limit(1);
+  if (exists) return;
+  const now = new Date();
+  const terms = { offer: o.code, partnerOrgId: refs.orgs.volt, mode: 'accept_terms', price: o.unitePrice, priceUnit: o.priceUnit, rewardModel: 'commission', rewardBps: 300, selectedAt: now.toISOString() };
+  const [r] = await db.insert(s.directOfferResponses).values({ offerId: o.id, organizationId: refs.orgs.volt, submittedBy: refs.users.asha, mode: 'accept_terms', price: o.unitePrice, priceUnit: o.priceUnit, rewardModel: 'commission', rewardBps: 300, hasOffice: true, officeLocation: 'Pune', message: 'Accepted. Our Pune sales team covers the Chakan, Talegaon and Kolhapur industrial belts.', status: 'selected', termsHash: sha256(JSON.stringify(terms)), decidedBy: refs.users.uniteAdmin, decisionNote: 'Strong Maharashtra network', decidedAt: now }).returning();
+  await db.update(s.directOfferRecipients).set({ status: 'selected' }).where(and(eq(s.directOfferRecipients.offerId, o.id), eq(s.directOfferRecipients.organizationId, refs.orgs.volt)));
+  const body = `AGREEMENT — ${o.title}\n\nBetween Unite Solar and Volt EPC, arising from direct offer ${o.code}.\n\n1. Scope. Introduce factory customers for rooftop solar packages; Unite Solar prices, contracts and delivers.\n\n2. Price. ₹42,000 per kW.\n\n3. Partner reward. Commission on sales · 3%. Earned only on sales registered under this offer and only when the customer has paid.\n\nDRAFT generated from the selected response.`;
+  const [c] = await db.insert(s.contracts).values({ code: 'CTR-2026-410001', kind: 'contract', title: `Agreement — ${o.title}`, issuerOrgId: o.issuerOrgId, counterpartyOrgId: refs.orgs.volt, offerId: o.id, offerResponseId: r.id, createdBy: refs.users.uniteAdmin }).returning();
+  await db.insert(s.contractVersions).values({ contractId: c.id, versionNo: 1, body, terms: { paymentTerms: '₹42,000 per kW' }, bodyHash: sha256(body), changeNote: `Generated from direct offer ${o.code}`, authorUserId: refs.users.uniteAdmin });
+  const [pol] = await db.select().from(s.commissionPolicies).where(and(eq(s.commissionPolicies.code, 'INTRODUCER-STD'), eq(s.commissionPolicies.status, 'active'))).limit(1);
+  let agreementId: string | null = null;
+  if (pol) {
+    const t = { policy: { code: `OFFER-${o.code}`, version: 1, name: `Direct offer ${o.code} — Commission on sales · 3%`, basis: 'percent', rateBps: 300, flatAmount: null, tiers: null, tdsBps: pol.tdsBps, clawbackDays: pol.clawbackDays, trigger: 'Customer payment for a sale registered under the offer' }, shareBps: 10000, gstRegistered: true, projectValue: 0 };
+    const [a] = await db.insert(s.commissionAgreements).values({ code: 'CA-2026-410001', beneficiaryOrgId: refs.orgs.volt, payerOrgId: o.issuerOrgId, offerId: o.id, offerResponseId: r.id, policyId: pol.id, terms: t, termsHash: sha256(canonicalJson(t)), createdBy: refs.users.uniteAdmin }).returning();
+    agreementId = a.id;
+  }
+  const hist = (st: string, note: string) => ({ at: now.toISOString(), status: st, note, by: refs.users.uniteAdmin });
+  await db.insert(s.offerSales).values({ code: 'OS-2026-410001', offerId: o.id, responseId: r.id, partnerOrgId: refs.orgs.volt, buyerName: 'Talegaon Plastics Pvt Ltd', buyerKey: 'talegaon plastics|talegaon', buyerCity: 'Talegaon', contactName: 'N. Kulkarni', description: '400 kW rooftop on two moulding sheds', estimatedValue: 1_70_00_000_00, consentMethod: 'meeting_minutes', status: 'quoted', history: [hist('registered', 'Registered by the partner'), hist('quoted', 'Quote US/Q-2611 sent')], createdBy: refs.users.asha });
+  const [won] = await db.insert(s.offerSales).values({ code: 'OS-2026-410002', offerId: o.id, responseId: r.id, partnerOrgId: refs.orgs.volt, buyerName: 'Chakan Precision Forgings', buyerKey: 'chakan precision forgings|chakan', buyerCity: 'Chakan', contactName: 'S. Pawar', description: '250 kW rooftop', estimatedValue: 1_00_00_000_00, consentMethod: 'written_email', status: 'won', saleValue: 1_05_00_000_00, history: [hist('registered', 'Registered by the partner'), hist('won', 'Order signed')], createdBy: refs.users.asha }).returning();
+  if (agreementId) {
+    // 3% of ₹1.05 Cr = ₹3,15,000; GST 18% = ₹56,700; TDS 5% = ₹15,750 → payable ₹3,55,950
+    await db.insert(s.commissionEntries).values({ agreementId, beneficiaryOrgId: refs.orgs.volt, offerSaleId: won.id, description: 'Sale OS-2026-410002: Chakan Precision Forgings', baseAmount: 1_05_00_000_00, gross: 3_15_000_00, share: 3_15_000_00, deductions: [], taxable: 3_15_000_00, gst: 56_700_00, tds: 15_750_00, payable: 3_55_950_00 });
+  }
+}
+
 export async function seedStages(db: Db, refs: SeedRefs) {
   await stage03(db, refs);
   await stage04(db, refs);
@@ -432,4 +461,5 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await stage14(db, refs);
   await stage15(db, refs);
   await offersDemo(db, refs);
+  await offerSalesDemo(db, refs);
 }

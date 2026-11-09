@@ -110,4 +110,30 @@ describe('Direct offers (native)', () => {
     await waitFor(() => screen.getByText('Saved.'));
     expect(mockPut).toHaveBeenCalledWith('/me/capacity', { hasOffice: true, officeLocations: ['Pune', 'Nashik'], totalManpower: 10, idleManpower: 6, idleSkills: [], lookingFor: ['manpower'] });
   });
+
+  it('selected: shows the agreement and sales with commission; registering a buyer needs consent', async () => {
+    const selected = offer({ myStatus: 'selected', open: false, myResponse: { mode: 'accept_terms', price: null, priceUnit: null, rewardModel: 'commission', rewardBps: 300, rewardAmount: null, rewardText: 'Commission on sales · 3%', manpower: null, hasOffice: false, officeLocation: null, message: 'x', status: 'selected', version: 1, decisionNote: null },
+      papers: { contract: { id: 'c1', code: 'CTR-2026-123456', status: 'approved' }, agreement: { id: 'a1', code: 'CA-2026-654321' } },
+      sales: [{ id: 's1', code: 'OS-2026-111111', buyerName: 'Apex Castings', buyerCity: 'Kolhapur', status: 'won', saleValue: 2_00_00_000_00, estimatedValue: null, lostReason: null, commission: { status: 'estimated', payable: 6_78_000_00 } }] });
+    mockGet.mockResolvedValue(selected);
+    mockRequest.mockResolvedValue({});
+    render(<OfferDetail />);
+    await waitFor(() => screen.getByText('CTR-2026-123456'));
+    expect(screen.getByText('Ready for your signature')).toBeTruthy();
+    expect(screen.getByText('Commission can be earned once the agreement is signed by both sides.')).toBeTruthy();
+    expect(screen.getByText('Kolhapur · ₹2,00,00,000 · Commission ₹6,78,000 · Projected')).toBeTruthy();
+    fireEvent.press(screen.getByTestId('open-sale'));
+    fireEvent.changeText(screen.getByLabelText('Buyer (company name)'), 'Western Auto Components');
+    fireEvent.changeText(screen.getByLabelText('City'), 'Pune');
+    fireEvent.changeText(screen.getByLabelText('What the buyer needs'), '300 kW rooftop on plant 2');
+    fireEvent.changeText(screen.getByLabelText('Expected order value ₹ (optional)'), '1,20,00,000');
+    fireEvent.press(screen.getByTestId('register-sale'));
+    expect(mockRequest).not.toHaveBeenCalled(); // consent not given
+    fireEvent(screen.getByLabelText('Buyer agreed to be introduced'), 'valueChange', true);
+    fireEvent.press(screen.getByTestId('register-sale'));
+    await waitFor(() => expect(mockRequest).toHaveBeenCalled());
+    const [method, path, body] = mockRequest.mock.calls[0];
+    expect([method, path]).toEqual(['POST', '/offers/of1/sales']);
+    expect(body).toMatchObject({ buyerName: 'Western Auto Components', buyerCity: 'Pune', estimatedValue: 1_20_00_000_00, consent: true });
+  });
 });

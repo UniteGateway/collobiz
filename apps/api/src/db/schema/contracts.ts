@@ -3,6 +3,7 @@ import { pgTable, uuid, text, timestamp, jsonb, integer, index, uniqueIndex, big
 import { sql } from 'drizzle-orm';
 import { id, createdAt, updatedAt, organizations, users } from './core';
 import { tenders, bids } from './tenders';
+import { directOffers, directOfferResponses } from './offers';
 
 export const contracts = pgTable('contracts', {
   id: id(),
@@ -13,6 +14,8 @@ export const contracts = pgTable('contracts', {
   counterpartyOrgId: uuid('counterparty_org_id').notNull().references(() => organizations.id),
   tenderId: uuid('tender_id').references(() => tenders.id),
   bidId: uuid('bid_id').references(() => bids.id),
+  offerId: uuid('offer_id').references(() => directOffers.id),
+  offerResponseId: uuid('offer_response_id').references(() => directOfferResponses.id),
   value: bigint('value', { mode: 'number' }),
   currency: text('currency').notNull().default('INR'),
   status: text('status').notNull().default('draft'),

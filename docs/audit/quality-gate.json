@@ -202,6 +202,7 @@
    "screenshots/gate/114-mobile.jpg"
   ],
   "tests": [
+   "offer-sales.e2e.ts",
    "stage14.e2e.ts",
    "browser journey (scripts/e2e-suites.mjs)"
   ],

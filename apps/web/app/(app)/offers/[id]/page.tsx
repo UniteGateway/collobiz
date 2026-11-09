@@ -5,13 +5,14 @@ import { useParams } from 'next/navigation';
 import { PRICE_UNITS, newIdempotencyKey } from '@collabiz/types';
 import { Alert, Button, Card, Checkbox, DescriptionList, Icon, LoadingState, Segmented, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
-import { MY_STATUS, dueText, isPercent, kindLabel, placesText, priceText, pricingLabel, rewardLabel, type Offer } from '@/components/Offers';
+import { MY_STATUS, dueText, isPercent, kindLabel, placesText, priceText, pricingLabel, rewardLabel, type Offer, type OfferSale } from '@/components/Offers';
+import { PartnerPapers, PartnerSales, type Papers } from '@/components/OfferSales';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 import { toMinor } from '@/lib/regions';
 
 interface MyResponse { id: string; mode: string; price: number | null; priceUnit: string | null; rewardModel: string; rewardBps: number | null; rewardAmount: number | null; rewardText: string; manpower: number | null; hasOffice: boolean; officeLocation: string | null; startDate: string | null; message: string; status: string; version: number; termsHash: string | null; decisionNote: string | null }
-type Detail = Offer & { myStatus: string; declineReason: string | null; myResponse: MyResponse | null; myCapacity: { hasOffice: boolean; officeLocations: string[]; idleManpower: number } | null };
+type Detail = Offer & { myStatus: string; declineReason: string | null; myResponse: MyResponse | null; myCapacity: { hasOffice: boolean; officeLocations: string[]; idleManpower: number } | null; papers: Papers | null; sales: OfferSale[] };
 const PAGE = { key: 'offer', title: 'Offer', access: 'verified-partner' as const };
 
 /** One direct offer: what Unite Group is asking for, its terms, and your response. */
@@ -49,7 +50,8 @@ export default function OfferDetail() {
         <div className="cz-stack">
           {o.myStatus === 'selected' && o.myResponse && (
             <Card title="You were selected">
-              <Alert tone="success">Agreed terms: {o.myResponse.rewardText}{o.myResponse.price != null ? ` · ${priceText(o.myResponse.price, o.myResponse.priceUnit)}` : ''}. Unite Group will contact you to start.</Alert>
+              <Alert tone="success">Agreed terms: {o.myResponse.rewardText}{o.myResponse.price != null ? ` · ${priceText(o.myResponse.price, o.myResponse.priceUnit)}` : ''}.</Alert>
+              <PartnerPapers papers={o.papers} />
               {o.myResponse.decisionNote && <p className="cz-muted">{o.myResponse.decisionNote}</p>}
               <p className="cz-muted" style={{ fontSize: 12.5 }}>Terms record <span className="cz-mono">{o.myResponse.termsHash?.slice(0, 16)}…</span> — kept unchanged for both sides.</p>
             </Card>
@@ -59,6 +61,7 @@ export default function OfferDetail() {
           {!decided && o.myStatus !== 'declined' && (o.open ? <Respond o={o} onDone={q.reload} /> : <Card title="Closed"><p style={{ margin: 0 }}>This offer is no longer taking responses.</p></Card>)}
         </div>
       </div>
+      {o.myStatus === 'selected' && <div style={{ marginTop: 20 }}><PartnerSales offerId={o.id} sales={o.sales ?? []} signed={o.papers?.contract?.status === 'executed'} hasCommission={!!o.papers?.agreement} onChange={q.reload} /></div>}
     </Screen>
   );
 }

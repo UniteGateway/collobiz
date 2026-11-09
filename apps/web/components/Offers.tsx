@@ -29,3 +29,16 @@ export const termsLine = (o: Offer) => (o.pricing === 'partner_quote' ? `Quote y
 export const MY_STATUS: Record<string, [string, 'info' | 'success' | 'warning' | 'neutral']> = {
   sent: ['New', 'info'], viewed: ['Not answered', 'warning'], responded: ['Response sent', 'info'], declined: ['Declined', 'neutral'], selected: ['Selected', 'success'], not_selected: ['Not selected', 'neutral'],
 };
+
+/** Sales registered under an offer. */
+export interface OfferSale {
+  id: string; code: string; partner: string; partnerOrgId: string; buyerName: string; buyerCity: string; contactName: string | null; contactPhone: string | null; contactEmail: string | null;
+  description: string; estimatedValue: number | null; consentMethod: string; status: string; saleValue: number | null; invoiceNumber: string | null; paymentReference: string | null; paidAt: string | null;
+  lostReason: string | null; createdAt: string; commission: { id: string; status: string; payable: number; gross: number; tds: number } | null;
+}
+export const SALE_STATUS: Record<string, [string, 'info' | 'success' | 'warning' | 'neutral' | 'danger']> = {
+  registered: ['Registered', 'info'], in_discussion: ['In discussion', 'info'], quoted: ['Quoted', 'warning'], won: ['Won — awaiting payment', 'success'], paid: ['Customer paid', 'success'], lost: ['Lost', 'neutral'], withdrawn: ['Withdrawn', 'neutral'],
+};
+export const CONSENT_METHODS: [string, string][] = [['meeting_minutes', 'Meeting minutes'], ['written_email', 'Written email'], ['signed_letter', 'Signed letter'], ['recorded_call', 'Recorded call']];
+export const CONTRACT_STATUS: Record<string, string> = { draft: 'Draft — Unite Group is preparing it', in_review: 'Awaiting Unite Group approval', approved: 'Ready for signatures', partially_signed: 'Partly signed', executed: 'Signed by both sides', terminated: 'Terminated' };
+export const COMMISSION_STATUS: Record<string, string> = { estimated: 'Projected', eligible: 'Eligible', earned: 'Earned', approved: 'Approved', invoiced: 'Requested', settled: 'Paid to you', on_hold: 'On hold', disputed: 'Disputed', reversed: 'Reversed' };

@@ -23,7 +23,7 @@ import {
 import { InjectDb, type Db } from '../../db/client';
 import {
   bankProfiles, commissionAgreements, commissionApprovals, commissionEntries, commissionJournal, commissionPolicies, financeDisputes, financeEnquiries, leadClaims, memberships, milestones, notifications, organizations,
-  payoutRequests, projectInvoices, projects, settlements, users,
+  payoutRequests, projectInvoices, projects, settlements, users, directOffers, offerSales,
 } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, RequireCaps, RequireOrg, type RequestContext } from '../../common/context';
@@ -223,28 +223,29 @@ export class CommissionsController {
   @Get('commissions/agreements')
   @RequireOrg()
   async agreements(@Ctx() ctx: RequestContext) {
-    const rows = await this.db.select({ a: commissionAgreements, project: projects.title, payer: organizations.displayName }).from(commissionAgreements).innerJoin(projects, eq(projects.id, commissionAgreements.projectId)).innerJoin(organizations, eq(organizations.id, commissionAgreements.payerOrgId))
+    const rows = await this.db.select({ a: commissionAgreements, project: projects.title, offer: directOffers.title, offerCode: directOffers.code, payer: organizations.displayName }).from(commissionAgreements).leftJoin(projects, eq(projects.id, commissionAgreements.projectId)).leftJoin(directOffers, eq(directOffers.id, commissionAgreements.offerId)).innerJoin(organizations, eq(organizations.id, commissionAgreements.payerOrgId))
       .where(or(eq(commissionAgreements.beneficiaryOrgId, ctx.orgId!), eq(commissionAgreements.payerOrgId, ctx.orgId!))).orderBy(desc(commissionAgreements.createdAt));
-    return rows.map((r) => ({ ...r.a, project: r.project, payer: r.payer }));
+    return rows.map((r) => ({ ...r.a, project: r.project ?? `${r.offerCode}: ${r.offer}`, source: r.a.projectId ? 'project' : 'offer', payer: r.payer }));
   }
 
   @Get('commissions/agreements/:id')
   async agreement(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string) {
     const a = await this.agreementFor(ctx, id);
-    const [p] = await this.db.select().from(projects).where(eq(projects.id, a.projectId));
+    const [p] = a.projectId ? await this.db.select().from(projects).where(eq(projects.id, a.projectId)) : [];
+    const [o] = a.offerId ? await this.db.select().from(directOffers).where(eq(directOffers.id, a.offerId)) : [];
     const names = await this.db.select({ id: organizations.id, name: organizations.displayName }).from(organizations).where(inArray(organizations.id, [a.beneficiaryOrgId, a.payerOrgId]));
-    const lines = await this.db.select({ e: commissionEntries, m: milestones, inv: projectInvoices }).from(commissionEntries).innerJoin(milestones, eq(milestones.id, commissionEntries.milestoneId)).leftJoin(projectInvoices, eq(projectInvoices.id, commissionEntries.projectInvoiceId))
-      .where(eq(commissionEntries.agreementId, id)).orderBy(asc(milestones.seq));
-    return { ...a, termsIntact: sha256(canonicalJson(a.terms)) === a.termsHash, project: { id: p.id, code: p.code, title: p.title, status: p.status, value: p.value },
+    const lines = await this.db.select({ e: commissionEntries, m: milestones, inv: projectInvoices, sale: offerSales }).from(commissionEntries).leftJoin(milestones, eq(milestones.id, commissionEntries.milestoneId)).leftJoin(projectInvoices, eq(projectInvoices.id, commissionEntries.projectInvoiceId))
+      .leftJoin(offerSales, eq(offerSales.id, commissionEntries.offerSaleId)).where(eq(commissionEntries.agreementId, id)).orderBy(asc(milestones.seq), asc(commissionEntries.createdAt));
+    return { ...a, termsIntact: sha256(canonicalJson(a.terms)) === a.termsHash, project: p ? { id: p.id, code: p.code, title: p.title, status: p.status, value: p.value } : null, offer: o ? { id: o.id, code: o.code, title: o.title, status: o.status } : null,
       beneficiary: names.find((n) => n.id === a.beneficiaryOrgId)?.name, payer: names.find((n) => n.id === a.payerOrgId)?.name,
-      lines: lines.map((l) => ({ ...l.e, milestone: { seq: l.m.seq, title: l.m.title, status: l.m.status, dueDate: l.m.dueDate, amount: l.m.amount, certifiedAmount: l.m.certifiedAmount }, invoice: l.inv ? { number: l.inv.number, status: l.inv.status, paidAt: l.inv.paidAt } : null })) };
+      lines: lines.map((l) => ({ ...l.e, milestone: l.m ? { seq: l.m.seq, title: l.m.title, status: l.m.status, dueDate: l.m.dueDate, amount: l.m.amount, certifiedAmount: l.m.certifiedAmount } : null, sale: l.sale ? { code: l.sale.code, buyer: l.sale.buyerName, status: l.sale.status, saleValue: l.sale.saleValue, paidAt: l.sale.paidAt } : null, invoice: l.inv ? { number: l.inv.number, status: l.inv.status, paidAt: l.inv.paidAt } : null })) };
   }
 
   // ---------- 027/095/158 earnings ----------
   @Get('earnings')
   @RequireOrg()
   async earnings(@Ctx() ctx: RequestContext) {
-    const rows = await this.db.select({ e: commissionEntries, a: commissionAgreements, project: projects.title }).from(commissionEntries).innerJoin(commissionAgreements, eq(commissionAgreements.id, commissionEntries.agreementId)).innerJoin(projects, eq(projects.id, commissionAgreements.projectId))
+    const rows = await this.db.select({ e: commissionEntries, a: commissionAgreements, project: sql<string>`coalesce(${projects.title}, ${directOffers.code} || ': ' || ${directOffers.title})` }).from(commissionEntries).innerJoin(commissionAgreements, eq(commissionAgreements.id, commissionEntries.agreementId)).leftJoin(projects, eq(projects.id, commissionAgreements.projectId)).leftJoin(directOffers, eq(directOffers.id, commissionAgreements.offerId))
       .where(eq(commissionEntries.beneficiaryOrgId, ctx.orgId!)).orderBy(desc(commissionEntries.updatedAt));
     const buckets: Record<string, number> = { estimated: 0, eligible: 0, earned: 0, approved: 0, invoiced: 0, settled: 0, on_hold: 0, disputed: 0, reversed: 0 };
     for (const r of rows) buckets[r.e.status] = (buckets[r.e.status] ?? 0) + r.e.payable;
@@ -271,8 +272,8 @@ export class CommissionsController {
   @Get('finance/approvals')
   async approvalQueue(@Ctx() ctx: RequestContext) {
     assertFinance(ctx, 'commission.approve');
-    const rows = await this.db.select({ e: commissionEntries, a: commissionAgreements, ben: organizations.displayName, project: projects.title }).from(commissionEntries).innerJoin(commissionAgreements, eq(commissionAgreements.id, commissionEntries.agreementId))
-      .innerJoin(organizations, eq(organizations.id, commissionEntries.beneficiaryOrgId)).innerJoin(projects, eq(projects.id, commissionAgreements.projectId))
+    const rows = await this.db.select({ e: commissionEntries, a: commissionAgreements, ben: organizations.displayName, project: sql<string>`coalesce(${projects.title}, ${directOffers.code} || ': ' || ${directOffers.title})` }).from(commissionEntries).innerJoin(commissionAgreements, eq(commissionAgreements.id, commissionEntries.agreementId))
+      .innerJoin(organizations, eq(organizations.id, commissionEntries.beneficiaryOrgId)).leftJoin(projects, eq(projects.id, commissionAgreements.projectId)).leftJoin(directOffers, eq(directOffers.id, commissionAgreements.offerId))
       .where(inArray(commissionEntries.status, ['earned', 'on_hold', 'eligible'])).orderBy(asc(commissionEntries.earnedAt));
     const approvals = rows.length ? await this.db.select({ a: commissionApprovals, who: users.fullName }).from(commissionApprovals).innerJoin(users, eq(users.id, commissionApprovals.approverUserId)).where(inArray(commissionApprovals.entryId, rows.map((r) => r.e.id))) : [];
     const threshold = config().DUAL_APPROVAL_THRESHOLD;

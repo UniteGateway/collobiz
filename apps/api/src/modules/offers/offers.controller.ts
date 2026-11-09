@@ -17,14 +17,15 @@ import { BadRequestException, Body, ConflictException, Controller, ForbiddenExce
 import { ApiTags } from '@nestjs/swagger';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { AGREEMENT_REWARDS, LOOKING_FOR, OFFER_KINDS, OFFER_PRICING, PARTNER_TYPES, PERCENT_REWARDS, PRICE_UNITS, REWARD_MODELS, SECTOR_CODES, rewardText } from '@collabiz/types';
+import { AGREEMENT_REWARDS, LOOKING_FOR, OFFER_KIND_LABELS, OFFER_KINDS, OFFER_PRICING, PARTNER_TYPES, PERCENT_REWARDS, PRICE_UNITS, REWARD_MODELS, SECTOR_CODES, rewardText } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
-import { directOfferRecipients, directOfferResponses, directOffers, memberships, notifications, organizations, partnerCapacity, partnerProfiles } from '../../db/schema';
+import { bankProfiles, commissionAgreements, commissionEntries, commissionPolicies, contractVersions, contracts, directOfferRecipients, directOfferResponses, directOffers, memberships, notifications, offerSales, organizations, partnerCapacity, partnerProfiles } from '../../db/schema';
+import { CommissionsModule, CommissionsService, lineAmounts } from '../commissions/commissions.controller';
 import { body } from '../../common/http';
 import { Ctx, RequireCaps, RequireOrg, type RequestContext } from '../../common/context';
 import { Idempotent } from '../../common/idempotency';
 import { AuditService } from '../../common/audit.service';
-import { randomDigits, sha256 } from '../../common/crypto';
+import { canonicalJson, randomDigits, sha256 } from '../../common/crypto';
 
 const textArray = (xs: string[]) => sql`ARRAY[${sql.join(xs.map((x) => sql`${x}`), sql`, `)}]::text[]`;
 const PARTNER_ORG = ['partner_company', 'partner_individual'];
@@ -74,6 +75,19 @@ const CapacitySchema = z.object({
 }).refine((v) => v.idleManpower <= v.totalManpower, { message: 'Idle people cannot exceed your total team', path: ['idleManpower'] })
   .refine((v) => !v.hasOffice || v.officeLocations.length > 0, { message: 'Add at least one office location', path: ['officeLocations'] });
 
+const SaleSchema = z.object({
+  buyerName: z.string().trim().min(2).max(200), buyerCity: z.string().trim().min(2).max(80), contactName: z.string().trim().min(2).max(120).optional(),
+  contactPhone: z.string().trim().regex(/^[+0-9 ()-]{7,20}$/, 'Enter a valid phone number').optional(), contactEmail: z.string().trim().email().optional(),
+  description: z.string().trim().min(10).max(2000), estimatedValue: amount.optional(),
+  consentMethod: z.enum(['written_email', 'signed_letter', 'meeting_minutes', 'recorded_call']), consent: z.literal(true, { message: 'Confirm that the buyer agreed to be introduced' }),
+});
+const SaleStatusSchema = z.object({ status: z.enum(['in_discussion', 'quoted', 'won', 'lost']), saleValue: amount.optional(), note: z.string().trim().max(1000).optional(), lostReason: z.string().trim().min(5).max(1000).optional() })
+  .refine((v) => v.status !== 'won' || v.saleValue != null, { message: 'Enter the sale value', path: ['saleValue'] })
+  .refine((v) => v.status !== 'lost' || !!v.lostReason, { message: 'Say why the sale was lost', path: ['lostReason'] });
+const SALE_NEXT: Record<string, string[]> = { registered: ['in_discussion', 'quoted', 'won', 'lost'], in_discussion: ['quoted', 'won', 'lost'], quoted: ['won', 'lost'] };
+/** "Apex Castings Pvt. Ltd." in "Pune" and "APEX CASTINGS PRIVATE LIMITED" in "pune" are the same buyer. */
+export const buyerKey = (name: string, city: string) => `${name.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\b(pvt|private|ltd|limited|llp|inc|co|company|the)\b/g, ' ').replace(/\s+/g, ' ').trim()}|${city.toLowerCase().replace(/[^a-z]/g, '')}`;
+
 type Offer = typeof directOffers.$inferSelect;
 const AGREEMENT_NOTE = 'Profit share and equity are indicative. They become binding only through an agreement drafted and signed in Contracts.';
 const needsAgreement = (o: { rewardModels: string[] }) => o.rewardModels.some((m) => AGREEMENT_REWARDS.has(m));
@@ -81,7 +95,7 @@ const open = (o: Offer) => o.status === 'open' && o.deadline.getTime() > Date.no
 
 @Injectable()
 export class OffersService {
-  constructor(@InjectDb() private db: Db, private audit: AuditService) {}
+  constructor(@InjectDb() private db: Db, private audit: AuditService, private commissions: CommissionsService) {}
 
   isVerifiedPartner(o?: { type: string; verificationStatus: string } | null) { return !!o && PARTNER_ORG.includes(o.type) && o.verificationStatus === 'verified'; }
 
@@ -125,6 +139,76 @@ export class OffersService {
       .where(and(eq(directOfferRecipients.offerId, id), eq(directOfferRecipients.organizationId, ctx.orgId!))).limit(1);
     if (!r || r.o.status === 'withdrawn') throw new NotFoundException();
     return r;
+  }
+
+  /**
+   * Paperwork for a selected response: a contract drafted in Contracts (it still needs approval by a second person and
+   * both signatures), and — for rewards paid as a share of sales — a commission agreement on the ledger. TDS and clawback
+   * follow the active standard introducer policy so finance keeps one place to set them.
+   */
+  async paperwork(ctx: RequestContext, o: Offer, r: typeof directOfferResponses.$inferSelect, partnerName: string, issuerName: string, termsHash: string, tx: Db) {
+    const reward = rewardText(r.rewardModel, r.rewardBps, r.rewardAmount);
+    const price = r.price != null ? `₹${(r.price / 100).toLocaleString('en-IN')}${r.priceUnit ? ` ${r.priceUnit}` : ''}` : 'as agreed per order';
+    const kind = ['project_work', 'manpower'].includes(o.kind) ? 'work_order' : 'contract';
+    const text = [
+      `${kind === 'work_order' ? 'WORK ORDER' : 'AGREEMENT'} — ${o.title}`,
+      `Between ${issuerName} ("Unite Group company") and ${partnerName} ("Partner"), arising from direct offer ${o.code}.`,
+      `1. Scope. ${OFFER_KIND_LABELS[o.kind] ?? o.kind}: ${o.summary}`,
+      `2. Price. ${price}.`,
+      `3. Partner reward. ${reward}.${['commission', 'revenue_share'].includes(r.rewardModel) ? ' Earned only on sales registered under this offer and only when the customer has paid; calculated and paid through the COLLABIZ commission ledger after finance approval, net of TDS.' : ''}${AGREEMENT_REWARDS.has(r.rewardModel) ? ' The basis of calculation, accounting period, audit rights and any transfer of shares must be set out in an annex before signature; nothing is owed until this agreement is executed.' : ''}`,
+      `4. Partner commitment. ${r.manpower != null ? `${r.manpower} people` : 'As proposed'}${r.officeLocation ? `; office at ${r.officeLocation}` : ''}${r.startDate ? `; start from ${r.startDate}` : ''}.`,
+      `5. Territory. ${o.regions.length ? o.regions.join(', ') : 'As agreed'}${o.exclusive ? ' — exclusive for the term of this agreement' : ' — non-exclusive'}.`,
+      `6. Terms record. Selected on ${new Date().toISOString().slice(0, 10)}; terms fingerprint ${termsHash}.`,
+      'DRAFT generated from the selected response — to be reviewed, approved by a second authorised person and signed by both parties. Legal templates pending review (B-08).',
+    ].join('\n\n');
+    const code = `CTR-${new Date().getUTCFullYear()}-${randomDigits(6)}`;
+    const [c] = await tx.insert(contracts).values({ code, kind, title: `${kind === 'work_order' ? 'Work Order' : 'Agreement'} — ${o.title}`, issuerOrgId: o.issuerOrgId, counterpartyOrgId: r.organizationId, offerId: o.id, offerResponseId: r.id, value: r.priceUnit === 'lump sum' ? r.price : null, createdBy: ctx.userId }).returning();
+    await tx.insert(contractVersions).values({ contractId: c.id, versionNo: 1, body: text, terms: { value: c.value, startDate: r.startDate, paymentTerms: price, deliverables: o.summary.slice(0, 500) }, bodyHash: sha256(text), changeNote: `Generated from direct offer ${o.code}`, authorUserId: ctx.userId });
+    let agreement: { id: string; code: string } | null = null;
+    if (['commission', 'revenue_share'].includes(r.rewardModel) && r.rewardBps) {
+      const [pol] = await tx.select().from(commissionPolicies).where(and(eq(commissionPolicies.code, 'INTRODUCER-STD'), eq(commissionPolicies.status, 'active'))).orderBy(desc(commissionPolicies.version)).limit(1);
+      if (pol) {
+        const [bank] = await tx.select({ gst: bankProfiles.gstRegistered }).from(bankProfiles).where(eq(bankProfiles.organizationId, r.organizationId)).limit(1);
+        const terms = { policy: { code: `OFFER-${o.code}`, version: 1, name: `Direct offer ${o.code} — ${reward}`, basis: 'percent', rateBps: r.rewardBps, flatAmount: null, tiers: null, tdsBps: pol.tdsBps, clawbackDays: pol.clawbackDays, trigger: 'Customer payment for a sale registered under the offer' }, shareBps: 10000, gstRegistered: !!bank?.gst, projectValue: 0 };
+        const [a] = await tx.insert(commissionAgreements).values({ code: `CA-${new Date().getUTCFullYear()}-${randomDigits(6)}`, beneficiaryOrgId: r.organizationId, payerOrgId: o.issuerOrgId, offerId: o.id, offerResponseId: r.id, policyId: pol.id, terms, termsHash: sha256(canonicalJson(terms)), createdBy: ctx.userId }).returning();
+        agreement = { id: a.id, code: a.code };
+      }
+    }
+    return { contract: { id: c.id, code: c.code, status: c.status }, agreement };
+  }
+
+  /** Contract and commission agreement for one selected response. */
+  async papersOf(responseId: string) {
+    const [c] = await this.db.select({ id: contracts.id, code: contracts.code, status: contracts.status }).from(contracts).where(eq(contracts.offerResponseId, responseId)).orderBy(desc(contracts.createdAt)).limit(1);
+    const [a] = await this.db.select({ id: commissionAgreements.id, code: commissionAgreements.code, terms: commissionAgreements.terms }).from(commissionAgreements).where(eq(commissionAgreements.offerResponseId, responseId)).limit(1);
+    return { contract: c ?? null, agreement: a ? { id: a.id, code: a.code } : null, agreementTerms: a?.terms ?? null };
+  }
+
+  async salesOf(offerId: string, partnerOrgId?: string) {
+    const rows = await this.db.select({ s: offerSales, partner: organizations.displayName, e: commissionEntries }).from(offerSales).innerJoin(organizations, eq(organizations.id, offerSales.partnerOrgId))
+      .leftJoin(commissionEntries, eq(commissionEntries.offerSaleId, offerSales.id)).where(and(eq(offerSales.offerId, offerId), partnerOrgId ? eq(offerSales.partnerOrgId, partnerOrgId) : undefined)).orderBy(desc(offerSales.createdAt));
+    return rows.map((r) => ({ ...r.s, partner: r.partner, commission: r.e ? { id: r.e.id, status: r.e.status, payable: r.e.payable, gross: r.e.gross, tds: r.e.tds } : null }));
+  }
+
+  /** A won sale opens a projected commission line at the agreed rate. */
+  async onSaleWon(sale: typeof offerSales.$inferSelect, userId: string) {
+    const [a] = await this.db.select().from(commissionAgreements).where(and(eq(commissionAgreements.offerResponseId, sale.responseId), eq(commissionAgreements.status, 'active'))).limit(1);
+    if (!a || sale.saleValue == null) return null;
+    const terms = { ...(a.terms as Record<string, unknown>), projectValue: sale.saleValue } as never;
+    const amounts = lineAmounts(terms, sale.saleValue);
+    const [e] = await this.db.insert(commissionEntries).values({ agreementId: a.id, beneficiaryOrgId: a.beneficiaryOrgId, offerSaleId: sale.id, description: `Sale ${sale.code}: ${sale.buyerName}`, baseAmount: sale.saleValue, ...amounts }).returning();
+    await this.commissions.journal(e.id, 'entry.estimated', null, 'estimated', e.payable, `Sale won at ₹${(sale.saleValue / 100).toLocaleString('en-IN')}`, userId);
+    return e;
+  }
+
+  /** The customer's payment is the only event that makes commission earned (same rule as projects). */
+  async onSalePaid(sale: typeof offerSales.$inferSelect, userId: string) {
+    const [e] = await this.db.select().from(commissionEntries).where(eq(commissionEntries.offerSaleId, sale.id)).limit(1);
+    if (!e || e.status !== 'estimated') return null;
+    const eligible = await this.commissions.move(e, 'eligible', userId, `Sale ${sale.code} invoiced${sale.invoiceNumber ? ` (${sale.invoiceNumber})` : ''}`);
+    const earned = await this.commissions.move(eligible, 'earned', userId, `Customer payment received (${sale.paymentReference})`, { earnedAt: new Date() });
+    await this.commissions.notifyOrg(e.beneficiaryOrgId, 'Commission earned', `${e.description}: ₹${(earned.payable / 100).toLocaleString('en-IN')} earned; awaiting finance approval.`, '/earnings/live');
+    return earned;
   }
 
   publicOffer(o: Offer, issuer: string) {
@@ -185,6 +269,8 @@ export class OffersController {
       ...this.svc.publicOffer(r.o, r.issuer), myStatus: r.rec.status === 'sent' ? 'viewed' : r.rec.status, declineReason: r.rec.declineReason,
       myResponse: resp ? { ...resp, rewardText: rewardText(resp.rewardModel, resp.rewardBps, resp.rewardAmount) } : null,
       myCapacity: cap ? { hasOffice: cap.hasOffice, officeLocations: cap.officeLocations, idleManpower: cap.idleManpower } : null,
+      papers: resp?.status === 'selected' ? await this.svc.papersOf(resp.id).then(({ contract, agreement }) => ({ contract, agreement })) : null,
+      sales: resp?.status === 'selected' ? await this.svc.salesOf(id, ctx.orgId!) : [],
     };
   }
 
@@ -278,8 +364,10 @@ export class OffersController {
       viewed: sql<number>`(select count(*)::int from direct_offer_recipients r where r.offer_id = ${directOffers.id} and r.status <> 'sent')`,
       responses: sql<number>`(select count(*)::int from direct_offer_responses x where x.offer_id = ${directOffers.id} and x.status <> 'withdrawn')`,
       selected: sql<number>`(select count(*)::int from direct_offer_responses x where x.offer_id = ${directOffers.id} and x.status = 'selected')`,
+      leads: sql<number>`(select count(*)::int from offer_sales x where x.offer_id = ${directOffers.id} and x.status <> 'withdrawn')`,
+      wonValue: sql<number>`(select coalesce(sum(x.sale_value), 0)::bigint from offer_sales x where x.offer_id = ${directOffers.id} and x.status in ('won', 'paid'))`,
     }).from(directOffers).innerJoin(organizations, eq(organizations.id, directOffers.issuerOrgId)).where(scope).orderBy(desc(directOffers.createdAt)).limit(200);
-    return rows.map((r) => ({ ...this.svc.publicOffer(r.o, r.issuer), targetMode: r.o.targetMode, sent: r.sent, viewed: r.viewed, responses: r.responses, selected: r.selected }));
+    return rows.map((r) => ({ ...this.svc.publicOffer(r.o, r.issuer), targetMode: r.o.targetMode, sent: r.sent, viewed: r.viewed, responses: r.responses, selected: r.selected, leads: r.leads, wonValue: Number(r.wonValue) }));
   }
 
   @Post('admin/offers')
@@ -321,6 +409,7 @@ export class OffersController {
     const [issuer] = await this.db.select({ name: organizations.displayName }).from(organizations).where(eq(organizations.id, o.issuerOrgId));
     const recipients = await this.db.select({ r: directOfferRecipients, name: organizations.displayName }).from(directOfferRecipients).innerJoin(organizations, eq(organizations.id, directOfferRecipients.organizationId))
       .where(eq(directOfferRecipients.offerId, id)).orderBy(organizations.displayName);
+    const sales = await this.svc.salesOf(id);
     const responses = await this.db.select({ x: directOfferResponses, org: organizations, cap: partnerCapacity }).from(directOfferResponses)
       .innerJoin(organizations, eq(organizations.id, directOfferResponses.organizationId)).leftJoin(partnerCapacity, eq(partnerCapacity.organizationId, directOfferResponses.organizationId))
       .where(and(eq(directOfferResponses.offerId, id), sql`${directOfferResponses.status} <> 'withdrawn'`)).orderBy(directOfferResponses.createdAt);
@@ -334,6 +423,15 @@ export class OffersController {
         termsHash: r.x.termsHash, decisionNote: r.x.decisionNote, decidedAt: r.x.decidedAt, submittedAt: r.x.updatedAt,
         idleManpower: r.cap?.idleManpower ?? null,
       })),
+      papers: await Promise.all(responses.filter((r) => r.x.status === 'selected').map(async (r) => ({ responseId: r.x.id, partner: r.org.displayName, ...(await this.svc.papersOf(r.x.id).then(({ contract, agreement }) => ({ contract, agreement }))) }))),
+      sales,
+      results: Object.values(sales.reduce((acc, s) => {
+        const k = s.partnerOrgId; const x = acc[k] ?? (acc[k] = { partner: s.partner, leads: 0, open: 0, won: 0, paid: 0, lost: 0, wonValue: 0, paidValue: 0, commission: 0 });
+        if (s.status === 'withdrawn') return acc;
+        x.leads += 1; if (['registered', 'in_discussion', 'quoted'].includes(s.status)) x.open += 1; if (s.status === 'lost') x.lost += 1;
+        if (['won', 'paid'].includes(s.status)) { x.won += 1; x.wonValue += s.saleValue ?? 0; } if (s.status === 'paid') { x.paid += 1; x.paidValue += s.saleValue ?? 0; }
+        x.commission += s.commission?.payable ?? 0; return acc;
+      }, {} as Record<string, { partner: string; leads: number; open: number; won: number; paid: number; lost: number; wonValue: number; paidValue: number; commission: number }>)),
     };
   }
 
@@ -356,8 +454,11 @@ export class OffersController {
       const [u] = await tx.update(directOfferResponses).set({ status: 'selected', termsHash, decidedBy: ctx.userId, decisionNote: b.note, decidedAt, updatedAt: decidedAt }).where(eq(directOfferResponses.id, rid)).returning();
       await tx.update(directOfferRecipients).set({ status: 'selected' }).where(and(eq(directOfferRecipients.offerId, id), eq(directOfferRecipients.organizationId, r.organizationId)));
       await this.audit.record(ctx, { action: 'offer.selected', objectType: 'direct_offer', objectId: id, reason: b.note, after: { ...terms, termsHash } }, tx);
+      const [iss] = await tx.select({ name: organizations.displayName }).from(organizations).where(eq(organizations.id, o.issuerOrgId));
+      const papers = await this.svc.paperwork(ctx, o, u, org.name, iss.name, termsHash, tx as unknown as Db);
+      await this.audit.record(ctx, { action: 'offer.paperwork', objectType: 'direct_offer', objectId: id, after: { contract: papers.contract.code, commissionAgreement: papers.agreement?.code ?? null } }, tx);
       const agreement = AGREEMENT_REWARDS.has(r.rewardModel);
-      await this.svc.notifyOrgs([r.organizationId], `Selected: ${o.code}`, `${o.title}. Agreed terms: ${rewardText(r.rewardModel, r.rewardBps, r.rewardAmount)}.${agreement ? ' An agreement will be drafted in Contracts for signature.' : ''}`, `/offers/${id}`, tx as unknown as Db);
+      await this.svc.notifyOrgs([r.organizationId], `Selected: ${o.code}`, `${o.title}. Agreed terms: ${rewardText(r.rewardModel, r.rewardBps, r.rewardAmount)}. Agreement ${papers.contract.code} is drafted in Contracts for approval and signature.`, `/offers/${id}`, tx as unknown as Db);
       let closed = false;
       if (n + 1 >= o.maxSelections) {
         closed = true;
@@ -369,7 +470,7 @@ export class OffersController {
           await this.svc.notifyOrgs(others.map((x) => x.org), `Offer closed: ${o.code}`, 'Thank you for responding. All places on this offer have been filled.', `/offers/${id}`, tx as unknown as Db);
         }
       }
-      return { ...u, rewardText: rewardText(u.rewardModel, u.rewardBps, u.rewardAmount), offerClosed: closed, agreementNote: agreement ? AGREEMENT_NOTE : null };
+      return { ...u, rewardText: rewardText(u.rewardModel, u.rewardBps, u.rewardAmount), offerClosed: closed, agreementNote: agreement ? AGREEMENT_NOTE : null, contract: papers.contract, commissionAgreement: papers.agreement };
     });
   }
 
@@ -388,6 +489,89 @@ export class OffersController {
     return { status: 'not_selected' };
   }
 
+  // ---------- Sales under an offer (selected partners register buyers; Unite moves them on) ----------
+  private async selectedResponse(ctx: RequestContext, offerId: string) {
+    const [resp] = await this.db.select().from(directOfferResponses).where(and(eq(directOfferResponses.offerId, offerId), eq(directOfferResponses.organizationId, ctx.orgId!), eq(directOfferResponses.status, 'selected'))).limit(1);
+    if (!resp) throw new ForbiddenException('Only a partner selected for this offer can register sales under it');
+    return resp;
+  }
+
+  @Get('offers/:id/sales')
+  @RequireOrg()
+  async mySales(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string) {
+    await this.svc.loadForPartner(ctx, id);
+    return this.svc.salesOf(id, ctx.orgId!);
+  }
+
+  @Post('offers/:id/sales')
+  @RequireOrg()
+  @Idempotent()
+  @HttpCode(201)
+  async registerSale(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Body(body(SaleSchema)) b: z.infer<typeof SaleSchema>) {
+    const { o } = await this.svc.loadForPartner(ctx, id);
+    const resp = await this.selectedResponse(ctx, id);
+    if (o.status === 'withdrawn') throw new ConflictException('This offer was withdrawn');
+    const key = buyerKey(b.buyerName, b.buyerCity);
+    const [dup] = await this.db.select({ id: offerSales.id }).from(offerSales).where(and(eq(offerSales.offerId, id), eq(offerSales.buyerKey, key), sql`${offerSales.status} not in ('lost','withdrawn')`)).limit(1);
+    if (dup) throw new ConflictException('This buyer is already registered under this offer');
+    const code = `OS-${new Date().getUTCFullYear()}-${randomDigits(6)}`;
+    const [sale] = await this.db.insert(offerSales).values({
+      code, offerId: id, responseId: resp.id, partnerOrgId: ctx.orgId!, buyerName: b.buyerName, buyerKey: key, buyerCity: b.buyerCity, contactName: b.contactName ?? null, contactPhone: b.contactPhone ?? null, contactEmail: b.contactEmail ?? null,
+      description: b.description, estimatedValue: b.estimatedValue ?? null, consentMethod: b.consentMethod, history: [{ at: new Date().toISOString(), status: 'registered', note: 'Registered by the partner', by: ctx.userId }], createdBy: ctx.userId,
+    }).returning();
+    await this.audit.record(ctx, { action: 'offer.sale_registered', objectType: 'offer_sale', objectId: sale.id, after: { offer: o.code, code, buyerCity: b.buyerCity, consentMethod: b.consentMethod } });
+    await this.svc.notifyOrgs([o.issuerOrgId], `New sale lead: ${o.code}`, `${b.buyerName}, ${b.buyerCity}`, `/offers/${id}`);
+    return sale;
+  }
+
+  @Post('offers/:id/sales/:sid/withdraw')
+  @RequireOrg()
+  @HttpCode(200)
+  async withdrawSale(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Param('sid', ParseUUIDPipe) sid: string) {
+    const [sale] = await this.db.select().from(offerSales).where(and(eq(offerSales.id, sid), eq(offerSales.offerId, id), eq(offerSales.partnerOrgId, ctx.orgId!))).limit(1);
+    if (!sale) throw new NotFoundException();
+    if (!['registered', 'in_discussion'].includes(sale.status)) throw new ConflictException('This sale has progressed and can no longer be withdrawn');
+    const history = [...(sale.history as unknown[]), { at: new Date().toISOString(), status: 'withdrawn', note: 'Withdrawn by the partner', by: ctx.userId }];
+    await this.db.update(offerSales).set({ status: 'withdrawn', history, updatedAt: new Date() }).where(eq(offerSales.id, sid));
+    await this.audit.record(ctx, { action: 'offer.sale_withdrawn', objectType: 'offer_sale', objectId: sid });
+    return { status: 'withdrawn' };
+  }
+
+  @Post('admin/offers/:id/sales/:sid/status')
+  @RequireCaps('opportunity.publish')
+  @HttpCode(200)
+  async saleStatus(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Param('sid', ParseUUIDPipe) sid: string, @Body(body(SaleStatusSchema)) b: z.infer<typeof SaleStatusSchema>) {
+    const o = await this.svc.loadForIssuer(ctx, id);
+    const [sale] = await this.db.select().from(offerSales).where(and(eq(offerSales.id, sid), eq(offerSales.offerId, id))).limit(1);
+    if (!sale) throw new NotFoundException();
+    if (!(SALE_NEXT[sale.status] ?? []).includes(b.status)) throw new ConflictException(`A sale that is ${sale.status.replace('_', ' ')} cannot move to ${b.status.replace('_', ' ')}`);
+    const history = [...(sale.history as unknown[]), { at: new Date().toISOString(), status: b.status, note: b.status === 'lost' ? b.lostReason : b.note ?? null, by: ctx.userId }];
+    const [u] = await this.db.update(offerSales).set({ status: b.status, saleValue: b.status === 'won' ? b.saleValue! : sale.saleValue, lostReason: b.status === 'lost' ? b.lostReason! : null, history, updatedAt: new Date() }).where(eq(offerSales.id, sid)).returning();
+    const entry = b.status === 'won' ? await this.svc.onSaleWon(u, ctx.userId) : null;
+    await this.audit.record(ctx, { action: `offer.sale_${b.status}`, objectType: 'offer_sale', objectId: sid, reason: b.lostReason ?? b.note, after: { saleValue: u.saleValue, commission: entry?.payable ?? null } });
+    const msg = b.status === 'won' ? `Won at ₹${(u.saleValue! / 100).toLocaleString('en-IN')}.${entry ? ` Projected commission ₹${(entry.payable / 100).toLocaleString('en-IN')}, earned when the customer pays.` : ''}` : b.status === 'lost' ? `Lost: ${b.lostReason}` : `Now ${b.status.replace('_', ' ')}.`;
+    await this.svc.notifyOrgs([sale.partnerOrgId], `${sale.buyerName} (${o.code})`, msg, `/offers/${id}`);
+    return { ...u, commission: entry ? { id: entry.id, status: entry.status, payable: entry.payable } : null };
+  }
+
+  @Post('admin/offers/:id/sales/:sid/paid')
+  @RequireCaps('opportunity.publish')
+  @HttpCode(200)
+  async salePaid(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Param('sid', ParseUUIDPipe) sid: string, @Body(body(z.object({ paymentReference: z.string().trim().min(4).max(60), invoiceNumber: z.string().trim().min(2).max(60).optional() }))) b: { paymentReference: string; invoiceNumber?: string }) {
+    const o = await this.svc.loadForIssuer(ctx, id);
+    const [sale] = await this.db.select().from(offerSales).where(and(eq(offerSales.id, sid), eq(offerSales.offerId, id))).limit(1);
+    if (!sale) throw new NotFoundException();
+    if (sale.status !== 'won') throw new ConflictException('Only a won sale can be marked as paid');
+    const papers = await this.svc.papersOf(sale.responseId);
+    if (papers.agreement && papers.contract?.status !== 'executed') throw new ConflictException(`Agreement ${papers.contract?.code ?? ''} must be signed by both sides before commission can be earned`.replace('  ', ' '));
+    const history = [...(sale.history as unknown[]), { at: new Date().toISOString(), status: 'paid', note: `Customer payment ${b.paymentReference}`, by: ctx.userId }];
+    const [u] = await this.db.update(offerSales).set({ status: 'paid', paymentReference: b.paymentReference, invoiceNumber: b.invoiceNumber ?? null, paidAt: new Date(), history, updatedAt: new Date() }).where(eq(offerSales.id, sid)).returning();
+    const earned = await this.svc.onSalePaid(u, ctx.userId);
+    await this.audit.record(ctx, { action: 'offer.sale_paid', objectType: 'offer_sale', objectId: sid, after: { paymentReference: b.paymentReference, commission: earned?.payable ?? null } });
+    if (!earned) await this.svc.notifyOrgs([sale.partnerOrgId], `Customer paid: ${sale.buyerName}`, `Payment recorded for ${o.code}.`, `/offers/${id}`);
+    return { ...u, commission: earned ? { id: earned.id, status: earned.status, payable: earned.payable } : null };
+  }
+
   @Post('admin/offers/:id/close')
   @RequireCaps('opportunity.publish')
   @HttpCode(200)
@@ -403,5 +587,5 @@ export class OffersController {
   }
 }
 
-@Module({ controllers: [OffersController], providers: [OffersService] })
+@Module({ imports: [CommissionsModule], controllers: [OffersController], providers: [OffersService] })
 export class OffersModule {}

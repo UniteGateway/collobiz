@@ -2291,6 +2291,7 @@
     "placeholder": false,
     "smokeHit": true,
     "apiTests": [
+      "offer-sales.e2e.ts",
       "stage14.e2e.ts"
     ],
     "native": null,

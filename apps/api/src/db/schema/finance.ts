@@ -1,9 +1,10 @@
 /** Stage 12 — commission ledger & finance: policies, agreements, ledger entries, append-only journal, approvals, payouts, settlements, disputes. */
-import { pgTable, uuid, text, timestamp, jsonb, integer, index, uniqueIndex, bigint } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, jsonb, integer, index, uniqueIndex, bigint, check } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { id, createdAt, updatedAt, organizations, users } from './core';
 import { projects, milestones, projectInvoices } from './projects';
 import { leadClaims } from './leads';
+import { directOffers, directOfferResponses, offerSales } from './offers';
 
 /** 135 — commission policy (rates in basis points; amounts in minor units). Active policies are immutable — retire and replace. */
 export const commissionPolicies = pgTable('commission_policies', {
@@ -33,7 +34,9 @@ export const commissionAgreements = pgTable('commission_agreements', {
   code: text('code').notNull(),
   beneficiaryOrgId: uuid('beneficiary_org_id').notNull().references(() => organizations.id),
   payerOrgId: uuid('payer_org_id').notNull().references(() => organizations.id),
-  projectId: uuid('project_id').notNull().references(() => projects.id),
+  projectId: uuid('project_id').references(() => projects.id), // a project agreement…
+  offerId: uuid('offer_id').references(() => directOffers.id), // …or a direct-offer agreement (commission on sales)
+  offerResponseId: uuid('offer_response_id').references(() => directOfferResponses.id),
   leadClaimId: uuid('lead_claim_id').references(() => leadClaims.id),
   policyId: uuid('policy_id').notNull().references(() => commissionPolicies.id),
   terms: jsonb('terms').notNull(), // frozen policy snapshot + shareBps + gst flag
@@ -42,14 +45,16 @@ export const commissionAgreements = pgTable('commission_agreements', {
   status: text('status').notNull().default('active'), // active | terminated
   createdBy: uuid('created_by').notNull().references(() => users.id),
   createdAt: createdAt(),
-}, (t) => [uniqueIndex('commission_agreements_code_uq').on(t.code), uniqueIndex('commission_agreements_project_beneficiary_uq').on(t.projectId, t.beneficiaryOrgId)]);
+}, (t) => [uniqueIndex('commission_agreements_code_uq').on(t.code), uniqueIndex('commission_agreements_project_beneficiary_uq').on(t.projectId, t.beneficiaryOrgId), uniqueIndex('commission_agreements_offer_response_uq').on(t.offerResponseId),
+  check('commission_agreements_source_ck', sql`project_id is not null or offer_id is not null`)]);
 
 /** Ledger entries — one per project milestone. Amounts are recomputed only by the server from frozen terms. */
 export const commissionEntries = pgTable('commission_entries', {
   id: id(),
   agreementId: uuid('agreement_id').notNull().references(() => commissionAgreements.id),
   beneficiaryOrgId: uuid('beneficiary_org_id').notNull().references(() => organizations.id),
-  milestoneId: uuid('milestone_id').notNull().references(() => milestones.id),
+  milestoneId: uuid('milestone_id').references(() => milestones.id), // a project milestone…
+  offerSaleId: uuid('offer_sale_id').references(() => offerSales.id), // …or a sale registered under a direct offer
   projectInvoiceId: uuid('project_invoice_id').references(() => projectInvoices.id),
   description: text('description').notNull(),
   baseAmount: bigint('base_amount', { mode: 'number' }).notNull(),
@@ -69,7 +74,8 @@ export const commissionEntries = pgTable('commission_entries', {
   version: integer('version').notNull().default(1),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
-}, (t) => [uniqueIndex('commission_entries_agreement_milestone_uq').on(t.agreementId, t.milestoneId), index('commission_entries_beneficiary_idx').on(t.beneficiaryOrgId, t.status)]);
+}, (t) => [uniqueIndex('commission_entries_agreement_milestone_uq').on(t.agreementId, t.milestoneId), index('commission_entries_beneficiary_idx').on(t.beneficiaryOrgId, t.status), uniqueIndex('commission_entries_agreement_sale_uq').on(t.agreementId, t.offerSaleId),
+  check('commission_entries_source_ck', sql`milestone_id is not null or offer_sale_id is not null`)]);
 
 /** Append-only journal of every ledger movement (gate). */
 export const commissionJournal = pgTable('commission_journal', {
