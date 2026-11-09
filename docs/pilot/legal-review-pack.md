@@ -35,6 +35,7 @@ COLLABIZ does not yet use a licensed e-signature provider (open item B-08). Ever
 | 7 | Contract / Letter of Intent from a tender award | Generated when a tender is awarded | Issuer and awarded partner |
 | 8 | Buyer-consent declaration for sales and leads | Every lead or sale a partner registers | Partner user |
 | 9 | Regulated businesses | Which Unite businesses are locked | Super admin records clearance |
+| 10 | Growth Desk outreach | AI-drafted, staff-approved e-mails to the lead database | Recipient can unsubscribe |
 
 ## Key commercial and legal parameters
 
@@ -244,9 +245,26 @@ Ten Unite Group businesses are hidden from partners and the public. They cannot 
 
 **Q21.** Please confirm that this list is complete, and name for each business the licence or opinion required before partners may promote it (e.g. RBI PA/PPI authorisation, SEBI, NBFC partnership, state lottery/prize laws, crypto-asset position).
 
+## 10. Growth Desk outreach (AI campaign agents)
+
+Unite staff keep a lead database of companies, associations, institutions and investors. AI campaign agents (one per product or service) score contacts and draft e-mails; a person approves every message; sending is switched off until a separate marketing e-mail service is set up. Every contact records its source and a lawful basis chosen from: consent given; business contact — legitimate interest; existing business relationship; no basis (never contacted). Scraping websites or social networks is not a permitted source. Every message ends with:
+
+```text
+Why you received this: «source» («source detail»).
+To stop receiving messages from Unite Group, open «link»
+```
+
+Unsubscribing works without signing in, applies to every Unite business and campaign, and the address is never contacted again. Investor outreach goes only to investors who opted in, and only after a super admin records a legal clearance note.
+
+**Q22.** The DPDP Act 2023 has no general "legitimate interest" ground (unlike the GDPR); it relies on consent and the "legitimate uses" in section 7. Can Unite e-mail a named individual at a company, whose details come from a public registry or a licensed directory, without prior consent? If not, should the app allow only consent and existing-relationship contacts for Indian individuals, and keep "legitimate interest" only for generic company addresses (e.g. info@) and for contacts in GDPR countries?
+
+**Q23.** For overseas recipients (UAE, Kenya, Nigeria, UK, US and others), which anti-spam and data-protection rules apply (e.g. GDPR/PECR, CAN-SPAM), and is the footer and unsubscribe mechanism above sufficient? Must the sender's postal address be added?
+
+**Q24.** May licensed directory and trade-data contacts be used for automated e-mail outreach under typical licence terms, or only for manual contact? Please list what to check in each data licence.
+
 ## Checklist for counsel
 
-Please answer or mark "not for pilot". Items 1, 4, 5, 10, 11 and 14 must be resolved before partners are invited.
+Please answer or mark "not for pilot". Items 1, 4, 5, 10, 11 and 14 must be resolved before partners are invited; items 22–24 before any Growth Desk message is sent.
 
 | Q | Question | Answer |
 |---|---|---|
@@ -271,5 +289,8 @@ Please answer or mark "not for pilot". Items 1, 4, 5, 10, 11 and 14 must be reso
 | Q19 | Tenders are out of scope for the pilot. Please review only if time allows; otherwise mark "not for pilot". | |
 | Q20 | Is this declaration enough to show lawful processing of the buyer's contact details under the DPDP Act, and to support the partner's claim to … | |
 | Q21 | Please confirm that this list is complete, and name for each business the licence or opinion required before partners may promote it (e.g. RBI PA/PPI … | |
+| Q22 | The DPDP Act 2023 has no general "legitimate interest" ground (unlike the GDPR); it relies on consent and the "legitimate uses" in section 7. Can … | |
+| Q23 | For overseas recipients (UAE, Kenya, Nigeria, UK, US and others), which anti-spam and data-protection rules apply (e.g. GDPR/PECR, CAN-SPAM), and is … | |
+| Q24 | May licensed directory and trade-data contacts be used for automated e-mail outreach under typical licence terms, or only for manual contact? Please … | |
 
 Return the marked-up document to the pilot owner. Approved texts are loaded with the bootstrap command (go-live checklist 5.2a) and the "DRAFT" wording is removed only from approved documents.

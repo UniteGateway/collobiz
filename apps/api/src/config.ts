@@ -24,6 +24,8 @@ const Env = z.object({
   WEB_BASE_URL: z.string().url().default('http://localhost:3000'),
   IDENTITY_PROVIDER: z.enum(['local', 'oidc']).default('local'),
   AI_PROVIDER: z.enum(['rules', 'anthropic']).default('rules'),
+  /** Growth Desk outreach sending. Off until a separate marketing e-mail domain/service is configured; approved drafts wait. */
+  GROWTH_SENDING_ENABLED: bool.default(false),
   ESIGN_PROVIDER: z.string().default('local'),
   /** Video provider for meeting rooms: local/none (scheduling, agenda, minutes only) or jitsi. */
   MEETING_PROVIDER: z.string().default('local'),

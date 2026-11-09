@@ -65,6 +65,7 @@ const accountFor = (s) => s.route.includes('[') && OWNER[resourceOf(s.route)] ? 
 const offerId = await one("select id from direct_offers where code = 'DO-2026-100002'");
 const salesOfferId = await one("select id from direct_offers where code = 'DO-2026-100001'");
 const ventureId = await one("select id from unite_ventures where slug = 'solcart'");
+const growthAgentId = await one("select id from growth_agents where name like 'SOLCART — factory%'");
 const offerAgreementId = await one("select id from commission_agreements where code = 'CA-2026-410001'");
 const EXTRA = [
   { id: 'X01', title: 'Offers for you', app: 'web', route: '/offers', access: 'verified-partner' },
@@ -84,6 +85,10 @@ const EXTRA = [
   { id: 'X15', title: 'New offer for a business', app: 'admin', route: `/offers/new?venture=${ventureId}`, access: 'unite-admin' },
   { id: 'X16', title: 'Pilot check-in', app: 'web', route: '/help/pilot', access: 'authenticated' },
   { id: 'X17', title: 'Pilot feedback (admin)', app: 'admin', route: '/pilot', access: 'unite-admin' },
+  { id: 'X18', title: 'Growth Desk', app: 'admin', route: '/growth', access: 'unite-admin' },
+  { id: 'X19', title: 'Growth Desk agent', app: 'admin', route: `/growth/agents/${growthAgentId}`, access: 'unite-admin' },
+  { id: 'X20', title: 'New Growth Desk agent', app: 'admin', route: '/growth/agents/new', access: 'unite-admin' },
+  { id: 'X21', title: 'Lead database', app: 'admin', route: '/growth/contacts', access: 'unite-admin' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

@@ -14,3 +14,4 @@ export * from './comms';
 export * from './growth';
 export * from './global';
 export * from './offers';
+export * from './growth-desk';

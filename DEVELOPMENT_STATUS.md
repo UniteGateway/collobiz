@@ -22,7 +22,7 @@ This file is the single place to see where the build stands. It follows the reco
 | Registry screens with a working route | **165 of 165** |
 | Covered by API tests and a browser journey | **165** |
 | Native screens required / built / with tests | 46 / 46 / **46** |
-| API tests | 223 passing (25 suites) |
+| API tests | 231 passing (26 suites) |
 | Browser journeys (desktop + phone) | 79 passing on a fresh database; axe scan clean on all 49 pages (2026-11-09: fixed low-contrast header "Join as partner" button and home-page step numbers) |
 | Native tests | 77 passing (16 suites) |
 | UI component tests | 30 passing |
@@ -90,9 +90,32 @@ Everything needed to run a small, controlled pilot, without buying or registerin
 | **Production bootstrap** (`apps/api/src/db/bootstrap.ts`) | Sets up a clean database without demo data. It creates the platform organization, loads the agreement texts, loads the 47 businesses (all closed), and grants the first super admin to someone who has already registered (audited). It also publishes lawyer-approved agreement texts as new versions and retires the drafts. Before this, a real server could not be set up, because the platform organization and agreements existed only in the demo seed. Safe to repeat. Tests: `test/bootstrap.e2e.ts` (3). |
 | **E-mail delivery** (`MAIL_DRIVER=smtp`) | Before this, `smtp` mode only queued messages, so sign-in codes were never sent. E-mail now goes out through any SMTP provider (`SMTP_URL`, `MAIL_FROM`). Failures are retried every minute and marked failed after 5 attempts. Internal routing addresses are skipped. Invitation links are absolute (`WEB_BASE_URL`). Tests: `test/mail-smtp.e2e.ts` (4), using a local test SMTP server, including a real sign-in code request. SMS still has no provider (B-04). |
 | **Pilot plan** (`docs/pilot/pilot-plan.md`) | One page: goals, one business (SOLCART recommended, optional non-solar business from week 5), 10–20 partners, 8-week timeline, metrics with targets, go/adjust/stop rule, weekly rhythm, risks, invitation letter. |
-| **Legal review pack** (`docs/pilot/legal-review-pack.docx` + `.md`) | Every legal text the app shows or generates, compiled for counsel's tracked-changes markup, with 21 questions and an answer table. It covers partner terms, lead registration, privacy notice, team NDA, the offer agreement and work order, commission terms, the tender contract and LOI, buyer consent, and the regulated businesses. Rebuild it with `scripts/legal-pack/build.mjs`. |
+| **Legal review pack** (`docs/pilot/legal-review-pack.docx` + `.md`) | Every legal text the app shows or generates, compiled for counsel's tracked-changes markup, with 24 questions and an answer table. It covers partner terms, lead registration, privacy notice, team NDA, the offer agreement and work order, commission terms, the tender contract and LOI, buyer consent, and the regulated businesses. Rebuild it with `scripts/legal-pack/build.mjs`. |
 | **Pilot check-in** (web: Help & support → Pilot check-in; app: Account → Pilot check-in) | A two-minute weekly survey: usefulness 1–5, ease 1–5, recommend 0–10, features used, most valuable, blockers, wish, would keep using, may we contact you. One answer per person per 20 hours. |
 | **Pilot feedback results** (admin → Pilot feedback) | Check-ins, usefulness, ease, recommendation score (NPS) and would-keep-using against the pilot targets. Also features used, a week-by-week table, comments (contact details only with consent), CSV download, and **Send reminder** (in-app reminder to verified partner contacts who haven't checked in for 6 days; at most once a day). Visible to `analytics.read` roles only. Tests: `test/pilot.e2e.ts` (3), `apps/mobile/test/pilot.test.tsx` (2), browser journey (partner sends a check-in, a second one the same day is held back, Unite reads it). The admin page is checked by the gate sweep (X16, X17). |
+
+## AI Growth Desk, Phase 1 (added 2026-11-09)
+
+AI campaign agents, one per Unite product or service. They look through a lawful lead database, score who fits, explain why, and draft personal outreach. **A person approves every message, and nothing is sent until a separate marketing e-mail service is configured.** Admin → Growth Desk (Unite admins and super admins).
+
+| Part | What it does |
+|---|---|
+| **Agents** | Each agent has a product or service, an optional Unite business, an audience (customers, new partners, associations, export/import buyers, opt-in investors), sectors, countries and states, an approved pitch and call to action, a schedule (manual, daily or weekly), a minimum score, leads per run and a daily send limit. **"Agent for every open business"** creates a draft agent for each open Unite business in one click (never for the locked finance businesses). Runs on schedule (checked hourly) or by hand. |
+| **Lead database** | Companies, associations, institutions and investors. Each one records **where it came from** and the **lawful basis** for contacting it. Contacts with no basis are kept but never used. Duplicates are refused regardless of case. CSV import gives one source and basis per batch, and reports added, duplicate, opted-out and invalid rows. Scraping and social-network copying are not offered as sources. |
+| **Scoring** | Hard rules first: opted out, no lawful basis, wrong country or sector, wrong kind of organisation, investor without consent. Then an explainable 0–100 score (sector, target state, warmth of source, named person, e-mail, import/export activity, a verified partner nearby). The reasons are shown next to each lead, and every run records what it skipped and why. A verified partner covering the area is suggested for follow-up, preferring approved promoters of that business. |
+| **Drafts** | Written by the built-in rules engine (`growth-rules-v1`) from the approved pitch only: no invented prices or claims. Each draft records its provider, prompt version and sources. Every draft ends with why the person received it and an unsubscribe link. |
+| **Safety** | Blocked wording ("guaranteed", "assured returns", "risk-free", "double your money", …) is refused in pitches and blocks drafts. Edited drafts are re-checked and must keep the unsubscribe link. Investor agents need a super admin's clearance note and reach only investors who opted in. All actions are audited. |
+| **Approval and sending** | Approve, edit, reject or mark "not a fit". Lead stages run from to review → approved → contacted → replied → meeting → won/lost. Sending (off by default, `GROWTH_SENDING_ENABLED`) respects the daily limit, re-checks opt-outs at send time and marks leads contacted. |
+| **Unsubscribe** | Public page `/unsubscribe?token=…`, no sign-in needed. It suppresses the address for every Unite business and campaign and blocks unsent drafts. |
+
+Tests: `apps/api/test/growth-desk.e2e.ts` (8), browser journey (blocked wording caught, fixed, approved; contact added with consent evidence; public unsubscribe), and four admin pages in the gate sweep (X18–X21). Demo: 30 fictional contacts (example domains) and 7 agents, of which 6 are active and the investor agent awaits clearance.
+
+**Next phases (need accounts):**
+- Phase 2: a Claude API key, for real AI research and more personal drafts behind the same writer interface.
+- Phase 3: a separate marketing domain and bulk e-mail service (SES, Brevo or similar), for sending and tracking replies and bounces.
+- Phase 4: ad-copy export, licensed trade-data connectors, and handing leads to partners.
+
+**Legal:** questions 22–24 in the legal review pack. India's DPDP Act has no general "legitimate interest" ground, so counsel must confirm which contacts may be e-mailed before anything is sent.
 
 ## Quality gate (2026-11-09)
 
@@ -161,6 +184,7 @@ Quality-gate status per screen is recorded in `docs/audit/quality-gate.json` and
 | B-09 | Investor data room and finance introductions are regulated activities | Regulatory/legal review before switching on |
 | — | Video provider for meeting rooms; language-model provider for AI drafts | Choice of provider, credentials, data-processing review |
 | — | Pilot: hosting server, two DNS names, SMTP e-mail account, operating legal entity (B-01), approved commission rates (B-10), legal review of the pack, pilot partner list | Unite Group decisions and accounts. Everything else is ready (`docs/pilot/go-live-checklist.md` §1). Nothing has been registered or purchased. |
+| — | Growth Desk: Claude API key (Phase 2), separate marketing e-mail domain and service (Phase 3), licences for any trade-data sources, legal answers to Q22–24 | Unite Group decisions and accounts |
 | — | Full launch: managed database, S3 storage (B-03), SMS with DLT (B-04), e-signature provider (B-08), payment rails, KYC providers | Commercial approval and credentials |
 
 ## How to verify locally

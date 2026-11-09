@@ -486,6 +486,7 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await offersDemo(db, refs);
   await offerSalesDemo(db, refs);
   await venturesDemo(db, refs);
+  await growthDemo(db, refs);
 }
 
 /** Demo pilot check-ins (spread over three weeks) so the admin results page has something to show. Not part of the test seed. */
@@ -501,4 +502,91 @@ export async function pilotDemo(db: Db, refs: SeedRefs) {
     { userId: refs.users.asha, organizationId: refs.orgs.volt, usefulness: 5, ease: 4, recommend: 10, used: ['offers', 'commissions', 'contracts'], mostValuable: 'Saw our commission move to Earned the day the customer paid.', continueUse: 'yes', contactOk: true, platform: 'web', createdAt: ago(2) },
   ];
   await db.insert(s.pilotFeedback).values(rows.filter((r) => r.userId && r.organizationId));
+}
+
+/** Growth Desk demo: fictional contacts (example domains) with sources and lawful bases, seven agents, first runs and a small funnel. */
+export async function growthDemo(db: Db, refs: SeedRefs) {
+  const [any] = await db.select({ id: s.growthAgents.id }).from(s.growthAgents).limit(1);
+  if (any || !refs.users.uniteAdmin) return;
+  const { GrowthDeskService } = await import('../modules/growth-desk/growth-desk.controller');
+  type C = typeof s.growthContacts.$inferInsert;
+  const c = (organizationName: string, sector: string, region: string | null, city: string | null, o: Partial<C> = {}): C => ({
+    organizationName, sector, region, city, country: 'IN', kind: 'company', source: 'public_registry', sourceDetail: 'MCA company master data, active companies', lawfulBasis: 'legitimate_interest_b2b',
+    contactName: null, email: null, createdBy: refs.users.uniteAdmin, ...o,
+  });
+  const contacts: C[] = [
+    c('Shree Ganesh Polymers', 'manufacturing', 'IN-MH', 'Pune', { contactName: 'Anil Deshpande', email: 'anil@ganeshpolymers.example', source: 'inbound_form', sourceDetail: 'Website enquiry about factory rooftop solar, 12 Oct 2026', lawfulBasis: 'consent', consentEvidence: 'Enquiry form with consent tick, ref ENQ-2026-1042' }),
+    c('Kaveri Textiles', 'manufacturing', 'IN-KA', 'Mysuru', { contactName: 'Lakshmi Rao', email: 'lakshmi@kaveritextiles.example', source: 'event', sourceDetail: 'Intersolar India 2026 stall sign-up', lawfulBasis: 'consent', consentEvidence: 'Event sign-up sheet, 3 Oct 2026' }),
+    c('Narmada Cold Storage', 'agri_food', 'IN-GJ', 'Vadodara', { contactName: 'Hitesh Patel', email: 'hitesh@narmadacold.example' }),
+    c('Rajhans Auto Components', 'manufacturing', 'IN-MH', 'Aurangabad', { contactName: 'Sameer Kulkarni', email: 'sameer@rajhansauto.example' }),
+    c('Deccan Paper Mills', 'manufacturing', 'IN-TG', 'Hyderabad', { email: 'info@deccanpaper.example' }),
+    c('Sabarmati Pharma', 'manufacturing', 'IN-GJ', 'Ahmedabad', { contactName: 'Nisha Shah', email: 'nisha@sabarmatipharma.example', source: 'partner_referral', sourceDetail: 'Referred by Volt EPC with the buyer’s agreement (meeting minutes)', lawfulBasis: 'consent', consentEvidence: 'Meeting minutes 28 Oct 2026 uploaded by Volt EPC' }),
+    c('Coastal Ice Factory', 'agri_food', 'IN-KL', 'Kochi', { email: 'office@coastalice.example' }),
+    c('Mahalaxmi Steel Fabricators', 'manufacturing', 'IN-MH', 'Nashik', { contactName: 'Prakash Jadhav', email: 'prakash@mahalaxmisteel.example', lawfulBasis: 'none', sourceDetail: 'Business card from a trade fair — consent not recorded' }),
+    c('Vindhya Infra Projects', 'construction_epc', 'IN-MP', 'Indore', { contactName: 'Rohit Tiwari', email: 'rohit@vindhyainfra.example', source: 'licensed_directory', sourceDetail: 'Licensed EPC contractor directory 2026' }),
+    c('Konkan Power Contractors', 'construction_epc', 'IN-MH', 'Ratnagiri', { contactName: 'Mahesh Sawant', email: 'mahesh@konkanpower.example', source: 'licensed_directory', sourceDetail: 'Licensed EPC contractor directory 2026' }),
+    c('Thar Solar Parks', 'solar', 'IN-RJ', 'Jodhpur', { contactName: 'Vikas Choudhary', email: 'vikas@tharsolar.example', source: 'existing_customer', sourceDetail: 'Bought inverters from Unite Solar in 2025', lawfulBasis: 'existing_relationship' }),
+    c('Bharat Grid Services', 'power_equipment', 'IN-UP', 'Lucknow', { contactName: 'Amit Verma', email: 'amit@bharatgrid.example', source: 'public_registry', sourceDetail: 'State tender portal — registered electrical contractors' }),
+    c('Sunbelt Solar Installers', 'solar', 'IN-KA', 'Bengaluru', { contactName: 'Farah Khan', email: 'farah@sunbeltsolar.example', source: 'event', sourceDetail: 'Installer meet-up, Bengaluru, Sep 2026', lawfulBasis: 'consent', consentEvidence: 'Meet-up registration with updates opt-in' }),
+    c('Green Roof Installers Co-op', 'solar', 'IN-GJ', 'Surat', { contactName: 'Jignesh Mehta', email: 'jignesh@greenroofcoop.example', source: 'inbound_form', sourceDetail: '“Become a partner” form on the website', lawfulBasis: 'consent', consentEvidence: 'Website form with consent tick, ref PRT-2026-0311' }),
+    c('Sahyadri Electricals', 'construction_epc', 'IN-MH', 'Kolhapur', { contactName: 'Ganesh Patil', email: 'ganesh@sahyadrielec.example', source: 'licensed_directory', sourceDetail: 'Licensed EPC contractor directory 2026' }),
+    c('Al Noor Trading LLC', 'trading', null, 'Dubai', { country: 'AE', contactName: 'Imran Siddiqui', email: 'imran@alnoortrading.example', source: 'licensed_directory', sourceDetail: 'Licensed import-buyer database (solar equipment, GCC)', tags: ['importer'] }),
+    c('Nairobi Solar Supplies', 'solar', null, 'Nairobi', { country: 'KE', contactName: 'Grace Wanjiru', email: 'grace@nairobisolar.example', source: 'event', sourceDetail: 'Solar Africa Expo 2026 meeting', lawfulBasis: 'consent', consentEvidence: 'Business-card exchange with request for price list', tags: ['importer'] }),
+    c('Lagos Energy Imports', 'trading', null, 'Lagos', { country: 'NG', contactName: 'Tunde Adebayo', email: 'tunde@lagosenergy.example', source: 'licensed_directory', sourceDetail: 'Licensed import-buyer database (West Africa)', tags: ['importer'] }),
+    c('Dhaka Power Traders', 'trading', null, 'Dhaka', { country: 'BD', email: 'sales@dhakapower.example', source: 'licensed_directory', sourceDetail: 'Licensed import-buyer database (South Asia)', tags: ['importer'] }),
+    c('Colombo Renewables', 'solar', null, 'Colombo', { country: 'LK', contactName: 'Dilan Perera', email: 'dilan@colomborenew.example', source: 'existing_customer', sourceDetail: 'Ordered mounting structures through Unite Exim in 2025', lawfulBasis: 'existing_relationship', tags: ['importer'] }),
+    c('Gulf Bright Energy', 'solar', null, 'Sharjah', { country: 'AE', contactName: 'Omar Haddad', email: 'omar@gulfbright.example', lawfulBasis: 'none', source: 'manual', sourceDetail: 'Found on a social network — not usable without consent' }),
+    c('Ahmedabad Kirana Merchants Association', 'local_commerce', 'IN-GJ', 'Ahmedabad', { kind: 'association', contactName: 'Bharat Joshi', email: 'secretary@akma.example', source: 'public_registry', sourceDetail: 'Registered trade association list, Gujarat' }),
+    c('Bengaluru Traders Federation', 'local_commerce', 'IN-KA', 'Bengaluru', { kind: 'association', contactName: 'Suresh Gowda', email: 'office@btfed.example', source: 'event', sourceDetail: 'Small-business digitisation seminar, Aug 2026', lawfulBasis: 'consent', consentEvidence: 'Seminar registration with updates opt-in' }),
+    c('Pune Retailers Guild', 'local_commerce', 'IN-MH', 'Pune', { kind: 'association', email: 'contact@puneretail.example' }),
+    c('Sri Venkateswara Engineering College', 'education', 'IN-AP', 'Tirupati', { kind: 'institution', contactName: 'Dr. K. Srinivas', email: 'placements@svec.example', source: 'inbound_form', sourceDetail: 'Enquiry about AI-tools workshops', lawfulBasis: 'consent', consentEvidence: 'Enquiry form ref EDU-2026-077' }),
+    c('Nirma Polytechnic', 'education', 'IN-GJ', 'Ahmedabad', { kind: 'institution', contactName: 'Prof. Meghna Desai', email: 'tpo@nirmapoly.example', source: 'public_registry', sourceDetail: 'AICTE approved institutions list' }),
+    c('Vidya Bharati Junior College', 'education', 'IN-MH', 'Nagpur', { kind: 'institution', email: 'principal@vidyabharati.example', source: 'public_registry', sourceDetail: 'State board institutions list' }),
+    c('Kerala Institute of Technology', 'education', 'IN-KL', 'Thrissur', { kind: 'institution', contactName: 'Dr. Anitha Menon', email: 'anitha@kit.example', optedOutAt: new Date(Date.now() - 20 * 86400_000), source: 'event', sourceDetail: 'Education fair 2026', lawfulBasis: 'consent', consentEvidence: 'Education fair sign-up' }),
+    c('Meridian Family Office', 'financial_services', 'IN-MH', 'Mumbai', { kind: 'investor', contactName: 'Rhea Kapoor', email: 'rhea@meridianfo.example', source: 'opt_in_list', sourceDetail: 'Asked to receive renewable-energy investment updates', lawfulBasis: 'consent', consentEvidence: 'Signed opt-in form 14 Sep 2026' }),
+    c('Horizon Angels Network', 'financial_services', 'IN-KA', 'Bengaluru', { kind: 'investor', email: 'deals@horizonangels.example', source: 'public_registry', sourceDetail: 'Public list of angel networks' }),
+  ];
+  const ins = await db.insert(s.growthContacts).values(contacts).returning();
+  await db.insert(s.growthSuppressions).values({ email: 'anitha@kit.example', reason: 'unsubscribed' }).onConflictDoNothing();
+  const ven = async (slug: string) => (await db.select({ id: s.uniteVentures.id }).from(s.uniteVentures).where(eq(s.uniteVentures.slug, slug)).limit(1))[0]?.id ?? null;
+  const by = refs.users.uniteAdmin;
+  const A = (o: Partial<typeof s.growthAgents.$inferInsert> & Pick<typeof s.growthAgents.$inferInsert, 'name' | 'product' | 'audience' | 'sectors' | 'pitch' | 'callToAction'>) =>
+    ({ code: `AG-${Math.floor(100000 + Math.random() * 899999)}`, regions: [], countries: ['IN'], cadence: 'weekly', status: 'active', minScore: 45, maxLeadsPerRun: 25, dailySendCap: 40, createdBy: by, ...o });
+  const agents = await db.insert(s.growthAgents).values([
+    A({ name: 'SOLCART — factory rooftop solar', ventureId: await ven('solcart'), product: 'SOLCART rooftop solar kits with local installation', audience: 'buyers', sectors: ['manufacturing', 'agri_food'], regions: ['IN-MH', 'IN-GJ', 'IN-KA'],
+      pitch: 'SOLCART supplies complete rooftop solar kits — panels, inverters, structures and batteries — with installation by a verified local installer and a single point of contact for service. Factories typically use rooftop solar to cut daytime grid consumption; we prepare a site-specific estimate before any commitment.',
+      callToAction: 'If you would like a free roof assessment and estimate, reply with a convenient time for a 15-minute call.' }),
+    A({ name: 'Unite Powertek — equipment for EPC contractors', ventureId: await ven('unite-powertek'), product: 'Transformers, switchgear and solar structures from Unite Powertek', audience: 'buyers', sectors: ['construction_epc', 'power_equipment'],
+      pitch: 'Unite Powertek manufactures distribution transformers, LT/HT panels and solar mounting structures, with a digital catalogue, dispatch tracking and on-site commissioning support for EPC contractors.',
+      callToAction: 'Reply with your next project’s bill of materials and we will send a quotation within two working days.' }),
+    A({ name: 'Unite Exim — solar equipment importers', product: 'Solar modules, inverters and structures for export from India', audience: 'trade', sectors: ['solar', 'trading'], countries: ['AE', 'KE', 'NG', 'BD', 'LK'],
+      pitch: 'Unite Exim exports solar modules, inverters and mounting structures from Indian manufacturers, handling quality inspection, export documentation and shipping coordination.',
+      callToAction: 'Reply with the products and quantities you import each quarter and we will share a price list and lead times.' }),
+    A({ name: 'Nano Bazar — merchant associations', ventureId: await ven('nano-bazar'), product: 'Nano Bazar digital storefronts for local shops', audience: 'associations', sectors: ['local_commerce'],
+      pitch: 'Nano Bazar gives local shops an online storefront with zero sales commission. Merchants keep control of their products and prices, and nearby customers can find them online. We run free onboarding sessions for association members.',
+      callToAction: 'Would your association like to host a free one-hour onboarding session for members? Reply with a suitable date.' }),
+    A({ name: 'Unite Learning — colleges and institutes', ventureId: await ven('unite-learning'), product: 'Unite Learning AI-tools and technology programmes', audience: 'buyers', sectors: ['education'],
+      pitch: 'Unite Learning runs practical technology and AI-tools programmes for colleges, with project work and placement-oriented training delivered on campus or online.',
+      callToAction: 'Reply to receive the programme brochure and arrange a short call with our academic team.' }),
+    A({ name: 'SOLCART — installer partners', ventureId: await ven('solcart'), product: 'SOLCART installation partner programme', audience: 'partners', sectors: ['solar', 'construction_epc'], regions: ['IN-KA', 'IN-GJ', 'IN-MH'],
+      pitch: 'We are building a network of verified installation partners to fit SOLCART orders in their area. Partners receive installation work orders through COLLABIZ, with agreed rates and payment tracked in the app.',
+      callToAction: 'If you install rooftop solar and would like to receive SOLCART orders, reply and we will send the partner sign-up link.' }),
+    A({ name: 'Power Partner — opt-in investors', product: 'Power Partner renewable PPA projects (information only)', audience: 'investors', sectors: ['financial_services'], status: 'draft', cadence: 'manual',
+      pitch: 'Power Partner connects industries that want renewable power under long-term agreements with investors who fund the plants, with Unite as the EPC contractor. This note shares general information only and is not an offer of securities.',
+      callToAction: 'If you would like to receive the information pack, reply and our team will contact you after the regulatory review is complete.' }),
+  ]).returning();
+  const svc = new GrowthDeskService(db, null as never, null as never);
+  for (const a of agents.slice(0, 6)) if (a.status === 'active') await svc.run(a, 'manual', by);
+  // A small funnel so the dashboard is not empty: approve two drafts, one replied, one meeting, one won.
+  const msgs = await db.select().from(s.growthMessages).where(eq(s.growthMessages.status, 'draft')).orderBy(s.growthMessages.createdAt);
+  const pick = (org: string) => msgs.find((m) => ins.find((x) => x.id === m.contactId)?.organizationName === org);
+  const step = async (org: string, lead: string, sent: boolean) => {
+    const m = pick(org); if (!m) return;
+    await db.update(s.growthMessages).set({ status: sent ? 'sent' : 'approved', approvedBy: by, approvedAt: new Date(), sentAt: sent ? new Date(Date.now() - 5 * 86400_000) : null }).where(eq(s.growthMessages.id, m.id));
+    await db.update(s.growthLeads).set({ status: lead, decidedBy: by }).where(eq(s.growthLeads.id, m.leadId));
+  };
+  await step('Shree Ganesh Polymers', 'meeting', true);
+  await step('Sabarmati Pharma', 'won', true);
+  await step('Thar Solar Parks', 'replied', true);
+  await step('Kaveri Textiles', 'approved', false);
 }

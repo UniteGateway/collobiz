@@ -13,3 +13,4 @@ export * from './client';
 export * from './offers';
 export * from './ventures';
 export * from './pilot';
+export * from './growth-desk';

@@ -1254,3 +1254,14 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
 .cz-pilot-comment { padding: 14px 16px; display: grid; gap: 6px; font-size: 14px; }
 .cz-pilot-comment p { margin: 0; }
 @media (max-width: 520px) { .cz-scale { grid-template-columns: repeat(6, minmax(0, 1fr)); } .cz-pilot-bar { grid-template-columns: 110px 1fr 30px; } }
+
+/* Growth Desk */
+.cz-growth-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.cz-growth-kpis > .cz-card, .cz-growth-kpis > * { margin: 0; }
+.cz-lead { padding: 16px; display: grid; gap: 8px; }
+.cz-lead-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.cz-score { display: inline-flex; align-items: center; justify-content: center; min-width: 42px; height: 28px; padding: 0 8px; border-radius: 999px; font-weight: 700; font-size: 13px; background: var(--cz-navy-100); color: var(--cz-navy-900); }
+.cz-score[data-high] { background: #E3F1E4; color: #1B5E20; }
+.cz-reasons { margin: 0; padding-left: 18px; font-size: 13px; color: var(--cz-grey-600); }
+.cz-draft { border: 1px solid var(--cz-grey-200); border-radius: 10px; background: var(--cz-grey-50); padding: 12px 14px; font-size: 13.5px; white-space: pre-wrap; word-break: break-word; margin: 0; font-family: inherit; }
+.cz-draft-subject { font-weight: 600; color: var(--cz-navy-900); }

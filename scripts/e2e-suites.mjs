@@ -1644,3 +1644,51 @@ suites.push({
     await shot('pilot-results');
   },
 });
+
+// Growth Desk: an agent's draft is checked for blocked wording, approved by a person; a recipient unsubscribes publicly.
+suites.push({
+  name: 'Growth Desk · admin reviews an agent draft (blocked wording caught, fixed, approved), adds a contact; recipient unsubscribes',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot, expect }) => {
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/growth');
+    await page.getByText('Drafting only — sending is switched off').waitFor();
+    await page.getByRole('link', { name: 'SOLCART — factory rooftop solar' }).click();
+    await page.getByText('What this agent does').waitFor();
+    const item = page.locator('[data-draft]').first();
+    const org = await item.getAttribute('data-draft');
+    await item.getByRole('button', { name: 'Edit' }).click();
+    const box = item.getByLabel('Message');
+    const text = await box.inputValue();
+    await box.fill(text.replace('Kind regards,', 'Savings are guaranteed.\nKind regards,'));
+    await item.getByRole('button', { name: 'Save changes' }).click();
+    await page.locator(`[data-draft="${org}"]`).getByText(/wording that is not allowed: guaranteed/).waitFor();
+    expect(await page.locator(`[data-draft="${org}"]`).getByRole('button', { name: 'Approve' }).isDisabled(), 'blocked draft can be approved');
+    await page.locator(`[data-draft="${org}"]`).getByRole('button', { name: 'Edit' }).click();
+    await page.locator(`[data-draft="${org}"]`).getByLabel('Message').fill(text);
+    await page.locator(`[data-draft="${org}"]`).getByRole('button', { name: 'Save changes' }).click();
+    await page.locator(`[data-draft="${org}"]`).getByText('edited by staff', { exact: false }).waitFor();
+    await page.locator(`[data-draft="${org}"]`).getByRole('button', { name: 'Approve' }).click();
+    await page.locator(`[data-draft="${org}"]`).waitFor({ state: 'detached' });
+    await page.getByRole('tab', { name: /All leads/ }).click();
+    await page.locator(`[data-lead="${org}"]`).getByText('Approved', { exact: true }).waitFor();
+    await shot('growth-agent');
+    await page.goto(ADMIN + '/growth/contacts');
+    await page.getByRole('button', { name: 'Add contact' }).click();
+    await page.getByLabel('Organisation').fill('Journey Test Industries');
+    await page.getByLabel('E-mail (optional)').fill('owner@journeytest.example');
+    await page.getByLabel('Details of the source').fill('Website enquiry ref ENQ-2026-9001');
+    await page.getByLabel('Lawful basis for contacting').selectOption({ label: 'Consent given' });
+    await page.getByRole('button', { name: 'Add contact' }).last().click();
+    await page.getByText(/Record how consent was given/).waitFor();
+    await page.getByLabel('How consent was given').fill('Enquiry form consent tick, 9 Nov 2026');
+    await page.getByRole('button', { name: 'Add contact' }).last().click();
+    await page.locator('[data-contact="Journey Test Industries"]').waitFor();
+    const token = (await (await import('node:child_process')).execSync(`psql "${process.env.DATABASE_URL}" -tAc "select unsubscribe_token from growth_messages where status = 'draft' limit 1"`)).toString().trim();
+    await page.context().clearCookies();
+    await page.goto(`${WEB}/unsubscribe?token=${token}`);
+    await page.getByRole('button', { name: 'Unsubscribe' }).click();
+    await page.getByText('You will not hear from us again').waitFor();
+    await shot('growth-unsubscribed');
+  },
+});
