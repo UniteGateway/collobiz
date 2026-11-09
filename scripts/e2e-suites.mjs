@@ -1709,7 +1709,8 @@ suites.push({
     await page.getByRole('heading', { name: 'Results for “Volt”' }).waitFor();
     await page.locator('[data-group="companies"]').getByText('Volt EPC').waitFor();
     await page.getByRole('navigation', { name: 'Workspace' }).getByRole('link', { name: 'Apps', exact: true }).click();
-    await page.locator('[data-app="hr"]').getByText('Coming in Phase B').waitFor();
+    await page.locator('[data-app="inventory"]').getByText('Coming in Phase D').waitFor();
+    expect(await page.locator('[data-app="hr"][data-status="live"]').count() === 1, 'HR not shown as live');
     await page.locator('[data-integration="erpnext"]').getByText('Not connected').waitFor();
     await page.getByRole('navigation', { name: 'Workspace' }).getByRole('link', { name: 'Companies', exact: true }).click();
     await page.locator('[data-company="Unite Group Inc."]').waitFor();
