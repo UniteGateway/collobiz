@@ -19,7 +19,10 @@ Code: calculation engine `packages/power-engine` (pure TypeScript, no I/O); app 
 | 2026-11-10 | M4 Dispatch | Done | `dispatch.ts`: daily LP (HiGHS) with SOC carry-over and value of overnight carry; three modes; per-interval checks; rule-based cross-check |
 | 2026-11-10 | M11 CUF & reliability | Done | `cuf.ts`: metrics with denominators, hourly coverage, firm availability, feasibility per day/month/year with limiting factor |
 
-Engine tests: 17/17 (`src/engine.test.ts`).
+| 2026-11-10 | M9 Savings engine | Done | `savings.ts`: present vs proposed bill, losses, OA charges, shortfall/backup, 25-year projection |
+| 2026-11-10 | App MVP (M1–M5, M9, M11 screens) | Done | `apps/power`: Next.js 16 + Tailwind 4 + Prisma 6.19 (db `unite_power`), sign-in with admin/analyst/viewer roles, Executive Dashboard, Project Configuration, Solar, Battery, Smart Dispatch (3 modes compared), Interactive Power Graph (synced tooltips, slider, calendar, zoom/pan, day/month/year, playback, CSV/PNG/PDF, Sankey), CUF & Reliability, Industrial Savings (+ proposal PDF). Checked in a browser (`scripts/power-ui-check.mjs`). |
+
+Engine tests: 22/22 (`src/engine.test.ts`, `src/savings.test.ts`).
 
 ## Findings so far (illustrative climate, default inputs)
 - Solar AC energy ≈ 61.5 GWh/yr (DC CUF 17.6 %, AC CUF 20.1 %).

@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+/* Dark mode follows a .dark class on <html> (set from the user's choice or the system setting). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-navy-950: #061226;
+  --color-navy-900: #0b1f3a;
+  --color-navy-800: #12305a;
+  --color-navy-700: #1b4277;
+  --color-blue-500: #1e6bff;
+  --color-blue-400: #4d8bff;
+  --color-green-600: #16a34a;
+  --color-green-500: #22c55e;
+  --color-amber-500: #f59e0b;
+  --color-red-500: #ef4444;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius-xl2: 1.25rem;
+}
+
+:root { color-scheme: light; }
+.dark { color-scheme: dark; }
+html, body { background: #f7f8fb; }
+.dark body, html.dark { background: #070d1a; }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 2px solid var(--color-blue-500); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+@media print { .no-print { display: none !important; } body { background: #fff; } }
+table th, table td { padding-left: 0.6rem; padding-right: 0.6rem; }
+table th:first-child, table td:first-child { padding-left: 0; }

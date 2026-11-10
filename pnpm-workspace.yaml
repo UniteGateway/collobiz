@@ -5,3 +5,6 @@ onlyBuiltDependencies:
   - esbuild
   - "@swc/core"
   - sharp
+  - prisma
+  - "@prisma/engines"
+  - "@prisma/client"

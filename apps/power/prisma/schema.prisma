@@ -1,0 +1,159 @@
+// Unite Power Dispatch — database schema (PostgreSQL). Separate database from COLLABIZ.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POWER_DATABASE_URL")
+}
+
+enum Role {
+  admin
+  analyst
+  viewer
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(viewer)
+  createdAt    DateTime @default(now())
+  audits       AuditLog[]
+}
+
+/// A plant configuration and its price inputs. `config` is a PlantConfig, `prices` a PriceInputs (engine types).
+model Project {
+  id        String          @id @default(uuid())
+  name      String
+  config    Json
+  prices    Json
+  version   Int             @default(1)
+  createdBy String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  runs      SimulationRun[]
+  consumers Consumer[]
+  alerts    Alert[]
+}
+
+model SimulationRun {
+  id          String   @id @default(uuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  inputsHash  String
+  mode        String
+  scenario    String
+  status      String   @default("done") // running | done | failed
+  summary     Json?
+  feasibility Json?
+  monthly     Json?
+  error       String?
+  durationMs  Int?
+  createdAt   DateTime @default(now())
+
+  @@index([projectId, inputsHash])
+}
+
+/// Regulated or contractual charge. Never edited in place once approved: a change creates a new version.
+model TariffRecord {
+  id               String    @id @default(uuid())
+  key              String // stable identity across versions, e.g. "AP.transmission.energy"
+  jurisdiction     String // AP, TS, KA, TN, MH, OD, ISTS, ...
+  chargeType       String // transmission | wheeling | losses_transmission | losses_distribution | sldc | css | additional_surcharge | banking | ists | scheduling | electricity_duty | ...
+  voltageKv        Int?
+  consumerCategory String?
+  value            Float
+  unit             String // Rs/kWh | Rs/kW/month | Rs/MW/day | % | Rs/day
+  provenance       String // verified | user | illustrative
+  orderTitle       String?
+  orderUrl         String?
+  orderDate        DateTime?
+  effectiveFrom    DateTime?
+  effectiveTo      DateTime?
+  conditions       String? // e.g. waiver eligibility conditions, verbatim summary
+  version          Int       @default(1)
+  status           String    @default("approved") // draft | pending_review | approved | superseded
+  notes            String?
+  enteredBy        String?
+  approvedBy       String?
+  approvedAt       DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@unique([key, version])
+  @@index([jurisdiction, chargeType])
+}
+
+/// A proposed change to a tariff found by the automation or entered by a user; applied only after human review.
+model RegulatoryChange {
+  id          String    @id @default(uuid())
+  key         String
+  proposed    Json
+  sourceTitle String
+  sourceUrl   String?
+  detectedBy  String // user | automation
+  status      String    @default("pending") // pending | approved | rejected
+  reviewer    String?
+  reviewNote  String?
+  decidedAt   DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model Consumer {
+  id        String   @id @default(uuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id])
+  name      String
+  location  String
+  inputs    Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AutomationJob {
+  id        String          @id @default(uuid())
+  kind      String // daily_simulation | dispatch_recommendation | weather_update | tariff_watch | battery_health | peak_forecast | savings_report | profitability | management_report
+  name      String
+  schedule  String // cron expression (UTC)
+  enabled   Boolean         @default(true)
+  config    Json
+  lastRunAt DateTime?
+  createdAt DateTime        @default(now())
+  runs      AutomationRun[]
+}
+
+model AutomationRun {
+  id         String        @id @default(uuid())
+  jobId      String
+  job        AutomationJob @relation(fields: [jobId], references: [id])
+  status     String // ok | failed | skipped
+  output     Json?
+  error      String?
+  startedAt  DateTime      @default(now())
+  finishedAt DateTime?
+}
+
+model Alert {
+  id             String    @id @default(uuid())
+  projectId      String?
+  project        Project?  @relation(fields: [projectId], references: [id])
+  kind           String
+  severity       String // info | warning | critical
+  message        String
+  createdAt      DateTime  @default(now())
+  acknowledgedAt DateTime?
+}
+
+model AuditLog {
+  id       String   @id @default(uuid())
+  userId   String?
+  user     User?    @relation(fields: [userId], references: [id])
+  action   String
+  entity   String
+  entityId String?
+  before   Json?
+  after    Json?
+  at       DateTime @default(now())
+}
