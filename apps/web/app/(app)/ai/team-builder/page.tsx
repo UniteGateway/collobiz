@@ -15,6 +15,7 @@ export default function TeamBuilder() {
   const opps = useQuery<{ items: { id: string; code: string; title: string }[] }>('/opportunities', { paged: 'true', limit: '50' });
   const [oid, setOid] = useState('');
   useEffect(() => { const o = new URLSearchParams(window.location.search).get('opportunity'); if (o) setOid(o); }, []);
+  useEffect(() => { const o = new URLSearchParams(window.location.search).get('opportunity'); if (o) setOid(o); }, []);
   const router = useRouter();
   const m = useMutation(async () => api.post<Plan>('/ai/team-builder', { opportunityId: oid }));
   const review = useMutation(async (status: string) => { await api.post(`/ai/suggestions/${m.data!.suggestionId}/review`, { status }); return status; });

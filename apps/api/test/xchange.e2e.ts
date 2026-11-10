@@ -5,7 +5,10 @@ import { api, auth, bootApp, loginAll, resetDatabase, seed } from './helpers';
 describe('COLLABIZ XCHANGE and COLLABIZ ONE', () => {
   let app: INestApplication; let t: Awaited<ReturnType<typeof loginAll>>; let pool: Pool;
   const one = async (q: string, p: unknown[] = []) => (await pool.query(q, p)).rows[0];
-  beforeAll(async () => { await resetDatabase(); await seed(); app = await bootApp(); t = await loginAll(app); pool = new Pool({ connectionString: process.env.DATABASE_URL }); });
+  beforeAll(async () => {
+    await resetDatabase(); await seed(); app = await bootApp(); t = await loginAll(app); pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    await pool.query('delete from xchange_approvals; delete from xchange_legs; delete from xchange_deals; delete from xchange_listings;'); // tests build their own market
+  });
   afterAll(async () => { await pool?.end(); await app?.close(); });
   const org = async (name: string) => (await one('select id from organizations where display_name = $1', [name])).id as string;
   const L = (side: string, category: string, title: string, value: number, accepts = ['barter', 'part_cash']) => ({ side, category, title, description: `${title} — sample listing for the exchange tests.`, value, valueBasis: 'price_list', region: 'IN-MH', accepts });

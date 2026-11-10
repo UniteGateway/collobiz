@@ -217,8 +217,12 @@ export const BLOCKS = [
   { t: 'q', n: 27, x: 'Buy-one-get-one: are the offer texts and the "free" wording compliant with the Consumer Protection Act 2019 and the CCPA guidelines on misleading advertisements; what must the terms include; and please confirm with a CA how GST applies to the free item (we assume the price paid covers both items and no separate tax is charged on the free one).' },
   { t: 'q', n: 28, x: 'Solar quotes and referrals: are the savings, payback and subsidy statements on the quote adequately qualified; is a 90-day retention of uploaded bills appropriate under the DPDP Act; do referral rewards paid to individuals need TDS (e.g. section 194R) or other reporting; and may a customer\'s referral link be shared on WhatsApp by the customer without further consent steps?' },
 
+  { t: 'h1', x: 'COLLABIZ XCHANGE — business barter' },
+  { t: 'p', x: 'Verified businesses list goods, services, machinery, surplus stock and idle capacity at a declared open-market value and exchange them directly, with part-cash, or in chains of three or four businesses. Every party approves the same terms; each supply is shown as a separate taxable supply with invoice data for the parties\' accountants. COLLABIZ issues no credits, points or platform currency and holds no money or goods.' },
+  { t: 'q', n: 29, x: 'Barter: please confirm that facilitating direct and multi-party barter (without any platform currency or holding of funds or goods) needs no registration or licence, and advise on GST for each leg (valuation under rule 27, time of supply, part-cash), on e-invoicing thresholds, and on how disputed or undelivered legs should be documented.' },
+
   { t: 'h1', x: 'Checklist for counsel' },
-  { t: 'p', x: 'Please answer or mark "not for pilot". Items 1, 4, 5, 10, 11 and 14 must be resolved before partners are invited; items 22–24 before any Growth Desk message is sent; items 25–26 before franchises or property are offered to partners; items 27–28 before offers or solar referrals go live.' },
+  { t: 'p', x: 'Please answer or mark "not for pilot". Items 1, 4, 5, 10, 11 and 14 must be resolved before partners are invited; items 22–24 before any Growth Desk message is sent; items 25–26 before franchises or property are offered to partners; items 27–28 before offers or solar referrals go live; item 29 before XCHANGE exchanges go live.' },
   { t: 'qtable' },
   { t: 'p', x: 'Return the marked-up document to the pilot owner. Approved texts are loaded with the bootstrap command (go-live checklist 5.2a) and the "DRAFT" wording is removed only from approved documents.' },
 ];

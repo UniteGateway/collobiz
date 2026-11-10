@@ -71,6 +71,8 @@ const projectId = await one("select id from property_projects where code = 'PRJ-
 const solarQuoteId = await one("select id from solar_quotes where model = 'epc' and partner_org_id is not null limit 1");
 const passportClaimId = await one("select claim_id as id from deal_passports where code = 'DP-2026-100001'");
 const v2ProjectId = await one("select id from projects where code = 'PRJ-2026-000001'");
+const xDealId = await one("select id from xchange_deals where code = 'XD-2026-10001'");
+const oneOppId = await one("select opportunity_id as id from lead_claims c join deal_passports p on p.claim_id = c.id where p.code = 'DP-2026-100001'");
 const offerAgreementId = await one("select id from commission_agreements where code = 'CA-2026-410001'");
 const EXTRA = [
   { id: 'X01', title: 'Offers for you', app: 'web', route: '/offers', access: 'verified-partner' },
@@ -135,6 +137,13 @@ const EXTRA = [
   { id: 'X60', title: 'Open work packages', app: 'web', route: '/packages', access: 'partner', account: 'ravi@sunrise.example' },
   { id: 'X61', title: 'Tender eligibility analyzer', app: 'web', route: '/tenders/analyzer', access: 'partner' },
   { id: 'X62', title: 'Tender eligibility reviews (admin)', app: 'admin', route: '/tender-reviews', access: 'unite-admin' },
+  { id: 'X63', title: 'XCHANGE marketplace', app: 'web', route: '/xchange', access: 'partner' },
+  { id: 'X64', title: 'XCHANGE matches', app: 'web', route: '/xchange/matches', access: 'partner' },
+  { id: 'X65', title: 'My exchanges', app: 'web', route: '/xchange/deals', access: 'partner' },
+  { id: 'X66', title: 'Exchange agreement', app: 'web', route: `/xchange/deals/${xDealId}`, access: 'partner' },
+  { id: 'X67', title: 'COLLABIZ ONE', app: 'web', route: '/one', access: 'partner', account: 'meera@consult.example' },
+  { id: 'X68', title: 'COLLABIZ ONE journey', app: 'web', route: `/one/${oneOppId}`, access: 'partner', account: 'meera@consult.example' },
+  { id: 'X69', title: 'XCHANGE oversight (admin)', app: 'admin', route: '/workspace/xchange', access: 'unite-admin' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

@@ -12,11 +12,13 @@ Status words: **Implemented** (built, real API and data) · **Tested** (automate
 | 05 | JV & Consortium Builder | Partially implemented (consortiums, alliances) | Contributions, MoU, amendments pending |
 | 06 | Milestone Payment Assurance | Partially implemented (milestones → invoice → paid; ledger) | Partial payments, overdue, reconciliation pending |
 | 07 | Local Opportunity Radar | Partially implemented (map, alerts) | Radar view pending |
-| 08 | Idle Capacity Exchange | Not started | |
+| 08 | Idle Capacity Exchange | **Tested** (via XCHANGE) | Capacity is an XCHANGE listing kind (warehouse, vehicles, crews, technicians, production lines, machinery) exchangeable for goods, part-cash or cash |
 | 09 | Voice-to-Opportunity | Not started | Browser speech recognition sends audio to the browser vendor's service — consent screen required |
 | 10 | Conflict & Commission Resolution | Partially implemented (lead and commission disputes) | Contract disputes, reviewer assignment, timeline pending |
 | 11 | Country Business Desks | Partially implemented (country partners, territory, import/export, compliance) | Per-country desk pending |
 | 12 | Opportunity-to-Revenue Intelligence | Partially implemented (partner funnel) | Revenue funnel pending |
+| — | **COLLABIZ XCHANGE** (barter) | **Tested** | Listings (offers/needs), matching incl. 3–4 way cycles, balanced agreements approved by all parties, delivery/acceptance/dispute/redelivery, invoice data (screens 180–183, admin oversight). Legal Q29 open |
+| — | **COLLABIZ ONE** | **Tested** | Six-step journey per opportunity from existing records (screens 178–179) |
 | 13 | Premium UI | Implemented for existing app (design system v3) | Applied to each new screen |
 | 14 | QA | Ongoing per stage | |
 | 15 | Reference review | Implemented | See gap analysis |

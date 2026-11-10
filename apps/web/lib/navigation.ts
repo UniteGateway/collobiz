@@ -9,8 +9,8 @@ export interface Module { key: string; label: string; icon: IconName; home: stri
 
 export const MODULES: Module[] = [
   { key: 'home', label: 'Home', icon: 'home', home: '/dashboard', match: ['/dashboard'] },
-  { key: 'opportunities', label: 'Opportunities', icon: 'opportunities', home: '/marketplace', match: ['/marketplace', '/opportunities', '/my/opportunities', '/feed', '/rfq', '/ai/matching', '/offers'],
-    tabs: [['/marketplace', 'Browse'], ['/offers', 'Offers for you'], ['/ai/matching', 'AI matches'], ['/feed', 'Recommended'], ['/my/opportunities', 'My applications'], ['/marketplace/saved', 'Saved & alerts'], ['/marketplace/categories', 'Categories'], ['/marketplace/map', 'Map']] },
+  { key: 'opportunities', label: 'Opportunities', icon: 'opportunities', home: '/marketplace', match: ['/marketplace', '/opportunities', '/my/opportunities', '/feed', '/rfq', '/ai/matching', '/offers', '/one'],
+    tabs: [['/marketplace', 'Browse'], ['/one', 'COLLABIZ ONE'], ['/offers', 'Offers for you'], ['/ai/matching', 'AI matches'], ['/feed', 'Recommended'], ['/my/opportunities', 'My applications'], ['/marketplace/saved', 'Saved & alerts'], ['/marketplace/categories', 'Categories'], ['/marketplace/map', 'Map']] },
   { key: 'leads', label: 'Leads & CRM', icon: 'leads', home: '/my/leads', match: ['/my/leads', '/leads', '/crm', '/tasks', '/activity', '/lead-protection', '/lead-disputes', '/passports'],
     tabs: [['/my/leads', 'My leads'], ['/crm/pipeline', 'Pipeline'], ['/tasks', 'Tasks'], ['/activity', 'Activity'], ['/lead-protection', 'Protection'], ['/lead-disputes', 'Disputes'], ['/passports', 'Shared passports']] },
   { key: 'collaboration', label: 'Collaboration', icon: 'teams', home: '/teams', match: ['/teams', '/partners', '/collaboration', '/consortiums', '/ai/partners', '/ai/team-builder', '/ai/team-plans'],
@@ -21,7 +21,7 @@ export const MODULES: Module[] = [
     tabs: [['/inbox', 'Inbox'], ['/meetings', 'Meetings'], ['/announcements', 'Announcements'], ['/notifications', 'Notifications']] },
   { key: 'tenders', label: 'Tenders', icon: 'tenders', home: '/tenders', match: ['/tenders'], ownTabs: true },
   { key: 'projects', label: 'Projects', icon: 'projects', home: '/projects', match: ['/projects', '/packages'], ownTabs: true },
-  { key: 'trading', label: 'Trading', icon: 'trading', home: '/trading', match: ['/trading'], ownTabs: true },
+  { key: 'trading', label: 'Trading', icon: 'trading', home: '/trading', match: ['/trading', '/xchange'], ownTabs: true },
   { key: 'earnings', label: 'Earnings', icon: 'earnings', home: '/earnings', match: ['/earnings', '/commissions', '/payouts', '/payments', '/tax-records', '/finance'], ownTabs: true },
   { key: 'global', label: 'Global', icon: 'map', home: '/global', match: ['/global', '/alliances', '/data-room'],
     tabs: [['/global', 'Markets'], ['/global/import-export', 'Import & export'], ['/global/compliance', 'Compliance'], ['/alliances', 'Alliances'], ['/global/country-partner', 'Country partner'], ['/global/territory', 'My territory']] },

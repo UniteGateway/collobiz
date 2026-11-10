@@ -492,6 +492,7 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await propertyDemo(db, refs);
   await solarDemo(db, refs);
   await v2Demo(db, refs);
+  await xchangeDemo(db, refs);
 }
 
 /** Demo pilot check-ins (spread over three weeks) so the admin results page has something to show. Not part of the test seed. */
@@ -758,4 +759,33 @@ export async function v2Demo(db: Db, refs: SeedRefs) {
     const [p] = await db.insert(s.dealPassports).values({ code: 'DP-2026-100001', claimId: claim.id, ownerOrgId: claim.introducerOrgId }).onConflictDoNothing().returning();
     if (p) await db.insert(s.dealPassportParties).values({ passportId: p.id, organizationId: refs.orgs.volt, role: 'execution_partner', ndaHash: 'demo-pending-undertaking', grantedBy: refs.users.meera });
   }
+}
+
+/** XCHANGE demo: offers and needs that form a three-way chain (Volt → Deccan → Sunrise → Volt), idle capacity, and one proposed swap. */
+export async function xchangeDemo(db: Db, refs: SeedRefs) {
+  if ((await db.select({ id: s.xchangeListings.id }).from(s.xchangeListings).limit(1)).length) return;
+  const { volt, sunrise, deccan, meera } = refs.orgs;
+  const by = { volt: refs.users.asha, sunrise: refs.users.ravi, deccan: refs.users.deepak, meera: refs.users.meera };
+  if (!volt || !sunrise || !deccan || !meera || !by.volt || !by.sunrise || !by.deccan || !by.meera) return;
+  const X = (orgId: string, createdBy: string, side: string, category: string, title: string, value: number, region: string, description: string, accepts = ['barter', 'part_cash']) =>
+    ({ code: `XL-${Math.floor(100000 + Math.random() * 899999)}`, orgId, createdBy, side, category, title, value, region, description, accepts, valueBasis: 'price_list' });
+  const rows = await db.insert(s.xchangeListings).values([
+    X(volt, by.volt, 'offer', 'solar_equipment', '540 Wp mono PERC panels — 200 nos (surplus)', 5_00_000_00, 'IN-MH', 'Surplus from a cancelled order, boxed with datasheets and flash test reports. Pune warehouse.'),
+    X(volt, by.volt, 'need', 'construction_services', 'Civil works for a rooftop structure', 5_00_000_00, 'IN-MH', 'Foundation and structure work for a 300 kW rooftop in Chakan, about four weeks.'),
+    X(sunrise, by.sunrise, 'offer', 'construction_services', 'Civil crew — 12 people, 4 weeks', 5_10_000_00, 'IN-GJ', 'Experienced civil and structure crew with supervisor; travel within Gujarat and Maharashtra.'),
+    X(sunrise, by.sunrise, 'need', 'advertising', 'Outdoor advertising in Gujarat', 5_00_000_00, 'IN-GJ', 'Hoardings and radio for our new solar range launch in Ahmedabad and Surat.'),
+    X(deccan, by.deccan, 'offer', 'advertising', 'Hoardings and regional radio package', 4_95_000_00, 'IN-KA', 'Twenty hoardings across Karnataka and Gujarat plus a 6-week regional radio campaign.'),
+    X(deccan, by.deccan, 'need', 'solar_equipment', 'Solar panels for our warehouse roof', 5_00_000_00, 'IN-KA', 'About 100 kW of panels for our distribution warehouse in Hubballi.'),
+    X(meera, by.meera, 'offer', 'warehouse_space', 'Warehouse space — 2,000 sq ft for 3 months', 6_00_000_00, 'IN-KA', 'Covered warehouse with loading bay near Bengaluru ring road; available from next month.', ['barter', 'part_cash', 'cash']),
+    X(meera, by.meera, 'need', 'electrical_equipment', 'Inverter and balance-of-system kit', 10_00_000_00, 'IN-KA', 'For a client energy-audit pilot; open to part-cash.'),
+  ]).returning();
+  const termsKey = (legs: { fromOrgId: string; toOrgId: string; description: string; value: number; cash: number }[]) => JSON.stringify(legs.map((l) => [l.fromOrgId, l.toOrgId, l.description, l.value, l.cash]).sort());
+  const legs = [
+    { fromOrgId: volt, toOrgId: meera, description: 'Inverter and BOS kit', value: 10_00_000_00, cash: 4_00_000_00 },
+    { fromOrgId: meera, toOrgId: volt, description: 'Warehouse space — 2,000 sq ft for 3 months', value: 6_00_000_00, cash: 0, listingId: rows[6].id },
+  ];
+  const key = termsKey(legs);
+  const [d] = await db.insert(s.xchangeDeals).values({ code: 'XD-2026-10001', kind: 'part_cash', termsKey: key, note: 'Part-cash: our inverter kit for your warehouse plus ₹4 lakh.', proposedByOrgId: volt, proposedBy: by.volt }).returning();
+  await db.insert(s.xchangeLegs).values(legs.map((l) => ({ ...l, dealId: d.id })));
+  await db.insert(s.xchangeApprovals).values({ dealId: d.id, orgId: volt, termsKey: key, approvedBy: by.volt });
 }

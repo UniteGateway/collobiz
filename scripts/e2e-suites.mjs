@@ -1943,3 +1943,37 @@ suites.push({
     await page.locator('[data-review="Kurnool 2 MW solar"]').getByText('Reviewed').waitFor();
   },
 });
+
+// XCHANGE and ONE: a three-way exchange found by matching, proposed balanced, approved by the other two; ONE journey steps.
+suites.push({
+  name: 'XCHANGE & ONE · three-way barter proposed from matches and approved; ONE journey shows the next step',
+  only: 'desktop',
+  run: async ({ page, WEB, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/xchange');
+    await page.locator('[data-listing="Hoardings and regional radio package"]').waitFor();
+    await page.goto(WEB + '/xchange/matches');
+    await page.locator('[data-cycle="Volt EPC>Deccan Distributors>Sunrise Traders"]').waitFor();
+    await shot('xchange-matches');
+    await page.getByRole('button', { name: 'Propose this exchange' }).first().click();
+    const dlg = page.locator('dialog[open]');
+    await dlg.getByText('Balanced', { exact: true }).waitFor();
+    await dlg.getByRole('button', { name: 'Send for approval' }).click();
+    await page.getByRole('heading', { name: /Exchange XD-\d{4}-\d{5}/ }).waitFor();
+    const url = page.url();
+    for (const who of ['ravi@sunrise.example', 'deepak@deccan.example']) {
+      await webLogin(page, WEB, who);
+      await page.goto(url);
+      await page.getByRole('button', { name: 'Approve these terms' }).click();
+      await page.getByRole('button', { name: 'Approve these terms' }).waitFor({ state: 'detached' });
+    }
+    await page.getByText('Agreed — delivering').first().waitFor();
+    await shot('xchange-agreed');
+    await webLogin(page, WEB, 'meera@consult.example');
+    await page.goto(WEB + '/one');
+    await page.locator('[data-one]').first().getByRole('link').click();
+    await page.locator('[data-step="review"][data-status="done"]').waitFor();
+    await page.locator('[data-step="analyse"][data-status="current"]').waitFor();
+    await shot('one-journey');
+  },
+});
