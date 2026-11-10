@@ -2192,3 +2192,46 @@ suites.push({
     await shot('tender-feed');
   },
 });
+
+// Voice lead (V2 stage 09): typed transcript (headless browsers have no speech service) → extracted fields → lead form prefilled.
+suites.push({
+  name: 'Voice lead · description read into fields, missing info asked, lead form prefilled',
+  only: 'desktop',
+  run: async ({ page, WEB, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/leads/voice');
+    await page.getByLabel('What the customer needs').fill('Somebody in Nashik needs a transformer');
+    await page.getByRole('button', { name: 'Read the details' }).click();
+    await page.locator('[data-voice-missing="Customer"]').waitFor();
+    await page.getByLabel('What the customer needs').fill('New lead: customer is Shree Ganesh Engineering Pvt Ltd in Pune, they want a 500 kW rooftop solar plant, budget about 2.4 crore, decision within 45 days. Contact 98220 11223.');
+    await page.getByRole('button', { name: 'Read the details' }).click();
+    await page.locator('[data-voice-field="Value"]').getByText('₹2,40,00,000').waitFor();
+    await page.locator('[data-voice-field="City"]').getByText('Pune').waitFor();
+    await shot('voice-lead');
+    await page.getByRole('button', { name: 'Use these details in the lead form' }).click();
+    await page.waitForURL(/\/leads\/new$/);
+    await page.goto(WEB + '/leads/new/customer');
+    const val = await page.getByLabel('Customer legal name').inputValue();
+    if (!/Shree Ganesh Engineering/.test(val)) throw new Error(`lead form not prefilled (${val})`);
+  },
+});
+
+// V2 Phase 3: country desk from the global markets list; revenue intelligence keeps the measures apart.
+suites.push({
+  name: 'Country desk and revenue intelligence',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/global');
+    await page.getByRole('list', { name: 'Markets' }).getByRole('link', { name: 'United Arab Emirates' }).click();
+    await page.getByRole('heading', { name: 'United Arab Emirates desk' }).waitFor();
+    await page.getByText(/Currency AED/).waitFor();
+    await page.getByRole('link', { name: /Export checklist for United Arab Emirates/ }).waitFor();
+    await shot('country-desk');
+    await adminLogin(page, ADMIN, 'finance@collabiz.local');
+    await page.goto(ADMIN + '/analytics/revenue');
+    await page.locator('[data-stage="Collected"]').getByText('₹3,20,00,000').waitFor();
+    await page.getByText(/must not be added together/).waitFor();
+    await shot('revenue-intelligence');
+  },
+});

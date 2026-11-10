@@ -21,7 +21,7 @@ export default function GlobalPortal() {
             {d.markets.map((m) => (
               <li key={m.country} className="cz-market" data-active={m.opportunities > 0 || m.countryPartners > 0 || undefined}>
                 <span className="cz-market-code">{m.country}</span>
-                <strong>{m.name}</strong>
+                <strong><Link href={`/global/desks/${m.country}`}>{m.name}</Link></strong>
                 <span className="cz-muted">{m.opportunities ? `${m.opportunities} open` : 'No open listings'} · {m.countryPartners ? `${m.countryPartners} country partner${m.countryPartners === 1 ? '' : 's'}` : 'Partner wanted'}</span>
               </li>
             ))}

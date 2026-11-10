@@ -12,6 +12,7 @@ export const PROVIDERS = {
   esign: { name: 'Aadhaar eSign / digital signature', needs: 'An agreement with a licensed eSign Service Provider (ESP) or ASP (paid; requires approval).', manual: 'Print the document, sign it, and upload the signed copy — or use typed acceptance where the law allows.' },
   whatsapp: { name: 'WhatsApp Business messages', needs: 'A WhatsApp Business Platform account with approved message templates (paid per conversation).', manual: 'Notifications arrive in COLLABIZ and by email once email is set up.' },
   treds: { name: 'TReDS invoice discounting', needs: 'Registration of the business on an RBI-licensed TReDS platform (RXIL, M1xchange or Invoicemart). COLLABIZ never handles the money.', manual: 'Use the prepared invoice details to upload the invoice on your TReDS platform yourself.' },
+  payments: { name: 'Online payments (payment gateway)', needs: 'A payment gateway merchant account (Razorpay, PayU, Cashfree or similar) with KYC — paid per transaction; needs approval.', manual: 'Pay by bank transfer against Unite’s invoice; Unite finance records the payment reference to activate the plan.' },
   tender_feed: { name: 'Public tender feeds', needs: 'Approval to read the chosen public sources (CPPP / GeM / state portals) within their terms, and network access to them.', manual: 'Upload tender documents yourself in the Tender analyzer.' },
 } as const;
 export type ProviderKey = keyof typeof PROVIDERS;

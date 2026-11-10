@@ -164,6 +164,9 @@ const EXTRA = [
   { id: 'X83', title: 'Integrations (admin)', app: 'admin', route: '/integrations', access: 'unite-admin' },
   { id: 'X84', title: 'Notifications with WhatsApp', app: 'web', route: '/settings/notifications', access: 'partner' },
   { id: 'X85', title: 'Tender feed (admin)', app: 'admin', route: '/tender-feed', access: 'unite-admin' },
+  { id: 'X86', title: 'Voice lead', app: 'web', route: '/leads/voice', access: 'partner' },
+  { id: 'X87', title: 'Country desk', app: 'web', route: '/global/desks/AE', access: 'partner' },
+  { id: 'X88', title: 'Opportunity to revenue (admin)', app: 'admin', route: '/analytics/revenue', access: 'finance' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

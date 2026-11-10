@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Alert, Button, Card, Select, TextArea, TextInput, LoadingState } from '@collabiz/ui';
 import { Screen } from '@/components/Screen';
@@ -15,6 +16,7 @@ export default function NewLeadPage() {
   return (
     <Screen id="043" description="Registering a lead time-stamps your introduction, seals an evidence snapshot and — once verified — protects it for a defined period. Unite Group gets a timed first review; you receive a tracking ID and certificate.">
       <LeadSteps />
+      <p style={{ margin: 0, fontSize: 14 }}>In a hurry? <Link href="/leads/voice">Describe the lead by voice</Link> and the form fills itself — you still confirm consent here.</p>
       <Alert tone="info">Only register buyers who asked for or agreed to the introduction. Leads without consent are rejected, and false claims can lead to suspension.</Alert>
       <Card title="Buyer consent">
         <div className="cz-grid cz-grid-3">
