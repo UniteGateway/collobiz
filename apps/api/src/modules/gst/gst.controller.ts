@@ -46,7 +46,7 @@ export class GstController {
   async saveProfile(@Ctx() ctx: RequestContext, @Body(body(TaxProfileSchema)) b: z.infer<typeof TaxProfileSchema>) {
     const orgId = this.myOrg(ctx, true);
     const stateCode = b.gstin.slice(0, 2);
-    const v = { ...b, tradeName: b.tradeName || null, address2: b.address2 || null, stateCode, updatedBy: ctx.userId, updatedAt: new Date() };
+    const v = { ...b, tradeName: b.tradeName || null, address2: b.address2 || null, udyamNumber: b.udyamNumber || null, stateCode, updatedBy: ctx.userId, updatedAt: new Date() };
     await this.db.insert(taxProfiles).values({ orgId, ...v }).onConflictDoUpdate({ target: taxProfiles.orgId, set: v });
     await this.audit.record(ctx, { action: 'tax.profile_saved', objectType: 'organization', objectId: orgId, after: { gstin: b.gstin, stateCode, einvoiceApplicable: b.einvoiceApplicable } });
     return { ...v, state: GST_STATE_CODES[stateCode], saved: true };

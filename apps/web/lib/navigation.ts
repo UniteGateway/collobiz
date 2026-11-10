@@ -27,7 +27,7 @@ export const MODULES: Module[] = [
     tabs: [['/global', 'Markets'], ['/global/import-export', 'Import & export'], ['/global/compliance', 'Compliance'], ['/alliances', 'Alliances'], ['/global/country-partner', 'Country partner'], ['/global/territory', 'My territory']] },
   { key: 'growth', label: 'Performance', icon: 'award', home: '/performance', match: ['/performance', '/reputation', '/learning', '/certificates', '/resources'],
     tabs: [['/performance', 'Scorecard'], ['/reputation/reviews', 'Reviews'], ['/reputation/excellence', 'Next level'], ['/learning', 'Learning'], ['/certificates', 'Certificates'], ['/resources', 'Marketing'], ['/resources/social', 'Social posts'], ['/resources/brochure', 'Brochure']] },
-  { key: 'documents', label: 'Documents', icon: 'documents', home: '/vault', match: ['/vault'] },
+  { key: 'documents', label: 'Documents', icon: 'documents', home: '/vault', match: ['/vault', '/contracts'] },
   { key: 'account', label: 'Account', icon: 'settings', home: '/profile', match: ['/profile', '/company', '/settings'],
     tabs: [['/profile', 'Profile'], ['/company/team', 'Company & team'], ['/settings/capacity', 'Capacity'], ['/settings/notifications', 'Notifications'], ['/settings/regional', 'Language & region'], ['/settings/security', 'Security'], ['/settings/privacy', 'Privacy & data'], ['/settings/tax', 'Tax profile'], ['/settings/import', 'Import data']] },
   { key: 'help', label: 'Help & support', icon: 'help', home: '/help', match: ['/help', '/support'], tabs: [['/help', 'Help & feedback'], ['/help/pilot', 'Pilot check-in'], ['/support/tickets', 'Support tickets']] },

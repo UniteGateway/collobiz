@@ -24,3 +24,4 @@ export * from './v2b';
 export * from './imports';
 export * from './bulk';
 export * from './gst';
+export * from './channels';

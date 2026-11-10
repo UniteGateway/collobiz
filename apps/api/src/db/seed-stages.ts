@@ -843,7 +843,7 @@ export async function gstDemo(db: Db, refs: SeedRefs) {
   const { volt, uniteSolar, sunrise } = refs.orgs;
   if (!volt || !uniteSolar || !sunrise || !refs.users.asha || !refs.users.uniteAdmin || !refs.users.ravi) return;
   await db.insert(s.taxProfiles).values([
-    { orgId: volt, gstin: '27AABCV1234F1ZO', legalName: 'Volt EPC Private Limited', tradeName: 'Volt EPC', address1: 'Plot 22, Hinjewadi Phase 2', city: 'Pune', pincode: '411057', stateCode: '27', einvoiceApplicable: true, updatedBy: refs.users.asha },
+    { orgId: volt, gstin: '27AABCV1234F1ZO', legalName: 'Volt EPC Private Limited', tradeName: 'Volt EPC', address1: 'Plot 22, Hinjewadi Phase 2', city: 'Pune', pincode: '411057', stateCode: '27', einvoiceApplicable: true, udyamNumber: 'UDYAM-MH-26-0012345', updatedBy: refs.users.asha },
     { orgId: uniteSolar, gstin: '36AAACU7777S1Z8', legalName: 'Unite Solar Private Limited', tradeName: 'Unite Solar', address1: 'Unite House, HITEC City', city: 'Hyderabad', pincode: '500081', stateCode: '36', einvoiceApplicable: true, updatedBy: refs.users.uniteAdmin },
     { orgId: sunrise, gstin: '24AAKFS9876K1ZB', legalName: 'Sunrise Traders', address1: '14 Naroda GIDC', city: 'Ahmedabad', pincode: '382330', stateCode: '24', updatedBy: refs.users.ravi },
   ]);

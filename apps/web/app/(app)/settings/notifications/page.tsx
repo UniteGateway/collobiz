@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Button, Icon, Skeleton } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { KIND_META } from '@/components/Comms';
+import { WhatsappPrefs } from '@/components/WhatsappPrefs';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
@@ -43,6 +44,7 @@ export default function NotificationPrefs() {
         </div>
       )}
       <p className="cz-muted" style={{ fontSize: 13, marginTop: 14 }}>SMS is sent only for time-critical items and when your mobile number is verified.</p>
+      <WhatsappPrefs />
     </Screen>
   );
 }

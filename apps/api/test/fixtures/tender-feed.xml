@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+ <channel>
+  <title>Latest Active Tenders</title>
+  <item>
+   <title>Supply, installation and commissioning of 500 kWp grid-connected rooftop solar PV plant at district hospital</title>
+   <link>https://example.gov.in/tender/2026_MSEDC_101</link>
+   <guid>2026_MSEDC_101</guid>
+   <description>Organisation: Maharashtra State Electricity Distribution Co. Ltd. Bid Submission End Date: 28-Nov-2026 15:00</description>
+   <dc:creator>MSEDCL</dc:creator>
+   <pubDate>Mon, 09 Nov 2026 10:00:00 +0530</pubDate>
+  </item>
+  <item>
+   <title>Construction of 33/11 kV substation and associated HT line</title>
+   <link>https://example.gov.in/tender/2026_KPTCL_88</link>
+   <guid>2026_KPTCL_88</guid>
+   <description>Organisation: KPTCL. Bid Submission End Date: 05-Dec-2026</description>
+   <pubDate>Sun, 08 Nov 2026 09:00:00 +0530</pubDate>
+  </item>
+  <item>
+   <title>Supply of office stationery for FY 2026-27</title>
+   <guid>2026_GAD_12</guid>
+   <description>Organisation: General Administration Department</description>
+  </item>
+ </channel>
+</rss>

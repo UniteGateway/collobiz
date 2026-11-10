@@ -1022,10 +1022,13 @@ suites.push({
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.goto(WEB + '/vault');
     await page.getByRole('button', { name: `Open ${code}` }).click();
+    // Volt signs the printed copy by hand and uploads it (wet-ink route); Unite then types its signature.
+    await page.getByRole('button', { name: 'Upload signed copy' }).click();
+    await page.getByLabel('Signed copy (PDF)').setInputFiles('apps/api/test/fixtures/sample-tender.pdf');
     await page.getByLabel('Type your full name').fill('Asha Patil');
     await page.getByLabel(/I am authorised to sign/).check();
-    await page.getByRole('button', { name: 'Sign document' }).click();
-    await page.getByRole('table', { name: 'Signatures' }).getByText('Asha Patil').waitFor();
+    await page.getByRole('button', { name: 'Upload and sign' }).click();
+    await page.getByRole('table', { name: 'Signatures' }).getByText('Signed copy uploaded').waitFor();
     // Issuer countersigns → executed
     await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
     await page.goto(base + '/award');
@@ -1038,6 +1041,11 @@ suites.push({
     lastExecutedContract = { base, code };
     expect(await page.getByRole('region', { name: 'Edit draft' }).count() === 0, 'approved contract still editable');
     await shot('074-executed');
+    await page.getByRole('link', { name: 'Signing certificate' }).click();
+    await page.locator('[data-signature="Volt EPC"]').getByText(/Wet-ink signed copy uploaded/).waitFor();
+    await page.locator('[data-signature="Unite Solar"]').getByText(/Typed signature/).waitFor();
+    await page.getByText(/unchanged since approval/).waitFor();
+    await shot('074-certificate');
   },
 });
 
@@ -2149,5 +2157,38 @@ suites.push({
     await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
     await page.goto(ADMIN + '/integrations');
     await page.locator('[data-integration="gst_filing"]').getByText('Not connected').waitFor();
+  },
+});
+
+// Phase D: WhatsApp opt-in (sending not connected); TReDS upload details for an unpaid invoice; Unite imports a tender feed.
+suites.push({
+  name: 'Channels · WhatsApp opt-in; TReDS upload details; tender feed import',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/settings/notifications');
+    await page.getByLabel('WhatsApp number').fill('98220 11223');
+    await page.getByLabel(/I agree to receive transactional messages/).check();
+    await page.getByRole('button', { name: 'Turn on WhatsApp updates' }).click();
+    await page.locator('[data-whatsapp="on"]').getByText(/Opted in for/).waitFor();
+    const proj = (await sqlExec("select id from projects where code = 'PRJ-2025-000014'")).rows[0].id;
+    await page.goto(WEB + `/projects/${proj}/payments`);
+    await page.locator('[data-milestone="Commissioning & net-metering"]').getByRole('button', { name: 'Get paid early' }).click();
+    const dlg = page.locator('dialog[open]');
+    await dlg.locator('[data-treds-check="msme"][data-ok="true"]').waitFor();
+    await shot('treds-checks');
+    await dlg.getByRole('button', { name: 'Prepare upload details' }).click();
+    await dlg.getByText(/Upload details downloaded for RXIL/).waitFor();
+    await dlg.getByRole('button', { name: 'Close' }).click();
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/tender-feed');
+    await page.getByLabel('Feed file (RSS or XML)').setInputFiles('apps/api/test/fixtures/tender-feed.xml');
+    await page.getByText('3 new tenders added').waitFor();
+    const solar = page.locator('[data-lead^="Supply, installation and commissioning"]');
+    await solar.getByText(/Solar & Renewable Energy/).waitFor();
+    await solar.getByRole('button', { name: 'Shortlist' }).click();
+    await page.getByLabel('Show').selectOption('shortlisted');
+    await solar.waitFor();
+    await shot('tender-feed');
   },
 });

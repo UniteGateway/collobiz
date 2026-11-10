@@ -31,6 +31,8 @@ export function ContractPanel({ id, onChanged }: { id: string; onChanged?: () =>
   const [draft, setDraft] = useState({ body: '', value: '', note: '' });
   const [review, setReview] = useState('');
   const [sig, setSig] = useState({ typedName: '', title: '', consent: false });
+  const [method, setMethod] = useState<'typed' | 'upload' | 'esign'>('typed');
+  const [signed, setSigned] = useState<File | null>(null);
   const [reason, setReason] = useState('');
   const router = useRouter();
   const [proj, setProj] = useState({ startDate: '', endDate: '', site: '' });
@@ -40,6 +42,11 @@ export function ContractPanel({ id, onChanged }: { id: string; onChanged?: () =>
   const submit = useMutation(async () => done(await api.post(`/contracts/${id}/submit`)));
   const decide = useMutation(async (decision: string) => done(await api.post(`/contracts/${id}/review`, { decision, note: review || undefined })));
   const sign = useMutation(async () => done(await api.request('POST', `/contracts/${id}/sign`, { ...sig, title: sig.title || undefined, bodyHash: approved.bodyHash }, { idempotencyKey: newIdempotencyKey() })));
+  const signUpload = useMutation(async () => {
+    const fd = new FormData(); fd.append('file', signed!); fd.append('typedName', sig.typedName); if (sig.title) fd.append('title', sig.title); fd.append('consent', String(sig.consent)); fd.append('bodyHash', approved.bodyHash);
+    return done(await api.upload(`/contracts/${id}/sign-upload`, fd));
+  });
+  const esign = useMutation(async () => api.post(`/contracts/${id}/esign`));
   const amend = useMutation(async () => done(await api.post<any>(`/contracts/${id}/amend`)));
   const terminate = useMutation(async () => done(await api.post(`/contracts/${id}/terminate`, { reason })));
   const startProject = useMutation(async () => { const pr = await api.post<any>(`/contracts/${id}/project`, { startDate: proj.startDate, endDate: proj.endDate, site: proj.site || undefined }); router.push(`/projects/${pr.id}/milestones`); return pr; });
@@ -50,7 +57,7 @@ export function ContractPanel({ id, onChanged }: { id: string; onChanged?: () =>
   };
   if (q.loading) return <LoadingState />;
   if (q.error) return <ApiErrorView error={q.error} onRetry={q.reload} />;
-  const err = save.error ?? submit.error ?? decide.error ?? sign.error ?? amend.error ?? terminate.error ?? startProject.error;
+  const err = save.error ?? submit.error ?? decide.error ?? sign.error ?? signUpload.error ?? amend.error ?? terminate.error ?? startProject.error;
   const p = c.permissions;
   return (
     <Card title={`${c.kindLabel} ${c.code}`} actions={<StatusBadge status={c.status} />}>
@@ -109,19 +116,39 @@ export function ContractPanel({ id, onChanged }: { id: string; onChanged?: () =>
           <h3>Signatures</h3>
           <DataTable caption="Signatures" rows={c.signatures.map((s: any, i: number) => ({ ...s, id: String(i) }))} columns={[
             { key: 'organization', header: 'Party' }, { key: 'typedName', header: 'Signed by', render: (s: any) => `${s.typedName}${s.title ? `, ${s.title}` : ''}` },
+            { key: 'method', header: 'Method', render: (s: any) => (s.method === 'wet_ink_upload' ? 'Signed copy uploaded' : s.method === 'aadhaar_esign' ? 'Aadhaar eSign' : 'Typed signature') },
             { key: 'signedAt', header: 'When', render: (s: any) => fmt(s.signedAt) },
             { key: 'bodyHash', header: 'Document hash', render: (s: any) => <span className="cz-mono">{s.bodyHash.slice(0, 16)}…</span> },
           ]} />
+          <p style={{ margin: '6px 0 0', fontSize: 13.5 }}><Link href={`/contracts/${id}/certificate`}>Signing certificate</Link></p>
         </>
       )}
       {p.sign && approved && (
         <section aria-label="Sign">
           <h3>Sign version {approved.versionNo}</h3>
-          <p className="cz-muted" style={{ fontSize: 13 }}>You are signing the exact text above (SHA-256 <span className="cz-mono">{approved.bodyHash}</span>). Click-to-sign evidence is recorded: typed name, time, IP address and document hash.</p>
-          <TextInput label="Type your full name" value={sig.typedName} onChange={(e) => setSig({ ...sig, typedName: e.target.value })} error={sign.fieldErrors.typedName} />
-          <TextInput label="Designation (optional)" value={sig.title} onChange={(e) => setSig({ ...sig, title: e.target.value })} />
-          <Checkbox label="I am authorised to sign for my organization and agree to this document" checked={sig.consent} onChange={(e) => setSig({ ...sig, consent: e.target.checked })} />
-          <Button variant="accent" onClick={() => sign.run()} disabled={!sig.consent || sig.typedName.trim().length < 3} loading={sign.pending}>Sign document</Button>
+          <div className="cz-row" style={{ gap: 8, marginBottom: 8 }} role="group" aria-label="How to sign">
+            {([['typed', 'Type to sign'], ['upload', 'Upload signed copy'], ['esign', 'Aadhaar eSign']] as const).map(([k, l]) => <Button key={k} size="sm" variant={method === k ? 'primary' : 'secondary'} aria-pressed={method === k} onClick={() => setMethod(k)}>{l}</Button>)}
+          </div>
+          {method === 'esign' ? (
+            <>
+              <Alert tone="info">Aadhaar eSign needs an agreement with a licensed eSign Service Provider, which is not in place yet. Use “Upload signed copy” where a handwritten signature is required.</Alert>
+              <Button variant="secondary" onClick={() => esign.run()} loading={esign.pending}>Check eSign availability</Button>
+              {esign.error && <p className="cz-muted" style={{ fontSize: 13 }}>{esign.error}</p>}
+            </>
+          ) : (
+            <>
+              <p className="cz-muted" style={{ fontSize: 13 }}>{method === 'typed'
+                ? <>You are signing the exact text above (SHA-256 <span className="cz-mono">{approved.bodyHash}</span>). Recorded: typed name, time, IP address and document hash. This is an electronic record of acceptance, not Aadhaar eSign.</>
+                : <>Download the approved text, print and sign it, then upload the signed PDF. COLLABIZ keeps the file and its fingerprint with your signature.</>}</p>
+              {method === 'upload' && <div className="cz-row" style={{ gap: 8, marginBottom: 8 }}><Button size="sm" variant="ghost" onClick={() => download(approved.id, c.code, approved.versionNo)}>Download approved text</Button><input type="file" accept="application/pdf" aria-label="Signed copy (PDF)" onChange={(e) => setSigned(e.target.files?.[0] ?? null)} /></div>}
+              <TextInput label="Type your full name" value={sig.typedName} onChange={(e) => setSig({ ...sig, typedName: e.target.value })} error={sign.fieldErrors.typedName ?? signUpload.fieldErrors.typedName} />
+              <TextInput label="Designation (optional)" value={sig.title} onChange={(e) => setSig({ ...sig, title: e.target.value })} />
+              <Checkbox label="I am authorised to sign for my organization and agree to this document" checked={sig.consent} onChange={(e) => setSig({ ...sig, consent: e.target.checked })} />
+              {method === 'typed'
+                ? <Button variant="accent" onClick={() => sign.run()} disabled={!sig.consent || sig.typedName.trim().length < 3} loading={sign.pending}>Sign document</Button>
+                : <Button variant="accent" onClick={() => signUpload.run()} disabled={!signed || !sig.consent || sig.typedName.trim().length < 3} loading={signUpload.pending}>Upload and sign</Button>}
+            </>
+          )}
         </section>
       )}
       {c.project && <Alert tone="info">Project <Link href={`/projects/${c.project.id}`} className="cz-mono">{c.project.code}</Link> runs under this contract.</Alert>}

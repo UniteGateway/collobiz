@@ -1,5 +1,6 @@
 /** Bank statement import (additive): uploaded statements and their lines, matched to project invoices. */
 import { pgTable, uuid, text, timestamp, bigint, integer, date, index, uniqueIndex, jsonb, boolean } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { id, createdAt, organizations, users } from './core';
 import { projectInvoices } from './projects';
 import { paymentReceipts } from './v2b';
@@ -71,6 +72,8 @@ export const taxProfiles = pgTable('tax_profiles', {
   stateCode: text('state_code').notNull(),
   /** The business says its aggregate turnover is above the e-invoicing limit (₹5 crore today). */
   einvoiceApplicable: boolean('einvoice_applicable').notNull().default(false),
+  /** Udyam registration number (MSME) — TReDS discounting is for MSME suppliers. */
+  udyamNumber: text('udyam_number'),
   updatedBy: uuid('updated_by').notNull().references(() => users.id),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
@@ -94,3 +97,42 @@ export const gstDocuments = pgTable('gst_documents', {
   createdBy: uuid('created_by').notNull().references(() => users.id),
   createdAt: createdAt(),
 }, (t) => [index('gst_documents_org_idx').on(t.orgId), index('gst_documents_source_idx').on(t.sourceType, t.sourceId)]);
+
+/** WhatsApp opt-in per person (recorded consent). Messages start only once a WhatsApp Business provider is connected. */
+export const channelPreferences = pgTable('channel_preferences', {
+  userId: uuid('user_id').primaryKey().references(() => users.id),
+  whatsappNumber: text('whatsapp_number'),
+  whatsappOptIn: boolean('whatsapp_opt_in').notNull().default(false),
+  optInAt: timestamp('opt_in_at', { withTimezone: true }),
+  optInText: text('opt_in_text'),
+  kinds: text('kinds').array().notNull().default(sql`'{}'::text[]`),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** An invoice prepared for upload on a TReDS platform by the supplier. COLLABIZ never handles the financing or the money. */
+export const tredsReferrals = pgTable('treds_referrals', {
+  id: id(),
+  invoiceId: uuid('invoice_id').notNull().references(() => projectInvoices.id),
+  orgId: uuid('org_id').notNull().references(() => organizations.id),
+  platform: text('platform').notNull(), // rxil | m1xchange | invoicemart
+  status: text('status').notNull().default('prepared'), // prepared | withdrawn
+  createdBy: uuid('created_by').notNull().references(() => users.id),
+  createdAt: createdAt(),
+}, (t) => [uniqueIndex('treds_referrals_invoice_uq').on(t.invoiceId, t.platform)]);
+
+/** Tenders read from a public feed file (RSS/XML) for Unite to review before anything is published to partners. */
+export const tenderLeads = pgTable('tender_leads', {
+  id: id(),
+  source: text('source').notNull(),
+  externalId: text('external_id').notNull(),
+  title: text('title').notNull(),
+  link: text('link'),
+  buyer: text('buyer'),
+  summary: text('summary'),
+  closesAt: timestamp('closes_at', { withTimezone: true }),
+  publishedAt: timestamp('published_at', { withTimezone: true }),
+  sector: text('sector'),
+  status: text('status').notNull().default('new'), // new | shortlisted | dismissed
+  importedBy: uuid('imported_by').notNull().references(() => users.id),
+  createdAt: createdAt(),
+}, (t) => [uniqueIndex('tender_leads_ext_uq').on(t.source, t.externalId)]);

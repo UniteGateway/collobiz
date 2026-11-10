@@ -5,15 +5,15 @@ import { Screen, ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
-interface P { saved: boolean; gstin: string; legalName: string; tradeName: string | null; address1: string; address2: string | null; city: string; pincode: string; state?: string; einvoiceApplicable: boolean }
+interface P { saved: boolean; gstin: string; legalName: string; tradeName: string | null; address1: string; address2: string | null; city: string; pincode: string; state?: string; einvoiceApplicable: boolean; udyamNumber?: string | null }
 interface Check { valid: boolean; state: string | null; pan: string | null; live: { connected: boolean; note: string } }
 
 /** Tax profile — the GSTIN and registered address that go on GST e-invoices and e-way bills. */
 export default function TaxProfile() {
   const q = useQuery<P>('/tax/profile');
-  const [f, setF] = useState({ gstin: '', legalName: '', tradeName: '', address1: '', address2: '', city: '', pincode: '', einvoiceApplicable: false });
+  const [f, setF] = useState({ gstin: '', legalName: '', tradeName: '', address1: '', address2: '', city: '', pincode: '', einvoiceApplicable: false, udyamNumber: '' });
   const [chk, setChk] = useState<Check | null>(null);
-  useEffect(() => { if (q.data) setF({ gstin: q.data.gstin ?? '', legalName: q.data.legalName ?? '', tradeName: q.data.tradeName ?? '', address1: q.data.address1 ?? '', address2: q.data.address2 ?? '', city: q.data.city ?? '', pincode: q.data.pincode ?? '', einvoiceApplicable: q.data.einvoiceApplicable }); }, [q.data]);
+  useEffect(() => { if (q.data) setF({ gstin: q.data.gstin ?? '', legalName: q.data.legalName ?? '', tradeName: q.data.tradeName ?? '', address1: q.data.address1 ?? '', address2: q.data.address2 ?? '', city: q.data.city ?? '', pincode: q.data.pincode ?? '', einvoiceApplicable: q.data.einvoiceApplicable, udyamNumber: q.data.udyamNumber ?? '' }); }, [q.data]);
   useEffect(() => {
     const g = f.gstin.trim();
     if (g.length !== 15) { setChk(null); return; }
@@ -40,6 +40,7 @@ export default function TaxProfile() {
               <TextInput label="City" value={f.city} onChange={(ev) => setF({ ...f, city: ev.target.value })} error={e.city} />
               <TextInput label="PIN code" inputMode="numeric" maxLength={6} value={f.pincode} onChange={(ev) => setF({ ...f, pincode: ev.target.value.replace(/\D/g, '') })} error={e.pincode} />
             </div>
+            <TextInput label="Udyam registration number (MSMEs, optional)" value={f.udyamNumber} onChange={(ev) => setF({ ...f, udyamNumber: ev.target.value.toUpperCase() })} error={e.udyamNumber} hint="UDYAM-XX-00-0000000 — needed to discount invoices on TReDS" />
             <label className="cz-check" style={{ margin: '6px 0 10px' }}><input type="checkbox" checked={f.einvoiceApplicable} onChange={(ev) => setF({ ...f, einvoiceApplicable: ev.target.checked })} /> Our aggregate turnover is above the e-invoicing limit (₹5 crore), so we must e-invoice B2B sales</label>
             <div><Button type="submit" loading={save.pending}>Save tax profile</Button></div>
           </form>

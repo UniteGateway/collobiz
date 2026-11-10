@@ -123,7 +123,7 @@ export class ContractsService {
       party, version: c.version, project: proj ?? null,
       versions: visible.map((v) => ({ id: v.id, versionNo: v.versionNo, body: v.body, terms: v.terms, bodyHash: v.bodyHash, changeNote: v.changeNote, author: name(v.authorUserId), submittedAt: v.submittedAt, approvedAt: v.approvedAt, approvedBy: name(v.approvedBy), rejectedAt: v.rejectedAt, rejectedBy: name(v.rejectedBy), reviewNote: v.reviewNote, locked: !!(v.submittedAt || v.approvedAt) })),
       approvedVersionId: approved?.id ?? null,
-      signatures: sigs.map((s) => ({ organization: s.name, organizationId: s.s.organizationId, typedName: s.s.typedName, title: s.s.title, versionId: s.s.versionId, bodyHash: s.s.bodyHash, signedAt: s.s.signedAt })),
+      signatures: sigs.map((s) => ({ organization: s.name, organizationId: s.s.organizationId, typedName: s.s.typedName, title: s.s.title, versionId: s.s.versionId, bodyHash: s.s.bodyHash, method: s.s.method, signedAt: s.s.signedAt })),
       permissions: {
         edit: this.canManage(ctx, c) && c.status === 'draft',
         submit: this.canManage(ctx, c) && c.status === 'draft' && !!latest && !latest.submittedAt,
