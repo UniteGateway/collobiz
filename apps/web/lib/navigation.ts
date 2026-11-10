@@ -29,7 +29,7 @@ export const MODULES: Module[] = [
     tabs: [['/performance', 'Scorecard'], ['/reputation/reviews', 'Reviews'], ['/reputation/excellence', 'Next level'], ['/learning', 'Learning'], ['/certificates', 'Certificates'], ['/resources', 'Marketing'], ['/resources/social', 'Social posts'], ['/resources/brochure', 'Brochure']] },
   { key: 'documents', label: 'Documents', icon: 'documents', home: '/vault', match: ['/vault', '/contracts'] },
   { key: 'account', label: 'Account', icon: 'settings', home: '/profile', match: ['/profile', '/company', '/settings'],
-    tabs: [['/profile', 'Profile'], ['/company/team', 'Company & team'], ['/settings/capacity', 'Capacity'], ['/settings/notifications', 'Notifications'], ['/settings/regional', 'Language & region'], ['/settings/security', 'Security'], ['/settings/privacy', 'Privacy & data'], ['/settings/tax', 'Tax profile'], ['/settings/import', 'Import data']] },
+    tabs: [['/profile', 'Profile'], ['/company/team', 'Company & team'], ['/settings/capacity', 'Capacity'], ['/settings/notifications', 'Notifications'], ['/settings/regional', 'Language & region'], ['/settings/security', 'Security'], ['/settings/privacy', 'Privacy & data'], ['/settings/plan', 'Plan'], ['/settings/tax', 'Tax profile'], ['/settings/import', 'Import data']] },
   { key: 'help', label: 'Help & support', icon: 'help', home: '/help', match: ['/help', '/support'], tabs: [['/help', 'Help & feedback'], ['/help/pilot', 'Pilot check-in'], ['/support/tickets', 'Support tickets']] },
 ];
 

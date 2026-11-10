@@ -2235,3 +2235,35 @@ suites.push({
     await shot('revenue-intelligence');
   },
 });
+
+// COLLABIZ plans: super admin prices and publishes Growth; a company requests it; finance activates with a bank reference.
+suites.push({
+  name: 'Plans · price and publish, request upgrade, activate on payment',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot }) => {
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/billing');
+    await page.locator('[data-plan="growth"]').getByRole('button', { name: 'Edit' }).click();
+    const dlg = page.locator('dialog[open]');
+    await dlg.getByLabel('Price per month (₹, excl. GST)').fill('4999');
+    await dlg.getByLabel('Price per year (₹, excl. GST)').fill('49990');
+    await dlg.getByRole('button', { name: 'Save' }).click();
+    await page.locator('[data-plan="growth"]').getByRole('button', { name: 'Publish' }).click();
+    await page.locator('[data-plan="growth"]').getByText('Offered').waitFor();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/settings/plan');
+    await page.locator('[data-usage="teamMembers"]').waitFor();
+    await page.getByRole('button', { name: 'Yearly' }).click();
+    await page.locator('[data-plan="growth"]').getByText(/Save 17% with yearly/).waitFor();
+    await shot('plans');
+    await page.locator('[data-plan="growth"]').getByRole('button', { name: 'Request Growth' }).click();
+    await page.getByText('Upgrade requested', { exact: true }).waitFor();
+    await adminLogin(page, ADMIN, 'finance@collabiz.local');
+    await page.goto(ADMIN + '/billing');
+    await page.locator('[data-request="Volt EPC"]').getByRole('button', { name: 'Record payment and activate' }).click();
+    await dlg.getByLabel('Bank / UTR reference of the payment').fill('UTR HDFC000123');
+    await dlg.getByLabel('Paid until').fill('2027-11-30');
+    await dlg.getByRole('button', { name: 'Activate plan' }).click();
+    await page.getByText(/Paid until .* · ref UTR HDFC000123/).waitFor();
+  },
+});
