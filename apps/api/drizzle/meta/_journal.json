@@ -197,6 +197,13 @@
       "when": 1794279504345,
       "tag": "0027_xchange",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1794285196100,
+      "tag": "0028_v2_phase2",
+      "breakpoints": true
     }
   ]
 }

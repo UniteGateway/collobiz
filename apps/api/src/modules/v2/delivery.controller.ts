@@ -27,6 +27,8 @@ import { randomDigits } from '../../common/crypto';
 import { GrowthModule } from '../growth/growth.controller';
 import { DealsController, V2Service } from './deals.controller';
 import { OneController } from './one.controller';
+import { Phase2Controller, Phase2Service } from './phase2.controller';
+import { CommissionsModule } from '../commissions/commissions.controller';
 
 const PARTNER = ['partner_company', 'partner_individual'];
 const platform = (ctx: RequestContext) => ctx.platformRoles.length > 0 && !ctx.mfaRequiredButMissing;
@@ -265,5 +267,5 @@ export class DeliveryController {
   }
 }
 
-@Module({ imports: [GrowthModule], controllers: [DealsController, DeliveryController, OneController], providers: [V2Service] })
+@Module({ imports: [GrowthModule, CommissionsModule], controllers: [DealsController, DeliveryController, OneController, Phase2Controller], providers: [V2Service, Phase2Service] })
 export class V2Module {}

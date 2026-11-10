@@ -150,6 +150,9 @@ export const projectInvoices = pgTable('project_invoices', {
   issuedAt: timestamp('issued_at', { withTimezone: true }).notNull().defaultNow(),
   paidAt: timestamp('paid_at', { withTimezone: true }),
   paymentReference: text('payment_reference'),
+  /** V2: payment due date (issue date + terms when not set) and last overdue reminder. */
+  dueDate: date('due_date'),
+  overdueNotifiedAt: timestamp('overdue_notified_at', { withTimezone: true }),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex('project_invoices_number_uq').on(t.number), uniqueIndex('project_invoices_milestone_uq').on(t.milestoneId)]);
 
