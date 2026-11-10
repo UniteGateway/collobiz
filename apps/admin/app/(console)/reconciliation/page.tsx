@@ -22,7 +22,7 @@ export default function Reconciliation() {
             <div className="cz-figure"><span>Invoiced</span><strong>{rupees(d.totals.invoiced)}</strong></div>
             <div className="cz-figure"><span>Received</span><strong className="cz-good">{rupees(d.totals.received)}</strong></div>
             <div className="cz-figure"><span>Outstanding</span><strong>{rupees(d.totals.outstanding)}</strong></div>
-            <div className="cz-figure"><span>Overdue</span><strong style={{ color: d.totals.overdue ? 'var(--cz-danger)' : undefined }}>{rupees(d.totals.overdue)}</strong><small>{d.totals.overdueCount} invoices</small></div>
+            <div className="cz-figure"><span>Overdue</span><strong style={{ color: d.totals.overdue ? 'var(--cz-danger)' : undefined }}>{rupees(d.totals.overdue)}</strong><small>{d.totals.overdueCount} {d.totals.overdueCount === 1 ? 'invoice' : 'invoices'}</small></div>
           </div>
           {d.remindersSent > 0 && <Alert tone="info">{d.remindersSent} overdue reminder{d.remindersSent > 1 ? 's' : ''} sent to payers just now (at most one a week per invoice).</Alert>}
           <Card>{!d.invoices.length ? <EmptyState icon="earnings" title="No project invoices" /> : (

@@ -33,7 +33,7 @@ export default function Radar() {
           </div>
           <Card title="Clusters">
             {!d.clusters.length ? <EmptyState icon="map" title="Nothing here yet">Try another state or sector.</EmptyState> : (
-              <div className="cz-choice-grid">{d.clusters.map((c) => <div key={c.city} className="cz-figure" data-cluster={c.city}><span>{c.city}</span><strong style={{ fontSize: 17 }}>{c.opportunities} opportunities · {c.partners} partners</strong><small>{c.topSectors.join(' · ')}</small></div>)}</div>
+              <div className="cz-choice-grid">{d.clusters.map((c) => <div key={c.city} className="cz-figure" data-cluster={c.city}><span>{c.city}</span><strong style={{ fontSize: 17 }}>{c.opportunities} {c.opportunities === 1 ? 'opportunity' : 'opportunities'} · {c.partners} {c.partners === 1 ? 'partner' : 'partners'}</strong><small>{c.topSectors.join(' · ')}</small></div>)}</div>
             )}
           </Card>
           <div className="cz-grid cz-grid-2">
