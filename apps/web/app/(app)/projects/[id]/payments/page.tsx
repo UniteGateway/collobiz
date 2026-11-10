@@ -8,9 +8,9 @@ import { ProjectTabs, fmtDate, rupees, useProject } from '@/components/Projects'
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
-interface Inv { id: string; number: string; amount: number; issuedAt: string; dueDate: string | null; status: string; received: number; outstanding: number; overdueDays: number; receipts: { amount: number; reference: string; receivedAt: string }[] }
+interface Inv { id: string; number: string; amount: number; issuedAt: string; dueDate: string | null; status: string; received: number; outstanding: number; overdueDays: number; receipts: { amount: number; reference: string; receivedAt: string; source?: string }[]; reported?: { id: string; amount: number; reference: string; receivedAt: string }[] }
 interface Row { id: string; seq: number; title: string; amount: number; state: string; invoice: Inv | null }
-interface Res { parties: { id: string; name: string }[]; project: { code: string; title: string; contracted: boolean }; canRecord: boolean; totals: Record<string, number>; milestones: Row[]; note: string }
+interface Res { parties: { id: string; name: string }[]; project: { code: string; title: string; contracted: boolean }; canRecord: boolean; canConfirm: boolean; totals: Record<string, number>; milestones: Row[]; note: string }
 const TONE: Record<string, 'success' | 'info' | 'warning' | 'neutral' | 'danger'> = { projected: 'neutral', contracted: 'neutral', earned: 'info', approved: 'info', invoiced: 'warning', partially_paid: 'warning', paid: 'success', disputed: 'danger' };
 
 /** Payments — milestone by milestone: projected, contracted, earned, approved, invoiced, part-paid, paid or disputed. */
@@ -20,6 +20,7 @@ export default function ProjectPayments() {
   const q = useQuery<Res>(`/projects/${pr.id}/payments`);
   const [pay, setPay] = useState<Inv | null>(null);
   const [disputing, setDisputing] = useState(false);
+  const confirm = useMutation(async (rid: string) => { await api.post(`/payment-receipts/${rid}/confirm`, {}); q.reload(); return true; });
   const d = q.data;
   return (
     <Screen page={{ key: 'project-payments', title: 'Payments', access: 'partner' }} description={d ? `${d.project.code} — ${d.project.title}` : undefined}
@@ -32,11 +33,18 @@ export default function ProjectPayments() {
               <div key={k} className="cz-figure"><span>{l}</span><strong className={k === 'received' ? 'cz-good' : undefined}>{rupees(d.totals[k])}</strong>{k === 'outstanding' && d.totals.overdue > 0 && <small style={{ color: 'var(--cz-danger)' }}>{rupees(d.totals.overdue)} overdue</small>}</div>
             ))}
           </div>
+          {confirm.error && <Alert tone="danger">{confirm.error}</Alert>}
           <p className="cz-muted" style={{ fontSize: 13, margin: 0 }}>Each figure is kept separate — projected value is not money received. {d.note}</p>
           <Card>
             <ul className="cz-ws-list">{d.milestones.map((m) => (
               <li key={m.id} data-milestone={m.title} style={{ alignItems: 'flex-start' }}>
                 <span><strong>{m.seq}. {m.title}</strong> · {rupees(m.amount)}<br />
+                  {m.invoice?.reported?.map((r) => (
+                    <span key={r.id} data-reported={r.reference} style={{ display: 'block', fontSize: 13, marginTop: 4 }}>
+                      Supplier reports {rupees(r.amount)} received on {fmtDate(r.receivedAt)} (ref {r.reference}) — not counted until the client confirms
+                      {d.canConfirm && <Button size="sm" variant="secondary" style={{ marginLeft: 8 }} loading={confirm.pending} onClick={() => confirm.run(r.id)}>Confirm it left our account</Button>}
+                    </span>
+                  ))}
                   {m.invoice ? <span className="cz-muted" style={{ fontSize: 13 }}>Invoice {m.invoice.number} · due {fmtDate(m.invoice.dueDate)} · received {rupees(m.invoice.received)} of {rupees(m.invoice.amount)}{m.invoice.overdueDays ? <strong style={{ color: 'var(--cz-danger)' }}> · {m.invoice.overdueDays} days overdue</strong> : ''}{m.invoice.receipts.length ? ` · ${m.invoice.receipts.map((r) => `${rupees(r.amount)} (${r.reference})`).join(', ')}` : ''}</span> : <span className="cz-muted" style={{ fontSize: 13 }}>Not invoiced yet</span>}</span>
                 <span className="cz-row" style={{ gap: 8 }}><StatusBadge status={m.state} tone={TONE[m.state]} label={PAYMENT_STATE_LABELS[m.state]} />
                   {d.canRecord && m.invoice && m.invoice.outstanding > 0 && <Button size="sm" onClick={() => setPay(m.invoice)}>Record payment</Button>}</span>

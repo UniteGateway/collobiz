@@ -76,6 +76,7 @@ const oneOppId = await one("select opportunity_id as id from lead_claims c join 
 const paidProjectId = await one("select id from projects where code = 'PRJ-2025-000014'");
 const caseId = await one("select id from resolution_cases where code = 'RC-2026-10001'");
 const consortiumId = await one("select id from collaboration_teams where name = 'Chakan Rooftop Consortium'");
+const stmtId = await one("select id from bank_statements order by created_at limit 1");
 const offerAgreementId = await one("select id from commission_agreements where code = 'CA-2026-410001'");
 const EXTRA = [
   { id: 'X01', title: 'Offers for you', app: 'web', route: '/offers', access: 'verified-partner' },
@@ -154,6 +155,9 @@ const EXTRA = [
   { id: 'X74', title: 'Opportunity radar', app: 'web', route: '/radar', access: 'partner' },
   { id: 'X75', title: 'Resolution centre (admin)', app: 'admin', route: '/resolution', access: 'unite-admin' },
   { id: 'X76', title: 'Payment reconciliation (admin)', app: 'admin', route: '/reconciliation', access: 'finance' },
+  { id: 'X77', title: 'Bank statements', app: 'web', route: '/payments/bank', access: 'partner' },
+  { id: 'X78', title: 'Bank statement review', app: 'web', route: `/payments/bank/${stmtId}`, access: 'partner' },
+  { id: 'X79', title: 'Bank statements (admin)', app: 'admin', route: '/bank-statements', access: 'finance' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

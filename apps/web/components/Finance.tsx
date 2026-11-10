@@ -11,7 +11,7 @@ export function CommissionBadge({ status }: { status: string }) {
   return <StatusBadge status={status} tone={TONE[status] ?? 'neutral'} label={COMMISSION_STATE_LABELS[status as CommissionState] ?? status} />;
 }
 
-const TABS: [string, string][] = [['/earnings', 'Overview'], ['/earnings/summary', 'Summary'], ['/earnings/live', 'Live tracker'], ['/payouts/request', 'Request payout'], ['/payments/history', 'Payments'], ['/tax-records', 'Tax records'], ['/commissions/calculator', 'Calculator'], ['/commissions/disputes', 'Disputes']];
+const TABS: [string, string][] = [['/earnings', 'Overview'], ['/earnings/summary', 'Summary'], ['/earnings/live', 'Live tracker'], ['/payouts/request', 'Request payout'], ['/payments/history', 'Payments'], ['/payments/bank', 'Bank statements'], ['/tax-records', 'Tax records'], ['/commissions/calculator', 'Calculator'], ['/commissions/disputes', 'Disputes']];
 export function EarningsTabs() {
   const path = usePathname();
   return <nav aria-label="Earnings sections" className="cz-tabs">{TABS.map(([h, l]) => <Link key={h} href={h} aria-current={path === h ? 'page' : undefined}>{l}</Link>)}</nav>;

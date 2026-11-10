@@ -37,7 +37,59 @@ const dueOf = (inv: { dueDate: string | null; issuedAt: Date | null }) => inv.du
 
 @Injectable()
 export class Phase2Service {
-  constructor(@InjectDb() private db: Db) {}
+  constructor(@InjectDb() private db: Db, private audit: AuditService, private commissions: CommissionsService) {}
+  /** Sum of confirmed (or, with pending = true, payee-reported and not yet confirmed) receipts on an invoice. */
+  async receivedOn(iid: string, pending = false) {
+    return Number((await this.db.select({ s: sql<number>`coalesce(sum(${paymentReceipts.amount}), 0)` }).from(paymentReceipts).where(and(eq(paymentReceipts.invoiceId, iid), eq(paymentReceipts.pending, pending))))[0].s);
+  }
+  /**
+   * The one path for every receipt (typed in, or matched from a bank statement). Never more than is due, counting reports still
+   * waiting for confirmation; never the same reference twice. A payee's own report stays pending until the payer or Unite
+   * finance confirms it — only confirmed money marks an invoice paid and earns commission.
+   */
+  async applyReceipt(ctx: RequestContext, inv: typeof projectInvoices.$inferSelect, b: { amount: number; reference: string; receivedAt?: string; note?: string }, opts: { source?: 'manual' | 'bank_statement'; pending?: boolean; statementLineId?: string } = {}) {
+    if (inv.status === 'paid') throw new ConflictException('This invoice is already fully paid');
+    const confirmed = await this.receivedOn(inv.id);
+    const reported = await this.receivedOn(inv.id, true);
+    const left = inv.amount - confirmed - reported;
+    if (b.amount > left) throw new BadRequestException({ statusCode: 400, message: `That is more than the ₹${Math.round(left / 100).toLocaleString('en-IN')} still due${reported ? ' (including payments reported and awaiting confirmation)' : ''}`, issues: [{ path: 'amount', message: 'More than the amount due' }] });
+    const pending = !!opts.pending;
+    const [r] = await this.db.insert(paymentReceipts).values({ invoiceId: inv.id, amount: b.amount, reference: b.reference, receivedAt: b.receivedAt ?? new Date().toISOString().slice(0, 10), note: b.note, recordedBy: ctx.userId, source: opts.source ?? 'manual', pending, statementLineId: opts.statementLineId ?? null, confirmedBy: pending ? null : ctx.userId, confirmedAt: pending ? null : new Date() }).onConflictDoNothing().returning();
+    if (!r) throw new ConflictException('This reference is already recorded on this invoice');
+    const [p] = await this.db.select().from(projects).where(eq(projects.id, inv.projectId));
+    const rupee = `₹${Math.round(b.amount / 100).toLocaleString('en-IN')}`;
+    if (pending) {
+      await this.audit.record(ctx, { action: 'project.receipt_reported', objectType: 'project_invoice', objectId: inv.id, after: { amount: b.amount, reference: b.reference, source: opts.source } });
+      await this.notifyOrg(p.ownerOrgId, `Confirm a payment on ${inv.number}`, `The supplier reports receiving ${rupee} (ref ${b.reference}). Confirm it if it left your account.`, `/projects/${p.id}/payments`);
+      return { receipt: r, received: confirmed, outstanding: inv.amount - confirmed, paid: false, pending: true };
+    }
+    const paid = await this.settleIfPaid(inv, confirmed + b.amount, b.reference);
+    await this.audit.record(ctx, { action: paid ? 'project.invoice_paid' : 'project.invoice_part_paid', objectType: 'project_invoice', objectId: inv.id, after: { amount: b.amount, reference: b.reference, total: confirmed + b.amount, of: inv.amount, source: opts.source ?? 'manual' } });
+    await this.notifyOrg(inv.issuedByOrgId, paid ? `Invoice ${inv.number} paid in full` : `Part payment on ${inv.number}`, `${rupee} received (ref ${b.reference}).`, `/projects/${p.id}/payments`);
+    return { receipt: r, received: confirmed + b.amount, outstanding: inv.amount - confirmed - b.amount, paid, pending: false };
+  }
+  /** Full confirmed payment: the existing rule that marks the invoice paid and earns commission. */
+  private async settleIfPaid(inv: typeof projectInvoices.$inferSelect, total: number, reference: string) {
+    if (total !== inv.amount) return false;
+    const [u] = await this.db.update(projectInvoices).set({ status: 'paid', paidAt: new Date(), paymentReference: reference }).where(and(eq(projectInvoices.id, inv.id), ne(projectInvoices.status, 'paid'))).returning();
+    if (u) await this.commissions.onInvoicePaid(u);
+    return !!u;
+  }
+  /** The payer (project owner) or Unite finance confirms a payment the payee reported from its bank statement. */
+  async confirmReceipt(ctx: RequestContext, rid: string, canConfirm: (projectOwnerOrgId: string) => boolean) {
+    const [r] = await this.db.select().from(paymentReceipts).where(eq(paymentReceipts.id, rid));
+    if (!r) throw new NotFoundException('Payment not found');
+    const [inv] = await this.db.select().from(projectInvoices).where(eq(projectInvoices.id, r.invoiceId));
+    const [p] = await this.db.select().from(projects).where(eq(projects.id, inv.projectId));
+    if (!canConfirm(p.ownerOrgId)) throw new ForbiddenException('The paying client or Unite finance confirms payments');
+    if (!r.pending) throw new ConflictException('This payment is already confirmed');
+    await this.db.update(paymentReceipts).set({ pending: false, confirmedBy: ctx.userId, confirmedAt: new Date() }).where(and(eq(paymentReceipts.id, rid), eq(paymentReceipts.pending, true)));
+    const total = await this.receivedOn(inv.id);
+    const paid = await this.settleIfPaid(inv, total, r.reference);
+    await this.audit.record(ctx, { action: paid ? 'project.invoice_paid' : 'project.receipt_confirmed', objectType: 'project_invoice', objectId: inv.id, after: { receipt: rid, amount: r.amount, total, of: inv.amount } });
+    await this.notifyOrg(inv.issuedByOrgId, paid ? `Invoice ${inv.number} paid in full` : `Payment confirmed on ${inv.number}`, `₹${Math.round(r.amount / 100).toLocaleString('en-IN')} (ref ${r.reference}) confirmed by the client.`, `/projects/${p.id}/payments`);
+    return { paid, received: total, outstanding: inv.amount - total };
+  }
   async notifyOrg(orgId: string, title: string, text: string, link: string) {
     const ms = await this.db.select({ u: memberships.userId }).from(memberships).where(and(eq(memberships.organizationId, orgId), eq(memberships.status, 'active')));
     if (ms.length) await this.db.insert(notifications).values(ms.map((m) => ({ userId: m.u, kind: 'announcement', title, body: text, link })));
@@ -68,7 +120,7 @@ export class Phase2Service {
     const open = await this.db.select().from(projectInvoices).where(ne(projectInvoices.status, 'paid'));
     let sent = 0;
     for (const inv of open) {
-      const received = Number((await this.db.select({ s: sql<number>`coalesce(sum(${paymentReceipts.amount}), 0)` }).from(paymentReceipts).where(eq(paymentReceipts.invoiceId, inv.id)))[0].s);
+      const received = await this.receivedOn(inv.id);
       const days = overdueDays(dueOf(inv), inv.amount - received);
       if (!days || (inv.overdueNotifiedAt && Date.now() - inv.overdueNotifiedAt.getTime() < 7 * 86400000)) continue;
       const [p] = await this.db.select().from(projects).where(eq(projects.id, inv.projectId));
@@ -96,13 +148,15 @@ export class Phase2Controller {
     const disputedMs = ms.length ? (await this.db.select({ m: commissionEntries.milestoneId }).from(financeDisputes).innerJoin(commissionEntries, eq(commissionEntries.id, financeDisputes.entryId)).where(and(inArray(commissionEntries.milestoneId, ms.map((m) => m.id)), notInArray(financeDisputes.status, ['resolved', 'closed', 'withdrawn'])))).map((r) => r.m) : [];
     const rows = ms.map((m) => {
       const inv = invs.find((i) => i.milestoneId === m.id) ?? null;
-      const rs = inv ? recs.filter((r) => r.invoiceId === inv.id) : [];
+      const all = inv ? recs.filter((r) => r.invoiceId === inv.id) : [];
+      const rs = all.filter((r) => !r.pending);
+      const reported = all.filter((r) => r.pending);
       const received = rs.reduce((a, r) => a + r.amount, 0);
       const due = inv ? dueOf(inv) : null;
       return {
         id: m.id, seq: m.seq, title: m.title, amount: m.amount, milestoneStatus: m.status, dueDate: m.dueDate,
         state: paymentState({ status: m.status, contracted: !!p.contractId }, inv ? { amount: inv.amount, received: inv.status === 'paid' && !rs.length ? inv.amount : received, status: inv.status } : null, disputedMs.includes(m.id)),
-        invoice: inv ? { id: inv.id, number: inv.number, amount: inv.amount, issuedAt: inv.issuedAt, dueDate: due, status: inv.status, received: inv.status === 'paid' && !rs.length ? inv.amount : received, outstanding: inv.status === 'paid' ? 0 : inv.amount - received, overdueDays: inv.status === 'paid' ? 0 : overdueDays(due, inv.amount - received), receipts: rs.map((r) => ({ amount: r.amount, reference: r.reference, receivedAt: r.receivedAt })) } : null,
+        invoice: inv ? { id: inv.id, number: inv.number, amount: inv.amount, issuedAt: inv.issuedAt, dueDate: due, status: inv.status, received: inv.status === 'paid' && !rs.length ? inv.amount : received, outstanding: inv.status === 'paid' ? 0 : inv.amount - received, overdueDays: inv.status === 'paid' ? 0 : overdueDays(due, inv.amount - received), receipts: rs.map((r) => ({ amount: r.amount, reference: r.reference, receivedAt: r.receivedAt, source: r.source })), reported: reported.map((r) => ({ id: r.id, amount: r.amount, reference: r.reference, receivedAt: r.receivedAt })) } : null,
       };
     });
     const sum = (f: (r: (typeof rows)[number]) => number) => rows.reduce((a, r) => a + f(r), 0);
@@ -111,7 +165,7 @@ export class Phase2Controller {
     const parties = [...new Set([p.ownerOrgId, p.leadOrgId, ...memberOrgs])].filter((o) => !ctx.memberships.some((m) => m.organizationId === o)).map((o) => ({ id: o, name: pname(o) }));
     return {
       parties,
-      project: { id: p.id, code: p.code, title: p.title, value: p.value, contracted: !!p.contractId }, role, canRecord: role === 'owner' || money(ctx),
+      project: { id: p.id, code: p.code, title: p.title, value: p.value, contracted: !!p.contractId }, role, canRecord: role === 'owner' || money(ctx), canConfirm: role === 'owner' || money(ctx),
       totals: {
         projected: sum((r) => r.amount), contracted: p.contractId ? sum((r) => r.amount) : 0, approved: sum((r) => (['approved', 'invoiced', 'partially_paid', 'paid'].includes(r.state) ? r.amount : 0)),
         invoiced: sum((r) => r.invoice?.amount ?? 0), received: sum((r) => r.invoice?.received ?? 0), outstanding: sum((r) => r.invoice?.outstanding ?? 0), overdue: sum((r) => (r.invoice?.overdueDays ? r.invoice.outstanding : 0)),
@@ -128,19 +182,14 @@ export class Phase2Controller {
     if (!(role === 'owner' || money(ctx))) throw new ForbiddenException('The paying client or Unite finance records payments');
     const [inv] = await this.db.select().from(projectInvoices).where(and(eq(projectInvoices.id, iid), eq(projectInvoices.projectId, id)));
     if (!inv) throw new NotFoundException('Invoice not found');
-    if (inv.status === 'paid') throw new ConflictException('This invoice is already fully paid');
-    const received = Number((await this.db.select({ s: sql<number>`coalesce(sum(${paymentReceipts.amount}), 0)` }).from(paymentReceipts).where(eq(paymentReceipts.invoiceId, iid)))[0].s);
-    if (received + b.amount > inv.amount) throw new BadRequestException({ statusCode: 400, message: `That is more than the ₹${Math.round((inv.amount - received) / 100).toLocaleString('en-IN')} still due`, issues: [{ path: 'amount', message: 'More than the amount due' }] });
-    const [r] = await this.db.insert(paymentReceipts).values({ invoiceId: iid, amount: b.amount, reference: b.reference, receivedAt: b.receivedAt ?? new Date().toISOString().slice(0, 10), note: b.note, recordedBy: ctx.userId }).onConflictDoNothing().returning();
-    if (!r) throw new ConflictException('This reference is already recorded on this invoice');
-    let paid = false;
-    if (received + b.amount === inv.amount) {
-      const [u] = await this.db.update(projectInvoices).set({ status: 'paid', paidAt: new Date(), paymentReference: b.reference }).where(and(eq(projectInvoices.id, iid), ne(projectInvoices.status, 'paid'))).returning();
-      if (u) { await this.commissions.onInvoicePaid(u); paid = true; } // full payment: the existing rule that earns commission
-    }
-    await this.audit.record(ctx, { action: paid ? 'project.invoice_paid' : 'project.invoice_part_paid', objectType: 'project_invoice', objectId: iid, after: { amount: b.amount, reference: b.reference, total: received + b.amount, of: inv.amount } });
-    await this.svc.notifyOrg(inv.issuedByOrgId, paid ? `Invoice ${inv.number} paid in full` : `Part payment on ${inv.number}`, `₹${Math.round(b.amount / 100).toLocaleString('en-IN')} received (ref ${b.reference}).`, `/projects/${id}/payments`);
-    return { received: received + b.amount, outstanding: inv.amount - received - b.amount, paid };
+    const { received, outstanding, paid } = await this.svc.applyReceipt(ctx, inv, b);
+    return { received, outstanding, paid };
+  }
+
+  @Post('payment-receipts/:rid/confirm')
+  @HttpCode(200)
+  async confirmReceipt(@Ctx() ctx: RequestContext, @Param('rid', ParseUUIDPipe) rid: string) {
+    return this.svc.confirmReceipt(ctx, rid, (owner) => money(ctx) || ctx.memberships.some((m) => m.organizationId === owner)); // same rule as recording a receipt
   }
 
   @Get('finance/reconciliation')
@@ -148,15 +197,16 @@ export class Phase2Controller {
     if (!money(ctx) && !staff(ctx)) throw new ForbiddenException('For finance and Unite admins');
     const reminded = await this.svc.remindOverdue();
     const invs = await this.db.select({ i: projectInvoices, p: projects }).from(projectInvoices).innerJoin(projects, eq(projects.id, projectInvoices.projectId)).orderBy(desc(projectInvoices.issuedAt)).limit(500);
-    const recs = invs.length ? await this.db.select({ id: paymentReceipts.invoiceId, s: sql<number>`sum(${paymentReceipts.amount})` }).from(paymentReceipts).where(inArray(paymentReceipts.invoiceId, invs.map((x) => x.i.id))).groupBy(paymentReceipts.invoiceId) : [];
+    const recs = invs.length ? await this.db.select({ id: paymentReceipts.invoiceId, s: sql<number>`sum(${paymentReceipts.amount})` }).from(paymentReceipts).where(and(inArray(paymentReceipts.invoiceId, invs.map((x) => x.i.id)), eq(paymentReceipts.pending, false))).groupBy(paymentReceipts.invoiceId) : [];
+    const reported = invs.length ? await this.db.select({ id: paymentReceipts.id, invoiceId: paymentReceipts.invoiceId, amount: paymentReceipts.amount, reference: paymentReceipts.reference, receivedAt: paymentReceipts.receivedAt }).from(paymentReceipts).where(and(inArray(paymentReceipts.invoiceId, invs.map((x) => x.i.id)), eq(paymentReceipts.pending, true))) : [];
     const name = await this.svc.names(invs.flatMap((x) => [x.i.issuedByOrgId, x.p.ownerOrgId]));
     const rows = invs.map(({ i, p }) => {
       const got = i.status === 'paid' ? i.amount : Number(recs.find((r) => r.id === i.id)?.s ?? 0);
       const due = dueOf(i);
-      return { id: i.id, number: i.number, project: p.code, projectId: p.id, issuer: name(i.issuedByOrgId), payer: name(p.ownerOrgId), amount: i.amount, received: got, outstanding: i.amount - got, dueDate: due, overdueDays: overdueDays(due, i.amount - got), status: i.status === 'paid' ? 'paid' : got > 0 ? 'partially_paid' : 'invoiced' };
+      return { id: i.id, number: i.number, project: p.code, projectId: p.id, issuer: name(i.issuedByOrgId), payer: name(p.ownerOrgId), amount: i.amount, received: got, outstanding: i.amount - got, dueDate: due, overdueDays: overdueDays(due, i.amount - got), status: i.status === 'paid' ? 'paid' : got > 0 ? 'partially_paid' : 'invoiced', awaitingConfirmation: reported.filter((r) => r.invoiceId === i.id).reduce((x, r) => x + r.amount, 0), reported: reported.filter((r) => r.invoiceId === i.id).map(({ invoiceId: _i, ...r }) => r) };
     });
     const t = (f: (r: (typeof rows)[number]) => number) => rows.reduce((a, r) => a + f(r), 0);
-    return { totals: { invoiced: t((r) => r.amount), received: t((r) => r.received), outstanding: t((r) => r.outstanding), overdue: t((r) => (r.overdueDays ? r.outstanding : 0)), overdueCount: rows.filter((r) => r.overdueDays).length }, invoices: rows, remindersSent: reminded };
+    return { canConfirm: money(ctx), totals: { invoiced: t((r) => r.amount), received: t((r) => r.received), outstanding: t((r) => r.outstanding), overdue: t((r) => (r.overdueDays ? r.outstanding : 0)), overdueCount: rows.filter((r) => r.overdueDays).length, awaitingConfirmation: t((r) => r.awaitingConfirmation) }, invoices: rows, remindersSent: reminded };
   }
 
   // ================= 10 Resolution centre =================

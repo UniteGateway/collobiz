@@ -494,6 +494,7 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await v2Demo(db, refs);
   await xchangeDemo(db, refs);
   await phase2Demo(db, refs);
+  await bankDemo(db, refs);
 }
 
 /** Demo pilot check-ins (spread over three weeks) so the admin results page has something to show. Not part of the test seed. */
@@ -819,4 +820,18 @@ export async function phase2Demo(db: Db, refs: SeedRefs) {
     { teamId: team.id, orgId: volt, kind: 'technical', description: 'Design, engineering and net-metering liaison', pledgedValue: 6_00_000_00, deliveredValue: 4_00_000_00, evidence: 'Single-line diagram and structural design shared in the workspace', confirmedByOrgId: volt, createdBy: refs.users.asha },
     { teamId: team.id, orgId: volt, kind: 'equipment', description: 'Lifting equipment and scaffolding for 6 weeks', pledgedValue: 2_50_000_00, createdBy: refs.users.asha },
   ]);
+}
+
+/** Bank statement demo: Volt's October statement — its credit is the part payment already recorded on INV-2026-900002. */
+export async function bankDemo(db: Db, refs: SeedRefs) {
+  if ((await db.select({ id: s.bankStatements.id }).from(s.bankStatements).limit(1)).length) return;
+  const { volt } = refs.orgs;
+  if (!volt || !refs.users.asha) return;
+  const lines = [
+    { seq: 1, txnDate: new Date(Date.now() - 12 * 86400_000).toISOString().slice(0, 10), description: 'NEFT-ICIC0031987720-UNITE SOLAR PVT LTD', reference: 'ICIC0031987720', direction: 'credit', amount: 1_20_00_000_00, utr: 'ICIC0031987720', status: 'unmatched', matchReason: 'Already recorded on INV-2026-900002' },
+    { seq: 2, txnDate: new Date(Date.now() - 10 * 86400_000).toISOString().slice(0, 10), description: 'IMPS 612398765432 SITE ADVANCE RETURN', reference: null, direction: 'credit', amount: 25_000_00, utr: '612398765432', status: 'unmatched', matchReason: null },
+    { seq: 3, txnDate: new Date(Date.now() - 9 * 86400_000).toISOString().slice(0, 10), description: 'MONTHLY ACCOUNT CHARGES', reference: null, direction: 'debit', amount: 590_00, utr: null, status: 'ignored', matchReason: null },
+  ];
+  const [st] = await db.insert(s.bankStatements).values({ orgId: volt, uploadedBy: refs.users.asha, fileName: 'volt-hdfc-october.csv', fileHash: 'demo-october-statement', layout: 'debit_credit_columns', periodFrom: lines[0].txnDate, periodTo: lines[2].txnDate, lineCount: 3 }).returning();
+  await db.insert(s.bankStatementLines).values(lines.map((l) => ({ ...l, statementId: st.id })));
 }

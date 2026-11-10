@@ -1,5 +1,5 @@
 /** COLLABIZ V2 Phase 2 (additive): payment receipts, consortium contributions and agreements, resolution centre. */
-import { pgTable, uuid, text, timestamp, bigint, integer, date, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, bigint, integer, date, index, uniqueIndex, boolean } from 'drizzle-orm/pg-core';
 import { id, createdAt, updatedAt, organizations, users } from './core';
 import { projectInvoices, projects } from './projects';
 import { collaborationTeams } from './teams';
@@ -13,6 +13,12 @@ export const paymentReceipts = pgTable('payment_receipts', {
   receivedAt: date('received_at').notNull(),
   note: text('note'),
   recordedBy: uuid('recorded_by').notNull().references(() => users.id),
+  /** manual | bank_statement. A receipt reported by the payee from its own statement waits for the payer or Unite finance. */
+  source: text('source').notNull().default('manual'),
+  pending: boolean('pending').notNull().default(false),
+  statementLineId: uuid('statement_line_id'),
+  confirmedBy: uuid('confirmed_by').references(() => users.id),
+  confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
   createdAt: createdAt(),
 }, (t) => [index('payment_receipts_invoice_idx').on(t.invoiceId), uniqueIndex('payment_receipts_ref_uq').on(t.invoiceId, t.reference)]);
 

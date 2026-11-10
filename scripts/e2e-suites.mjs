@@ -2058,3 +2058,30 @@ suites.push({
     await shot('v2b-radar');
   },
 });
+
+// Bank statement import: Volt uploads its statement, confirms the suggested match (reported), Unite finance confirms it → paid.
+suites.push({
+  name: 'Bank statements · payee imports statement, confirms a suggested match; finance confirms the reported payment',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/payments/bank');
+    await page.getByLabel('Bank statement (CSV or Excel)').setInputFiles('apps/api/test/fixtures/sample-statement.csv');
+    await page.getByRole('heading', { name: 'sample-statement.csv' }).waitFor();
+    await page.getByText(/Credits you match are recorded as/).waitFor();
+    const l1 = page.locator('[data-line="1"]');
+    await l1.getByText(/Suggested: INV-2026-900002/).waitFor();
+    await shot('bank-statement-review');
+    await l1.getByRole('button', { name: 'Confirm match' }).click();
+    await page.getByRole('button', { name: 'All (4)' }).click();
+    await page.locator('[data-line="1"]').getByText(/waiting for the client to confirm/).waitFor();
+    await page.locator('[data-line="3"]').getByRole('button', { name: 'Ignore' }).click();
+    await page.locator('[data-line="3"]').getByText('Ignored').waitFor();
+    await adminLogin(page, ADMIN, 'finance@collabiz.local');
+    await page.goto(ADMIN + '/reconciliation');
+    await page.locator('[data-reported="HDFCN52026110512345"]').waitFor();
+    await shot('bank-reconciliation-reported');
+    await page.locator('[data-reported="HDFCN52026110512345"]').getByRole('button', { name: 'Confirm received' }).click();
+    await page.locator('[data-invoice="INV-2026-900002"]').getByText('Paid', { exact: true }).waitFor();
+  },
+});

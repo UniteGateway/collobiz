@@ -344,3 +344,7 @@ REVIEWED=1 node scripts/record-gate.mjs docs/audit/screenshots/gate   # after re
 bash scripts/up.sh                                    # after a machine restart: Postgres, Redis, API, web, admin
 node scripts/capture-screens.mjs docs/audit/screenshots/after   # evidence screenshots (demo database)
 ```
+
+## Pilot-readiness additions (2026-11-10)
+
+- **Bank statement import** (Earnings → *Bank statements*; admin *Bank statements*; migration 0029): upload a CSV or .xlsx statement as downloaded from net banking. COLLABIZ finds the table (debit/credit columns, amount + Dr/Cr, or signed amount), reads Indian dates and amounts, extracts NEFT/RTGS/IMPS/UPI UTRs, and suggests the invoice each line settles (invoice number in the narration, exact outstanding amount, or the payer's name for part payments; ties are left for a person). Payments already recorded are recognised by UTR. A payee's own match is a *reported* payment that the paying client or Unite finance confirms (project *Payments* tab or admin reconciliation) before it counts — only confirmed money marks an invoice paid and earns commission. COLLABIZ reads uploaded files only; it is not connected to any bank. Tests: engine (CSV, amounts, dates, UTRs, layouts, matching), `bank-import.e2e.ts` 5, journey *Bank statements*, gate sweep X77–X79.
