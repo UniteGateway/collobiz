@@ -19,3 +19,4 @@ export * from './franchise-property';
 export * from './solar';
 export * from './promotions';
 export * from './v2';
+export * from './xchange';

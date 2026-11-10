@@ -25,3 +25,14 @@ Phase 4: native screens for the most-used new flows, regression, security review
 
 ## Reference repositories (Stage 15)
 Reviewed as references only — no code copied. Twenty (AGPL), Plane (AGPL), Chatwoot (MIT core, enterprise folder proprietary), Keycloak (Apache-2.0), Vendure (GPL-3.0 core), Expo (MIT), LangChain.js (MIT), ERPNext (GPL-3.0, already integrated **over its API**, not linked). AGPL/GPL code is not brought into COLLABIZ; existing COLLABIZ modules already cover CRM, projects, commerce, messaging and auth, so none is replaced. LangChain.js may be used later behind `AI_PROVIDER` once an LLM key is approved.
+
+## Added 2026-11-10: COLLABIZ ONE and COLLABIZ XCHANGE
+
+| Proposal | Already in COLLABIZ | Gap | Plan |
+|---|---|---|---|
+| **COLLABIZ ONE** (virtual company builder) | Opportunity + lead protection, Unite priority review, AI team plans with gaps, team/consortium with NDA and sharing proposals, Deal Passport, work packages, projects, commission ledger | One guided journey per opportunity showing the six steps (bring → analyse → Unite review → assemble → agree structure → win, execute, settle) with live status and the next action | `GET /one/:opportunityId` aggregates existing records; screen **178** `/one/[id]`, list **179** `/one`. A "virtual company" is a collaboration workspace, never an incorporated entity. |
+| Business DNA Passport | Partner profile, KYB documents, reputation from verified outcomes | Evidence-backed capability view | Later: capabilities marked *evidenced* (KYB document, completed COLLABIZ project) vs *self-declared* — team plans already label certificates as self-declared |
+| Opportunity Rescue Engine | Team plans for any project/tender, work packages | Trigger from a stuck project | Covered by team plans + packages; "Rescue" entry point on ONE when a step is blocked |
+| Dynamic Contribution Ledger | — | = V2 Stage 05 contributions | Phase 2 |
+| 48-hour team challenge, Revival | — | — | Later, on top of ONE |
+| **COLLABIZ XCHANGE** (B2B barter) | Partner capacity, trading catalogue | Barter listings (offers and needs incl. idle capacity), matching, multi-party cycles, exchange agreements with legs, approvals, delivery/acceptance, invoice data | New module (migration 0027). Covers V2 **Stage 08 Idle Capacity Exchange** (capacity is a listing kind; cash allowed). Screens **180–183**. No trade-credit tokens or proprietary currency. Each leg is treated as a separate taxable supply at open-market value (CGST Rule 27) — invoice data is prepared for the parties' accountants, never filed by COLLABIZ. |

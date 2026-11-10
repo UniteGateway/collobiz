@@ -26,6 +26,7 @@ import { MAX_UPLOAD_BYTES, StorageService } from '../../common/adapters';
 import { randomDigits } from '../../common/crypto';
 import { GrowthModule } from '../growth/growth.controller';
 import { DealsController, V2Service } from './deals.controller';
+import { OneController } from './one.controller';
 
 const PARTNER = ['partner_company', 'partner_individual'];
 const platform = (ctx: RequestContext) => ctx.platformRoles.length > 0 && !ctx.mfaRequiredButMissing;
@@ -264,5 +265,5 @@ export class DeliveryController {
   }
 }
 
-@Module({ imports: [GrowthModule], controllers: [DealsController, DeliveryController], providers: [V2Service] })
+@Module({ imports: [GrowthModule], controllers: [DealsController, DeliveryController, OneController], providers: [V2Service] })
 export class V2Module {}
