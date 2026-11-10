@@ -10,7 +10,7 @@ export const teamRoleLabel = (r: string) => TEAM_ROLE_LABELS[r] ?? r;
 
 export function TeamTabs({ id }: { id: string }) {
   const path = usePathname();
-  const tabs = [['workspace', 'Workspace'], ['members', 'Members & roles'], ['invite', 'Invite'], ['nda', 'NDA'], ['sharing', 'Commercial sharing'], ['activation', 'Activation']];
+  const tabs = [['workspace', 'Workspace'], ['members', 'Members & roles'], ['invite', 'Invite'], ['nda', 'NDA'], ['sharing', 'Commercial sharing'], ['ledger', 'Contributions & MoU'], ['activation', 'Activation']];
   return <nav aria-label="Team sections" className="cz-tabs">{tabs.map(([p, l]) => <Link key={p} href={`/teams/${id}/${p}`} aria-current={path === `/teams/${id}/${p}` ? 'page' : undefined}>{l}</Link>)}</nav>;
 }
 

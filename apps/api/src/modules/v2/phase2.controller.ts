@@ -123,7 +123,7 @@ export class Phase2Controller {
   @Post('projects/:id/invoices/:iid/receipts')
   @HttpCode(201)
   async receipt(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Param('iid', ParseUUIDPipe) iid: string, @Body(body(ReceiptSchema)) b: z.infer<typeof ReceiptSchema>) {
-    const { p, role } = await this.svc.projectRole(ctx, id);
+    const { role } = await this.svc.projectRole(ctx, id);
     if (!(role === 'owner' || money(ctx))) throw new ForbiddenException('The paying client or Unite finance records payments');
     const [inv] = await this.db.select().from(projectInvoices).where(and(eq(projectInvoices.id, iid), eq(projectInvoices.projectId, id)));
     if (!inv) throw new NotFoundException('Invoice not found');
@@ -256,7 +256,7 @@ export class Phase2Controller {
       ...xd.map((d) => ({ kind: 'xchange', id: d.id, code: d.code, subject: xl.filter((l) => l.dealId === d.id).map((l) => l.disputeReason).join('; ').slice(0, 90), parties: [...new Set(xl.filter((l) => l.dealId === d.id).flatMap((l) => [name(l.fromOrgId), name(l.toOrgId)]))], status: d.status, open: true, ageDays: age(d.createdAt), reviewer: reviewer('xchange', d.id), link: '/workspace/xchange' })),
     ].sort((a, b) => Number(b.open) - Number(a.open) || b.ageDays - a.ageDays);
     const reviewers = await this.db.selectDistinct({ id: users.id, name: users.fullName }).from(memberships).innerJoin(users, eq(users.id, memberships.userId)).where(and(inArray(memberships.role, ['super_admin', 'unite_admin', 'compliance', 'finance']), eq(memberships.status, 'active')));
-    return { totals: { open: rows.filter((r) => r.open).length, unassigned: rows.filter((r) => r.open && !r.reviewer).length, over14: rows.filter((r) => r.open && r.ageDays > 14).length }, cases: rows, reviewers };
+    return { totals: { open: rows.filter((r) => r.open).length, unassigned: rows.filter((r) => r.open && !r.reviewer).length, over14: rows.filter((r) => r.open && r.ageDays > 14).length }, cases: rows, reviewers, canAssign: staff(ctx) };
   }
 
   @Post('admin/resolution/assign')

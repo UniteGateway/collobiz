@@ -493,6 +493,7 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await solarDemo(db, refs);
   await v2Demo(db, refs);
   await xchangeDemo(db, refs);
+  await phase2Demo(db, refs);
 }
 
 /** Demo pilot check-ins (spread over three weeks) so the admin results page has something to show. Not part of the test seed. */
@@ -788,4 +789,34 @@ export async function xchangeDemo(db: Db, refs: SeedRefs) {
   const [d] = await db.insert(s.xchangeDeals).values({ code: 'XD-2026-10001', kind: 'part_cash', termsKey: key, note: 'Part-cash: our inverter kit for your warehouse plus ₹4 lakh.', proposedByOrgId: volt, proposedBy: by.volt }).returning();
   await db.insert(s.xchangeLegs).values(legs.map((l) => ({ ...l, dealId: d.id })));
   await db.insert(s.xchangeApprovals).values({ dealId: d.id, orgId: volt, termsKey: key, approvedBy: by.volt });
+}
+
+/** V2 Phase 2 demo: invoices on the completed Volt project (one paid, one part-paid and overdue, one new), a contract dispute and a consortium contribution. */
+export async function phase2Demo(db: Db, refs: SeedRefs) {
+  if ((await db.select({ id: s.resolutionCases.id }).from(s.resolutionCases).limit(1)).length) return;
+  const { volt, uniteSolar } = refs.orgs;
+  if (!volt || !uniteSolar || !refs.users.asha || !refs.users.uniteAdmin) return;
+  const [proj] = await db.select().from(s.projects).where(eq(s.projects.code, 'PRJ-2025-000014')).limit(1);
+  if (proj) {
+    const ms = await db.select().from(s.milestones).where(eq(s.milestones.projectId, proj.id)).orderBy(s.milestones.seq);
+    const day = 86400_000;
+    const ago = (d: number) => new Date(Date.now() - d * day);
+    const iso = (d: Date) => d.toISOString().slice(0, 10);
+    const plan = [{ issued: 75, paid: 'full' }, { issued: 50, paid: 'part' }, { issued: 5, paid: 'none' }] as const;
+    for (const [i, m] of ms.slice(0, 3).entries()) {
+      if ((await db.select({ id: s.projectInvoices.id }).from(s.projectInvoices).where(eq(s.projectInvoices.milestoneId, m.id))).length) continue;
+      const p = plan[i];
+      const issuedAt = ago(p.issued);
+      const [inv] = await db.insert(s.projectInvoices).values({ number: `INV-2026-90000${i + 1}`, projectId: proj.id, milestoneId: m.id, amount: m.amount, issuedByOrgId: volt, issuedAt, dueDate: iso(new Date(issuedAt.getTime() + 30 * day)), status: p.paid === 'full' ? 'paid' : 'issued', paidAt: p.paid === 'full' ? ago(p.issued - 28) : null, paymentReference: p.paid === 'full' ? 'UTR HDFC0026514477' : null }).returning();
+      if (p.paid === 'full') await db.insert(s.paymentReceipts).values({ invoiceId: inv.id, amount: m.amount, reference: 'UTR HDFC0026514477', receivedAt: iso(ago(p.issued - 28)), recordedBy: refs.users.uniteAdmin });
+      if (p.paid === 'part') await db.insert(s.paymentReceipts).values({ invoiceId: inv.id, amount: Math.round(m.amount * 0.6), reference: 'UTR ICIC0031987720', receivedAt: iso(ago(12)), note: 'Balance held pending as-built drawings', recordedBy: refs.users.uniteAdmin });
+    }
+    const [c] = await db.insert(s.resolutionCases).values({ code: 'RC-2026-10001', projectId: proj.id, raisedByOrgId: volt, againstOrgId: uniteSolar, subject: 'Balance on Electrical BoS invoice withheld', statement: 'Unite Solar paid 60% of invoice INV-2026-900002 and is holding the balance for as-built drawings, which were shared on site on the handover date. We ask for the balance to be released.', amount: Math.round((ms[1]?.amount ?? 0) * 0.4), createdBy: refs.users.asha }).returning();
+    await db.insert(s.resolutionEvents).values({ caseId: c.id, orgId: volt, userId: refs.users.asha, kind: 'statement', body: c.statement });
+  }
+  const [team] = await db.select().from(s.collaborationTeams).where(eq(s.collaborationTeams.name, 'Chakan Rooftop Consortium')).limit(1);
+  if (team) await db.insert(s.teamContributions).values([
+    { teamId: team.id, orgId: volt, kind: 'technical', description: 'Design, engineering and net-metering liaison', pledgedValue: 6_00_000_00, deliveredValue: 4_00_000_00, evidence: 'Single-line diagram and structural design shared in the workspace', confirmedByOrgId: volt, createdBy: refs.users.asha },
+    { teamId: team.id, orgId: volt, kind: 'equipment', description: 'Lifting equipment and scaffolding for 6 weeks', pledgedValue: 2_50_000_00, createdBy: refs.users.asha },
+  ]);
 }

@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { FRANCHISE_FORMATS, FRANCHISE_FORMAT_LABELS, FRANCHISE_STATUS_LABELS, INDIA_STATES } from '@collabiz/types';
-import { Alert, Button, Card, Dialog, EmptyState, Select, Skeleton, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
+import { Alert, Button, Dialog, EmptyState, Select, Skeleton, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';

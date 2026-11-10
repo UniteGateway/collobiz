@@ -6,7 +6,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { createPool } from './client';
 import * as s from './schema';
-import { franchiseDemo, groupCompaniesDemo, growthDemo, propertyDemo, solarDemo, v2Demo, xchangeDemo, offerSalesDemo, offersDemo, pilotDemo, venturesDemo } from './seed-stages';
+import { franchiseDemo, groupCompaniesDemo, growthDemo, phase2Demo, propertyDemo, solarDemo, v2Demo, xchangeDemo, offerSalesDemo, offersDemo, pilotDemo, venturesDemo } from './seed-stages';
 
 async function main() {
   const pool = createPool();
@@ -41,6 +41,8 @@ async function main() {
   console.log('V2 demo (Deal Passport, work packages) in place');
   await xchangeDemo(db, refs);
   console.log('XCHANGE demo in place');
+  await phase2Demo(db, refs);
+  console.log('V2 Phase 2 demo (payments, dispute, contributions) in place');
   await pool.end();
 }
 main().catch((e) => { console.error(e); process.exit(1); });

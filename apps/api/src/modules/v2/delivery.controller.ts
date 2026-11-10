@@ -11,7 +11,7 @@
  *  - A PDF tender is read page by page; each eligibility condition is shown with its page and line. It is compared with the
  *    company's self-declared profile and documents; results are indicative and say so until an authorised reviewer confirms.
  */
-import { BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, HttpCode, Injectable, Module, NotFoundException, Param, ParseUUIDPipe, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, HttpCode, Module, NotFoundException, Param, ParseUUIDPipe, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { and, asc, desc, eq, inArray, ne, sql } from 'drizzle-orm';

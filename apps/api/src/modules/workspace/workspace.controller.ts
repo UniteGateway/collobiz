@@ -9,7 +9,7 @@
  */
 import { Controller, ForbiddenException, Get, Injectable, Module, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { and, asc, desc, eq, gte, ilike, inArray, isNotNull, lt, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, ilike, inArray, isNotNull, or, sql } from 'drizzle-orm';
 import { countryLabel } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import {

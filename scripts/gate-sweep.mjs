@@ -73,6 +73,9 @@ const passportClaimId = await one("select claim_id as id from deal_passports whe
 const v2ProjectId = await one("select id from projects where code = 'PRJ-2026-000001'");
 const xDealId = await one("select id from xchange_deals where code = 'XD-2026-10001'");
 const oneOppId = await one("select opportunity_id as id from lead_claims c join deal_passports p on p.claim_id = c.id where p.code = 'DP-2026-100001'");
+const paidProjectId = await one("select id from projects where code = 'PRJ-2025-000014'");
+const caseId = await one("select id from resolution_cases where code = 'RC-2026-10001'");
+const consortiumId = await one("select id from collaboration_teams where name = 'Chakan Rooftop Consortium'");
 const offerAgreementId = await one("select id from commission_agreements where code = 'CA-2026-410001'");
 const EXTRA = [
   { id: 'X01', title: 'Offers for you', app: 'web', route: '/offers', access: 'verified-partner' },
@@ -144,6 +147,13 @@ const EXTRA = [
   { id: 'X67', title: 'COLLABIZ ONE', app: 'web', route: '/one', access: 'partner', account: 'meera@consult.example' },
   { id: 'X68', title: 'COLLABIZ ONE journey', app: 'web', route: `/one/${oneOppId}`, access: 'partner', account: 'meera@consult.example' },
   { id: 'X69', title: 'XCHANGE oversight (admin)', app: 'admin', route: '/workspace/xchange', access: 'unite-admin' },
+  { id: 'X70', title: 'Project payments', app: 'web', route: `/projects/${paidProjectId}/payments`, access: 'partner' },
+  { id: 'X71', title: 'My disputes', app: 'web', route: '/resolution', access: 'partner' },
+  { id: 'X72', title: 'Contract dispute', app: 'web', route: `/resolution/${caseId}`, access: 'partner' },
+  { id: 'X73', title: 'Consortium contributions & MoU', app: 'web', route: `/teams/${consortiumId}/ledger`, access: 'partner' },
+  { id: 'X74', title: 'Opportunity radar', app: 'web', route: '/radar', access: 'partner' },
+  { id: 'X75', title: 'Resolution centre (admin)', app: 'admin', route: '/resolution', access: 'unite-admin' },
+  { id: 'X76', title: 'Payment reconciliation (admin)', app: 'admin', route: '/reconciliation', access: 'finance' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

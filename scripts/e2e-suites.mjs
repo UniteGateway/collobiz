@@ -1977,3 +1977,84 @@ suites.push({
     await shot('one-journey');
   },
 });
+
+// V2 Phase 2: payment states and overdue on a project; contract dispute → assigned reviewer decides → appeal → super admin closes; consortium ledger and MoU; radar.
+suites.push({
+  name: 'V2 Phase 2 · payment states and reconciliation; dispute decided, appealed and closed; consortium ledger and MoU; radar',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot }) => {
+    const one = async (q, p = []) => (await sqlExec(q, p)).rows[0];
+    const proj = (await one("select id from projects where code = 'PRJ-2025-000014'")).id;
+    const team = (await one("select id from collaboration_teams where name = 'Chakan Rooftop Consortium'")).id;
+    // Asha (Volt, lead contractor) sees each milestone's payment state kept apart from projected value.
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + `/projects/${proj}/payments`);
+    await page.locator('[data-milestone="Structure & mounting"]').getByText('Paid', { exact: true }).waitFor();
+    await page.locator('[data-milestone="Electrical BoS"]').getByText('Partially paid').waitFor();
+    await page.locator('[data-milestone="Electrical BoS"]').getByText(/days overdue/).waitFor();
+    await page.getByText(/does not hold funds and nothing here is escrow/).waitFor();
+    await shot('v2b-payments');
+    // Her company's dispute is listed; she adds evidence.
+    await page.goto(WEB + '/resolution');
+    await page.locator('[data-dispute="RC-2026-10001"]').getByRole('link').click();
+    await page.getByRole('heading', { name: /RC-2026-10001/ }).waitFor();
+    await page.getByLabel('Your response or evidence').fill('Handover sheet signed by the Unite Solar site engineer lists the as-built drawings as received.');
+    await page.getByRole('button', { name: 'Add as evidence' }).click();
+    await page.locator('[data-event="evidence"]').waitFor();
+    // Unite: assign a reviewer from neither party; the reviewer reads the record and decides.
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/resolution');
+    await page.locator('[data-case="RC-2026-10001"]').getByText('not assigned').waitFor();
+    await shot('v2b-resolution-queue');
+    await page.locator('[data-case="RC-2026-10001"]').getByRole('button', { name: 'Assign' }).click();
+    await page.locator('dialog[open]').getByLabel('Reviewer').selectOption({ label: 'Priya Nair (Compliance)' });
+    await page.locator('dialog[open]').getByRole('button', { name: 'Assign' }).click();
+    await page.locator('[data-case="RC-2026-10001"]').getByText(/reviewer: Priya Nair/).waitFor();
+    // The assigned compliance reviewer (not an assigner) opens the record and decides.
+    await adminLogin(page, ADMIN, 'compliance@collabiz.local');
+    await page.goto(ADMIN + '/resolution');
+    await page.locator('[data-case="RC-2026-10001"]').getByRole('button', { name: 'Assign' }).waitFor({ state: 'detached' });
+    await page.locator('[data-case="RC-2026-10001"]').getByRole('button', { name: 'Open record' }).click();
+    const dlg = page.locator('dialog[open]');
+    await dlg.getByText(/recorded events over/).waitFor();
+    await dlg.getByLabel('Decision').selectOption('partly_upheld');
+    await dlg.getByLabel(/Reasons/).fill('Handover sheet shows the drawings were received; half the balance is released now and half on the CEIG certificate.');
+    await dlg.getByRole('button', { name: 'Record decision' }).click();
+    await page.locator('[data-case="RC-2026-10001"]').getByText('Decided').waitFor();
+    // Asha appeals once; a super admin makes the final decision.
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/resolution');
+    await page.locator('[data-dispute="RC-2026-10001"]').getByRole('link').click();
+    await page.getByText('Decision: Partly upheld').waitFor();
+    await page.getByLabel('Why the decision should change').fill('The CEIG certificate is the owner’s responsibility under clause 7 and is not ours to obtain.');
+    await page.getByRole('button', { name: 'Appeal' }).click();
+    await page.getByText('Appealed', { exact: true }).waitFor();
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/resolution');
+    await page.locator('[data-case="RC-2026-10001"]').getByRole('button', { name: 'Open record' }).click();
+    await dlg.getByLabel('Final decision (appeal)').selectOption('upheld');
+    await dlg.getByLabel(/Reasons/).fill('Clause 7 places the CEIG certificate on the owner; the full balance is to be released.');
+    await dlg.getByRole('button', { name: 'Record decision' }).click();
+    await page.locator('[data-case="RC-2026-10001"]').getByText('Closed').waitFor();
+    // Finance reconciliation shows invoiced, received and overdue separately.
+    await adminLogin(page, ADMIN, 'finance@collabiz.local');
+    await page.goto(ADMIN + '/reconciliation');
+    await page.locator('[data-invoice="INV-2026-900002"]').getByText(/days overdue/).waitFor();
+    await shot('v2b-reconciliation');
+    // Consortium: Asha records a pledge and proposes MoU terms; radar for Maharashtra.
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + `/teams/${team}/ledger`);
+    await page.locator('[data-ledger="Volt EPC"]').waitFor();
+    await page.getByRole('button', { name: 'Propose terms' }).click();
+    await dlg.getByLabel('Title').fill('Chakan rooftop consortium MoU');
+    await dlg.getByLabel('Who may sign and commit for the group').fill('Asha Patil for Volt EPC, as lead member');
+    await dlg.getByLabel('Terms').fill('Volt EPC leads design and execution; members contribute as recorded in the ledger. Revenue is shared by agreed share after costs. Either member may exit with 30 days notice before award.');
+    await dlg.getByRole('button', { name: 'Propose' }).click();
+    await page.locator('[data-agreement="Chakan rooftop consortium MoU"]').waitFor();
+    await shot('v2b-ledger');
+    await page.goto(WEB + '/radar');
+    await page.getByRole('heading', { name: 'Opportunity radar' }).waitFor();
+    await page.getByText('Open opportunities').first().waitFor();
+    await shot('v2b-radar');
+  },
+});

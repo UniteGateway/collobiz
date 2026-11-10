@@ -76,7 +76,8 @@ export class DealsController {
 
   @Get('leads/:id/passport')
   async passport(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string) {
-    let { claim, p } = await this.passportFor(id);
+    const { claim, p: found } = await this.passportFor(id);
+    let p = found;
     const a = await this.access(ctx, claim, p?.id ?? null);
     if (!p) {
       if (!PASSPORT_ELIGIBLE_CLAIM_STATES.includes(claim.status)) throw new ConflictException('A Deal Passport is issued once Unite has reviewed and protected this lead');
