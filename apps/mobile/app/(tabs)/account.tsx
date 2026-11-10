@@ -27,6 +27,7 @@ export default function Account() {
           <Row icon="business" title="Partner profile" onPress={go('/profile')} />
           {org.verificationStatus !== 'verified' && <Row icon="checkmark-circle" iconTint={theme.colors.warning} title="Verification status" subtitle="See what’s left to verify" onPress={go('/onboarding/status')} />}
           <Row icon="people" title="Collaboration requests" onPress={go('/collaboration')} />
+          <Row icon="alert-circle" title="Disputes" subtitle="Lead, commission, XCHANGE and contract disputes" onPress={go('/disputes')} />
         </Section>
       )}
       {org && (

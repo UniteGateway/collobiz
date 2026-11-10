@@ -3,6 +3,7 @@ import { Switch, Text, View } from 'react-native';
 import { Button, ErrorView, Loading, Notice, ScreenView, Section, s, theme } from '@/components/ui';
 import { api } from '@/api';
 import { useAction, useApi } from '@/hooks';
+import { WhatsappPrefs } from '@/components/WhatsappPrefs';
 
 interface Pref { kind: string; email: boolean; sms: boolean; push: boolean; mandatory: boolean }
 const LABEL: Record<string, string> = { message: 'Messages', meeting: 'Meetings', project: 'Projects', tender: 'Tenders', contract: 'Contracts', commission: 'Commission', trade: 'Trading', team: 'Teams', opportunity: 'Opportunities', lead: 'Leads', announcement: 'Announcements', support: 'Support', security: 'Security' };
@@ -34,6 +35,7 @@ export default function NotificationPrefs() {
           ))}
         </Section>
       ))}
+      <WhatsappPrefs />
     </ScreenView>
   );
 }

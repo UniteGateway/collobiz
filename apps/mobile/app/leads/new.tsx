@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Pressable, Switch, Text, View } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { newIdempotencyKey, SECTORS } from '@collabiz/types';
 import { Button, Card, Chips, Field, Notice, ScreenView, s, theme } from '@/components/ui';
 import { api } from '@/api';
@@ -15,9 +15,11 @@ export default function NewLead() {
   const key = useMemo(newIdempotencyKey, []);
   const [method, setMethod] = useState('written_email');
   const [scope, setScope] = useState('unite_and_approved_partners');
-  const [sector, setSector] = useState<string[]>(['solar']);
+  const params = useLocalSearchParams<Record<string, string>>();
+  const [sector, setSector] = useState<string[]>([params.sector || 'solar']);
   const [urgent, setUrgent] = useState(false);
-  const [f, setF] = useState<Record<string, string>>({});
+  // Fields can arrive prefilled from the voice screen; the person still checks each one and gives consent here.
+  const [f, setF] = useState<Record<string, string>>(() => Object.fromEntries(['legalName', 'city', 'product', 'value', 'requirements'].filter((k) => params[k]).map((k) => [k, String(params[k])])));
   const set = (k: string) => (v: string) => setF({ ...f, [k]: v });
   const a = useAction(async () => {
     const r = await api.request<any>('POST', '/leads', {
@@ -36,6 +38,7 @@ export default function NewLead() {
   return (
     <ScreenView id="043" footer={<Button title="Register protected lead" variant="accent" onPress={() => a.run()} loading={a.busy} testID="lead-submit" />}>
       <Stack.Screen options={{ title: 'Register lead' }} />
+      {!params.legalName && <Text accessibilityRole="link" style={[s.p, { color: '#2E7D32', fontWeight: '600' }]} onPress={() => router.push('/leads/voice')}>Describe it by voice instead →</Text>}
       <Notice tone="info">Register only buyers who agreed to the introduction. Consent is recorded as of now.</Notice>
       {a.error && <Notice tone="danger">{a.error}</Notice>}
       <Card title="Consent & evidence">

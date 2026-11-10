@@ -31,6 +31,7 @@ export default function Projects() {
           {p.nextMilestone && <Text style={s.p}>Next: {p.nextMilestone.title} · due {new Date(p.nextMilestone.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}{p.overdue ? ` · ${p.overdue} overdue` : ''}</Text>}
           {p.value != null && <Text style={s.hint}>Value {money(p.value)}</Text>}
           <Text accessibilityRole="link" style={[s.p, { color: '#2E7D32', fontWeight: '600', marginTop: 6 }]} onPress={() => router.push(`/projects/${p.id}/progress`)}>Site progress & photos →</Text>
+          <Text accessibilityRole="link" style={[s.p, { color: '#2E7D32', fontWeight: '600', marginTop: 2 }]} onPress={() => router.push(`/projects/${p.id}/payments`)}>Payments →</Text>
         </Card>
       ))}
     </ScreenView>
