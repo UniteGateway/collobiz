@@ -2112,3 +2112,42 @@ suites.push({
     await page.locator('[data-import="tally-masters.xml"]').getByText('Imported').waitFor();
   },
 });
+
+// GST: services e-invoice from a project invoice (IGST, inter-state); goods e-way bill from a purchase order; filing not connected.
+suites.push({
+  name: 'GST · e-invoice for a project invoice; e-way bill for a purchase order; JSON for portal upload',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/settings/tax');
+    await page.getByText(/Valid format and check digit · Maharashtra/).waitFor();
+    await page.goto(WEB + '/gst');
+    await page.getByText(/Direct filing is/).waitFor();
+    await page.locator('[data-gst="INV-2026-900003"]').getByRole('button', { name: 'Prepare e-invoice' }).click();
+    const dlg = page.locator('dialog[open]');
+    await dlg.getByLabel('SAC code').fill('8541');
+    await dlg.getByRole('button', { name: 'Check and prepare' }).click();
+    await dlg.locator('[data-gst-issue="Line 1 HSN/SAC"]').getByText(/starting with 99/).waitFor();
+    await dlg.getByLabel('SAC code').fill('995461');
+    await dlg.getByRole('button', { name: 'Check and prepare' }).click();
+    await dlg.getByText('Ready to upload').waitFor();
+    await dlg.getByText(/IGST/).waitFor();
+    await shot('gst-einvoice-ready');
+    await dlg.getByRole('button', { name: 'Close' }).click();
+    await page.locator('[data-gst="INV-2026-900003"]').getByText('E-invoice JSON ready').waitFor();
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/gst');
+    await page.locator('[data-gst="PO-2026-000412"]').getByRole('button', { name: 'Prepare e-way bill' }).click();
+    await dlg.locator('[data-gst-line="1"]').getByLabel('HSN code').fill('85414300');
+    await dlg.locator('[data-gst-line="1"]').getByLabel('GST rate').selectOption('5');
+    await dlg.locator('[data-gst-line="2"]').getByLabel('HSN code').fill('73089090');
+    await dlg.getByLabel('Distance (km)').fill('660');
+    await dlg.getByLabel('Vehicle number').fill('GJ01AB4321');
+    await dlg.getByRole('button', { name: 'Check and prepare' }).click();
+    await dlg.getByText(/valid 4 days/).waitFor();
+    await shot('gst-ewaybill-ready');
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/integrations');
+    await page.locator('[data-integration="gst_filing"]').getByText('Not connected').waitFor();
+  },
+});

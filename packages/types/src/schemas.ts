@@ -5,6 +5,7 @@
 import { z } from 'zod';
 import { PARTNER_TYPES, MEMBERSHIP_ROLES } from './roles';
 import { SECTOR_CODES, CURRENCIES } from './taxonomy';
+import { isValidGstin } from './bulk';
 
 /** Plain-language validation messages, shared by API responses and client forms. */
 z.config({
@@ -89,7 +90,7 @@ export const CompanyProfileSchema = z.object({
   legalName: z.string().trim().min(2).max(200),
   tradeName: z.string().trim().max(200).optional(),
   registrationNumber: z.string().trim().min(4).max(40),
-  gstin: z.string().trim().toUpperCase().regex(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/, 'Invalid GSTIN').optional(),
+  gstin: z.string().trim().toUpperCase().refine(isValidGstin, 'Not a valid GSTIN — check the 15 characters (the last one is a check digit)').optional(),
   country: z.string().length(2).toUpperCase(),
   city: z.string().trim().min(2).max(80),
   website: z.string().url().optional(),
@@ -122,7 +123,7 @@ export const BankTaxSchema = z.object({
   bankName: z.string().trim().min(2).max(120),
   pan: z.string().trim().toUpperCase().regex(/^[A-Z]{5}[0-9]{4}[A-Z]$/, 'PAN format: ABCDE1234F'),
   gstRegistered: z.boolean(),
-  gstin: z.string().trim().toUpperCase().optional(),
+  gstin: z.string().trim().toUpperCase().refine(isValidGstin, 'Not a valid GSTIN — check the 15 characters (the last one is a check digit)').optional(),
   tdsSection: z.string().max(20).optional(),
 }).refine((v) => !v.gstRegistered || !!v.gstin, { message: 'GSTIN required when GST registered', path: ['gstin'] });
 export const AgreementAcceptSchema = z.object({ templateCode: z.string().min(2).max(60), version: z.number().int().positive(), typedName: z.string().trim().min(2).max(120) });

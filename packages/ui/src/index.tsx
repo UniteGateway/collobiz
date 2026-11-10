@@ -338,6 +338,7 @@ export function Dialog({ open, onClose, title, children }: { open: boolean; onCl
   }, [open]);
   return (
     <dialog ref={ref} className="cz-dialog" onClose={onClose} aria-labelledby={titleId}>
+      <button type="button" className="cz-dialog-close" aria-label="Close" onClick={() => (ref.current?.open ? ref.current.close() : onClose())}><Icon name="close" size={18} /></button>
       <h2 id={titleId}>{title}</h2>
       {children}
     </dialog>

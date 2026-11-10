@@ -1677,3 +1677,10 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
 @media (prefers-reduced-motion: reduce) {
   .cz-auth-aurora span, .cz-anim-rays, .cz-anim-sun, .cz-anim-flow, .cz-anim-node, .cz-anim-sheen, .cz-auth-chip, .cz-auth-card { animation: none !important; }
 }
+
+/* Dialog close button — touch users cannot press Esc. */
+.cz-dialog { position: relative; }
+.cz-dialog > h2 { padding-right: 40px; }
+.cz-dialog-close { position: absolute; top: 18px; right: 18px; width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 999px; background: var(--cz-surface-2, rgba(1, 30, 72, .06)); color: inherit; cursor: pointer; }
+.cz-dialog-close:hover { background: rgba(1, 30, 72, .12); }
+.cz-dialog-close:focus-visible { outline: 2px solid var(--cz-green-700); outline-offset: 2px; }

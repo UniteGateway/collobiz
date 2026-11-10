@@ -12,7 +12,7 @@ async function newVerifiedUser(app: INestApplication, email: string, fullName: s
 }
 
 /** Runs onboarding steps 013–021 for a company. */
-async function onboardCompany(app: INestApplication, tok: string, fullName: string, gstin = '29AAACN1234M1Z3') {
+async function onboardCompany(app: INestApplication, tok: string, fullName: string, gstin = '29AAACN1234M1ZE') {
   await api(app).post('/v1/onboarding/account-type').set(auth(tok)).send({ kind: 'company', partnerTypes: ['contractor'] }).expect(200);
   await api(app).put('/v1/onboarding/company').set(auth(tok)).send({ legalName: `${fullName} Projects Pvt Ltd`, registrationNumber: 'U12345KA2020PTC1', gstin, country: 'IN', city: 'Bengaluru' }).expect(200);
   await api(app).put('/v1/onboarding/industries').set(auth(tok)).send({ sectors: ['solar'], skills: ['Rooftop'], certifications: [], capacityMax: 1_00_00_000_00 }).expect(200);
@@ -123,7 +123,7 @@ describe('Stage 03 — onboarding and KYB', () => {
         await api(app).post('/v1/onboarding/submit').set(auth(tok)).set('Idempotency-Key', 'kiran-submit-0002').expect(200);
         // second company reusing Kiran's GSTIN triggers an automatic high-severity flag
         const tok2 = await newVerifiedUser(app, 'dup@clone.example', 'Dup Clone');
-        await onboardCompany(app, tok2, 'Dup Clone', '29AAACN1234M1Z3');
+        await onboardCompany(app, tok2, 'Dup Clone', '29AAACN1234M1ZE');
         const sub = await api(app).post('/v1/onboarding/submit').set(auth(tok2)).set('Idempotency-Key', 'dup-submit-0001').expect(200);
         const dupOrg = sub.body.organization.id;
         const risk = await api(app).get('/v1/admin/risk').set(auth(t.compliance)).expect(200);

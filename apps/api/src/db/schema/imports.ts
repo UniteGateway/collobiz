@@ -1,5 +1,5 @@
 /** Bank statement import (additive): uploaded statements and their lines, matched to project invoices. */
-import { pgTable, uuid, text, timestamp, bigint, integer, date, index, uniqueIndex, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, bigint, integer, date, index, uniqueIndex, jsonb, boolean } from 'drizzle-orm/pg-core';
 import { id, createdAt, organizations, users } from './core';
 import { projectInvoices } from './projects';
 import { paymentReceipts } from './v2b';
@@ -57,3 +57,40 @@ export const bulkImports = pgTable('bulk_imports', {
   createdAt: createdAt(),
   committedAt: timestamp('committed_at', { withTimezone: true }),
 }, (t) => [index('bulk_imports_org_idx').on(t.orgId)]);
+
+/** Seller / buyer details GST documents need (GSTIN, registered address, PIN, state). One per company. */
+export const taxProfiles = pgTable('tax_profiles', {
+  orgId: uuid('org_id').primaryKey().references(() => organizations.id),
+  gstin: text('gstin').notNull(),
+  legalName: text('legal_name').notNull(),
+  tradeName: text('trade_name'),
+  address1: text('address1').notNull(),
+  address2: text('address2'),
+  city: text('city').notNull(),
+  pincode: text('pincode').notNull(),
+  stateCode: text('state_code').notNull(),
+  /** The business says its aggregate turnover is above the e-invoicing limit (₹5 crore today). */
+  einvoiceApplicable: boolean('einvoice_applicable').notNull().default(false),
+  updatedBy: uuid('updated_by').notNull().references(() => users.id),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Prepared GST JSON (e-invoice or e-way bill). Filing needs a provider; until then the business uploads the JSON itself. */
+export const gstDocuments = pgTable('gst_documents', {
+  id: id(),
+  orgId: uuid('org_id').notNull().references(() => organizations.id),
+  kind: text('kind').notNull(), // einvoice | ewaybill
+  sourceType: text('source_type').notNull(), // project_invoice | purchase_order
+  sourceId: uuid('source_id').notNull(),
+  docNo: text('doc_no').notNull(),
+  payload: jsonb('payload').notNull(),
+  payloadHash: text('payload_hash').notNull(),
+  issues: jsonb('issues').notNull(),
+  ready: boolean('ready').notNull(),
+  totalValue: bigint('total_value', { mode: 'number' }).notNull(),
+  /** Set only from the government system's reply (via a provider) — never filled in by COLLABIZ itself. */
+  irn: text('irn'),
+  ewbNo: text('ewb_no'),
+  createdBy: uuid('created_by').notNull().references(() => users.id),
+  createdAt: createdAt(),
+}, (t) => [index('gst_documents_org_idx').on(t.orgId), index('gst_documents_source_idx').on(t.sourceType, t.sourceId)]);

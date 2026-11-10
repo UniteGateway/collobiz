@@ -159,6 +159,9 @@ const EXTRA = [
   { id: 'X78', title: 'Bank statement review', app: 'web', route: `/payments/bank/${stmtId}`, access: 'partner' },
   { id: 'X79', title: 'Bank statements (admin)', app: 'admin', route: '/bank-statements', access: 'finance' },
   { id: 'X80', title: 'Import data', app: 'web', route: '/settings/import', access: 'partner' },
+  { id: 'X81', title: 'Tax profile', app: 'web', route: '/settings/tax', access: 'partner' },
+  { id: 'X82', title: 'GST documents', app: 'web', route: '/gst', access: 'partner' },
+  { id: 'X83', title: 'Integrations (admin)', app: 'admin', route: '/integrations', access: 'unite-admin' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

@@ -63,5 +63,9 @@ export const contractSignatures = pgTable('contract_signatures', {
   bodyHash: text('body_hash').notNull(),
   ip: text('ip'),
   userAgent: text('user_agent'),
+  /** typed (click-to-sign on the approved text) | wet_ink_upload (signed copy uploaded) | aadhaar_esign (via a licensed ESP — not connected). */
+  method: text('method').notNull().default('typed'),
+  evidenceKey: text('evidence_key'),
+  evidenceSha256: text('evidence_sha256'),
   signedAt: timestamp('signed_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [uniqueIndex('contract_signatures_uq').on(t.versionId, t.organizationId)]);

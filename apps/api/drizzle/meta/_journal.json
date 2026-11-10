@@ -218,6 +218,20 @@
       "when": 1794292959930,
       "tag": "0030_bulk_imports",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1794293494328,
+      "tag": "0031_gst",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1794293884602,
+      "tag": "0032_signature_methods",
+      "breakpoints": true
     }
   ]
 }

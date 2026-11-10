@@ -495,6 +495,7 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await xchangeDemo(db, refs);
   await phase2Demo(db, refs);
   await bankDemo(db, refs);
+  await gstDemo(db, refs);
 }
 
 /** Demo pilot check-ins (spread over three weeks) so the admin results page has something to show. Not part of the test seed. */
@@ -834,4 +835,19 @@ export async function bankDemo(db: Db, refs: SeedRefs) {
   ];
   const [st] = await db.insert(s.bankStatements).values({ orgId: volt, uploadedBy: refs.users.asha, fileName: 'volt-hdfc-october.csv', fileHash: 'demo-october-statement', layout: 'debit_credit_columns', periodFrom: lines[0].txnDate, periodTo: lines[2].txnDate, lineCount: 3 }).returning();
   await db.insert(s.bankStatementLines).values(lines.map((l) => ({ ...l, statementId: st.id })));
+}
+
+/** GST demo: tax profiles (valid demo GSTINs) for Volt EPC, Unite Solar and Sunrise Traders, and an accepted purchase order (goods). */
+export async function gstDemo(db: Db, refs: SeedRefs) {
+  if ((await db.select({ id: s.taxProfiles.orgId }).from(s.taxProfiles).limit(1)).length) return;
+  const { volt, uniteSolar, sunrise } = refs.orgs;
+  if (!volt || !uniteSolar || !sunrise || !refs.users.asha || !refs.users.uniteAdmin || !refs.users.ravi) return;
+  await db.insert(s.taxProfiles).values([
+    { orgId: volt, gstin: '27AABCV1234F1ZO', legalName: 'Volt EPC Private Limited', tradeName: 'Volt EPC', address1: 'Plot 22, Hinjewadi Phase 2', city: 'Pune', pincode: '411057', stateCode: '27', einvoiceApplicable: true, updatedBy: refs.users.asha },
+    { orgId: uniteSolar, gstin: '36AAACU7777S1Z8', legalName: 'Unite Solar Private Limited', tradeName: 'Unite Solar', address1: 'Unite House, HITEC City', city: 'Hyderabad', pincode: '500081', stateCode: '36', einvoiceApplicable: true, updatedBy: refs.users.uniteAdmin },
+    { orgId: sunrise, gstin: '24AAKFS9876K1ZB', legalName: 'Sunrise Traders', address1: '14 Naroda GIDC', city: 'Ahmedabad', pincode: '382330', stateCode: '24', updatedBy: refs.users.ravi },
+  ]);
+  const lines = [{ item: '540 Wp mono PERC panels', quantity: 200, unit: 'Nos', unitPrice: 12_500_00 }, { item: 'Module mounting structure (hot-dip galvanised)', quantity: 20, unit: 'Set', unitPrice: 45_000_00 }];
+  const subtotal = lines.reduce((a, l) => a + l.quantity * l.unitPrice, 0);
+  await db.insert(s.purchaseOrders).values({ number: 'PO-2026-000412', buyerOrgId: volt, supplierOrgId: sunrise, lines, subtotal, taxPct: 5, total: Math.round(subtotal * 1.05), deliveryAddress: 'Volt EPC site store, Chakan MIDC Phase 2, Pune 410501', deliveryBy: new Date(Date.now() + 10 * 86400_000).toISOString().slice(0, 10), paymentTerms: '30 days from delivery', status: 'accepted', createdBy: refs.users.asha }).onConflictDoNothing();
 }

@@ -11,7 +11,7 @@
  *    Signatures are append-only (trigger). Both parties signing executes the contract; an executed amendment
  *    supersedes the contract it amends.
  */
-import { BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, Header, HttpCode, Injectable, Module, NotFoundException, Param, ParseUUIDPipe, Post, Put, Query, Req, Res } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, Header, HttpCode, Injectable, Module, NotFoundException, Param, ParseUUIDPipe, Post, Put, Query, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { and, asc, desc, eq, inArray, isNotNull, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod';
@@ -28,6 +28,9 @@ import { Ctx, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
 import { decryptField, randomDigits, sha256 } from '../../common/crypto';
 import { Idempotent } from '../../common/idempotency';
+import { MAX_UPLOAD_BYTES, StorageService } from '../../common/adapters';
+import { requireProvider } from '../../common/providers';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 type Contract = typeof contracts.$inferSelect;
 type Terms = z.infer<typeof ContractDraftSchema>['terms'];
@@ -139,7 +142,7 @@ export class ContractsService {
 @Controller()
 @RequireOrg()
 export class ContractsController {
-  constructor(@InjectDb() private db: Db, private svc: ContractsService, private audit: AuditService) {}
+  constructor(@InjectDb() private db: Db, private svc: ContractsService, private audit: AuditService, private storage: StorageService) {}
 
   /** Contracts where my organization is a party (both sides). Optional tender filter for 074. */
   @Get('contracts')
@@ -253,6 +256,11 @@ export class ContractsController {
   @Idempotent()
   @HttpCode(200)
   async sign(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Body(body(ContractSignSchema)) b: z.infer<typeof ContractSignSchema>, @Req() req: { headers: Record<string, string | undefined> }) {
+    return this.doSign(ctx, id, b, req.headers['user-agent']);
+  }
+
+  /** One signing path for every method: approved version only, the hash the signer saw, one signature per party; both parties executes it. */
+  private async doSign(ctx: RequestContext, id: string, b: { typedName: string; title?: string; bodyHash: string }, userAgent: string | undefined, evidence?: { method: 'wet_ink_upload'; key: string; sha256: string }) {
     const c = await this.svc.load(ctx, id);
     if (!this.svc.canSignFor(ctx, c)) throw new ForbiddenException('Only an authorised signatory (owner, admin or contract manager) of a party can sign');
     if (!['approved', 'partially_signed'].includes(c.status)) throw new ConflictException('Only approved contracts can be signed');
@@ -263,7 +271,7 @@ export class ContractsController {
     const existing = await this.db.select({ id: contractSignatures.id }).from(contractSignatures).where(and(eq(contractSignatures.versionId, v.id), eq(contractSignatures.organizationId, ctx.orgId!))).limit(1);
     if (existing.length) throw new ConflictException('Your organization has already signed this version');
     const out = await this.db.transaction(async (tx) => {
-      await tx.insert(contractSignatures).values({ contractId: id, versionId: v.id, organizationId: ctx.orgId!, userId: ctx.userId, typedName: b.typedName, title: b.title, bodyHash: v.bodyHash, ip: ctx.ip, userAgent: req.headers['user-agent']?.slice(0, 300) });
+      await tx.insert(contractSignatures).values({ contractId: id, versionId: v.id, organizationId: ctx.orgId!, userId: ctx.userId, typedName: b.typedName, title: b.title, bodyHash: v.bodyHash, ip: ctx.ip, userAgent: userAgent?.slice(0, 300), method: evidence?.method ?? 'typed', evidenceKey: evidence?.key ?? null, evidenceSha256: evidence?.sha256 ?? null });
       const orgsSigned = new Set((await tx.select({ o: contractSignatures.organizationId }).from(contractSignatures).where(eq(contractSignatures.versionId, v.id))).map((x) => x.o));
       const both = orgsSigned.has(c.issuerOrgId) && orgsSigned.has(c.counterpartyOrgId);
       const u = await this.svc.set(ctx, c, both ? 'executed' : 'partially_signed', undefined, both ? { executedAt: new Date() } : {}, tx as unknown as Db);
@@ -273,10 +281,46 @@ export class ContractsController {
       }
       return u;
     });
-    await this.audit.record(ctx, { action: 'contract.signed', objectType: 'contract', objectId: id, after: { versionId: v.id, bodyHash: v.bodyHash, organizationId: ctx.orgId, typedName: b.typedName } });
+    await this.audit.record(ctx, { action: 'contract.signed', objectType: 'contract', objectId: id, after: { versionId: v.id, bodyHash: v.bodyHash, organizationId: ctx.orgId, typedName: b.typedName, method: evidence?.method ?? 'typed', evidenceSha256: evidence?.sha256 } });
     const other = ctx.orgId === c.issuerOrgId ? c.counterpartyOrgId : c.issuerOrgId;
     await this.svc.notifyOrg(other, out.status === 'executed' ? `Executed: ${c.code}` : `Signed by the other party: ${c.code}`, out.status === 'executed' ? `${c.title} is fully signed.` : `${c.title} is waiting for your signature.`, `/vault?contract=${id}`);
     return this.svc.view(ctx, out);
+  }
+
+  /** Wet-ink route: the signatory prints the approved text, signs it and uploads the signed PDF (kept as evidence with its SHA-256). */
+  @Post('contracts/:id/sign-upload')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 } }))
+  @HttpCode(200)
+  async signUpload(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @UploadedFile() file: { buffer: Buffer; mimetype: string } | undefined, @Body() raw: Record<string, string>, @Req() req: { headers: Record<string, string | undefined> }) {
+    const b = ContractSignSchema.safeParse({ typedName: raw.typedName, title: raw.title || undefined, consent: raw.consent === 'true', bodyHash: raw.bodyHash });
+    if (!b.success) throw new BadRequestException({ message: 'Check the highlighted fields', fields: Object.fromEntries(b.error.issues.map((i) => [String(i.path[0]), i.message])) });
+    if (!file) throw new BadRequestException('Attach the signed copy (PDF)');
+    const c = await this.svc.load(ctx, id);
+    if (!this.svc.canSignFor(ctx, c)) throw new ForbiddenException('Only an authorised signatory (owner, admin or contract manager) of a party can sign');
+    const stored = await this.storage.put(file.buffer, 'application/pdf', `contracts/${id}/signed`);
+    return this.doSign(ctx, id, b.data, req.headers['user-agent'], { method: 'wet_ink_upload', key: stored.key, sha256: stored.sha256 });
+  }
+
+  /** Aadhaar eSign through a licensed eSign Service Provider — needs an ESP agreement first (not connected). */
+  @Post('contracts/:id/esign')
+  @HttpCode(200)
+  async esign(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string) {
+    await this.svc.load(ctx, id);
+    return requireProvider('esign');
+  }
+
+  /** Signing certificate: the approved text's fingerprint and, for each party, who signed, how, when and from where. */
+  @Get('contracts/:id/certificate')
+  async certificate(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string) {
+    const c = await this.svc.load(ctx, id);
+    const v = await this.svc.approved(id);
+    const sigs = await this.db.select({ s: contractSignatures, org: organizations.displayName }).from(contractSignatures).innerJoin(organizations, eq(organizations.id, contractSignatures.organizationId)).where(eq(contractSignatures.contractId, id)).orderBy(asc(contractSignatures.signedAt));
+    const intact = !!v && sha256(v.body) === v.bodyHash;
+    return {
+      code: c.code, title: c.title, kind: c.kind, status: c.status, executedAt: c.executedAt, version: v ? { no: v.versionNo, bodyHash: v.bodyHash, approvedAt: v.approvedAt } : null, intact,
+      signatures: sigs.map(({ s: x, org }) => ({ organization: org, typedName: x.typedName, title: x.title, method: x.method, bodyHash: x.bodyHash, matchesApproved: x.bodyHash === v?.bodyHash, evidenceSha256: x.evidenceSha256, ip: x.ip, signedAt: x.signedAt })),
+      note: 'Typed signatures are electronic records of acceptance bound to the approved text’s SHA-256. They are not Aadhaar eSign or a digital signature certificate; where the law requires one, use the wet-ink upload or eSign once connected.',
+    };
   }
 
   /** Amendment: a new draft contract that supersedes this one once it is executed. The original stays valid until then. */
