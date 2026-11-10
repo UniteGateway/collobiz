@@ -1,7 +1,11 @@
 'use client';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { Alert, Card, LoadingState } from '@collabiz/ui';
+import { Alert, Button, Card, LoadingState, TextInput } from '@collabiz/ui';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
+import { useMutation } from '@/lib/hooks';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { useQuery } from '@/lib/hooks';
 
@@ -31,9 +35,25 @@ export default function OneJourney() {
               </div>
             </Card>
           ))}</div>
+          <ChallengeStarter opportunityId={j.opportunity.id} />
           <Alert tone="info">{j.note}</Alert>
         </>
       )}
     </Screen>
+  );
+}
+
+/** 48-hour team challenge — the owner lists roles and verified partners in the sector are invited to put themselves forward. */
+function ChallengeStarter({ opportunityId }: { opportunityId: string }) {
+  const router = useRouter();
+  const [roles, setRoles] = useState('');
+  const go = useMutation(async () => { const c = await api.post<{ id: string }>(`/opportunities/${opportunityId}/challenge`, { roles: roles.split(',').map((r) => r.trim()).filter(Boolean) }); router.push(`/challenges/${c.id}`); return c; });
+  return (
+    <Card title="48-hour team challenge">
+      <p className="cz-muted" style={{ margin: '0 0 8px', fontSize: 13.5 }}>Invite verified partners in this sector to put themselves forward within 48 hours. The deadline is a coordination target, not a guarantee.</p>
+      {go.error && <Alert tone="danger">{go.error}</Alert>}
+      <TextInput label="Roles needed (comma separated)" value={roles} onChange={(e) => setRoles(e.target.value)} hint="e.g. EPC lead, Module supply, Civil works" />
+      <Button onClick={() => go.run()} loading={go.pending} disabled={roles.trim().length < 3}>Start the challenge</Button>
+    </Card>
   );
 }

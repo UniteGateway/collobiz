@@ -13,6 +13,7 @@
  */
 import { BankImportController } from './bank.controller';
 import { Phase3Controller } from './phase3.controller';
+import { OneExtrasController } from './one-extras.controller';
 import { BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, HttpCode, Module, NotFoundException, Param, ParseUUIDPipe, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
@@ -269,5 +270,5 @@ export class DeliveryController {
   }
 }
 
-@Module({ imports: [GrowthModule, CommissionsModule], controllers: [DealsController, DeliveryController, OneController, Phase2Controller, BankImportController, Phase3Controller], providers: [V2Service, Phase2Service] })
+@Module({ imports: [GrowthModule, CommissionsModule], controllers: [DealsController, DeliveryController, OneController, Phase2Controller, BankImportController, Phase3Controller, OneExtrasController], providers: [V2Service, Phase2Service] })
 export class V2Module {}

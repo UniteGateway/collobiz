@@ -77,6 +77,8 @@ const paidProjectId = await one("select id from projects where code = 'PRJ-2025-
 const caseId = await one("select id from resolution_cases where code = 'RC-2026-10001'");
 const consortiumId = await one("select id from collaboration_teams where name = 'Chakan Rooftop Consortium'");
 const stmtId = await one("select id from bank_statements order by created_at limit 1");
+const voltOrgId = await one("select id from organizations where display_name = 'Volt EPC'");
+const leadProjectId = await one("select id from projects where code = 'PRJ-2026-000001'");
 const offerAgreementId = await one("select id from commission_agreements where code = 'CA-2026-410001'");
 const EXTRA = [
   { id: 'X01', title: 'Offers for you', app: 'web', route: '/offers', access: 'verified-partner' },
@@ -169,6 +171,9 @@ const EXTRA = [
   { id: 'X88', title: 'Opportunity to revenue (admin)', app: 'admin', route: '/analytics/revenue', access: 'finance' },
   { id: 'X89', title: 'Plan', app: 'web', route: '/settings/plan', access: 'partner' },
   { id: 'X90', title: 'Plans & billing (admin)', app: 'admin', route: '/billing', access: 'finance' },
+  { id: 'X91', title: 'Business DNA', app: 'web', route: `/dna/${voltOrgId}`, access: 'partner', account: 'ravi@sunrise.example' },
+  { id: 'X92', title: 'Project rescue', app: 'web', route: `/projects/${leadProjectId}/rescue`, access: 'partner' },
+  { id: 'X93', title: 'Revive past opportunities', app: 'web', route: '/one/revival', access: 'partner', account: 'meera@consult.example' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

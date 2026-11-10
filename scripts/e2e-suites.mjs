@@ -2267,3 +2267,64 @@ suites.push({
     await page.getByText(/Paid until .* · ref UTR HDFC000123/).waitFor();
   },
 });
+
+// COLLABIZ ONE extras: DNA passport, rescue authorised by both parties, 48-hour challenge, revival.
+suites.push({
+  name: 'ONE extras · DNA passport, rescue with authorisation, team challenge, revival',
+  only: 'desktop',
+  run: async ({ page, WEB, shot }) => {
+    const one = async (q) => (await sqlExec(q)).rows[0];
+    const volt = (await one("select id from organizations where display_name = 'Volt EPC'")).id;
+    const proj = (await one("select id from projects where code = 'PRJ-2026-000001'")).id;
+    const opp = (await one("select o.id from opportunities o join lead_claims c on c.opportunity_id = o.id join organizations g on g.id = c.introducer_org_id where g.display_name = 'Meera Iyer Consulting' order by o.code limit 1")).id;
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + `/dna/${volt}`);
+    await page.getByRole('heading', { name: 'Volt EPC — Business DNA' }).waitFor();
+    await page.getByText('Evidenced').first().waitFor();
+    await shot('dna-passport');
+    // Rescue: Volt asks; Unite Solar authorises; Sunrise offers help.
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + `/projects/${proj}/rescue`);
+    await page.getByLabel('Equipment or machinery').check();
+    await page.getByLabel('Manpower or crews').check();
+    await page.getByLabel('Describe the gap').fill('A 25 t crane and a 12-person installation crew for four weeks at Shed A.');
+    await page.getByRole('button', { name: 'Ask the other party to authorise' }).click();
+    await page.getByText('Waiting for authorisation').waitFor();
+    await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
+    await page.goto(WEB + `/projects/${proj}/rescue`);
+    await page.getByRole('button', { name: 'Authorise the search' }).click();
+    await page.getByText('Authorised — searching').waitFor();
+    await shot('rescue-searching');
+    const rid = (await one(`select id from rescue_requests where project_id = '${proj}'`)).id;
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + `/rescue/${rid}`);
+    await page.getByLabel('Equipment or machinery').check();
+    await page.getByLabel('What you can provide').fill('25 t crane with operator, available from Monday.');
+    await page.getByRole('button', { name: 'Offer to help' }).click();
+    await page.getByText(/You offered: Equipment or machinery/).waitFor();
+    // Team challenge: Meera starts it; Volt puts itself forward.
+    await webLogin(page, WEB, 'meera@consult.example');
+    await page.goto(WEB + `/one/${opp}`);
+    await page.getByLabel('Roles needed (comma separated)').fill('EPC lead, Module supply, Civil works');
+    await page.getByRole('button', { name: 'Start the challenge' }).click();
+    await page.getByText('Roles covered: 0 of 3').waitFor();
+    const url = page.url();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(url);
+    await page.getByLabel('EPC lead').check();
+    await page.getByLabel('Why your company').fill('Volt has delivered 12 rooftop EPC projects in Maharashtra.');
+    await page.getByRole('button', { name: 'Put us forward' }).click();
+    await page.getByText('Roles covered: 1 of 3').waitFor();
+    await shot('team-challenge');
+    // Revival of a lost opportunity by its owner.
+    await sqlExec(`update opportunities set status = 'lost' where id = '${opp}'`);
+    await webLogin(page, WEB, 'meera@consult.example');
+    await page.goto(WEB + '/one/revival');
+    const row = page.locator('[data-revival]').first();
+    await row.getByText(/Bid as a consortium/).waitFor();
+    await row.getByRole('button', { name: 'Revive' }).click();
+    await page.locator('dialog[open]').getByLabel('Why it can work now').fill('The buyer still needs the plant; a phased scope can start this quarter.');
+    await page.locator('dialog[open]').getByRole('button', { name: 'Revive' }).click();
+    await row.getByText('Revival approved').waitFor();
+  },
+});

@@ -13,7 +13,7 @@ export default function PartnerProfile() {
   if (q.error) return <Screen id="056"><ApiErrorView error={q.error} onRetry={q.reload} /></Screen>;
   const p = q.data;
   return (
-    <Screen id="056" title={p.name} actions={!p.isMe && <><ButtonLink href={`/partners/${id}/reputation`} variant="secondary">Reputation</ButtonLink><ButtonLink href={`/teams/builder?partner=${id}`}>Invite to a team</ButtonLink></>}>
+    <Screen id="056" title={p.name} actions={!p.isMe && <><ButtonLink href={`/dna/${id}`} variant="secondary">Business DNA</ButtonLink><ButtonLink href={`/partners/${id}/reputation`} variant="secondary">Reputation</ButtonLink><ButtonLink href={`/teams/builder?partner=${id}`}>Invite to a team</ButtonLink></>}>
       <div className="cz-grid cz-grid-2" style={{ alignItems: 'start' }}>
         <PartnerCard p={p} />
         <div className="cz-stack">

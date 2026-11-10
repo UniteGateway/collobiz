@@ -16,7 +16,7 @@ export function useProject() {
 
 export function ProjectTabs({ id, role }: { id: string; role?: string }) {
   const path = usePathname();
-  const tabs: [string, string][] = [['', 'Overview'], ['/milestones', 'Milestones'], ['/payments', 'Payments'], ['/packages', 'Work packages'], ['/allocation', 'Allocation'], ['/progress', 'Site progress'], ['/materials', 'Materials'], ['/documents', 'Documents'], ['/inspections', 'Inspections']];
+  const tabs: [string, string][] = [['', 'Overview'], ['/milestones', 'Milestones'], ['/payments', 'Payments'], ['/packages', 'Work packages'], ['/rescue', 'Rescue'], ['/allocation', 'Allocation'], ['/progress', 'Site progress'], ['/materials', 'Materials'], ['/documents', 'Documents'], ['/inspections', 'Inspections']];
   if (role !== 'subcontractor') tabs.push(['/certification', 'Certification & invoices']);
   tabs.push(['/closure', 'Closure']);
   return <nav aria-label="Project sections" className="cz-tabs">{tabs.map(([p, l]) => <Link key={p} href={`/projects/${id}${p}`} aria-current={path === `/projects/${id}${p}` ? 'page' : undefined}>{l}</Link>)}</nav>;

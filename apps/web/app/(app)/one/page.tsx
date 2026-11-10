@@ -10,7 +10,7 @@ const rupees = (p: number | null) => (p == null ? '—' : `₹${Math.round(p / 1
 export default function OneList() {
   const q = useQuery<{ id: string; code: string; title: string; value: number | null; done: number; current: string }[]>('/one');
   return (
-    <Screen page={{ key: 'one', title: 'COLLABIZ ONE', access: 'partner' }} description="One opportunity. One team. One business. Bring an opportunity, and COLLABIZ helps you assemble the team that can win and deliver it — with Unite Group’s first review, agreed terms and verified payments.">
+    <Screen page={{ key: 'one', title: 'COLLABIZ ONE', access: 'partner' }} actions={<Link href="/one/revival">Revive past opportunities</Link>} description="One opportunity. One team. One business. Bring an opportunity, and COLLABIZ helps you assemble the team that can win and deliver it — with Unite Group’s first review, agreed terms and verified payments.">
       <section className="cz-ws-hero" style={{ marginBottom: 4 }} aria-hidden="true">
         <div className="cz-ws-hero-text"><p className="cz-ws-eyebrow">COLLABIZ ONE</p><h2 style={{ color: '#fff', margin: '6px 0' }}>Bring → Analyse → Unite review → Assemble → Agree → Deliver</h2><p>Your “virtual company” is a shared workspace among named partners. Forming a legal JV or company is a separate legal step.</p></div>
       </section>
