@@ -32,6 +32,7 @@ export const GST_STATE_CODES: Record<string, string> = {
 };
 /** Indian mobile → 10 digits (drops +91 / 0 prefixes and spaces). */
 export function normalizeIndianMobile(p: string): string | null {
+  if (/^\s*0\d{2,4}[\s-]+\d{6,8}\s*$/.test(p)) return null; // STD code + number, e.g. 080-41234567, is a landline
   const d = p.replace(/[^\d]/g, '').replace(/^(91|0)(?=\d{10}$)/, '');
   return /^[6-9]\d{9}$/.test(d) ? d : null;
 }

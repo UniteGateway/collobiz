@@ -1,5 +1,5 @@
 /** Bank statement import (additive): uploaded statements and their lines, matched to project invoices. */
-import { pgTable, uuid, text, bigint, integer, date, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, bigint, integer, date, index, uniqueIndex, jsonb } from 'drizzle-orm/pg-core';
 import { id, createdAt, organizations, users } from './core';
 import { projectInvoices } from './projects';
 import { paymentReceipts } from './v2b';
@@ -36,3 +36,24 @@ export const bankStatementLines = pgTable('bank_statement_lines', {
   receiptId: uuid('receipt_id').references(() => paymentReceipts.id),
   createdAt: createdAt(),
 }, (t) => [index('bank_statement_lines_stmt_idx').on(t.statementId), index('bank_statement_lines_utr_idx').on(t.utr)]);
+
+/** Bulk import (CSV/.xlsx or Tally XML) of customers or products: previewed, mapped and checked before anything is written. */
+export const bulkImports = pgTable('bulk_imports', {
+  id: id(),
+  orgId: uuid('org_id').notNull().references(() => organizations.id),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  target: text('target').notNull(), // customers | products
+  source: text('source').notNull(), // file | tally
+  fileName: text('file_name').notNull(),
+  fileHash: text('file_hash').notNull(),
+  rows: jsonb('rows').notNull(), // the parsed table, kept until committed so the mapping can be adjusted without re-uploading
+  status: text('status').notNull().default('previewed'), // previewed | committed
+  header: integer('header'),
+  mapping: jsonb('mapping'),
+  consentBasis: text('consent_basis'),
+  created: integer('created').notNull().default(0),
+  skippedExisting: integer('skipped_existing').notNull().default(0),
+  rejected: integer('rejected').notNull().default(0),
+  createdAt: createdAt(),
+  committedAt: timestamp('committed_at', { withTimezone: true }),
+}, (t) => [index('bulk_imports_org_idx').on(t.orgId)]);

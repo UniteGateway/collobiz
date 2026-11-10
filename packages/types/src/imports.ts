@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 /** RFC 4180 CSV parser: quoted fields, doubled quotes, CRLF/LF, a leading BOM, and `;` or tab files detected from the header. */
 export function parseCsv(text: string): string[][] {
-  const src = text.replace(/^﻿/, '');
+  const src = text.replace(/^\uFEFF/, '');
   const nl = src.search(/\r?\n/);
   const first = nl < 0 ? src : src.slice(0, nl);
   const counts = [',', ';', '\t'].map((d) => [d, first.split(d).length] as const).sort((a, b) => b[1] - a[1]);

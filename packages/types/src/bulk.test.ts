@@ -18,6 +18,8 @@ describe('Indian identifiers', () => {
     expect(normalizeIndianMobile('09820456789')).toBe('9820456789');
     expect(normalizeIndianMobile('12345')).toBeNull();
     expect(normalizeIndianMobile('5820456789')).toBeNull();
+    expect(normalizeIndianMobile('080-41234567')).toBeNull(); // Bengaluru landline
+    expect(normalizeIndianMobile('022 2345 6789')).toBeNull(); // Mumbai landline
   });
 });
 

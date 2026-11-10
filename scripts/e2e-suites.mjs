@@ -2085,3 +2085,30 @@ suites.push({
     await page.locator('[data-invoice="INV-2026-900002"]').getByText('Paid', { exact: true }).waitFor();
   },
 });
+
+// Bulk import: a CSV of customers with problem rows; Tally stock items as products.
+suites.push({
+  name: 'Import data · CSV customers with consent basis; Tally XML products',
+  only: 'desktop',
+  run: async ({ page, WEB, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/settings/import');
+    await page.getByLabel('What are you importing?').selectOption('customers');
+    await page.getByLabel('File to import').setInputFiles('apps/api/test/fixtures/customers.csv');
+    await page.locator('[data-issue-row="4"]').getByText(/Not a valid GSTIN/).waitFor();
+    await page.getByLabel('GSTIN').waitFor();
+    await shot('import-review');
+    await page.getByLabel('On what basis do you hold these contacts?').selectOption('existing_customer');
+    await page.getByRole('button', { name: 'Import 2 customers' }).click();
+    await page.getByText('2 records imported').waitFor();
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/settings/import');
+    await page.getByLabel('What are you importing?').selectOption('products');
+    await page.getByLabel('File to import').setInputFiles('apps/api/test/fixtures/tally-masters.xml');
+    await page.getByText(/Read from a Tally export/).waitFor();
+    await page.getByLabel('Sector for these products').selectOption('solar');
+    await page.getByRole('button', { name: 'Import 2 products' }).click();
+    await page.getByText('2 records imported').waitFor();
+    await page.locator('[data-import="tally-masters.xml"]').getByText('Imported').waitFor();
+  },
+});

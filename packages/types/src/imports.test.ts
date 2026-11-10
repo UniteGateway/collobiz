@@ -3,7 +3,7 @@ import { extractUtr, parseAmount, parseBankStatement, parseCsv, parseDate, sugge
 
 describe('CSV and values', () => {
   it('parses quotes, doubled quotes, CRLF, BOM and semicolons', () => {
-    expect(parseCsv('﻿a,b\r\n"x, y","say ""hi"""\r\n\r\n')).toEqual([['a', 'b'], ['x, y', 'say "hi"']]);
+    expect(parseCsv('\uFEFFa,b\r\n"x, y","say ""hi"""\r\n\r\n')).toEqual([['a', 'b'], ['x, y', 'say "hi"']]);
     expect(parseCsv('a;b\n1;2')).toEqual([['a', 'b'], ['1', '2']]);
   });
   it('reads Indian amounts and dates, day first', () => {
