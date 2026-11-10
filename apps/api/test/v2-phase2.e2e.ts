@@ -13,6 +13,7 @@ describe('V2 Phase 2 — payment assurance, resolution centre, consortium ledger
   describe('payment assurance', () => {
     it('eight display states, part payments, full payment, overdue and reconciliation', async () => {
       projectId = (await one("select id from projects where code = 'PRJ-2026-000001'")).id;
+      const base = (await api(app).get('/v1/finance/reconciliation').set(auth(t.finance)).expect(200)).body.totals; // demo invoices exist; this also sends their reminders
       const m1 = (await one('select id, amount from milestones where project_id = $1 and seq = 1', [projectId]));
       await pool.query("update milestones set status = 'invoiced' where id = $1", [m1.id]);
       invoiceId = (await one("insert into project_invoices (number, project_id, milestone_id, amount, issued_by_org_id, status, issued_at) values ('INV-T-001', $1, $2, $3, (select lead_org_id from projects where id = $1), 'issued', now() - interval '40 days') returning id", [projectId, m1.id, m1.amount])).id;
@@ -28,8 +29,8 @@ describe('V2 Phase 2 — payment assurance, resolution centre, consortium ledger
       await api(app).post(`/v1/projects/${projectId}/invoices/${invoiceId}/receipts`).set(auth(t.uniteAdmin)).send({ amount: 1, reference: 'UTR-001' }).expect(409); // same reference twice
       expect((await api(app).get(`/v1/projects/${projectId}/payments`).set(auth(t.asha)).expect(200)).body.milestones[0].state).toBe('partially_paid');
       const rec = (await api(app).get('/v1/finance/reconciliation').set(auth(t.finance)).expect(200)).body;
-      expect(rec.totals.overdueCount).toBe(1);
-      expect(rec.remindersSent).toBe(1);
+      expect(rec.totals.overdueCount).toBe(base.overdueCount + 1);
+      expect(rec.remindersSent).toBe(1); // only the new overdue invoice
       expect((await api(app).get('/v1/finance/reconciliation').set(auth(t.finance)).expect(200)).body.remindersSent).toBe(0); // once a week
       await api(app).get('/v1/finance/reconciliation').set(auth(t.asha)).expect(403);
       const full = (await api(app).post(`/v1/projects/${projectId}/invoices/${invoiceId}/receipts`).set(auth(t.uniteAdmin)).send({ amount: Number(m1.amount) - 1_00_00_000_00, reference: 'UTR-002' }).expect(201)).body;
@@ -66,6 +67,9 @@ describe('V2 Phase 2 — payment assurance, resolution centre, consortium ledger
       const decision = { decision: 'partly_upheld', note: 'Site instruction is evidenced by photos; quantity to be measured jointly before payment.' };
       await api(app).post(`/v1/admin/resolution/contract/${caseId}/decide`).set(auth(t.finance)).send(decision).expect(403); // not assigned
       await api(app).post(`/v1/admin/resolution/contract/${caseId}/decide`).set(auth(t.compliance)).send(decision).expect(200);
+      const seen = (await api(app).get(`/v1/resolution/${caseId}`).set(auth(t.asha)).expect(200)).body; // the reviewer's event has no company
+      expect(seen).toMatchObject({ status: 'decided', decision: 'partly_upheld', canAppeal: true });
+      expect(seen.events.at(-1)).toMatchObject({ kind: 'decision', org: 'Unite reviewer' });
       await api(app).post(`/v1/resolution/${caseId}/appeal`).set(auth(t.asha)).send({ note: 'Joint measurement already happened on 2 November; please include it.' }).expect(200);
       await api(app).post(`/v1/resolution/${caseId}/appeal`).set(auth(t.asha)).send({ note: 'Second appeal should not be possible at all here.' }).expect(409);
       await api(app).post(`/v1/admin/resolution/contract/${caseId}/decide`).set(auth(t.compliance)).send(decision).expect(403); // appeals go to a super admin
@@ -81,11 +85,12 @@ describe('V2 Phase 2 — payment assurance, resolution centre, consortium ledger
       const members = (await pool.query("select o.display_name n from team_members m join organizations o on o.id = m.organization_id where m.team_id = $1 and m.status = 'nda_signed'", [teamId])).rows.map((r) => r.n);
       expect(members).toEqual(expect.arrayContaining(['Volt EPC']));
       await api(app).get(`/v1/teams/${teamId}/ledger`).set(auth(t.vikram)).expect(404);
+      const before = (await api(app).get(`/v1/teams/${teamId}/ledger`).set(auth(t.asha)).expect(200)).body.ledger.find((x: any) => x.name === 'Volt EPC') ?? { pledged: 0, delivered: 0 }; // demo contributions
       const c = (await api(app).post(`/v1/teams/${teamId}/contributions`).set(auth(t.asha)).send({ kind: 'equipment', description: 'Crane and installation tools for 6 weeks', pledgedValue: 4_00_000_00 }).expect(201)).body;
       await api(app).post(`/v1/team-contributions/${c.id}/deliver`).set(auth(t.asha)).send({ deliveredValue: 3_00_000_00, evidence: 'Crane on site 4 weeks, log attached' }).expect(200);
       const l = (await api(app).get(`/v1/teams/${teamId}/ledger`).set(auth(t.asha)).expect(200)).body;
       const v = l.ledger.find((x: any) => x.name === 'Volt EPC');
-      expect(v).toMatchObject({ pledged: 4_00_000_00, delivered: 3_00_000_00 });
+      expect(v).toMatchObject({ pledged: before.pledged + 4_00_000_00, delivered: before.delivered + 3_00_000_00 });
       expect(v.flags).toContain('Delivered less than pledged');
       expect(l.note).toMatch(/separate legal step/);
     });

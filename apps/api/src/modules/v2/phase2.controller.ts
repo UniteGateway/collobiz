@@ -46,8 +46,9 @@ export class Phase2Service {
     const a = await this.db.selectDistinct({ u: memberships.userId }).from(memberships).where(and(inArray(memberships.role, ['unite_admin', 'super_admin']), eq(memberships.status, 'active')));
     if (a.length) await this.db.insert(notifications).values(a.map((x) => ({ userId: x.u, kind: 'announcement', title, body: text, link })));
   }
-  async names(ids: string[]) {
-    const rows = ids.length ? await this.db.select({ id: organizations.id, n: organizations.displayName }).from(organizations).where(inArray(organizations.id, [...new Set(ids)])) : [];
+  async names(ids: (string | null | undefined)[]) {
+    const uniq = [...new Set(ids.filter((x): x is string => !!x))];
+    const rows = uniq.length ? await this.db.select({ id: organizations.id, n: organizations.displayName }).from(organizations).where(inArray(organizations.id, uniq)) : [];
     return (id: string | null | undefined) => rows.find((r) => r.id === id)?.n ?? '—';
   }
   /** Role of the caller's company on a project. */
@@ -203,7 +204,7 @@ export class Phase2Controller {
   async one(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string) {
     const { c, party } = await this.caseFor(ctx, id);
     const ev = await this.db.select({ e: resolutionEvents, who: users.fullName }).from(resolutionEvents).innerJoin(users, eq(users.id, resolutionEvents.userId)).where(eq(resolutionEvents.caseId, id)).orderBy(asc(resolutionEvents.createdAt));
-    const name = await this.svc.names([c.raisedByOrgId, c.againstOrgId, ...ev.map((x) => x.e.orgId ?? '')]);
+    const name = await this.svc.names([c.raisedByOrgId, c.againstOrgId, ...ev.map((x) => x.e.orgId)]);
     const [p] = c.projectId ? await this.db.select({ code: projects.code, title: projects.title }).from(projects).where(eq(projects.id, c.projectId)) : [];
     const appealOpen = c.status === 'decided' && !!c.decidedAt && Date.now() - c.decidedAt.getTime() < APPEAL_DAYS * 86400000;
     return {
