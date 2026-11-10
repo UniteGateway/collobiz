@@ -6,6 +6,7 @@ import { Screen } from '@/components/Screen';
 import { MatchFactors } from '@/components/Growth';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
+import { useRouter } from 'next/navigation';
 
 interface Plan { suggestionId: string; opportunity: { id: string; code: string; title: string }; plan: { role: string; why: string; coveredByYou: boolean; candidates: { partnerId: string; partnerName: string; score: number; reputation: number | null; factors: { factor: string; weight: number; score: number; detail: string }[] }[] }[]; note: string; provider: string; promptVersion: string }
 
@@ -14,6 +15,7 @@ export default function TeamBuilder() {
   const opps = useQuery<{ items: { id: string; code: string; title: string }[] }>('/opportunities', { paged: 'true', limit: '50' });
   const [oid, setOid] = useState('');
   useEffect(() => { const o = new URLSearchParams(window.location.search).get('opportunity'); if (o) setOid(o); }, []);
+  const router = useRouter();
   const m = useMutation(async () => api.post<Plan>('/ai/team-builder', { opportunityId: oid }));
   const review = useMutation(async (status: string) => { await api.post(`/ai/suggestions/${m.data!.suggestionId}/review`, { status }); return status; });
   return (
@@ -37,7 +39,7 @@ export default function TeamBuilder() {
           </ol>
           <div className="cz-ai-actions">
             <p className="cz-ai-prov" style={{ margin: 0 }}><Icon name="info" size={13} />{m.data.note} Version {m.data.promptVersion}.</p>
-            {review.data ? <span className="cz-muted">Thanks — feedback recorded.</span> : <span className="cz-row" style={{ gap: 6 }}><Link href="/teams/new" className="cz-btn cz-btn-accent cz-btn-sm" onClick={() => review.run('accepted')}>Create a team</Link><Button size="sm" variant="ghost" onClick={() => review.run('rejected')}>Not useful</Button></span>}
+            {review.data ? <span className="cz-muted">Thanks — feedback recorded.</span> : <span className="cz-row" style={{ gap: 6 }}><Button size="sm" onClick={async () => { review.run('accepted'); const r = await api.post<{ id: string }>('/ai/team-plans', { sourceType: 'opportunity', sourceId: oid }); router.push(`/ai/team-plans/${r.id}`); }}>Plan, invite and approve</Button><Link href="/teams/new" className="cz-btn cz-btn-secondary cz-btn-sm" onClick={() => review.run('accepted')}>Create a team manually</Link><Button size="sm" variant="ghost" onClick={() => review.run('rejected')}>Not useful</Button></span>}
           </div>
         </>
       )}

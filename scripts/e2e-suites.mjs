@@ -1889,3 +1889,57 @@ suites.push({
     await shot('promotions');
   },
 });
+
+// V2 Phase 1: Deal Passport sharing with an undertaking; work package bid → award; tender PDF analysis with page references.
+suites.push({
+  name: 'V2 · Deal Passport shared under undertaking; work package bid and award; tender PDF eligibility analysis',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot }) => {
+    const one = async (q, p = []) => (await sqlExec(q, p)).rows[0];
+    const claim = (await one("select claim_id from deal_passports where code = 'DP-2026-100001'")).claim_id;
+    // Volt (Asha) was invited by Meera: undertaking first, then a view without customer contacts.
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/passports');
+    await page.locator('[data-passport="DP-2026-100001"]').getByRole('link').click();
+    await page.getByLabel('Type your full name to accept').fill('Asha Patil');
+    await page.getByRole('button', { name: 'Accept and view' }).click();
+    await page.getByRole('heading', { name: /Deal Passport DP-2026-100001/ }).waitFor();
+    await page.getByText('Customer contact details are hidden; your views are logged.').waitFor();
+    await shot('v2-passport-party');
+    // Work packages: Asha leads the project and opens the second package; Ravi bids; Asha awards.
+    const proj = (await one("select id from projects where code = 'PRJ-2026-000001'")).id;
+    await page.goto(WEB + `/projects/${proj}/packages`);
+    await page.locator('[data-package="HT switchyard and evacuation line"]').getByRole('button', { name: 'Open for bids' }).click();
+    await page.locator('[data-package="HT switchyard and evacuation line"]').getByText('Open for bids').first().waitFor();
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/packages');
+    await page.locator('[data-open-package="Module mounting foundations"]').getByRole('button', { name: 'Bid' }).click();
+    const dlg = page.locator('dialog[open]');
+    await dlg.getByLabel('Your price (₹)').fill('9500000');
+    await dlg.getByLabel('Days to complete').fill('60');
+    await dlg.getByLabel(/Why you/).fill('Own piling rig, 30-person civil crew, 12 similar solar foundations.');
+    await dlg.getByRole('button', { name: 'Submit bid' }).click();
+    await page.locator('[data-open-package="Module mounting foundations"]').getByText(/Your bid ₹95,00,000/).waitFor();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + `/projects/${proj}/packages`);
+    await page.locator('[data-package="Module mounting foundations"] [data-bid="Sunrise Traders"]').getByRole('button', { name: 'Award' }).click();
+    await page.locator('[data-package="Module mounting foundations"]').getByText(/Awarded to/).waitFor();
+    await shot('v2-packages');
+    // Tender analyzer: upload, see conditions with page/line, request review; a Unite reviewer confirms.
+    await page.goto(WEB + '/tenders/analyzer');
+    await page.getByLabel('Tender name (optional)').fill('Kurnool 2 MW solar');
+    await page.getByLabel('Tender document (PDF)').setInputFiles('apps/api/test/fixtures/sample-tender.pdf');
+    await page.getByRole('heading', { name: 'Kurnool 2 MW solar' }).waitFor();
+    await page.locator('[data-criterion="Average annual turnover"]').getByText(/Page 2, line 2/).waitFor();
+    await page.getByText(/Not confirmed until an authorised reviewer/).first().waitFor();
+    await shot('v2-tender-analysis');
+    await page.getByRole('button', { name: 'Request review' }).click();
+    await page.getByText('Review requested').first().waitFor();
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/tender-reviews');
+    await page.locator('[data-review="Kurnool 2 MW solar"]').getByRole('button', { name: 'Review' }).click();
+    await page.locator('dialog[open]').getByLabel(/What you checked/).fill('Checked turnover, ISO and EMD clauses against the original PDF.');
+    await page.locator('dialog[open]').getByRole('button', { name: 'Confirm review' }).click();
+    await page.locator('[data-review="Kurnool 2 MW solar"]').getByText('Reviewed').waitFor();
+  },
+});

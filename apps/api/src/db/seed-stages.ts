@@ -491,6 +491,7 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await franchiseDemo(db, refs);
   await propertyDemo(db, refs);
   await solarDemo(db, refs);
+  await v2Demo(db, refs);
 }
 
 /** Demo pilot check-ins (spread over three weeks) so the admin results page has something to show. Not part of the test seed. */
@@ -738,4 +739,23 @@ export async function solarDemo(db: Db, refs: SeedRefs) {
     code: 'STO-2026-100001', customer: { name: 'Meena Shah', phone: '9820456789', address: '12 Lake View Society, Baner Road', city: 'Pune', region: 'IN-MH', pincode: '411045' }, phone10: '9820456789',
     lines: [{ ref: `item:${items[0].id}`, name: items[0].name, sector: items[0].sector, unitPrice: items[0].storePrice, qty: 1, freeQty: 0, freeValue: 0, promotionId: null, promotionName: null, lineTotal: items[0].storePrice }], subtotal: items[0].storePrice!, freeValue: 0,
   });
+}
+
+/** V2 demo: a Deal Passport on a protected lead (shared with Volt EPC) and work packages on the Volt-led Unite Solar project. */
+export async function v2Demo(db: Db, refs: SeedRefs) {
+  const [any] = await db.select({ id: s.workPackages.id }).from(s.workPackages).limit(1);
+  if (any || !refs.users.uniteAdmin) return;
+  const [proj] = await db.select().from(s.projects).where(eq(s.projects.code, 'PRJ-2026-000001')).limit(1);
+  if (proj) {
+    const day = 86400_000;
+    await db.insert(s.workPackages).values([
+      { code: 'WP-2026-000001-101', projectId: proj.id, category: 'civil', title: 'Module mounting foundations', scope: 'Pile foundations, module mounting structures and drainage for the solar array, including soil tests and as-built drawings.', budget: Math.round(proj.value * 0.12), closesAt: new Date(Date.now() + 9 * day), status: 'open', eligibility: { sectors: [], regions: [], certifications: [] }, createdBy: refs.users.asha ?? refs.users.uniteAdmin },
+      { code: 'WP-2026-000001-102', projectId: proj.id, category: 'electrical', title: 'HT switchyard and evacuation line', scope: '11 kV switchyard, transformer installation and a 2 km evacuation line up to the DISCOM substation, with CEIG approval.', budget: Math.round(proj.value * 0.18), closesAt: new Date(Date.now() + 14 * day), status: 'draft', eligibility: { sectors: [], regions: [], certifications: [] }, createdBy: refs.users.asha ?? refs.users.uniteAdmin },
+    ]);
+  }
+  const [claim] = await db.select().from(s.leadClaims).where(eq(s.leadClaims.status, 'protected')).limit(1);
+  if (claim && refs.orgs.volt && refs.users.meera) {
+    const [p] = await db.insert(s.dealPassports).values({ code: 'DP-2026-100001', claimId: claim.id, ownerOrgId: claim.introducerOrgId }).onConflictDoNothing().returning();
+    if (p) await db.insert(s.dealPassportParties).values({ passportId: p.id, organizationId: refs.orgs.volt, role: 'execution_partner', ndaHash: 'demo-pending-undertaking', grantedBy: refs.users.meera });
+  }
 }

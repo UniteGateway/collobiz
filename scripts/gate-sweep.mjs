@@ -51,7 +51,7 @@ const OWNER = {
   agreement: await owner('select u.email from commission_agreements a join memberships m on m.organization_id = a.beneficiary_org_id join users u on u.id = m.user_id order by a.created_at limit 1'),
 };
 const resourceOf = (route) => Object.entries(PARAM).filter(([p]) => route.startsWith(p)).sort((a, b) => b[0].length - a[0].length)[0]?.[1];
-const accountFor = (s) => s.route.includes('[') && OWNER[resourceOf(s.route)] ? ['web', OWNER[resourceOf(s.route)]]
+const accountFor = (s) => s.account ? [s.app === 'admin' ? 'admin' : 'web', s.account] : s.route.includes('[') && OWNER[resourceOf(s.route)] ? ['web', OWNER[resourceOf(s.route)]]
   : s.id === '138' ? ['admin', 'finance@collabiz.local'] // finance approver role
   : s.app === 'admin' && s.id.startsWith('X') ? ['admin', 'unite.admin@collabiz.local']
   : s.app === 'admin' ? ['admin', 'superadmin@collabiz.local']
@@ -69,6 +69,8 @@ const growthAgentId = await one("select id from growth_agents where name like 'S
 const franchiseId = await one("select id from franchise_units where lower(city) = 'pune' limit 1");
 const projectId = await one("select id from property_projects where code = 'PRJ-10001'");
 const solarQuoteId = await one("select id from solar_quotes where model = 'epc' and partner_org_id is not null limit 1");
+const passportClaimId = await one("select claim_id as id from deal_passports where code = 'DP-2026-100001'");
+const v2ProjectId = await one("select id from projects where code = 'PRJ-2026-000001'");
 const offerAgreementId = await one("select id from commission_agreements where code = 'CA-2026-410001'");
 const EXTRA = [
   { id: 'X01', title: 'Offers for you', app: 'web', route: '/offers', access: 'verified-partner' },
@@ -125,6 +127,14 @@ const EXTRA = [
   { id: 'X52', title: 'Solar quote (admin)', app: 'admin', route: `/workspace/solar/quotes/${solarQuoteId}`, access: 'unite-admin' },
   { id: 'X53', title: 'Promotions (BOGO)', app: 'admin', route: '/workspace/promotions', access: 'unite-admin' },
   { id: 'X54', title: 'Online store (admin)', app: 'admin', route: '/workspace/store', access: 'unite-admin' },
+  { id: 'X55', title: 'Deal Passport (owner)', app: 'web', route: `/leads/${passportClaimId}/passport`, access: 'partner', account: 'meera@consult.example' },
+  { id: 'X56', title: 'Deal Passport (shared, undertaking)', app: 'web', route: `/leads/${passportClaimId}/passport`, access: 'partner' },
+  { id: 'X57', title: 'Shared Deal Passports', app: 'web', route: '/passports', access: 'partner' },
+  { id: 'X58', title: 'AI team plans', app: 'web', route: '/ai/team-plans', access: 'partner' },
+  { id: 'X59', title: 'Project work packages', app: 'web', route: `/projects/${v2ProjectId}/packages`, access: 'partner' },
+  { id: 'X60', title: 'Open work packages', app: 'web', route: '/packages', access: 'partner', account: 'ravi@sunrise.example' },
+  { id: 'X61', title: 'Tender eligibility analyzer', app: 'web', route: '/tenders/analyzer', access: 'partner' },
+  { id: 'X62', title: 'Tender eligibility reviews (admin)', app: 'admin', route: '/tender-reviews', access: 'unite-admin' },
 ];
 const RAW = /\b(?:[a-z]+_[a-z_]+|undefined|NaN|\[object Object\])\b/g;
 const results = [];

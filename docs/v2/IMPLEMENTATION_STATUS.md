@@ -5,10 +5,10 @@ Status words: **Implemented** (built, real API and data) · **Tested** (automate
 | Stage | Feature | Status | Evidence / notes |
 |---|---|---|---|
 | 00 | Audit and plans | Implemented | `docs/v2/*` |
-| 01 | AI Project Team Builder | Partially implemented (existing builder) | V2 extension pending |
-| 02 | Deal Passport | Partially implemented (certificate, consent, review, audit exist) | V2 passport pending |
-| 03 | Project Splitting Marketplace | Not started | |
-| 04 | AI Tender Eligibility Analyzer | Partially implemented (structured eligibility) | Document extraction pending |
+| 01 | AI Project Team Builder | **Tested** | Team plans for projects/tenders/opportunities: roles, responsibilities, ranked verified candidates, gaps (incl. self-declared certificates), RACI matrix, invite → accept → approve creates a real team (screen 166). API tests + journey |
+| 02 | Deal Passport | **Tested** | Joins lead, consent, review, duplicates, agreements, contract, milestones, documents, hash-chained audit; party sharing behind a confidentiality undertaking (no customer contacts, views logged); public verification; print/PDF (screen 167) |
+| 03 | Project Splitting Marketplace | **Tested** | Work packages under a parent project; budgets can never exceed project value; eligibility with reasons; bids; award adds winner as subcontractor; budget-weighted progress (screens 168–169) |
+| 04 | AI Tender Eligibility Analyzer | **Tested** | PDF → 11 kinds of conditions with page/line references; comparison with profile and KYB documents; checklist; consortium candidates; Unite reviewer confirmation (screen 170 + admin Tender reviews). Scanned PDFs need OCR (blocked) |
 | 05 | JV & Consortium Builder | Partially implemented (consortiums, alliances) | Contributions, MoU, amendments pending |
 | 06 | Milestone Payment Assurance | Partially implemented (milestones → invoice → paid; ledger) | Partial payments, overdue, reconciliation pending |
 | 07 | Local Opportunity Radar | Partially implemented (map, alerts) | Radar view pending |

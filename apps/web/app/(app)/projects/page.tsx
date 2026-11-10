@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { Card, DataTable, EmptyState, Grid, Kpi, LoadingState, ProgressBar, StatusBadge } from '@collabiz/ui';
+import { ButtonLink, Card, DataTable, EmptyState, Grid, Kpi, LoadingState, ProgressBar, StatusBadge } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { fmtDate, rupees } from '@/components/Projects';
 import { useQuery } from '@/lib/hooks';
@@ -10,7 +10,7 @@ export default function Portfolio() {
   const q = useQuery<any[]>('/projects');
   const rows = q.data ?? [];
   return (
-    <Screen id="075" description="Projects your organization owns, leads or works on as a subcontractor. Projects start from an executed contract.">
+    <Screen id="075" actions={<ButtonLink href="/packages" variant="secondary">Open work packages</ButtonLink>} description="Projects your organization owns, leads or works on as a subcontractor. Projects start from an executed contract.">
       {q.loading ? <LoadingState /> : q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : (
         <>
           <Grid cols={4}>

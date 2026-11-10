@@ -14,7 +14,7 @@ export function LeadSteps() {
 
 export function LeadTabs({ id }: { id: string }) {
   const path = usePathname();
-  const tabs = [['', 'Overview'], ['/review-status', 'Unite review'], ['/documents', 'Documents'], ['/duplicates', 'Duplicate check'], ['/certificate', 'Protection certificate'], ['/registration-certificate', 'Registration certificate'], ['/timeline', 'Timeline']];
+  const tabs = [['', 'Overview'], ['/review-status', 'Unite review'], ['/documents', 'Documents'], ['/duplicates', 'Duplicate check'], ['/certificate', 'Protection certificate'], ['/passport', 'Deal Passport'], ['/registration-certificate', 'Registration certificate'], ['/timeline', 'Timeline']];
   return (
     <nav aria-label="Lead sections" className="cz-tabs">
       {tabs.map(([p, l]) => <Link key={p} href={`/leads/${id}${p || '/confirmation'}`} aria-current={path === `/leads/${id}${p || '/confirmation'}` ? 'page' : undefined}>{l}</Link>)}

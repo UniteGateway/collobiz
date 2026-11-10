@@ -13,7 +13,7 @@ export default function TenderDashboard() {
   const { can } = useSession();
   const d = q.data;
   return (
-    <Screen id="065" actions={can('tender.issue') ? <ButtonLink href="/tenders/new">Publish tender</ButtonLink> : undefined}>
+    <Screen id="065" actions={<span className="cz-row" style={{ gap: 8 }}><ButtonLink href="/tenders/analyzer" variant="secondary">Check eligibility from a PDF</ButtonLink>{can('tender.issue') && <ButtonLink href="/tenders/new">Publish tender</ButtonLink>}</span>}>
       {q.loading ? <LoadingState /> : q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : (
         <>
           <Grid cols={4}>

@@ -9,7 +9,11 @@ const TENDER_PDF = readFileSync(join(__dirname, 'fixtures', 'sample-tender.pdf')
 describe('V2 Phase 1 — Deal Passport, team plans, work packages, tender analyzer', () => {
   let app: INestApplication; let t: Awaited<ReturnType<typeof loginAll>>; let pool: Pool;
   const one = async (q: string, p: unknown[] = []) => (await pool.query(q, p)).rows[0];
-  beforeAll(async () => { await resetDatabase(); await seed(); app = await bootApp(); t = await loginAll(app); pool = new Pool({ connectionString: process.env.DATABASE_URL }); });
+  beforeAll(async () => {
+    await resetDatabase(); await seed(); app = await bootApp(); t = await loginAll(app); pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    // Start from a clean slate: the demo seed adds a sample passport and work packages that these tests create themselves.
+    await pool.query('delete from deal_passport_parties; delete from deal_passports; delete from work_package_bids; delete from work_packages;');
+  });
   afterAll(async () => { await pool?.end(); await app?.close(); });
   const org = async (name: string) => (await one('select id from organizations where display_name = $1', [name])).id as string;
 
