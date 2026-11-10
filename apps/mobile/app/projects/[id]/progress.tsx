@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Button, Card, Empty, ErrorView, Field, Loading, Notice, ScreenView, s, theme } from '@/components/ui';
 import { api, API_URL } from '@/api';
 import { useAction, useApi } from '@/hooks';
+import { isOffline, outbox, useOutbox, type SiteUpdateItem } from '@/outbox';
 
 type Photo = { uri: string; name: string; type: string };
 
@@ -18,6 +19,17 @@ export default function SiteProgress() {
   const [milestoneId, setMilestoneId] = useState<string | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [done, setDone] = useState(false);
+  const [queued, setQueued] = useState(false);
+  const send = async (it: Pick<SiteUpdateItem, 'projectId' | 'note' | 'milestoneId' | 'progressPct' | 'photos'>) => {
+    const fd = new FormData();
+    fd.append('note', it.note);
+    if (it.milestoneId) fd.append('milestoneId', it.milestoneId);
+    if (it.milestoneId && it.progressPct) fd.append('progressPct', it.progressPct);
+    it.photos.forEach((p) => fd.append('files', p as unknown as Blob));
+    await api.upload(`/projects/${it.projectId}/updates`, fd);
+  };
+  const box = useOutbox(send);
+  const pending = box.items.filter((i) => i.projectId === id);
   const add = async (camera: boolean) => {
     const perm = camera ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) return;
@@ -26,13 +38,18 @@ export default function SiteProgress() {
     setPhotos([...photos, ...r.assets.map((a, i) => ({ uri: a.uri, name: a.fileName ?? `site-${Date.now()}-${i}.jpg`, type: a.mimeType ?? 'image/jpeg' }))].slice(0, 5));
   };
   const post = useAction(async () => {
-    const fd = new FormData();
-    fd.append('note', note);
-    if (milestoneId) fd.append('milestoneId', milestoneId);
-    if (milestoneId && pct) fd.append('progressPct', pct);
-    photos.forEach((p) => fd.append('files', p as unknown as Blob));
-    await api.upload(`/projects/${id}/updates`, fd);
-    setNote(''); setPct(''); setPhotos([]); setDone(true);
+    const item = { projectId: id, note, milestoneId, progressPct: pct, photos };
+    setDone(false); setQueued(false);
+    try {
+      await send(item);
+      setDone(true);
+    } catch (e) {
+      if (!isOffline(e)) throw e; // the server's answer (e.g. a validation message) is shown as usual
+      await outbox().add(item); // no signal: keep it on the phone and send it later
+      await box.refresh();
+      setQueued(true);
+    }
+    setNote(''); setPct(''); setPhotos([]);
     await Promise.all([updates.reload(), ms.reload()]);
   });
   const open = useAction(async (docId: string) => { const r = await api.get<{ url: string }>(`/projects/${id}/documents/${docId}/url`); await Linking.openURL(API_URL + r.url); });
@@ -43,6 +60,15 @@ export default function SiteProgress() {
     <ScreenView id="079">
       <Stack.Screen options={{ title: 'Site progress' }} />
       {done && <Notice tone="success">Update posted. Photos are stored privately and count as evidence for the milestone.</Notice>}
+      {queued && <Notice tone="info">No connection — the update is saved on this phone and will be sent automatically when you are back online.</Notice>}
+      {pending.length > 0 && (
+        <Card title={`Waiting to send (${pending.length})`}>
+          {pending.map((p) => <Text key={p.id} style={s.p} testID="outbox-item">{p.note}{p.photos.length ? ` · ${p.photos.length} photo(s)` : ''}{p.error ? ` — not accepted: ${p.error}` : ''}</Text>)}
+          <Button title="Send now" variant="secondary" onPress={() => box.flush()} loading={box.busy} testID="outbox-send" />
+          {pending.some((p) => p.error) && <Text style={s.hint}>Updates marked “not accepted” need changes — remove them and post again.</Text>}
+          {pending.filter((p) => p.error).map((p) => <Button key={`rm-${p.id}`} title={`Remove “${p.note.slice(0, 24)}”`} variant="plain" onPress={() => box.remove(p.id)} />)}
+        </Card>
+      )}
       {(post.error || open.error) && <Notice tone="danger">{post.error ?? open.error}</Notice>}
       <Card title="Post a site update">
         <Field label="What happened on site?" value={note} onChangeText={setNote} multiline error={post.fieldErrors.note} testID="update-note" />
