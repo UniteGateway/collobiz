@@ -11,3 +11,4 @@ export * from './wind';
 export * from './hybrid';
 export * from './hybridDecision';
 export * from './samples';
+export * from './offtake';

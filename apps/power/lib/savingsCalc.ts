@@ -13,6 +13,10 @@ export const ConsumerSchema = z.object({
   openAccessChargesRsKwh: n.min(0), lossFraction: n.min(0).max(0.5), demandReductionKva: n.min(0), backupPremiumRsKwh: n.min(0),
   /** Share of the plant's delivered energy allocated to this consumer (1 = all of it). */
   allocation: n.min(0).max(1).default(1),
+  /** Offer checks: where the consumer is, how it buys, and what solar it already has. */
+  state: z.string().min(2).max(3).default('AP'), structure: z.enum(['third_party', 'group_captive', 'captive']).default('third_party'),
+  sanctionedLoadKw: n.positive().optional(), loadShape: z.enum(['flat', 'two_shift', 'day_shift']).default('two_shift'), rooftopKwp: n.min(0).default(0),
+  ownershipPct: n.min(0).max(100).optional(), plantConsumptionSharePct: n.min(0).max(100).optional(),
 });
 
 /** Monthly plant supply for the consumer from the simulated year (average month), scaled by allocation. */

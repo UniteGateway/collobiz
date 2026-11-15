@@ -18,6 +18,7 @@ export const NAV = [
   { href: '/voltage', label: 'Voltage & Evacuation', icon: Cable },
   { href: '/open-access', label: 'AP Open Access', icon: Activity },
   { href: '/interstate', label: 'Interstate Transmission', icon: Map },
+  { href: '/offtake', label: 'Consumer Offtake Limits', icon: Gauge },
   { href: '/savings', label: 'Industrial Savings', icon: Factory },
   { href: '/finance', label: 'Financial Analysis', icon: CircleDollarSign },
   { href: '/cuf', label: 'CUF & Reliability', icon: Gauge },

@@ -3,6 +3,7 @@ import { handle } from '@/lib/http';
 import { cr, heading, inr, newDoc, para, pctS, table } from '@/lib/pdf';
 import { ConsumerSchema, computeSavings } from '@/lib/savingsCalc';
 import { loadProject, runYear } from '@/lib/sim';
+import { activeRules, offtakeFromSim } from '@/lib/offtake';
 import { projectIdOf, simRequest } from '@/lib/simreq';
 
 /** Commercial proposal PDF for an industrial consumer. */
@@ -24,6 +25,11 @@ export const POST = handle(async (req: Request) => {
   table(doc, [['Input', 'Value'], ['Solar PPA tariff', `Rs ${c.ppaTariffRsKwh}/kWh`], ['Peak BESS tariff', `Rs ${c.peakBessTariffRsKwh}/kWh`], ['Open-access charges (all-in)', `Rs ${c.openAccessChargesRsKwh}/kWh delivered`], ['Losses on the route', pctS(c.lossFraction)], ['Present rates (peak / normal / off-peak)', `Rs ${c.rate.peak} / ${c.rate.normal} / ${c.rate.offpeak} per kWh`], ['Demand charge', `Rs ${c.demandChargeRsKvaMonth}/kVA/month`]]);
   heading(doc, `Years 1–${Math.min(c.contractYears, 25)}`);
   table(doc, [['Year', 'Present', 'Proposed', 'Saving'], ...s.years.slice(0, 25).map((y) => [y.year, cr(y.present), cr(y.proposed), cr(y.saving)])]);
+  const ot = offtakeFromSim({ state: c.state, structure: c.structure, contractDemandKva: c.contractDemandKva, sanctionedLoadKw: c.sanctionedLoadKw, monthlyConsumptionKwh: c.monthlyKwh, loadShape: c.loadShape, proposedOaMw: p.config.delivery.contractedMw * c.allocation, rooftopKwp: c.rooftopKwp, rooftopKwhPerKwpYear: 1450, lossFraction: c.lossFraction, ownershipPct: c.ownershipPct, plantConsumptionSharePct: c.plantConsumptionSharePct }, sim, await activeRules());
+  heading(doc, 'How much solar you can take');
+  table(doc, [['Check', 'Result'], ['Structure / state', `${c.structure.replace('_', ' ')} · ${c.state}`], ['Open-access capacity offered', `${(p.config.delivery.contractedMw * c.allocation).toFixed(2)} MW`], ['Largest capacity with no hour above your load', `${ot.noSurplusMw.toFixed(2)} MW`], ['Capacity matching your yearly use (needs banking)', `${ot.energyMatchMw.toFixed(2)} MW`], ['Limit under recorded state rules', ot.result.maxOaMwByRules == null ? 'Not recorded — to be confirmed' : `${ot.result.maxOaMwByRules.toFixed(2)} MW`], ['Rooftop', `${c.rooftopKwp} kWp — ${ot.result.rooftop.arrangement}`], ['Renewable share of your consumption', pctS(ot.result.annual.reShare)]]);
+  for (const x of ot.result.findings.filter((f) => f.severity !== 'info')) para(doc, `• ${x.check}: ${x.message}`, x.severity === 'block' ? '#b91c1c' : '#5b6475');
+  if (ot.result.unknownRules.length) para(doc, `To be confirmed for ${c.state} before this offer is final: ${ot.result.unknownRules.join('; ')}.`, '#c2410c');
   heading(doc, 'Important');
   para(doc, `${s.note} Plant output is simulated (${sim.solar.weather.label}; dispatch mode: ${sim.req.mode.replace(/_/g, ' ')}). Open-access charges, losses and any waivers must be confirmed against the orders in force and the approvals actually granted. This proposal is not an offer to contract.`, '#5b6475');
   doc.end();

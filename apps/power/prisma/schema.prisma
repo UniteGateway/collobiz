@@ -202,3 +202,23 @@ model HybridCombinationRun {
   createdBy  String?
   createdAt  DateTime @default(now())
 }
+
+/// Consumer offtake limits (open-access eligibility and capacity, banking, rooftop net metering, captive tests).
+/// Every row carries its source and confidence; superseded rows are kept with active = false.
+model OfftakeRule {
+  id            String   @id @default(uuid())
+  state         String
+  structure     String
+  key           String
+  value         Float
+  confidence    String // verified | secondary | user
+  source        String
+  sourceUrl     String?
+  effectiveFrom String?
+  note          String?
+  active        Boolean  @default(true)
+  enteredBy     String?
+  createdAt     DateTime @default(now())
+
+  @@index([state, key, active])
+}

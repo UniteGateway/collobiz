@@ -7,7 +7,7 @@ import { useScenario } from '@/components/Scenario';
 import { api, useApi } from '@/lib/client';
 
 type C = Record<string, any>;
-interface R { consumer: C; supply: { solarMwh: number; batteryMwh: number; batteryPeakMwh: number }; result: { present: C; proposed: C; monthlySaving: number; annualSaving: number; savingPct: number; peakSavingMonthly: number; years: { year: number; present: number; proposed: number; saving: number }[]; lifetimeSaving: number; shortfallCostMonthly: number; note: string } }
+interface R { offtake?: C; consumer: C; supply: { solarMwh: number; batteryMwh: number; batteryPeakMwh: number }; result: { present: C; proposed: C; monthlySaving: number; annualSaving: number; savingPct: number; peakSavingMonthly: number; years: { year: number; present: number; proposed: number; saving: number }[]; lifetimeSaving: number; shortfallCostMonthly: number; note: string } }
 
 /** Module 9 — industrial customer savings with a downloadable proposal PDF. */
 export default function Savings() {
@@ -39,6 +39,10 @@ export default function Savings() {
             <Field label="Consumer name" value={c.name} onChange={(e) => set('name', e.target.value)} /><Field label="Location" value={c.location} onChange={(e) => set('location', e.target.value)} />
             {num('receivingVoltageKv', 'Receiving voltage', 'kV')}{num('contractDemandKva', 'Contracted demand', 'kVA')}
             {num('billedDemandKva', 'Billed demand', 'kVA')}{num('monthlyKwh', 'Monthly consumption', 'kWh')}
+            <Field label="State" value={c.state ?? 'AP'} onChange={(e) => set('state', e.target.value.toUpperCase())} />
+            <label className="flex flex-col gap-1 text-[13px] font-medium text-slate-700 dark:text-slate-300">Structure<select className="h-10 rounded-xl bg-slate-50 px-3 text-sm ring-1 ring-slate-200 dark:bg-white/5 dark:ring-white/10" value={c.structure ?? 'third_party'} onChange={(e) => set('structure', e.target.value)}><option value="third_party">Third-party PPA</option><option value="group_captive">Group captive</option><option value="captive">Captive</option></select></label>
+            <label className="flex flex-col gap-1 text-[13px] font-medium text-slate-700 dark:text-slate-300">Working pattern<select className="h-10 rounded-xl bg-slate-50 px-3 text-sm ring-1 ring-slate-200 dark:bg-white/5 dark:ring-white/10" value={c.loadShape ?? 'two_shift'} onChange={(e) => set('loadShape', e.target.value)}><option value="flat">Round the clock</option><option value="two_shift">Two shifts, 6 AM–10 PM</option><option value="day_shift">Day shift, 8 AM–8 PM</option></select></label>
+            {num('rooftopKwp', 'Existing rooftop solar', 'kWp')}
             {pctF('todShare.peak', 'Peak-hour share')}{pctF('todShare.normal', 'Normal-hour share')}{pctF('todShare.offpeak', 'Off-peak share')}
           </div>
         </Card>
@@ -68,6 +72,18 @@ export default function Savings() {
             <Stat label="Peak-hour saving" value={rupees(s.peakSavingMonthly)} hint="per month" tone="blue" /><Stat label="Plant share of consumption" value={pct(s.proposed.coverage)} hint={`${Math.round(s.proposed.plantKwh).toLocaleString('en-IN')} kWh/month`} />
             <Stat label="Shortfall bought from discom" value={rupees(s.shortfallCostMonthly)} hint={`${Math.round(s.proposed.discomKwh).toLocaleString('en-IN')} kWh/month`} tone="amber" /><Stat label="Lost on the route" value={`${Math.round(s.proposed.lostKwh).toLocaleString('en-IN')} kWh`} hint="per month" />
           </div>
+          {r?.offtake && (
+            <Card title="How much solar this consumer can take" subtitle="Checked against contract demand, hour-by-hour use, banking and recorded state rules" className="mt-4">
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <Stat label="Offer" value={r.offtake.result.ok ? 'No blocking issue' : 'Blocked'} tone={r.offtake.result.ok ? 'green' : 'red'} />
+                <Stat label="Never above the load" value={`${r.offtake.noSurplusMw.toFixed(2)} MW`} tone="blue" />
+                <Stat label="Matches yearly use" value={`${r.offtake.energyMatchMw.toFixed(2)} MW`} hint="needs banking" />
+                <Stat label="Rooftop" value={`${c.rooftopKwp ?? 0} kWp`} hint={r.offtake.result.rooftop.arrangement} />
+              </div>
+              <ul className="mt-3 space-y-1 text-[13px]">{r.offtake.result.findings.filter((x: C) => x.severity !== 'info').map((x: C, i: number) => <li key={i} className={x.severity === 'block' ? 'text-red-600' : 'text-amber-700 dark:text-amber-400'}>{x.check}: {x.message}</li>)}</ul>
+              {r.offtake.result.unknownRules.length > 0 && <p className="mt-2 text-[12px] text-slate-500">Not recorded for {c.state}: {r.offtake.result.unknownRules.join('; ')}. <a className="underline" href="/offtake">Record rules</a></p>}
+            </Card>
+          )}
           <Card title={`${s.years.length}-year projection`} subtitle="₹ crore per year" className="mt-4">
             <div className="h-72"><ResponsiveContainer><BarChart data={s.years.map((y) => ({ year: y.year, present: y.present / 1e7, proposed: y.proposed / 1e7, saving: y.saving / 1e7 }))}><CartesianGrid strokeDasharray="3 3" opacity={0.3} /><XAxis dataKey="year" /><YAxis /><Tooltip formatter={(v) => `₹${Number(v).toFixed(2)} cr`} /><Legend /><Bar dataKey="present" name="Present bill" fill="#94a3b8" /><Bar dataKey="proposed" name="Proposed bill" fill="#1e6bff" /><Bar dataKey="saving" name="Saving" fill="#16a34a" /></BarChart></ResponsiveContainer></div>
             <p className="mt-2 text-[12px] text-slate-500">{s.note}</p>
