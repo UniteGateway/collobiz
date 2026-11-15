@@ -82,5 +82,12 @@ export async function networkDemo(db: Db, refs: SeedRefs) {
   // Powertek products: a default seller commission for the demo only (Unite sets real rates per product line in the admin desk).
   const [pt] = await db.select({ id: s.organizations.id }).from(s.organizations).where(eq(s.organizations.displayName, 'Powertek')).limit(1);
   if (pt) await db.insert(s.productCommissionRules).values({ brandOrgId: pt.id, productLine: null, category: null, rateBps: 200, note: 'Demo default rate — Unite to confirm real rates', updatedBy: refs.users.uniteAdmin }).onConflictDoNothing();
+  // Library entries that point at real, live COLLABIZ content (uploaded brochures and DPRs are added by Unite admins).
+  await db.insert(s.moduleDocuments).values([
+    { moduleKey: 'powertek', title: 'Unite Powertek product catalogue', kind: 'catalogue', description: 'All 360 products from unitepowertek.com in 15 product lines, with photos and enquiry basket.', url: '/powertek', visibility: 'partners', sortOrder: 1, createdBy: refs.users.uniteAdmin },
+    { moduleKey: 'unite-solar', title: 'Unite Solar partner plans — compare all five', kind: 'brochure', description: 'Basic, Master and District franchise, and stores with or without stock: prices, territory, LeadDNA and earnings.', url: '/unite-solar', visibility: 'partners', sortOrder: 1, createdBy: refs.users.uniteAdmin },
+    { moduleKey: 'unite-solar', title: 'Unite Solar product catalogue', kind: 'catalogue', description: 'Modules, inverters, batteries, kits and allied products with partner and customer prices.', url: '/unite-solar/catalogue', visibility: 'partners', sortOrder: 2, createdBy: refs.users.uniteAdmin },
+    { moduleKey: 'general', title: 'How COLLABIZ works', kind: 'guide', description: 'Have → need → match → apply → proposal → agreement → execution → earnings.', url: '/how-it-works', visibility: 'public', sortOrder: 1, createdBy: refs.users.uniteAdmin },
+  ]);
   console.log('Unite Solar network demo in place');
 }

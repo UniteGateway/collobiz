@@ -6,6 +6,7 @@ import { PageHeader, LoadingState, PermissionDenied, Alert, ButtonLink, ErrorSta
 import { moduleFor } from '@/lib/navigation';
 import { useSession, type Me } from '@/lib/session';
 import { isForbidden } from '@/lib/hooks';
+import { HeroArt, MODULE_EXTRAS, ModuleDocuments } from '@/components/ModuleExtras';
 
 /** Client-side gate (UX only — the API enforces every permission server-side). */
 export function accessDenial(access: ScreenAccess, me: Me | null): { reason: string; action?: { href: string; label: string } } | null {
@@ -54,10 +55,15 @@ export function Screen({ id, page, children, actions, description, title, eyebro
   if (!def) return <ErrorState error={`Unknown screen ${id}`} />;
   const sid = def.id;
   const mod = moduleFor(path);
+  /** On a module's home page: gradient hero and the module's catalogues & documents. */
+  const extras = mod && mod.home === path ? MODULE_EXTRAS[mod.key] : undefined;
   const family = SCREEN_FAMILIES[def.family - 1]?.name;
   return (
     <div data-screen={sid}>
-      {header && <PageHeader title={title ?? def.title} screenId={sid} eyebrow={eyebrow ?? mod?.label ?? (def.access === 'public' ? undefined : family)} showScreenId={SHOW_IDS} actions={!denial ? actions : undefined} description={description} />}
+      {header && (() => {
+        const head = <PageHeader title={title ?? def.title} screenId={sid} eyebrow={(() => { const e = eyebrow ?? mod?.label ?? (def.access === 'public' ? undefined : family); return e && e.toLowerCase() === (title ?? def.title).toLowerCase() ? undefined : e; })()} showScreenId={SHOW_IDS} actions={!denial ? actions : undefined} description={description} />;
+        return extras ? <div className="cz-hero" data-palette={extras.palette}><HeroArt icon={extras.icon} />{head}</div> : head;
+      })()}
       {mod?.tabs && !mod.ownTabs && mod.tabs.some(([h]) => h === path) && (
         <nav aria-label={`${mod.label} sections`} className="cz-tabs">{mod.tabs.map(([h, l]) => <UiLink key={h} href={h} aria-current={h === path ? 'page' : undefined}>{l}</UiLink>)}</nav>
       )}
@@ -66,7 +72,7 @@ export function Screen({ id, page, children, actions, description, title, eyebro
           <PermissionDenied reason={denial.reason} />
           {denial.action && <div style={{ textAlign: 'center' }}><ButtonLink href={denial.action.href}>{denial.action.label}</ButtonLink></div>}
         </div>
-      ) : children}
+      ) : <>{children}{extras && me && <div style={{ marginTop: 20 }}><ModuleDocuments moduleKey={extras.docs} /></div>}</>}
     </div>
   );
 }

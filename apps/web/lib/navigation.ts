@@ -50,7 +50,7 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}): Nav
   const work = MODULES.filter((m) => !['account', 'documents', 'help'].includes(m.key)).map((m) => ({ href: m.home, label: m.label, icon: m.icon, count: m.key === 'home' ? undefined : undefined }));
   sections.push({ title: 'Workspace', items: work });
   if (me?.capabilities.includes('commission.approve')) sections.push({ title: 'Finance', items: [{ href: '/commissions/approvals', label: 'Commission approvals', icon: 'verify' }] });
-  sections.push({ title: 'Account', items: [{ href: '/vault', label: 'Documents', icon: 'documents' }, { href: '/profile', label: 'Settings', icon: 'settings' }, { href: '/help', label: 'Help & support', icon: 'help' }] });
+  sections.push({ title: 'Account', items: [{ href: '/library', label: 'Catalogues & documents', icon: 'package' }, { href: '/vault', label: 'My documents', icon: 'documents' }, { href: '/profile', label: 'Settings', icon: 'settings' }, { href: '/help', label: 'Help & support', icon: 'help' }] });
   void counts;
   return sections;
 }

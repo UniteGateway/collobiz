@@ -1775,3 +1775,60 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
 .cz-pt-noimg { display: grid; place-items: center; font-size: 34px; color: var(--cz-grey-400, #9aa3b2); }
 .cz-pt-desc { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .cz-us-products > .cz-card + .cz-card { margin-top: 0; }
+
+/* ===================== Module heroes, gradients and motion (design system v3.1) ===================== */
+.cz-hero { position: relative; isolation: isolate; overflow: hidden; border-radius: 24px; padding: 26px 28px 22px; margin-bottom: 18px;
+  background: var(--hero-bg); color: #fff; box-shadow: 0 18px 40px -24px rgba(1, 30, 72, .55); }
+.cz-hero[data-palette="navy"] { --hero-bg: linear-gradient(125deg, #011E48 0%, #0B3D91 55%, #1E6BFF 100%); --orb1: #3b82f6; --orb2: #22c55e; --orb3: #93c5fd; }
+.cz-hero[data-palette="green"] { --hero-bg: linear-gradient(125deg, #04342a 0%, #0f6b47 50%, #27a35f 100%); --orb1: #4ade80; --orb2: #38bdf8; --orb3: #bbf7d0; }
+.cz-hero[data-palette="sun"] { --hero-bg: linear-gradient(125deg, #0b2a55 0%, #1d4f91 45%, #f59e0b 120%); --orb1: #fbbf24; --orb2: #f97316; --orb3: #fde68a; }
+.cz-hero[data-palette="violet"] { --hero-bg: linear-gradient(125deg, #1e1b4b 0%, #4338ca 55%, #8b5cf6 100%); --orb1: #a78bfa; --orb2: #f472b6; --orb3: #c4b5fd; }
+.cz-hero[data-palette="teal"] { --hero-bg: linear-gradient(125deg, #062a35 0%, #0e7490 55%, #14b8a6 100%); --orb1: #2dd4bf; --orb2: #60a5fa; --orb3: #99f6e4; }
+.cz-hero .cz-page-head { position: relative; z-index: 1; margin: 0; }
+.cz-hero .cz-page-head h1 { color: #fff; }
+.cz-hero .cz-page-head .cz-muted { color: rgba(255, 255, 255, .82); max-width: 720px; }
+.cz-hero .cz-eyebrow { color: rgba(255, 255, 255, .78); }
+.cz-hero .cz-actions .cz-btn { box-shadow: 0 6px 18px -8px rgba(0, 0, 0, .45); }
+.cz-hero-art { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.cz-orb { position: absolute; border-radius: 50%; filter: blur(38px); opacity: .55; animation: cz-float 14s ease-in-out infinite alternate; }
+.cz-orb-a { width: 260px; height: 260px; right: -60px; top: -90px; background: var(--orb1); }
+.cz-orb-b { width: 200px; height: 200px; right: 22%; bottom: -120px; background: var(--orb2); animation-duration: 18s; opacity: .4; }
+.cz-orb-c { width: 140px; height: 140px; left: 38%; top: -70px; background: var(--orb3); animation-duration: 11s; opacity: .3; }
+.cz-hero-lines { position: absolute; right: 0; bottom: 0; width: 62%; height: 100%; opacity: .45; }
+.cz-hero-lines path { fill: none; stroke: rgba(255, 255, 255, .7); stroke-width: 1.4; stroke-dasharray: 6 10; animation: cz-flow 9s linear infinite; }
+.cz-hero-lines path + path { opacity: .5; animation-duration: 13s; }
+.cz-hero-lines circle { fill: #fff; animation: cz-pulse 2.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.cz-hero-glyph { position: absolute; right: 28px; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, .16); animation: cz-bob 7s ease-in-out infinite; }
+@keyframes cz-float { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(-30px, 22px, 0) scale(1.12); } }
+@keyframes cz-flow { to { stroke-dashoffset: -160; } }
+@keyframes cz-pulse { 0%, 100% { opacity: .5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.6); } }
+@keyframes cz-bob { 0%, 100% { transform: translateY(-50%); } 50% { transform: translateY(calc(-50% - 8px)); } }
+@media (max-width: 640px) { .cz-hero { padding: 20px 18px 18px; border-radius: 20px; } .cz-hero-glyph { display: none; } .cz-hero-lines { width: 100%; opacity: .3; } }
+
+/* Gentle entrance for cards and accent gradients */
+.cz-card { animation: cz-rise .38s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes cz-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.cz-btn-primary, .cz-btn--primary { background-image: linear-gradient(135deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, 0) 60%); }
+.cz-kpi[data-accent], .cz-kpi.cz-kpi-accent { background: linear-gradient(135deg, #ffffff 0%, #eef5ff 100%); }
+
+/* Catalogues & documents */
+.cz-docs-list { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.cz-docs-list button { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--cz-grey-100, #eef0f4);
+  background: linear-gradient(180deg, #fff, #fafbfd); font: inherit; color: inherit; cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s; }
+.cz-docs-list button:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -16px rgba(1, 30, 72, .5); border-color: #d7e3ff; }
+.cz-docs-list button:focus-visible { outline: 3px solid #1E6BFF; outline-offset: 2px; }
+.cz-doc-ic { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; color: #fff; background: linear-gradient(135deg, #0B3D91, #1E6BFF); }
+.cz-doc-brochure { background: linear-gradient(135deg, #0f6b47, #27a35f); } .cz-doc-dpr { background: linear-gradient(135deg, #b45309, #f59e0b); }
+.cz-doc-datasheet { background: linear-gradient(135deg, #0e7490, #14b8a6); } .cz-doc-presentation { background: linear-gradient(135deg, #4338ca, #8b5cf6); }
+.cz-doc-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.cz-doc-text strong { font-size: 14.5px; color: var(--cz-navy-900, #011E48); }
+.cz-doc-desc { color: var(--cz-grey-600, #5b6475); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cz-orb, .cz-hero-lines path, .cz-hero-lines circle, .cz-hero-glyph, .cz-card { animation: none !important; }
+  .cz-docs-list button { transition: none; }
+}
+.cz-hero .cz-btn-primary { background: #fff; color: var(--cz-navy-900, #011E48); }
+.cz-hero .cz-btn-primary:hover { background: #eef4ff; }
+.cz-hero .cz-btn-secondary, .cz-hero .cz-btn-ghost { background: rgba(255, 255, 255, .16); color: #fff; border-color: rgba(255, 255, 255, .35); backdrop-filter: blur(8px); }
+.cz-hero .cz-btn:disabled { opacity: .7; }
