@@ -68,4 +68,14 @@ _Audit date: 2026-11-15 · Branch `claude/collabiz-platform-build` · Reconciles
 | Date | Item | Status |
 |---|---|---|
 | 2026-11-15 | Stage 00 audit and plan | Done (this file) |
-| 2026-11-15 | Phase 1 core journey | In progress |
+| 2026-11-15 | Phase 1 core journey — API | **Done and tested**: `test/collab.e2e.ts` (7 tests) drives have → need → publish → moderation → matching → apply → shortlist → proposal/counter → accept → agreement → both sign → project → milestone certified → invoiced → paid, with the four money figures kept separate. 9 unit tests for matching and lifecycle rules (`packages/types/src/collab.test.ts`). Opportunity, contract and direct-offer regression suites still pass (26 tests). |
+| 2026-11-15 | Phase 1 core journey — web | **Done and tested in a browser**: Collab (have / need / matches), Business Offers (browse, publish, my offers, detail with applications and suggested partners), proposal room, My collaborations; admin “Business offer checks”. Two browser journeys pass at 1440 px and 390 px (`scripts/e2e-suites.mjs`, suites “COLLAB ·”), no horizontal overflow on phone. |
+| 2026-11-15 | Phase 1 core journey — native app | **Done, unit-tested**: tab bar is now Home · Collab · Post · Inbox · Profile (Discover and Leads stay reachable from Home); native Collab, Post, offer detail, proposal room and My collaborations (`apps/mobile/test/collab.test.tsx`, 5 tests; all 91 native tests pass). Not yet run on a device or simulator. |
+
+### Not done yet (next, in order)
+1. Unite programmes as Collab programmes with the configurable Unite-first review window on consenting offers (fields exist; routing not wired).
+2. Invitations from reverse matches (today the suggested partners are listed; inviting them is not built).
+3. Scheduled expiry reminders (expiry is applied on every read; no reminder job yet).
+4. Unite Green Park energy vertical on the same records, using the `@unite/power-engine` landed-cost calculator.
+5. EQUITY9 hand-off — blocked on an EQUITY9 API and agreement.
+6. The `docs/master` registry files (module, screen, API, database, security, test reports) — this file is the current source of truth.

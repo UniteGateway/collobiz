@@ -328,7 +328,7 @@ export class CollabController {
     if (!own && !this.moderator(ctx) && !OFFER_OPEN.includes(r.b.status as OfferStatus) && !party) throw new NotFoundException('Offer not found');
     const view = this.present(r, ctx);
     const assets = r.b.assetIds.length ? await this.db.select().from(collabAssets).where(and(inArray(collabAssets.id, r.b.assetIds), isNull(collabAssets.archivedAt))) : [];
-    const eligibility = ctx.orgId && !own ? await this.opps.eligibility(ctx, r.o) : null;
+    const applyCheck = ctx.orgId && !own ? await this.opps.eligibility(ctx, r.o) : null;
     const myApplication = ctx.orgId && !own ? (await this.db.select().from(opportunityApplications).where(and(eq(opportunityApplications.opportunityId, id), eq(opportunityApplications.organizationId, ctx.orgId), ne(opportunityApplications.status, 'withdrawn'))).limit(1))[0] ?? null : null;
     let applications: unknown[] = [], suggested: unknown[] = [];
     if (own) {
@@ -340,7 +340,7 @@ export class CollabController {
           .map((f) => { const o = others.find((x) => x.a.id === f.item.id)!; return { organization: o.org, resource: { kind: o.a.kind, kindLabel: ASSET_LABELS[o.a.kind as AssetKind], title: o.a.title, city: o.a.city, capacity: o.a.capacity, verification: o.a.verification }, score: f.score, reasons: f.reasons }; });
       }
     }
-    return { ...view, assets: assets.map((a) => ({ id: a.id, kind: a.kind, kindLabel: ASSET_LABELS[a.kind as AssetKind], title: a.title, capacity: a.capacity, verification: a.verification })), eligibility, myApplication, applications, suggested,
+    return { ...view, assets: assets.map((a) => ({ id: a.id, kind: a.kind, kindLabel: ASSET_LABELS[a.kind as AssetKind], title: a.title, capacity: a.capacity, verification: a.verification })), applyCheck, myApplication, applications, suggested,
       notice: view.regulated ? 'Business sales, acquisitions, exits and investments are listed for discovery only. COLLABIZ does not arrange or execute these transactions; they continue through an appropriately licensed channel.' : null };
   }
 

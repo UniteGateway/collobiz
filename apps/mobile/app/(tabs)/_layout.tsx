@@ -9,7 +9,7 @@ const tab = (title: string, icon: Name, active: Name) => ({
   tabBarIcon: ({ color, focused, size }: { color: unknown; focused: boolean; size: number }) => <Ionicons name={focused ? active : icon} size={size - 2} color={String(color)} />,
 });
 
-/** Partner tab bar: the five places partners go every day. Projects, earnings and everything else are one tap from Home or Account. */
+/** Partner tab bar: Home · Collab · Post · Inbox · Profile. Discover, leads, projects and earnings are one tap from Home or Profile. */
 export default function TabsLayout() {
   return (
     <Tabs screenOptions={{
@@ -20,10 +20,13 @@ export default function TabsLayout() {
       tabBarStyle: { backgroundColor: 'rgba(255,255,255,0.97)', borderTopColor: colors.grey200 },
     }}>
       <Tabs.Screen name="home" options={tab('Home', 'home-outline', 'home')} />
-      <Tabs.Screen name="marketplace" options={tab('Discover', 'storefront-outline', 'storefront')} />
-      <Tabs.Screen name="leads" options={tab('Leads', 'shield-checkmark-outline', 'shield-checkmark')} />
-      <Tabs.Screen name="messages" options={tab('Messages', 'chatbubbles-outline', 'chatbubbles')} />
-      <Tabs.Screen name="account" options={tab('Account', 'person-circle-outline', 'person-circle')} />
+      <Tabs.Screen name="collab" options={tab('Collab', 'people-outline', 'people')} />
+      <Tabs.Screen name="post" options={tab('Post', 'add-circle-outline', 'add-circle')} />
+      <Tabs.Screen name="messages" options={tab('Inbox', 'chatbubbles-outline', 'chatbubbles')} />
+      <Tabs.Screen name="account" options={tab('Profile', 'person-circle-outline', 'person-circle')} />
+      {/* Still reachable from Home and Profile; not permanent tabs on a small screen. */}
+      <Tabs.Screen name="marketplace" options={{ ...tab('Discover', 'storefront-outline', 'storefront'), href: null }} />
+      <Tabs.Screen name="leads" options={{ ...tab('Leads', 'shield-checkmark-outline', 'shield-checkmark'), href: null }} />
     </Tabs>
   );
 }

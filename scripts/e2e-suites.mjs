@@ -56,6 +56,118 @@ const suites = [
     },
   },
 ];
+
+// COLLAB core journey: have → need → publish → checks → match → apply → shortlist → proposal → counter → accept → agreement.
+suites.push({
+  name: 'COLLAB · what I have and need, offer checked and matched, application, proposals and agreement',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, expect, shot }) => {
+    const exp = new Date(Date.now() + 45 * 86400000).toISOString().slice(0, 10);
+    // Sunrise declares an office and a need, then publishes its seats as an offer.
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/collab');
+    await page.getByRole('heading', { name: 'What do you have?' }).waitFor();
+    await page.getByRole('button', { name: '+ Office space' }).click();
+    let dlg = page.locator('dialog[open]');
+    await dlg.getByLabel('Short title').fill('Hyderabad office with 40 workstations');
+    await dlg.getByLabel('Describe it').fill('Fitted office, 40 workstations, fibre and power backup, available from next month.');
+    await dlg.getByLabel(/^Capacity/).fill('40');
+    await dlg.getByLabel('City', { exact: true }).fill('Hyderabad');
+    await dlg.getByLabel('State / region').fill('Telangana');
+    await dlg.getByRole('button', { name: 'Save' }).click();
+    await page.locator('[data-asset="Hyderabad office with 40 workstations"]').waitFor();
+    await shot('collab-have');
+    await page.goto(WEB + '/business-offers/new');
+    await page.getByLabel('Category', { exact: true }).selectOption('bpo_contract');
+    await page.getByLabel('Sector', { exact: true }).selectOption('technology');
+    await page.getByLabel('Title', { exact: true }).fill('40 seats and a trained team for customer support');
+    await page.getByLabel('Describe the offer').fill('Ready support desk in Hyderabad: 40 workstations, 30 trained agents, two shifts, CRM experience. Seeking customer-support contracts.');
+    await page.getByLabel('City', { exact: true }).fill('Hyderabad');
+    await page.getByLabel('State / region').fill('Telangana');
+    await page.getByLabel('Offer expires on').fill(exp);
+    await shot('offer-publish');
+    await page.getByRole('button', { name: 'Submit for checks' }).click();
+    await page.getByText('COLLABIZ is checking this offer').waitFor();
+    // A moderator records the checks and publishes it.
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/business-offers');
+    const card = page.locator('[data-review]').filter({ hasText: 'Ready support desk in Hyderabad' });
+    await card.getByLabel('Publisher’s business verification (KYB) is complete').check();
+    await card.getByLabel('Checked for duplicate listings').check();
+    await shot('offer-checks');
+    await card.getByRole('button', { name: 'Approve and publish' }).click();
+    await card.waitFor({ state: 'detached' });
+    // Deccan needs a service provider; matching finds the offer and explains why.
+    await webLogin(page, WEB, 'deepak@deccan.example');
+    await page.goto(WEB + '/collab');
+    await page.getByRole('button', { name: 'Add a need' }).click();
+    dlg = page.locator('dialog[open]');
+    await dlg.getByLabel('I need').selectOption('service_provider');
+    await dlg.getByLabel('Details').fill('An English-speaking support team for our dealer helpline, Mon–Sat.');
+    await dlg.getByLabel(/Where/).fill('Telangana');
+    await dlg.getByRole('button', { name: 'Save' }).click();
+    const match = page.locator('[data-offer="40 seats and a trained team for customer support"]');
+    await match.waitFor();
+    expect(await match.getByRole('list', { name: 'Why this matched' }).getByText(/looking for a service provider/).count() === 1, 'match reason missing');
+    await shot('collab-matches');
+    await match.getByRole('link', { name: '40 seats and a trained team for customer support' }).click();
+    await page.getByText('Publisher’s business verification (KYB) is complete').waitFor();
+    await page.getByLabel('Why you are a good fit').fill('We need a support desk for 1,200 dealers, Mon–Sat, 9am–7pm IST.');
+    await page.getByRole('button', { name: 'Apply' }).click();
+    await page.getByText('The publisher will shortlist applications').waitFor();
+    const offerUrl = page.url();
+    // Sunrise shortlists and sends the first proposal (Deccan pays).
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(offerUrl);
+    await page.locator('[data-application="Deccan Distributors"]').getByRole('button', { name: 'Shortlist' }).click();
+    await page.locator('[data-application="Deccan Distributors"]').getByRole('link', { name: 'Open proposal room' }).click();
+    await page.getByRole('button', { name: 'Send a proposal' }).click();
+    await page.getByLabel('Scope of work').fill('Inbound dealer support: calls, WhatsApp and email, 12 agents, Mon–Sat 9am–7pm IST.');
+    await page.getByLabel('Deliverables').fill('Daily call log, weekly SLA report, monthly QA scorecard');
+    await page.getByLabel('Pricing').selectOption('monthly_retainer');
+    await page.getByLabel('Total value for the term (₹)').fill('2400000');
+    await page.getByLabel('Payment terms').fill('Monthly in arrears, 15 days');
+    await page.getByRole('button', { name: 'They pay' }).click();
+    await page.getByRole('button', { name: 'Send', exact: true }).click();
+    await page.locator('[data-round="1"][data-status="sent"]').waitFor();
+    const room = page.url();
+    // Deccan counters lower; Sunrise accepts — the agreement is created for both to sign.
+    await webLogin(page, WEB, 'deepak@deccan.example');
+    await page.goto(room);
+    await page.getByRole('button', { name: 'Send a counter-proposal' }).click();
+    await page.getByLabel('Total value for the term (₹)').fill('2160000');
+    await page.getByRole('button', { name: 'Send', exact: true }).click();
+    await page.locator('[data-round="2"][data-status="sent"]').waitFor();
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(room);
+    await page.getByRole('button', { name: 'Accept and create agreement' }).click();
+    await page.getByRole('link', { name: 'Review and sign' }).waitFor();
+    await shot('collab-agreement');
+    await page.goto(WEB + '/collab/workspace');
+    await page.locator('[data-collab="40 seats and a trained team for customer support"]').getByText('Agreement').waitFor();
+    await shot('collab-workspace');
+  },
+});
+suites.push({
+  name: 'COLLAB · phone layouts for collab, offers and the proposal room fit the screen',
+  only: 'mobile',
+  run: async ({ page, WEB, expect, shot }) => {
+    await webLogin(page, WEB, 'deepak@deccan.example');
+    for (const [path, name] of [['/collab', 'm-collab'], ['/business-offers', 'm-offers'], ['/collab/workspace', 'm-workspace']]) {
+      await page.goto(WEB + path);
+      await page.locator('h1').first().waitFor();
+      await page.waitForLoadState('networkidle');
+      const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(over <= 1, `${path} overflows by ${over}px`);
+      await shot(name);
+    }
+    await page.locator('[data-collab]').first().getByRole('link').click();
+    await page.getByRole('heading', { name: 'Proposals' }).waitFor();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth) <= 1, 'room overflows');
+    await shot('m-room');
+  },
+});
+
 export default suites;
 
 // ---------------- Stage 02 ----------------
