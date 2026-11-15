@@ -5,3 +5,5 @@ export * from './prices';
 export * from './dispatch';
 export * from './cuf';
 export * from './savings';
+export * from './network';
+export * from './openaccess';

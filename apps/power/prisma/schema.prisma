@@ -64,6 +64,9 @@ model TariffRecord {
   jurisdiction     String // AP, TS, KA, TN, MH, OD, ISTS, ...
   chargeType       String // transmission | wheeling | losses_transmission | losses_distribution | sldc | css | additional_surcharge | banking | ists | scheduling | electricity_duty | ...
   voltageKv        Int?
+  minKv            Int?
+  maxKv            Int?
+  waiver           Json? // { waives, fraction, conditions[] } — applied only when every condition is confirmed
   consumerCategory String?
   value            Float
   unit             String // Rs/kWh | Rs/kW/month | Rs/MW/day | % | Rs/day

@@ -29,3 +29,9 @@ Engine tests: 22/22 (`src/engine.test.ts`, `src/savings.test.ts`).
 - 17 MW for 06:00–22:00 needs 99.3 GWh/yr; even perfect storage could deliver at most ≈ 60.4 GWh (61 %). **Not feasible** —
   limiting factor: contracted demand above plant capability. Smaller contracts (e.g. 6–8 MW) with 100–120 MWh are feasible on
   most days, limited by weather in the monsoon.
+
+## Checkpoint — Modules 6–8 (partial, paused)
+- Engine: `network.ts` (line/transformer losses, voltage comparison, connectivity flags) and `openaccess.ts` (versioned tariff records, waivers applied only with every condition confirmed, STU→ISTS routing, landed cost, buyer saving, developer net). 31 engine tests pass.
+- App: TariffRecord gains minKv/maxKv/waiver (migration `20261110092742_tariff_voltage_waiver`); `lib/tariffs.ts` (illustrative seed, approved records); API `GET /api/tariffs`, `GET/POST /api/tariffs/changes`, `POST /api/tariffs/changes/[id]` (admin approve → new version, supersede old). Typecheck and lint pass; routes not yet exercised in a browser.
+- Not done: open-access / interstate / network calculation routes and the Voltage, AP Open Access and Interstate pages; Modules 10, 12–15.
+- Paused to prioritise the COLLABIZ core journey audit (user request).
