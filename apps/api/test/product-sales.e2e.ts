@@ -32,7 +32,7 @@ describe('Product sales — Unite Powertek for everyone', () => {
     const c = (await get('/catalogue', t.vikram).expect(200)).body;
     expect(c.total).toBeGreaterThanOrEqual(360);
     expect(c.lines.find((l: { line: string }) => l.line === 'POWERTEK SOLAR').count).toBe(57);
-    expect(c.items[0].commissionBps).toBeNull(); // no rate set yet: shown as "to be confirmed"
+    expect(c.items[0].commissionBps).toBe(200); // the demo default rate
     const solar = (await get('/catalogue?line=POWERTEK%20SOLAR&q=Mono%20PERC', t.asha).expect(200)).body;
     expect(solar.items[0]).toMatchObject({ name: 'Mono PERC Solar PV Modules', productLine: 'POWERTEK SOLAR', category: 'PV Modules', hasImage: true });
     expect(solar.items[0].productPage).toMatch(/^https:\/\/www\.unitepowertek\.com\/products\//);

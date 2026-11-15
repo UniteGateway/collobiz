@@ -2510,3 +2510,48 @@ suites.push({
     await shot('unite-network-admin');
   },
 });
+suites.push({
+  name: 'Powertek products · any seller enquires → sales desk quotes and wins → finance records payment',
+  run: async ({ page, WEB, ADMIN, label, expect, shot }) => {
+    const customer = pick(label, 'Sri Rama Agro Industries', 'Krishna Dairy Farms');
+    await webLogin(page, WEB, 'meera@consult.example'); // an individual consultant = agent channel
+    await page.goto(WEB + '/powertek');
+    await page.locator('[data-sku]').first().waitFor();
+    expect(await page.getByText(/products ·/).first().isVisible(), 'catalogue total shown');
+    await shot('powertek-catalogue');
+    await page.locator('[data-sku]').first().getByRole('button', { name: 'Add' }).click();
+    await page.getByRole('button', { name: /Enquiry basket \(1\)/ }).click();
+    const dlg = page.locator('dialog[open]');
+    await dlg.getByLabel('Customer (company or person)').fill(customer);
+    await dlg.getByLabel('City').fill('Nalgonda');
+    await dlg.getByLabel('State').selectOption('Telangana');
+    await dlg.getByLabel('PIN code').fill(pick(label, '508001', '508002'));
+    await dlg.getByLabel('Customer requirement').fill('Supply and installation for 12 farms before the kharif season.');
+    await dlg.getByLabel(/customer agreed to be contacted/).check();
+    await dlg.getByRole('button', { name: 'Send enquiry to Powertek' }).click();
+    await dlg.getByText(/sent to Powertek/).waitFor();
+    await page.goto(WEB + '/powertek/enquiries');
+    await page.getByText(customer, { exact: false }).first().waitFor();
+    await page.getByText('Agent / individual').first().waitFor();
+    await shot('powertek-my-enquiries');
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/workspace/product-sales');
+    const row = page.locator('tr', { hasText: customer });
+    await row.waitFor();
+    page.once('dialog', (d) => d.accept('950000'));
+    await row.getByRole('button', { name: 'Quote' }).click();
+    await row.getByText('Quoted').waitFor();
+    const answers = ['900000', 'PT-SO-' + pick(label, '901', '902')];
+    const onDialog = (d) => d.accept(answers.shift());
+    page.on('dialog', onDialog);
+    await row.getByRole('button', { name: 'Won' }).click();
+    await row.getByText('Order won').waitFor();
+    page.off('dialog', onDialog);
+    expect(await row.getByText(/₹18,000 \(2%\)/).count() === 1, 'commission frozen at the demo 2% on ₹9 lakh');
+    page.once('dialog', (d) => d.accept('NEFT-' + pick(label, 'A1', 'B2')));
+    await row.getByRole('button', { name: /Payment received/ }).click();
+    await page.getByRole('button', { name: 'Closed' }).click(); // paid orders leave the in-progress list
+    await page.locator('tr', { hasText: customer }).getByText(/Paid — commission earned/).waitFor();
+    await shot('powertek-sales-desk');
+  },
+});

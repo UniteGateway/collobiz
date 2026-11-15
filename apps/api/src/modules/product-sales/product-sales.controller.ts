@@ -96,7 +96,8 @@ export class ProductSalesController {
   async catalogue(@Param('brand') slug: string, @Query('q') q?: string, @Query('line') line?: string, @Query('category') category?: string, @Query('page') page = '1') {
     const b = await this.brand(slug);
     const where = and(eq(catalogItems.ownerOrgId, b.id), eq(catalogItems.status, 'published'), inArray(catalogItems.visibility, ['public', 'partners']),
-      line ? sql`${catalogItems.specs}->>'Product line' = ${line}` : undefined, category ? sql`${catalogItems.specs}->>'Category' = ${category}` : undefined,
+      line ? (line === 'Other' ? sql`${catalogItems.specs}->>'Product line' is null` : sql`${catalogItems.specs}->>'Product line' = ${line}`) : undefined,
+      category ? (category === 'Other' ? sql`${catalogItems.specs}->>'Category' is null` : sql`${catalogItems.specs}->>'Category' = ${category}`) : undefined,
       q ? sql`(${catalogItems.name} ilike ${'%' + q + '%'} or ${catalogItems.sku} ilike ${'%' + q + '%'} or ${catalogItems.description} ilike ${'%' + q + '%'})` : undefined);
     const size = 24, p = Math.max(1, Number(page) || 1);
     const [{ n }] = await this.db.select({ n: sql<number>`count(*)::int` }).from(catalogItems).where(where);

@@ -1768,3 +1768,10 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
 .cz-us-prices dt { color: var(--cz-grey-600, #5b6475); }
 .cz-us-prices dd { margin: 0; text-align: right; font-weight: 600; }
 .cz-scroll-x { overflow-x: auto; max-width: 100%; }
+
+/* Powertek products */
+.cz-pt-item { display: flex; flex-direction: column; gap: 6px; }
+.cz-pt-img { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; background: var(--cz-grey-50, #f7f8fa); border-radius: 10px; }
+.cz-pt-noimg { display: grid; place-items: center; font-size: 34px; color: var(--cz-grey-400, #9aa3b2); }
+.cz-pt-desc { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.cz-us-products > .cz-card + .cz-card { margin-top: 0; }

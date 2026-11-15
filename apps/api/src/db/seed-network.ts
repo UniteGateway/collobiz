@@ -79,5 +79,8 @@ export async function networkDemo(db: Db, refs: SeedRefs) {
   const sub = saleLines.reduce((a, l) => a + l.qty * l.unitPrice, 0), gst = saleLines.reduce((a, l) => a + Math.round((l.qty * l.unitPrice * l.gstBps) / 10000), 0);
   await db.insert(s.franchiseOrders).values({ unitId: u.id, number: 'US-SO-DEMO-01', kind: 'sale', customerName: 'Demo customer (Peenya workshop)', pincode: '560058', orderDate: '2026-11-04', lines: saleLines, subtotal: sub, gst, total: sub + gst, status: 'delivered', fulfilment: 'from_stock', createdBy: refs.users.deepak, history: [{ at: new Date().toISOString(), by: refs.users.deepak, to: 'delivered', status: 'delivered', note: 'Sold from store stock' }] });
   await db.update(s.franchiseUnits).set({ checklist: u.checklist }).where(eq(s.franchiseUnits.id, u.id));
+  // Powertek products: a default seller commission for the demo only (Unite sets real rates per product line in the admin desk).
+  const [pt] = await db.select({ id: s.organizations.id }).from(s.organizations).where(eq(s.organizations.displayName, 'Powertek')).limit(1);
+  if (pt) await db.insert(s.productCommissionRules).values({ brandOrgId: pt.id, productLine: null, category: null, rateBps: 200, note: 'Demo default rate — Unite to confirm real rates', updatedBy: refs.users.uniteAdmin }).onConflictDoNothing();
   console.log('Unite Solar network demo in place');
 }
