@@ -32,3 +32,4 @@ export * from './one';
 export * from './collab';
 export * from './unite-solar';
 export * from './product-sales';
+export * from './module-documents';
