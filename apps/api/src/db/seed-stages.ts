@@ -1,3 +1,4 @@
+import { networkDemo } from './seed-network';
 /** Stage-specific demo data, appended as stages are delivered. Must stay idempotent. */
 import { and, eq, sql } from 'drizzle-orm';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -489,6 +490,7 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await growthDemo(db, refs);
   await groupCompaniesDemo(db, refs);
   await franchiseDemo(db, refs);
+  await networkDemo(db, refs);
   await propertyDemo(db, refs);
   await solarDemo(db, refs);
   await v2Demo(db, refs);

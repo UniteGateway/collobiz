@@ -4,13 +4,13 @@ import { z } from 'zod';
 export const FRANCHISE_FORMATS = ['experience_centre', 'store', 'kiosk', 'service_point'] as const;
 export const FRANCHISE_FORMAT_LABELS: Record<string, string> = { experience_centre: 'Experience centre', store: 'Store', kiosk: 'Kiosk', service_point: 'Service point',
   basic_franchise: 'Basic Franchise', master_franchise: 'Master Franchise', district_franchise: 'District Franchise', store_with_stock: 'Store Partner — With Stock', store_without_stock: 'Store Partner — Without Stock' };
-export const FRANCHISE_STATUSES = ['applied', 'approved', 'agreement_signed', 'setup', 'live', 'suspended', 'rejected', 'closed'] as const;
+export const FRANCHISE_STATUSES = ['draft', 'applied', 'approved', 'agreement_signed', 'setup', 'live', 'suspended', 'rejected', 'closed'] as const;
 export const FRANCHISE_STATUS_LABELS: Record<string, string> = {
-  applied: 'Applied', approved: 'Approved', agreement_signed: 'Agreement signed', setup: 'Setting up', live: 'Live', suspended: 'Suspended', rejected: 'Not approved', closed: 'Closed',
+  draft: 'Draft', applied: 'Applied', approved: 'Approved', agreement_signed: 'Agreement signed', setup: 'Setting up', live: 'Live', suspended: 'Suspended', rejected: 'Not approved', closed: 'Closed',
 };
 /** Allowed next steps. Going live also requires every checklist item to be done. */
 export const FRANCHISE_NEXT: Record<string, string[]> = {
-  applied: ['approved', 'rejected'], approved: ['agreement_signed', 'closed'], agreement_signed: ['setup', 'closed'], setup: ['live', 'closed'],
+  draft: ['applied', 'closed'], applied: ['approved', 'rejected', 'draft'], approved: ['agreement_signed', 'closed'], agreement_signed: ['setup', 'closed'], setup: ['live', 'closed'],
   live: ['suspended', 'closed'], suspended: ['live', 'closed'], rejected: [], closed: [],
 };
 export const FRANCHISE_CHECKLIST: [string, string][] = [

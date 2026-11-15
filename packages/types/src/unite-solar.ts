@@ -130,3 +130,23 @@ export const DEMO_NEXT: Record<string, { to: string; by: 'admin' | 'partner' }[]
 export const SERVICE_KINDS = ['site_survey', 'installation', 'service', 'loan_assistance', 'subsidy_guidance', 'complaint'] as const;
 export const SERVICE_KIND_LABELS: Record<string, string> = { site_survey: 'Site survey', installation: 'Installation', service: 'Service / warranty', loan_assistance: 'Loan assistance', subsidy_guidance: 'Subsidy guidance', complaint: 'Customer complaint' };
 export const FULFILMENT_STATUSES = ['requested', 'dispatched', 'installed', 'accepted'] as const;
+
+// ------------------------------------------------------------------ request bodies shared by the API and the apps
+export const NetworkApplicationSchema = z.object({
+  packageCode: z.enum(PACKAGE_KINDS), leadDnaAddon: z.boolean().default(false), territoryId: z.string().uuid().optional(),
+  state: z.string().trim().min(2).max(40), district: z.string().trim().min(2).max(80), city: z.string().trim().min(2).max(80),
+  pincode: z.string().regex(/^\d{6}$/, 'Enter a 6-digit PIN code'), message: z.string().trim().min(10, 'Tell us a little about your business (10+ characters)').max(2000),
+});
+export const NetworkSaleSchema = z.object({
+  customerName: z.string().trim().min(2).max(160), customerPhone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a 10-digit mobile number').optional(),
+  pincode: z.string().regex(/^\d{6}$/), fulfilment: z.enum(['from_stock', 'unite']),
+  lines: z.array(z.object({ productId: z.string().uuid(), qty: z.number().int().positive().max(10000) })).min(1).max(30), notes: z.string().trim().max(1000).optional(),
+});
+export const NetworkTerritorySchema = z.object({
+  level: z.enum(TERRITORY_LEVELS), name: z.string().trim().min(2).max(120), state: z.string().trim().min(2).max(40), district: z.string().trim().min(2).max(80),
+  pincodes: z.array(z.string().regex(/^\d{6}$/)).max(500).default([]), exclusive: z.boolean().default(true),
+}).refine((t) => t.level === 'district' || t.pincodes.length > 0, { message: 'List the PIN codes this territory covers', path: ['pincodes'] });
+export const ServiceRequestSchema = z.object({
+  kind: z.enum(SERVICE_KINDS), customerName: z.string().trim().min(2).max(160), customerPhone: z.string().regex(/^[6-9]\d{9}$/).optional(),
+  pincode: z.string().regex(/^\d{6}$/).optional(), orderId: z.string().uuid().optional(), details: z.string().trim().min(10).max(2000),
+});

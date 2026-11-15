@@ -32,6 +32,7 @@ import { GrowthDeskModule } from './modules/growth-desk/growth-desk.controller';
 import { WorkspaceModule } from './modules/workspace/workspace.controller';
 import { ErpModule } from './modules/erp/erp.controller';
 import { FranchiseModule } from './modules/franchise/franchise.controller';
+import { UniteNetworkModule } from './modules/unite-network/network.module';
 import { PropertyModule } from './modules/property/property.controller';
 import { config } from './config';
 
@@ -44,7 +45,7 @@ import { ImportsModule } from './modules/imports/imports.controller';
 import { GstModule } from './modules/gst/gst.controller';
 import { ChannelsModule } from './modules/channels/channels.controller';
 import { BillingModule } from './modules/billing/billing.controller';
-export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule, GrowthDeskModule, WorkspaceModule, ErpModule, FranchiseModule, PropertyModule, SolarModule, PromotionsModule, V2Module, XchangeModule, ImportsModule, GstModule, ChannelsModule, BillingModule, CollabModule];
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule, GrowthDeskModule, WorkspaceModule, ErpModule, FranchiseModule, UniteNetworkModule, PropertyModule, SolarModule, PromotionsModule, V2Module, XchangeModule, ImportsModule, GstModule, ChannelsModule, BillingModule, CollabModule];
 
 @Module({
   imports: [
