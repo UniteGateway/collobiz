@@ -26,3 +26,4 @@ export * from './billing';
 export * from './one';
 export * from './collab';
 export * from './unite-solar';
+export * from './product-sales';
