@@ -27,12 +27,12 @@ export default function FranchiseNetwork() {
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !d ? <LoadingState /> : (
         <>
           <div className="cz-fr-kpis">
-            <Kpi label="Live franchises" value={t.live} hint={`${t.cities} cities · ${t.pipeline} in the pipeline`} accent />
+            <Kpi label="Live franchises" value={t.live} hint={`${t.cities} ${t.cities === 1 ? 'city' : 'cities'} · ${t.pipeline} in the pipeline`} accent />
             <Kpi label="Network sales last month" value={rupees(t.salesLastMonth)} hint="net of GST" />
-            <Kpi label="Sales this financial year" value={rupees(t.salesYtd)} hint={`${t.ordersMtd} customer orders this month`} />
+            <Kpi label="Sales this financial year" value={rupees(t.salesYtd)} hint={`${t.ordersMtd} customer order${t.ordersMtd === 1 ? '' : 's'} this month`} />
             <Kpi label="Royalty billed this FY" value={rupees(t.royaltyBilledYtd)} hint={`collected ${rupees(t.royaltyCollectedYtd)}`} />
             <Kpi label="Royalty to invoice" value={rupees(t.royaltyToInvoice)} hint={t.royaltyOverdue ? `${rupees(t.royaltyOverdue)} overdue` : 'nothing overdue'} />
-            <Kpi label="Stock sold to franchisees" value={rupees(t.purchaseValueYtd)} hint={`${t.purchaseOrdersToConfirm} purchase orders to confirm`} />
+            <Kpi label="Stock sold to franchisees" value={rupees(t.purchaseValueYtd)} hint={`${t.purchaseOrdersToConfirm} purchase order${t.purchaseOrdersToConfirm === 1 ? '' : 's'} to confirm`} />
             <Kpi label="Disputes" value={t.disputes} hint="royalty statements" />
             <Kpi label="Renewals" value={t.renewalsDue} hint="due within 90 days or expired" />
           </div>

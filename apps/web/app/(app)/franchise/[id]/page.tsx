@@ -43,13 +43,13 @@ function Overview({ d }: { d: R }) {
   return (
     <>
       <div className="cz-fr-kpis">
-        <Kpi label="Sales this month" value={rupees(k.salesMtd)} hint={`${k.ordersMtd} orders, net of GST`} accent />
+        <Kpi label="Sales this month" value={rupees(k.salesMtd)} hint={`${k.ordersMtd} order${k.ordersMtd === 1 ? '' : 's'}, net of GST`} accent />
         <Kpi label="Sales this financial year" value={rupees(k.salesYtd)} hint="from April" />
         <Kpi label="Last month vs target" value={k.lastMonthTargetPct == null ? rupees(k.lastMonthSales) : `${Math.round(k.lastMonthTargetPct * 100)}%`} hint={u.monthlyTarget ? `${rupees(k.lastMonthSales)} of ${rupees(u.monthlyTarget)}` : 'no target set'} />
         <Kpi label="Average order" value={rupees(k.avgOrderValue)} hint="delivered and paid" />
-        <Kpi label="To collect from customers" value={rupees(k.receivables)} hint={`${k.openSaleOrders} orders still to deliver`} />
+        <Kpi label="To collect from customers" value={rupees(k.receivables)} hint={`${k.openSaleOrders} order${k.openSaleOrders === 1 ? '' : 's'} still to deliver`} />
         <Kpi label="Royalty outstanding" value={rupees(k.royaltyOutstanding)} hint={k.royaltyOverdue ? `${rupees(k.royaltyOverdue)} overdue` : `paid this FY ${rupees(k.royaltyPaidYtd)}`} />
-        <Kpi label="Stock bought this FY" value={rupees(k.purchasesYtd)} hint={`${k.openPurchaseOrders} purchase orders open`} />
+        <Kpi label="Stock bought this FY" value={rupees(k.purchasesYtd)} hint={`${k.openPurchaseOrders} purchase order${k.openPurchaseOrders === 1 ? '' : 's'} open`} />
         <Kpi label="Set-up checklist" value={`${d.checklistDone}/${d.checklistTotal}`} hint={u.openedAt ? `opened ${new Date(u.openedAt).toLocaleDateString('en-IN')}` : 'not yet open'} />
       </div>
       <Card title="Monthly sales" subtitle="Net of GST. Grey bars are months not yet closed; dashed green line is the monthly target.">

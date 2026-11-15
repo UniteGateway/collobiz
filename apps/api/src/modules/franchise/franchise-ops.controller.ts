@@ -287,7 +287,7 @@ export class FranchiseOpsController {
       const u = units.find((x) => x.id === v.id)!;
       const last = salesOf(v.id, lastM), ytd = months.filter((m) => m >= fy).reduce((a, m) => a + salesOf(v.id, m), 0);
       const lastClosed = [...statements.filter((s) => s.unitId === v.id).map((s) => s.month), ...reports.filter((r) => r.unitId === v.id).map((r) => r.month)].sort().pop() ?? null;
-      return { id: v.id, code: v.code, brand: v.brand, franchisee: v.franchisee, city: v.city, format: v.format, status: v.status, lastMonthSales: last, salesYtd: ytd, target: u.monthlyTarget, targetPct: u.monthlyTarget ? last / u.monthlyTarget : null,
+      return { id: v.id, code: v.code, brand: v.brand, franchisee: v.franchisee, city: v.city, format: v.format, status: v.status, lastMonthSales: last, salesYtd: ytd, target: u.monthlyTarget, targetPct: u.monthlyTarget && ['live', 'suspended'].includes(u.status) ? last / u.monthlyTarget : null,
         royaltyOutstanding: statements.filter((s) => s.unitId === v.id && ['due', 'invoiced', 'disputed'].includes(s.status)).reduce((a, s) => a + s.total, 0),
         openPurchaseOrders: orders.filter((o) => o.unitId === v.id && o.kind === 'purchase' && o.status === 'placed').length, agreementEnds: u.agreementEnds,
         flags: franchiseFlags({ status: u.status, agreementEnds: u.agreementEnds, monthlyTarget: u.monthlyTarget, lastMonthSales: last, lastReportedMonth: lastClosed }) };
