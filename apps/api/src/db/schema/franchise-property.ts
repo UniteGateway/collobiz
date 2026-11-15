@@ -29,6 +29,18 @@ export const franchiseUnits = pgTable('franchise_units', {
   agreementStarts: text('agreement_starts'), // YYYY-MM-DD
   agreementEnds: text('agreement_ends'),
   agreementContractId: uuid('agreement_contract_id'),
+  /** Unite Solar network: package (code + version priced), LeadDNA add-on, territory, server-computed price and payment. */
+  packageCode: text('package_code'),
+  packageVersion: integer('package_version'),
+  leadDnaAddon: boolean('lead_dna_addon').notNull().default(false),
+  pricing: jsonb('pricing'),
+  territoryId: uuid('territory_id'),
+  pincode: text('pincode'),
+  district: text('district'),
+  paymentStatus: text('payment_status').notNull().default('unpaid'), // unpaid | submitted | verified | rejected
+  paymentReference: text('payment_reference'),
+  paymentAmount: bigint('payment_amount', { mode: 'number' }),
+  paymentVerifiedBy: uuid('payment_verified_by'),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (t) => [index('franchise_units_brand_idx').on(t.brandOrgId, t.status), uniqueIndex('franchise_units_active_uq').on(t.franchiseeOrgId, t.brandOrgId, sql`lower(${t.city})`).where(sql`status not in ('rejected', 'closed')`)]);
@@ -60,6 +72,12 @@ export const franchiseOrders = pgTable('franchise_orders', {
   status: text('status').notNull(),
   history: jsonb('history').notNull().default(sql`'[]'::jsonb`),
   notes: text('notes'),
+  /** Network sales: fulfilment from the store's own stock or by Unite; payment verification and fulfilment progress. */
+  fulfilment: text('fulfilment'), // from_stock | unite
+  fulfilmentStatus: text('fulfilment_status'), // requested | dispatched | installed | accepted
+  paymentVerified: boolean('payment_verified').notNull().default(false),
+  customerPhone: text('customer_phone'),
+  pincode: text('pincode'),
   createdBy: uuid('created_by').notNull().references(() => users.id),
   createdAt: createdAt(),
   updatedAt: updatedAt(),

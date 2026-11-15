@@ -30,3 +30,4 @@ export * from './phase3';
 export * from './plans';
 export * from './one';
 export * from './collab';
+export * from './unite-solar';
