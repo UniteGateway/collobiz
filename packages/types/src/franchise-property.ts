@@ -68,3 +68,67 @@ export const PropertyHoldSchema = z.object({
   consent: z.literal(true, { message: 'Confirm that the buyer agreed to be introduced' }),
   agentRera: z.string().trim().max(60).optional().or(z.literal('').transform(() => undefined)),
 });
+
+// ---------------- Franchise operations: agreement, orders, revenue and royalty ----------------
+/**
+ * Two order books per franchise unit:
+ *  - sale: the franchisee's customer orders (its revenue). Royalty is charged on delivered/paid sales, net of GST.
+ *  - purchase: the franchisee's stock orders to the brand (the brand confirms and dispatches; the franchisee receives).
+ * Money in paise, rates in basis points.
+ */
+export const FRANCHISE_ORDER_KINDS = ['sale', 'purchase'] as const;
+export const ORDER_STATUS: Record<'sale' | 'purchase', string[]> = {
+  sale: ['confirmed', 'delivered', 'paid', 'cancelled'],
+  purchase: ['placed', 'confirmed', 'dispatched', 'received', 'cancelled'],
+};
+export const ORDER_STATUS_LABELS: Record<string, string> = { confirmed: 'Confirmed', delivered: 'Delivered', paid: 'Paid', cancelled: 'Cancelled', placed: 'Placed', dispatched: 'Dispatched', received: 'Received' };
+/** Who may move an order to each status: the franchisee ('unit') or the brand ('brand'). */
+export const ORDER_NEXT: Record<'sale' | 'purchase', Record<string, { to: string; by: 'unit' | 'brand' }[]>> = {
+  sale: { confirmed: [{ to: 'delivered', by: 'unit' }, { to: 'cancelled', by: 'unit' }], delivered: [{ to: 'paid', by: 'unit' }], paid: [], cancelled: [] },
+  purchase: { placed: [{ to: 'confirmed', by: 'brand' }, { to: 'cancelled', by: 'unit' }, { to: 'cancelled', by: 'brand' }], confirmed: [{ to: 'dispatched', by: 'brand' }, { to: 'cancelled', by: 'brand' }], dispatched: [{ to: 'received', by: 'unit' }], received: [], cancelled: [] },
+};
+/** Sale statuses that count as revenue for royalty. */
+export const REVENUE_STATUSES = ['delivered', 'paid'];
+export const OrderLineSchema = z.object({
+  item: z.string().trim().min(2).max(160), sku: z.string().trim().max(60).optional(),
+  qty: z.number().positive().max(1_000_000), unitPrice: z.number().int().min(0).max(1_00_00_00_000_00), gstBps: z.number().int().refine((x) => [0, 500, 1200, 1800, 2800].includes(x), { message: 'Use a GST rate of 0, 5, 12, 18 or 28%' }),
+});
+export const FranchiseOrderSchema = z.object({
+  kind: z.enum(FRANCHISE_ORDER_KINDS),
+  customerName: z.string().trim().max(160).optional(),
+  orderDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  lines: z.array(OrderLineSchema).min(1).max(50),
+  notes: z.string().trim().max(1000).optional(),
+}).refine((o) => o.kind !== 'sale' || (o.customerName?.length ?? 0) >= 2, { message: 'Enter the customer', path: ['customerName'] });
+export type OrderLine = z.infer<typeof OrderLineSchema>;
+export function orderTotals(lines: OrderLine[]) {
+  let subtotal = 0, gst = 0;
+  for (const l of lines) { const net = Math.round(l.qty * l.unitPrice); subtotal += net; gst += Math.round((net * l.gstBps) / 10000); }
+  return { subtotal, gst, total: subtotal + gst };
+}
+/**
+ * Royalty on net sales (excluding GST) at the agreed rate. GST on the royalty is shown at 18% — the rate commonly applied to
+ * franchise royalties; the SAC code and rate must be confirmed by the company's CA. TDS (s.194J) is deducted by the payer.
+ */
+export const ROYALTY_GST_BPS = 1800;
+export function royaltyFor(netSales: number, bps: number) { const royalty = Math.round((netSales * bps) / 10000); const gst = Math.round((royalty * ROYALTY_GST_BPS) / 10000); return { royalty, gst, total: royalty + gst }; }
+export const STATEMENT_STATUS_LABELS: Record<string, string> = { due: 'Due — not invoiced', invoiced: 'Invoiced', paid: 'Paid', disputed: 'Disputed' };
+export const FranchiseAgreementSchema = z.object({
+  termYears: z.number().int().min(1).max(20), territory: z.string().trim().min(3).max(300), exclusive: z.boolean(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), noticeDays: z.number().int().min(15).max(365).default(90),
+});
+/** Status flags shown on dashboards: renewal window, missing reports, behind target. */
+export function franchiseFlags(u: { status: string; agreementEnds?: string | null; monthlyTarget?: number | null; lastMonthSales?: number | null; lastReportedMonth?: string | null }, today = new Date()) {
+  const flags: { key: string; label: string; tone: 'warning' | 'danger' | 'info' }[] = [];
+  if (u.agreementEnds) {
+    const days = Math.round((new Date(u.agreementEnds).getTime() - today.getTime()) / 86400000);
+    if (days < 0) flags.push({ key: 'expired', label: 'Agreement expired', tone: 'danger' });
+    else if (days <= 90) flags.push({ key: 'renewal', label: `Renewal due in ${days} days`, tone: 'warning' });
+  }
+  if (u.status === 'live') {
+    const prev = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 1, 1)).toISOString().slice(0, 7);
+    if (!u.lastReportedMonth || u.lastReportedMonth < prev) flags.push({ key: 'report', label: `Sales for ${prev} not closed`, tone: 'warning' });
+    if (u.monthlyTarget && u.lastMonthSales != null && u.lastMonthSales < u.monthlyTarget * 0.8) flags.push({ key: 'target', label: 'Below 80% of target last month', tone: 'info' });
+  }
+  return flags;
+}

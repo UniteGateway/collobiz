@@ -654,6 +654,24 @@ export async function franchiseDemo(db: Db, refs: SeedRefs) {
     { unitId: live.id, month: m(-2), sales: 21_40_000_00, orders: 18, royalty: Math.round(21_40_000_00 * 0.03), submittedBy: refs.users.asha },
     { unitId: live.id, month: m(-1), sales: 27_85_000_00, orders: 23, royalty: Math.round(27_85_000_00 * 0.03), submittedBy: refs.users.asha },
   ]);
+  // Royalty statements for the reported months (one paid, one invoiced) and this month's order book — sample data.
+  const st = (month: string, net: number, orders: number, status: string, extra: Record<string, unknown> = {}) => { const r = Math.round(net * 0.03), g = Math.round(r * 0.18); return { unitId: live.id, month, netSales: net, orders, royaltyBps: 300, royalty: r, gst: g, total: r + g, source: 'report', status, ...extra }; };
+  await db.insert(s.franchiseRoyaltyStatements).values([
+    st(m(-2), 21_40_000_00, 18, 'paid', { invoiceNumber: `RY-${m(-2).replace('-', '')}-10001`, dueDate: `${m(-1)}-10`, paidAt: new Date(Date.now() - 20 * 86400_000), paymentReference: 'UTR-DEMO-0001' }),
+    st(m(-1), 27_85_000_00, 23, 'invoiced', { invoiceNumber: `RY-${m(-1).replace('-', '')}-10002`, dueDate: new Date(Date.now() + 10 * 86400_000).toISOString().slice(0, 10) }),
+  ]);
+  const today = new Date(), d = (n: number) => new Date(today.getFullYear(), today.getMonth(), Math.max(1, Math.min(today.getDate(), n))).toISOString().slice(0, 10);
+  const line = (item: string, qty: number, unitPrice: number, gstBps: number) => ({ item, qty, unitPrice, gstBps });
+  const order = (number: string, kind: string, customerName: string | null, orderDate: string, lines: ReturnType<typeof line>[], status: string) => {
+    const subtotal = lines.reduce((a, l) => a + Math.round(l.qty * l.unitPrice), 0), gst = lines.reduce((a, l) => a + Math.round((Math.round(l.qty * l.unitPrice) * l.gstBps) / 10000), 0);
+    return { unitId: live.id, number, kind, customerName, orderDate, lines, subtotal, gst, total: subtotal + gst, status, history: [{ status, at: new Date().toISOString() }], createdBy: refs.users.asha };
+  };
+  await db.insert(s.franchiseOrders).values([
+    order('SO-DEMO-0001', 'sale', 'Kulkarni Residence (sample)', d(2), [line('3 kW on-grid rooftop system', 1, 1_85_000_00, 1200)], 'paid'),
+    order('SO-DEMO-0002', 'sale', 'Shree Auto Components (sample)', d(4), [line('25 kW commercial rooftop system', 1, 11_50_000_00, 1200), line('AMC — year 1', 1, 35_000_00, 1800)], 'delivered'),
+    order('SO-DEMO-0003', 'sale', 'Deshmukh Bungalow (sample)', d(6), [line('5 kW hybrid system with battery', 1, 3_40_000_00, 1200)], 'confirmed'),
+    order('PO-DEMO-0001', 'purchase', null, d(3), [line('540 Wp bifacial modules', 60, 14_500_00, 1200), line('5 kW string inverter', 6, 48_000_00, 1200)], 'placed'),
+  ]);
 }
 
 /** Real-estate demo: an industrial park (no RERA needed) and a residential project with a clearly fake demo RERA number. */

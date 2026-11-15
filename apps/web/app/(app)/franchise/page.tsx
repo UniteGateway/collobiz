@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { FRANCHISE_FORMATS, FRANCHISE_FORMAT_LABELS, FRANCHISE_STATUS_LABELS, INDIA_STATES } from '@collabiz/types';
-import { Alert, Button, Dialog, EmptyState, Select, Skeleton, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
+import { Alert, Button, ButtonLink, Dialog, EmptyState, Select, Skeleton, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -38,7 +38,7 @@ function UnitCard({ u, onChange }: { u: Unit; onChange: () => void }) {
     <section className="cz-card" aria-label={`${u.brand} ${u.city}`} data-franchise={u.city}>
       <div className="cz-row" style={{ justifyContent: 'space-between', gap: 8 }}>
         <div><h2 style={{ margin: 0, fontSize: 18 }}>{u.brand} — {u.city}</h2><span className="cz-muted" style={{ fontSize: 13 }}>{u.code} · {FRANCHISE_FORMAT_LABELS[u.format]}</span></div>
-        <StatusBadge status={u.status} tone={TONE[u.status] ?? 'neutral'} label={FRANCHISE_STATUS_LABELS[u.status]} />
+        <div className="cz-row" style={{ gap: 8 }}><StatusBadge status={u.status} tone={TONE[u.status] ?? 'neutral'} label={FRANCHISE_STATUS_LABELS[u.status]} /><ButtonLink href={`/franchise/${u.id}`} size="sm">Open dashboard</ButtonLink></div>
       </div>
       {u.decisionNote && <p className="cz-muted" style={{ fontSize: 13.5 }}>Unite: “{u.decisionNote}”</p>}
       {u.fee != null && <p style={{ fontSize: 14 }}>Franchise fee {rupees(u.fee)} · royalty {(u.royaltyBps ?? 0) / 100}% of sales{u.monthlyTarget ? ` · monthly target ${rupees(u.monthlyTarget)}` : ''}</p>}

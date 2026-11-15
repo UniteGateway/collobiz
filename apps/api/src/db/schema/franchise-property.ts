@@ -21,6 +21,14 @@ export const franchiseUnits = pgTable('franchise_units', {
   decidedBy: uuid('decided_by').references(() => users.id),
   appliedBy: uuid('applied_by').notNull().references(() => users.id),
   openedAt: timestamp('opened_at', { withTimezone: true }),
+  /** Agreement terms and the generated agreement in Contracts (signed there by both parties). */
+  territory: text('territory'),
+  exclusive: boolean('exclusive').notNull().default(false),
+  termYears: integer('term_years'),
+  noticeDays: integer('notice_days'),
+  agreementStarts: text('agreement_starts'), // YYYY-MM-DD
+  agreementEnds: text('agreement_ends'),
+  agreementContractId: uuid('agreement_contract_id'),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (t) => [index('franchise_units_brand_idx').on(t.brandOrgId, t.status), uniqueIndex('franchise_units_active_uq').on(t.franchiseeOrgId, t.brandOrgId, sql`lower(${t.city})`).where(sql`status not in ('rejected', 'closed')`)]);
@@ -36,6 +44,48 @@ export const franchiseReports = pgTable('franchise_reports', {
   submittedBy: uuid('submitted_by').notNull().references(() => users.id),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex('franchise_reports_unit_month_uq').on(t.unitId, t.month)]);
+
+/** Order book of a franchise unit: customer sales and stock purchases from the brand. */
+export const franchiseOrders = pgTable('franchise_orders', {
+  id: id(),
+  unitId: uuid('unit_id').notNull().references(() => franchiseUnits.id),
+  number: text('number').notNull().unique(),
+  kind: text('kind').notNull(), // sale | purchase
+  customerName: text('customer_name'),
+  orderDate: text('order_date').notNull(),
+  lines: jsonb('lines').notNull(),
+  subtotal: bigint('subtotal', { mode: 'number' }).notNull(),
+  gst: bigint('gst', { mode: 'number' }).notNull(),
+  total: bigint('total', { mode: 'number' }).notNull(),
+  status: text('status').notNull(),
+  history: jsonb('history').notNull().default(sql`'[]'::jsonb`),
+  notes: text('notes'),
+  createdBy: uuid('created_by').notNull().references(() => users.id),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (t) => [index('franchise_orders_unit_idx').on(t.unitId, t.kind, t.orderDate)]);
+
+/** Monthly royalty statement: net sales × agreed rate, GST on royalty, invoicing and payment. */
+export const franchiseRoyaltyStatements = pgTable('franchise_royalty_statements', {
+  id: id(),
+  unitId: uuid('unit_id').notNull().references(() => franchiseUnits.id),
+  month: text('month').notNull(),
+  netSales: bigint('net_sales', { mode: 'number' }).notNull(),
+  orders: integer('orders').notNull(),
+  royaltyBps: integer('royalty_bps').notNull(),
+  royalty: bigint('royalty', { mode: 'number' }).notNull(),
+  gst: bigint('gst', { mode: 'number' }).notNull(),
+  total: bigint('total', { mode: 'number' }).notNull(),
+  source: text('source').notNull(), // orders | report
+  status: text('status').notNull().default('due'),
+  invoiceNumber: text('invoice_number'),
+  dueDate: text('due_date'),
+  paidAt: timestamp('paid_at', { withTimezone: true }),
+  paymentReference: text('payment_reference'),
+  disputeReason: text('dispute_reason'),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (t) => [uniqueIndex('franchise_royalty_unit_month_uq').on(t.unitId, t.month)]);
 
 export const propertyProjects = pgTable('property_projects', {
   id: id(),

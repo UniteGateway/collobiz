@@ -1736,3 +1736,16 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
   .cz-stepper li { font-size: 0; }
   .cz-stepper li[aria-current="step"] { font-size: 12px; white-space: nowrap; }
 }
+
+/* ---------- Franchise dashboards ---------- */
+.cz-fr-bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; align-items: end; height: 190px; margin: 0; padding: 8px 0 0; }
+.cz-fr-bar { display: grid; grid-template-rows: 1fr auto; height: 100%; gap: 4px; min-width: 0; }
+.cz-fr-bar-track { position: relative; display: flex; align-items: flex-end; border-bottom: 1px solid var(--cz-grey-200); }
+.cz-fr-fill { display: block; width: 100%; border-radius: 6px 6px 0 0; background: var(--cz-navy-700, #1e3a64); min-height: 2px; }
+.cz-fr-fill[data-muted] { background: var(--cz-grey-300); }
+.cz-fr-target { position: absolute; left: -2px; right: -2px; border-top: 2px dashed #16a34a; }
+.cz-fr-bar-label { font-size: 11px; color: var(--cz-grey-600); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cz-fr-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+.cz-fr-flags { display: flex; flex-wrap: wrap; gap: 6px; }
+.cz-fr-lines { display: grid; grid-template-columns: minmax(0, 2.2fr) 0.7fr 1fr 0.8fr auto; gap: 8px; align-items: end; }
+@media (max-width: 640px) { .cz-fr-lines { grid-template-columns: 1fr 1fr; } .cz-fr-bars { height: 150px; } }
