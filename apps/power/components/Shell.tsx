@@ -2,13 +2,14 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Activity, BarChart3, BatteryCharging, Cable, CircleDollarSign, Factory, FileText, Gauge, LayoutDashboard, LineChart, Map, Moon, Settings, SlidersHorizontal, Sun, Workflow, Zap } from 'lucide-react';
+import { Activity, BarChart3, Layers, BatteryCharging, Cable, CircleDollarSign, Factory, FileText, Gauge, LayoutDashboard, LineChart, Map, Moon, Settings, SlidersHorizontal, Sun, Workflow, Zap } from 'lucide-react';
 import { cn, Select } from './ui';
 import { useScenario } from './Scenario';
 import { api, useApi } from '@/lib/client';
 
 export const NAV = [
   { href: '/', label: 'Executive Dashboard', icon: LayoutDashboard },
+  { href: '/hybrid', label: 'Hybrid Power Lab', icon: Layers },
   { href: '/config', label: 'Project Configuration', icon: SlidersHorizontal },
   { href: '/solar', label: 'Solar Generation', icon: Sun },
   { href: '/battery', label: 'Battery Storage', icon: BatteryCharging },

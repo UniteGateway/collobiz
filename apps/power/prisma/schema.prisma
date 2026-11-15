@@ -160,3 +160,45 @@ model AuditLog {
   after    Json?
   at       DateTime @default(now())
 }
+
+/// Hybrid Power Lab scenario. Inputs are versioned; results record the input version they were computed from.
+model HybridScenario {
+  id            String    @id @default(uuid())
+  projectId     String?
+  sampleKey     String?
+  name          String
+  inputs        Json
+  inputVersion  Int       @default(1)
+  resultVersion Int?
+  results       Json?
+  series        Json?
+  decision      String?
+  reviewStage   String    @default("draft")
+  checklist     Json      @default("{}")
+  computedAt    DateTime?
+  createdBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  reviews       HybridReviewEvent[]
+}
+
+model HybridReviewEvent {
+  id         String         @id @default(uuid())
+  scenarioId String
+  scenario   HybridScenario @relation(fields: [scenarioId], references: [id])
+  fromStage  String
+  toStage    String
+  checklist  Json?
+  note       String?
+  actor      String
+  at         DateTime       @default(now())
+}
+
+model HybridCombinationRun {
+  id         String   @id @default(uuid())
+  scenarioId String
+  request    Json
+  result     Json
+  createdBy  String?
+  createdAt  DateTime @default(now())
+}
