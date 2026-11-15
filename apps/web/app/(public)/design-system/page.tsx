@@ -43,7 +43,7 @@ export default function DesignSystemPage() {
         {tab === 'table' && <DataTable columns={[{ key: 'pkg', header: 'Work package' }, { key: 'owner', header: 'Owner' }, { key: 'due', header: 'Due' }, { key: 'status', header: 'Status', render: (r: any) => <StatusBadge status={r.status} /> }]} rows={[{ id: '1', pkg: 'Civil foundations', owner: 'EPC Partner', due: '18 Nov', status: 'in_progress' }, { id: '2', pkg: 'Electrical panels', owner: 'Powertek', due: '24 Nov', status: 'approved' }]} />}
         {tab === 'ai' && <FactorBars factors={[{ factor: 'Sector', weight: 35, score: 1, detail: 'Works in solar' }, { factor: 'Geography', weight: 20, score: 0.7, detail: 'Partial coverage' }]} />}
       </Card>
-      <Card title="Timeline"><Timeline items={[{ id: '1', at: new Date().toISOString(), title: 'Lead registered', detail: 'Evidence snapshot sealed' }]} /></Card>
+      <Card title="Timeline"><Timeline items={[{ id: '1', at: '2026-11-01T09:30:00.000Z', title: 'Lead registered', detail: 'Evidence snapshot sealed' }]} /></Card>
     </div>
   );
 }
