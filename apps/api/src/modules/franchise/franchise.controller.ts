@@ -51,7 +51,7 @@ export class FranchiseController {
   @Get('franchise/mine')
   @RequireOrg()
   async mine(@Ctx() ctx: RequestContext) {
-    const ids = (await this.db.select({ id: franchiseUnits.id }).from(franchiseUnits).where(eq(franchiseUnits.franchiseeOrgId, ctx.orgId!))).map((r) => r.id);
+    const ids = (await this.db.select({ id: franchiseUnits.id }).from(franchiseUnits).where(and(eq(franchiseUnits.franchiseeOrgId, ctx.orgId!), sql`${franchiseUnits.packageCode} is null`))).map((r) => r.id);
     return this.svc.view(ids);
   }
 

@@ -15,10 +15,11 @@ export class FranchiseService {
     if (!u) throw new NotFoundException('Franchise not found');
     return u;
   }
+  /** Brand franchise units. Without ids, Unite Solar network partners (managed in the network module) are left out. */
   async view(ids?: string[]) {
     const brand = sql<string>`(select display_name from organizations o where o.id = ${franchiseUnits.brandOrgId})`;
     const rows = await this.db.select({ u: franchiseUnits, brand, franchisee: organizations.displayName }).from(franchiseUnits).innerJoin(organizations, eq(organizations.id, franchiseUnits.franchiseeOrgId))
-      .where(ids ? inArray(franchiseUnits.id, ids.length ? ids : ['00000000-0000-0000-0000-000000000000']) : undefined).orderBy(desc(franchiseUnits.updatedAt));
+      .where(ids ? inArray(franchiseUnits.id, ids.length ? ids : ['00000000-0000-0000-0000-000000000000']) : sql`${franchiseUnits.packageCode} is null`).orderBy(desc(franchiseUnits.updatedAt));
     const reports = rows.length ? await this.db.select().from(franchiseReports).where(inArray(franchiseReports.unitId, rows.map((r) => r.u.id))).orderBy(desc(franchiseReports.month)) : [];
     return rows.map(({ u, brand, franchisee }) => {
       const reps = reports.filter((r) => r.unitId === u.id);

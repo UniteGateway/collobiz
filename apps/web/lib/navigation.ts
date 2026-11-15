@@ -17,6 +17,8 @@ export const MODULES: Module[] = [
     tabs: [['/my/leads', 'My leads'], ['/crm/pipeline', 'Pipeline'], ['/tasks', 'Tasks'], ['/activity', 'Activity'], ['/lead-protection', 'Protection'], ['/lead-disputes', 'Disputes'], ['/passports', 'Shared passports'], ['/resolution', 'All disputes']] },
   { key: 'collaboration', label: 'Collaboration', icon: 'teams', home: '/teams', match: ['/teams', '/partners', '/collaboration', '/consortiums', '/ai/partners', '/ai/team-builder', '/ai/team-plans'],
     tabs: [['/teams', 'My teams'], ['/collaboration/requests', 'Requests'], ['/partners/find', 'Find partners'], ['/ai/partners', 'Recommended partners'], ['/ai/team-builder', 'Team builder'], ['/ai/team-plans', 'Team plans'], ['/partners', 'Directory'], ['/consortiums', 'Consortiums']] },
+  { key: 'unite-solar', label: 'Unite Solar', icon: 'value', home: '/unite-solar/my', match: ['/unite-solar'],
+    tabs: [['/unite-solar', 'Franchise plans'], ['/unite-solar/apply', 'Become a partner'], ['/unite-solar/my', 'My franchise'], ['/unite-solar/catalogue', 'Product catalogue'], ['/unite-solar/sales', 'Sales & orders'], ['/unite-solar/inventory', 'Inventory'], ['/unite-solar/earnings', 'Earnings'], ['/unite-solar/marketing', 'Marketing & training'], ['/unite-solar/support', 'Support']] },
   { key: 'ventures', label: 'Unite businesses', icon: 'building', home: '/ventures', match: ['/ventures', '/solar', '/franchise', '/property', '/store/redeem'],
     tabs: [['/ventures', 'Businesses'], ['/solar', 'Solar desk'], ['/franchise', 'Franchise'], ['/property', 'Property sales']] },
   { key: 'messages', label: 'Messages', icon: 'messages', home: '/inbox', match: ['/inbox', '/chat', '/meetings', '/announcements', '/notifications'],

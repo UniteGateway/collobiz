@@ -2440,3 +2440,73 @@ suites.push({
     await row.getByText('Revival approved').waitFor();
   },
 });
+suites.push({
+  name: 'Unite Solar network · plans → apply → approve → payment gating; store stock sale; earnings; admin centre',
+  run: async ({ page, WEB, ADMIN, label, expect, shot }) => {
+    const [terr, city, pin] = pick(label, ['Ghatkesar mandal', 'Ghatkesar', '501301'], ['Shamshabad mandal', 'Shamshabad', '501218']);
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/unite-solar');
+    await page.locator('[data-plan]').first().waitFor();
+    expect(await page.locator('[data-plan]').count() === 5, 'five plans');
+    expect(await page.locator('[data-plan="store_with_stock"]').getByText(/₹4 lakh stock/).count() === 1, 'stock store shows ₹4 lakh stock');
+    await shot('unite-solar-plans');
+    await page.goto(WEB + '/unite-solar/apply?package=basic_franchise');
+    await page.getByLabel(/Add LeadDNA software/).check();
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByLabel('State').selectOption('Telangana');
+    const terrSel = page.getByLabel(/Exclusive mandal territory/);
+    await terrSel.locator('option', { hasText: terr }).waitFor({ state: 'attached' });
+    await terrSel.selectOption(await terrSel.locator('option', { hasText: terr }).getAttribute('value'));
+    await page.getByLabel('City / town').fill(city);
+    await page.getByLabel('PIN code').fill(pin);
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByLabel('About your business').fill('Electrical trader moving into residential rooftop solar.');
+    await page.getByRole('button', { name: 'Save draft and see price' }).click();
+    await page.getByText('₹8,26,000').waitFor(); // ₹7 lakh + 18% GST, computed by the server
+    await shot('unite-solar-apply-review');
+    await page.getByRole('button', { name: 'Submit application' }).click();
+    await page.waitForURL(/\/unite-solar\/my/);
+    await page.getByText('Application submitted').first().waitFor();
+    const id = new URL(page.url()).searchParams.get('unit');
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + `/workspace/network/applications/${id}`);
+    await page.getByRole('button', { name: /Approve and reserve territory/ }).click();
+    await page.getByRole('button', { name: 'Activate partnership' }).waitFor();
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + `/unite-solar/my?unit=${id}`);
+    await page.getByLabel('UTR / transaction reference').fill(pick(label, 'UTR77001', 'UTR77002'));
+    await page.getByRole('button', { name: /Record payment of ₹8,26,000/ }).click();
+    await page.getByText('Awaiting verification by Unite finance').waitFor();
+    await shot('unite-solar-my-payment');
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + `/workspace/network/applications/${id}`);
+    await page.getByRole('button', { name: 'Verify payment (finance)' }).click();
+    await page.getByRole('button', { name: 'Activate partnership' }).click();
+    await page.getByText(/agreement must be signed by both parties/).waitFor(); // payment alone never activates
+    await shot('unite-network-application-admin');
+    // The live demo store sells from stock; the sale earns margin, not commission.
+    await webLogin(page, WEB, 'deepak@deccan.example');
+    await page.goto(WEB + '/unite-solar/inventory');
+    await page.getByText('Stock reconciles').waitFor();
+    await shot('unite-solar-inventory');
+    await page.goto(WEB + '/unite-solar/sales');
+    await page.getByRole('button', { name: 'New sale' }).click();
+    const dlg = page.locator('dialog[open]');
+    await dlg.getByLabel('Customer name').fill(pick(label, 'Lakshmi Narayan', 'Arun Gowda'));
+    const spd = await dlg.getByLabel('Product 1').locator('option', { hasText: 'Surge protection device' }).getAttribute('value');
+    await dlg.getByLabel('Product 1').selectOption(spd);
+    await dlg.getByRole('button', { name: 'Record sale from stock' }).click();
+    await page.getByText(pick(label, 'Lakshmi Narayan', 'Arun Gowda'), { exact: false }).first().waitFor();
+    await shot('unite-solar-sales');
+    await page.goto(WEB + '/unite-solar/earnings');
+    await page.locator('[data-stream]').first().waitFor();
+    expect(await page.locator('[data-stream]').count() === 5, 'five earnings streams');
+    await page.goto(WEB + '/unite-solar/marketing');
+    await page.getByRole('img', { name: /QR code/ }).waitFor();
+    await shot('unite-solar-marketing');
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/workspace/network');
+    await page.getByText('Active partners').waitFor();
+    await shot('unite-network-admin');
+  },
+});

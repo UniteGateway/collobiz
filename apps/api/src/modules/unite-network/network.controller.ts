@@ -62,7 +62,7 @@ export class NetworkController {
   private summary(u: Unit, p?: PackageConfig) {
     return {
       id: u.id, code: u.code, packageCode: u.packageCode, packageName: p?.name ?? u.packageCode, status: u.status, statusLabel: FRANCHISE_STATUS_LABELS[u.status] ?? u.status, city: u.city, district: u.district, state: u.region,
-      pincode: u.pincode, territory: u.territory, leadDnaAddon: u.leadDnaAddon, pricing: u.pricing, paymentStatus: u.paymentStatus, decisionNote: u.decisionNote, createdAt: u.createdAt,
+      pincode: u.pincode, territory: u.territory, message: u.message, leadDnaAddon: u.leadDnaAddon, pricing: u.pricing, paymentStatus: u.paymentStatus, decisionNote: u.decisionNote, createdAt: u.createdAt,
     };
   }
 

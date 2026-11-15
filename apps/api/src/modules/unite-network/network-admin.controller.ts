@@ -75,7 +75,7 @@ export class NetworkAdminController {
     this.guard(ctx);
     const rows = await this.db.select({ u: franchiseUnits, org: organizations.displayName, verified: organizations.verificationStatus }).from(franchiseUnits).innerJoin(organizations, eq(organizations.id, franchiseUnits.franchiseeOrgId))
       .where(and(sql`${franchiseUnits.packageCode} is not null`, status ? eq(franchiseUnits.status, status) : ne(franchiseUnits.status, 'draft'))).orderBy(desc(franchiseUnits.updatedAt));
-    return rows.map(({ u, org, verified }) => ({ id: u.id, code: u.code, partner: org, verified: verified === 'verified', packageCode: u.packageCode, packageVersion: u.packageVersion, status: u.status, city: u.city, district: u.district, state: u.region, pincode: u.pincode, territory: u.territory, territoryId: u.territoryId, leadDnaAddon: u.leadDnaAddon, pricing: u.pricing, paymentStatus: u.paymentStatus, paymentReference: u.paymentReference, paymentAmount: u.paymentAmount, agreementContractId: u.agreementContractId, decisionNote: u.decisionNote, createdAt: u.createdAt, message: u.message }));
+    return rows.map(({ u, org, verified }) => ({ id: u.id, code: u.code, partner: org, franchiseeOrgId: u.franchiseeOrgId, verified: verified === 'verified', packageCode: u.packageCode, packageVersion: u.packageVersion, status: u.status, city: u.city, district: u.district, state: u.region, pincode: u.pincode, territory: u.territory, territoryId: u.territoryId, leadDnaAddon: u.leadDnaAddon, pricing: u.pricing, paymentStatus: u.paymentStatus, paymentReference: u.paymentReference, paymentAmount: u.paymentAmount, agreementContractId: u.agreementContractId, decisionNote: u.decisionNote, createdAt: u.createdAt, message: u.message }));
   }
 
   @Get('applications/:id')

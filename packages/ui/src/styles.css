@@ -1749,3 +1749,21 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
 .cz-fr-flags { display: flex; flex-wrap: wrap; gap: 6px; }
 .cz-fr-lines { display: grid; grid-template-columns: minmax(0, 2.2fr) 0.7fr 1fr 0.8fr auto; gap: 8px; align-items: end; }
 @media (max-width: 640px) { .cz-fr-lines { grid-template-columns: 1fr 1fr; } .cz-fr-bars { height: 150px; } }
+
+/* Unite Solar partner network */
+.cz-us-plans { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.cz-us-plan { display: flex; flex-direction: column; gap: 10px; }
+.cz-us-plan > a:last-child { margin-top: auto; }
+.cz-us-price { font-size: 26px; font-weight: 700; color: var(--cz-navy, #011E48); letter-spacing: -0.02em; }
+.cz-us-steps { list-style: none; padding: 0; margin: 14px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.cz-us-steps li { font-size: 13px; padding: 6px 10px; border-radius: 999px; background: var(--cz-grey-100, #f1f3f6); color: var(--cz-grey-600, #5b6475); }
+.cz-us-steps li[data-done] { background: #e7f6ec; color: #17663a; }
+.cz-us-steps li[data-current] { background: #e8efff; color: #1e4fd6; font-weight: 600; }
+.cz-us-earn { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 12px; }
+.cz-us-earn > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--cz-grey-50, #f7f8fa); }
+.cz-us-earn strong { font-size: 18px; }
+.cz-us-products { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.cz-us-prices { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 13.5px; margin: 0; }
+.cz-us-prices dt { color: var(--cz-grey-600, #5b6475); }
+.cz-us-prices dd { margin: 0; text-align: right; font-weight: 600; }
+.cz-scroll-x { overflow-x: auto; max-width: 100%; }

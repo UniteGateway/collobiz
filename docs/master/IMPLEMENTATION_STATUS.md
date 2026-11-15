@@ -17,6 +17,7 @@ _Audit date: 2026-11-15 · Branch `claude/collabiz-platform-build` · Reconciles
 | Projects (from executed contract), milestones → certification → invoice → paid | Working | `projects` |
 | Earnings | Working for the commission ledger only; project receipts of an executing partner are not shown as earnings | `commissions` |
 | XCHANGE barter (direct, part-cash, multi-party cycles), COLLABIZ ONE, rescue, revival, 48-hour team challenge, team builder, deal passport, JV contributions | Working, tested | `xchange`, `v2`, `teams` |
+| Unite Solar Franchise & Store Partner network (plans, applications, territories, stock, five-stream ledger, settlements) | Working, tested (8 e2e tests + browser journey); LeadDNA and payment gateway not connected | docs/unite-solar/FRANCHISE_NETWORK.md |
 | Franchise, property, solar desk, trading, tenders, ERP, GST, billing, comms/inbox, search | Working, tested | respective modules |
 | Unite Power Dispatch (separate engineering app) | MVP + Modules 6–8 engine | `apps/power` |
 
