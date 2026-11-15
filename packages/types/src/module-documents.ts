@@ -4,7 +4,7 @@ import { z } from 'zod';
 /** Module keys match the partner app's navigation modules (lib/navigation.ts). */
 export const DOCUMENT_MODULES = [
   ['general', 'COLLABIZ (all modules)'], ['collab', 'Collab'], ['business-offers', 'Business Offers'], ['opportunities', 'Opportunities'], ['leads', 'Leads & CRM'],
-  ['collaboration', 'Collaboration'], ['unite-solar', 'Unite Solar'], ['powertek', 'Powertek products'], ['ventures', 'Unite businesses'], ['tenders', 'Tenders'],
+  ['collaboration', 'Teams & partners'], ['unite-solar', 'Unite Solar'], ['powertek', 'Powertek products'], ['ventures', 'Unite businesses'], ['tenders', 'Tenders'],
   ['projects', 'Projects'], ['trading', 'Trading'], ['earnings', 'Earnings'], ['global', 'Global'], ['growth', 'Performance & learning'], ['help', 'Help & support'],
 ] as const;
 export type DocumentModule = (typeof DOCUMENT_MODULES)[number][0];
