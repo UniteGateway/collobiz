@@ -3,16 +3,22 @@ import ExcelJS from 'exceljs';
 import { Pool } from 'pg';
 import { api, auth, bootApp, loginAll, resetDatabase, seed } from './helpers';
 
-/** Volt EPC's own bank statement: credits for the demo invoices INV-2026-900002 (₹80 lakh outstanding) and -900003 (₹1.4 crore). */
+/**
+ * Volt EPC's own bank statement: credits for the demo invoices INV-2026-900002 (₹80 lakh outstanding) and -900003 (₹1.4 crore).
+ * Dated in the last four days: the demo invoices are issued relative to today (-900003 five days ago), and a payment can only
+ * match an invoice issued on or before it.
+ */
+const day = (back: number) => { const d = new Date(Date.now() - back * 86400_000); return { iso: d.toISOString().slice(0, 10), dmy: `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}` }; };
+const [D1, D2, D3, D4] = [3, 2, 1, 0].map(day);
 const STATEMENT = [
   'Account Number,50100012345678',
-  'Statement Period,01/10/2026 to 10/11/2026',
+  `Statement Period,01/10/2026 to ${D4.dmy}`,
   '',
   'Date,Narration,Chq./Ref.No.,Value Dt,Withdrawal Amt.,Deposit Amt.,Closing Balance',
-  '05/11/2026,NEFT-HDFCN52026110512345-UNITE SOLAR-INV-2026-900002,HDFCN52026110512345,05/11/2026,,"80,00,000.00","95,00,000.00"',
-  '06/11/2026,RTGS/UTIBR52026110600054321/UNITE SOLAR PVT,UTIBR52026110600054321,06/11/2026,,"1,40,00,000.00","2,35,00,000.00"',
-  '07/11/2026,UPI/612345678901/REFUND/someone@okaxis,612345678901,07/11/2026,,"5,000.00","2,35,05,000.00"',
-  '08/11/2026,NEFT-SBIN0001-SALARY NOV,,08/11/2026,"12,00,000.00",,"2,23,05,000.00"',
+  `${D1.dmy},NEFT-HDFCN52026110512345-UNITE SOLAR-INV-2026-900002,HDFCN52026110512345,${D1.dmy},,"80,00,000.00","95,00,000.00"`,
+  `${D2.dmy},RTGS/UTIBR52026110600054321/UNITE SOLAR PVT,UTIBR52026110600054321,${D2.dmy},,"1,40,00,000.00","2,35,00,000.00"`,
+  `${D3.dmy},UPI/612345678901/REFUND/someone@okaxis,612345678901,${D3.dmy},,"5,000.00","2,35,05,000.00"`,
+  `${D4.dmy},NEFT-SBIN0001-SALARY NOV,,${D4.dmy},"12,00,000.00",,"2,23,05,000.00"`,
   ',Closing balance,,,,,"2,23,05,000.00"',
 ].join('\n');
 const csv = (text: string, name = 'volt-hdfc-nov.csv') => ({ buf: Buffer.from(text), name });
@@ -32,7 +38,7 @@ describe('Bank statement import — parse, suggest, confirm; payee reports wait 
   it('only owners/admins import their own statement; the same file twice is refused', async () => {
     await upload(t.rohit, csv(STATEMENT)).expect(403);
     const r = (await upload(t.asha, csv(STATEMENT)).expect(201)).body;
-    expect(r).toMatchObject({ lines: 4, skipped: 1, suggested: 2, alreadyRecorded: 0, layout: 'debit_credit_columns', period: ['2026-11-05', '2026-11-08'] });
+    expect(r).toMatchObject({ lines: 4, skipped: 1, suggested: 2, alreadyRecorded: 0, layout: 'debit_credit_columns', period: [D1.iso, D4.iso] });
     stmtId = r.id;
     await upload(t.asha, csv(STATEMENT)).expect(409);
     await upload(t.asha, csv('hello,world\n1,2', 'junk.csv')).expect(400);
