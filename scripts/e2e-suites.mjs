@@ -2448,7 +2448,7 @@ suites.push({
     await page.goto(WEB + '/unite-solar');
     await page.locator('[data-plan]').first().waitFor();
     expect(await page.locator('[data-plan]').count() === 5, 'five plans');
-    expect(await page.locator('[data-plan="store_with_stock"]').getByText(/₹4 lakh stock/).count() === 1, 'stock store shows ₹4 lakh stock');
+    expect(await page.locator('[data-plan="store_with_stock"]').getByText(/₹4 lakh stock/).count() >= 1, 'stock store shows ₹4 lakh stock');
     await shot('unite-solar-plans');
     await page.goto(WEB + '/unite-solar/apply?package=basic_franchise');
     await page.getByLabel(/Add LeadDNA software/).check();

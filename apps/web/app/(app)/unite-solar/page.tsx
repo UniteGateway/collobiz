@@ -32,7 +32,7 @@ export default function UniteSolarPlans() {
                   <li>✓ {p.termYears}-year term, renewable</li>
                 </ul>
                 <div className="cz-muted" style={{ fontSize: 12.5 }}>Payable: {inr(p.pricing.total)} incl. GST{p.pricingWithLeadDna && !p.leadDnaIncluded ? ` · with LeadDNA ${inr(p.pricingWithLeadDna.total)}` : ''}</div>
-                <ButtonLink href={`/unite-solar/apply?package=${p.code}`} variant={p.code === 'district_franchise' ? 'primary' : 'secondary'}>Apply for {p.name}</ButtonLink>
+                <ButtonLink href={`/unite-solar/apply?package=${p.code}`} variant={p.code === 'district_franchise' ? 'primary' : 'secondary'}>Apply</ButtonLink>
               </section>
             ))}
           </div>

@@ -48,7 +48,7 @@ function Dashboard({ id, onChange }: { id: string; onChange: () => void }) {
           <StatusBadge status={u.status} tone={STATUS_TONE[u.status] ?? 'neutral'} label={u.statusLabel} />
         </div>
         {u.decisionNote && <Alert tone={u.status === 'draft' ? 'warning' : 'info'} title="Note from Unite">{u.decisionNote}</Alert>}
-        <ol className="cz-us-steps" aria-label="Progress">{d.steps.map((s, i) => <li key={s.key} data-done={s.done || undefined} data-current={i === current || undefined}>{s.done ? '✓' : i + 1}. {s.label}</li>)}</ol>
+        <ol className="cz-us-steps" aria-label="Progress">{d.steps.map((s, i) => <li key={s.key} data-done={s.done || undefined} data-current={i === current || undefined}>{s.done ? '✓' : `${i + 1}.`} {s.label}</li>)}</ol>
         {u.status === 'draft' && <div className="cz-row" style={{ gap: 8 }}><ButtonLink href={`/unite-solar/apply?id=${u.id}`} variant="secondary">Edit application</ButtonLink><Button onClick={() => submit.run()} loading={submit.pending}>Submit application</Button></div>}
         {submit.error && <Alert tone="danger">{submit.error}</Alert>}
         {u.agreementContractId && <p style={{ fontSize: 14 }}>Agreement: <a href={`/contracts/${u.agreementContractId}`}>open in Contracts to review and sign</a></p>}

@@ -1751,7 +1751,8 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
 @media (max-width: 640px) { .cz-fr-lines { grid-template-columns: 1fr 1fr; } .cz-fr-bars { height: 150px; } }
 
 /* Unite Solar partner network */
-.cz-us-plans { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.cz-us-plans { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); align-items: stretch; }
+.cz-us-plans > .cz-card + .cz-card { margin-top: 0; }
 .cz-us-plan { display: flex; flex-direction: column; gap: 10px; }
 .cz-us-plan > a:last-child { margin-top: auto; }
 .cz-us-price { font-size: 26px; font-weight: 700; color: var(--cz-navy, #011E48); letter-spacing: -0.02em; }
