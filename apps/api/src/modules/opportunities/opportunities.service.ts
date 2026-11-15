@@ -125,7 +125,8 @@ export class OpportunitiesService {
     const lvl = (l: string | null | undefined) => (l ? `${l.charAt(0).toUpperCase()}${l.slice(1).replace('_', ' ')} partner` : 'none');
     add('level', 'Membership level', v.levelRank >= need ? 'pass' : 'fail', `Requires ${lvl(o.minLevel)} or above · you are ${lvl(ctx.orgMembershipLevel)}`);
     const sectorOk = !!p?.sectors.includes(o.sector);
-    add('sector', 'Sector capability', sectorOk ? 'pass' : 'fail', sectorOk ? `Declared capability in ${sectorName(o.sector)}` : `Add ${sectorName(o.sector)} to your industries (screen 016) if you have this capability`);
+    // Business offers are resource-first: a missing sector declaration is a warning there, not a block.
+    add('sector', 'Sector capability', sectorOk ? 'pass' : o.route === 'partner_listing' ? 'warn' : 'fail', sectorOk ? `Declared capability in ${sectorName(o.sector)}` : `Add ${sectorName(o.sector)} to your industries (screen 016) if you have this capability`);
     const missing = o.requiredCertifications.filter((c) => !p?.certifications.includes(c));
     add('certifications', 'Required certifications', missing.length ? 'fail' : 'pass', missing.length ? `Missing: ${missing.join(', ')}` : o.requiredCertifications.length ? 'All held' : 'None required');
     if (o.region) {

@@ -29,3 +29,4 @@ export * from './voice';
 export * from './phase3';
 export * from './plans';
 export * from './one';
+export * from './collab';

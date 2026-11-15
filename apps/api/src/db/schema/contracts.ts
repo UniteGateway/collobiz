@@ -16,6 +16,9 @@ export const contracts = pgTable('contracts', {
   bidId: uuid('bid_id').references(() => bids.id),
   offerId: uuid('offer_id').references(() => directOffers.id),
   offerResponseId: uuid('offer_response_id').references(() => directOfferResponses.id),
+  /** Set when the agreement comes from an accepted Collab proposal on a business offer. */
+  opportunityId: uuid('opportunity_id'),
+  collabProposalId: uuid('collab_proposal_id'),
   value: bigint('value', { mode: 'number' }),
   currency: text('currency').notNull().default('INR'),
   status: text('status').notNull().default('draft'),
