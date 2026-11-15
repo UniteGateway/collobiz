@@ -142,7 +142,7 @@ export function deliveredCost(records: TariffRecord[], r: RouteInputs): RouteRes
   };
 }
 
-export const STATES: Record<string, string> = { AP: 'Andhra Pradesh', TS: 'Telangana', KA: 'Karnataka', TN: 'Tamil Nadu', MH: 'Maharashtra', OD: 'Odisha' };
+export const STATES: Record<string, string> = { AP: 'Andhra Pradesh', TS: 'Telangana', KA: 'Karnataka', TN: 'Tamil Nadu', MH: 'Maharashtra', OD: 'Odisha', GJ: 'Gujarat', RJ: 'Rajasthan' };
 
 /**
  * Illustrative starting records so the calculators run. Every value is a PLACEHOLDER of a plausible order of magnitude —
@@ -169,6 +169,8 @@ export function illustrativeTariffs(): TariffRecord[] {
   st('TN', 0.42, 0.7, 3.5, 6.0, 1.7, 0.6, 0.05);
   st('MH', 0.45, 0.8, 3.4, 6.5, 1.9, 1.0, 0.08);
   st('OD', 0.3, 0.5, 3.0, 6.0, 1.2, 0.4, 0.04);
+  st('GJ', 0.38, 0.6, 3.2, 5.8, 1.5, 0.7, 0.07);
+  st('RJ', 0.4, 0.65, 3.6, 6.2, 1.6, 0.8, 0.06);
   out.push(
     { key: 'ISTS.charge', jurisdiction: 'ISTS', chargeType: 'ists_charge', unit: 'Rs/kW/month', value: 300, ...ill },
     { key: 'ISTS.loss', jurisdiction: 'ISTS', chargeType: 'ists_loss', unit: '%', value: 3.0, ...ill },
