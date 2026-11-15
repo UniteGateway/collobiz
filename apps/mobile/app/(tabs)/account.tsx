@@ -46,6 +46,7 @@ export default function Account() {
       )}
       {org && (
         <Section title="Work">
+          <Row icon="sunny-outline" iconTint={theme.colors.green700} title="Unite Solar partnership" subtitle="Franchise / store: sales, stock and earnings" onPress={go('/unite-solar')} testID="unite-solar-row" />
           <Row icon="business" iconTint={theme.colors.green700} title="Unite businesses" subtitle="Every Unite Group business you can help grow" onPress={go('/ventures')} testID="ventures-row" />
           <Row icon="briefcase" iconTint={theme.colors.green700} title="Offers for you" subtitle="Work and products Unite Group sent to you" onPress={go('/offers')} testID="offers-row" />
           <Row icon="people" title="Your capacity" subtitle="Offices and people free for new work" onPress={go('/capacity')} />

@@ -1,7 +1,10 @@
 # Unite Solar — Franchise & Store Partner Module
 
 Built inside COLLABIZ (no separate app). Partner screens are under **Unite Solar** in the partner app (`/unite-solar/*`);
-the Admin Control Centre is the **Unite Solar Network** app in the admin workspace (`/workspace/network/*`).
+the Admin Control Centre is the **Unite Solar Network** app in the admin workspace (`/workspace/network/*`). The mobile app
+has the partner side under Account → Unite Solar partnership (`/unite-solar`): my partnership, plans, apply, sales (including
+customer acceptance), inventory (confirm stock received), earnings, and marketing/demo/service. Payment recording, damage/returns
+and the QR image stay on the web; the mobile app shares the referral link through the phone's share sheet.
 
 ## What reuses what
 
