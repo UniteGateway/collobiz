@@ -1,6 +1,7 @@
 """Builds one PDF per app from capture-all.mjs output: cover + contents, then each screen with its route and title.
 Usage: python3 scripts/screens-to-pdf.py SHOTS_DIR OUT_DIR"""
-import json, os, sys
+import datetime, json, os, sys
+TODAY = datetime.date.today().isoformat()
 from PIL import Image, ImageDraw, ImageFont
 
 shots, out = sys.argv[1], sys.argv[2]
@@ -30,7 +31,7 @@ for app in ['web', 'admin', 'power']:
     if not rows: continue
     done = [m for m in rows if m.get('file')]
     pages = []
-    lines = [('Screens captured from the running application with demonstration data (2026-11-15).', False, GREY),
+    lines = [(f'Screens captured from the running application with demonstration data ({TODAY}).', False, GREY),
              (f"{len([m for m in done if m['vw']=='desktop'])} desktop screens (1440 px) and {len([m for m in done if m['vw']=='mobile'])} phone screens (390 px).", False, GREY),
              ('Figures, companies and people are sample data. "Access-limited view" means the demo user lacks the role for that page.', False, GREY), ('', False, GREY)]
     for i, m in enumerate(rows, 1):
