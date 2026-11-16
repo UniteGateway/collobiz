@@ -7,6 +7,7 @@ import { Screen, ApiErrorView } from '@/components/Screen';
 import { useQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
 import { AppsTray, InvestHighlight, LatestOpportunities, OnlineStrip } from '@/components/HomeExtras';
+import { NoticeBoard } from '@/components/ActionOS';
 import { AdCarousel, AreaChart, NewsCard, ThemeHero, VideoCard, type Ad, type News, type Theme, type Video } from '@/components/DashboardKit';
 
 interface Home {
@@ -82,6 +83,9 @@ export default function DashboardPage() {
               </ul>
             ) : <EmptyState icon="success" title="Nothing waiting on you">New invitations, signatures, certifications and payouts will appear here.</EmptyState>}
           </section>
+
+          {/* ---------- ACTION OS notice board (always on the home dashboard) ---------- */}
+          <div className="cz-dash-notice"><NoticeBoard /></div>
 
           {/* ---------- Earnings ---------- */}
           <section className="cz-card cz-dash-earn" aria-labelledby="earn-h">

@@ -17,6 +17,7 @@ export function HomeFeed() {
   const apps = useApi<{ id: string; slug: string; name: string; sector: string; open: boolean; myInterest: string | null }[]>('/ventures');
   const online = useApi<{ members: { userId: string; name: string }[] }>('/community/online');
   const offers = useApi<{ id: string; title: string; location: string; unitPrice: number; unitLabel: string; grossYieldPct: number; subscribedPct: number; status: string }[]>('/invest/offers');
+  const board = useApi<{ counts: { open: number; critical: number; high: number; overdue: number; decisions: number }; items: { id: string; title: string; band: string; kindLabel: string; dueAt: string | null }[] }>('/action-os/dashboard');
   const opps = useApi<{ items: { id: string; title: string; sector: string; city: string | null; estimatedValue: number | null }[] }>('/opportunities', { paged: 'true', limit: '4', sort: 'newest' });
   // Each part renders only when its data has the expected shape, so one failing call never breaks Home.
   const f = feed.data && Array.isArray(feed.data.ads) ? feed.data : undefined;
@@ -45,6 +46,18 @@ export function HomeFeed() {
             </Pressable>
           ))}
         </ScrollView>
+      )}
+
+      {board.data && Array.isArray(board.data.items) && (
+        <Pressable testID="notice-board" onPress={() => router.push('/action-os' as never)} accessibilityRole="button" accessibilityLabel={`My Business Notice Board: ${board.data.counts.open} open, ${board.data.counts.overdue} overdue. Open the action board`} style={[s.card, { gap: 8, backgroundColor: '#F7FAFF' }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}><Text style={{ flex: 1, fontSize: 16, fontWeight: '700', color: theme.colors.navy900 }}>My Business Notice Board</Text><Icon name="chevron-forward" size={17} color={theme.colors.grey300} /></View>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {([['Top', board.data.counts.critical + board.data.counts.high], ['Overdue', board.data.counts.overdue], ['Decisions', board.data.counts.decisions], ['Open', board.data.counts.open]] as [string, number][]).map(([l, v]) => (
+              <View key={l} style={{ flex: 1, backgroundColor: '#fff', borderRadius: 12, padding: 8, borderWidth: 1, borderColor: '#E4E7EC' }}><Text style={{ fontSize: 20, fontWeight: '800', color: l === 'Overdue' && v ? '#B54708' : theme.colors.navy900 }}>{v}</Text><Text style={{ fontSize: 11, color: theme.colors.grey600 }}>{l}</Text></View>
+            ))}
+          </View>
+          {board.data.items.slice(0, 2).map((n) => <View key={n.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: n.band === 'P0' ? '#D92D20' : n.band === 'P1' ? '#F79009' : '#2E90FA' }} /><Text style={{ flex: 1, fontSize: 13.5, color: theme.colors.navy900 }} numberOfLines={1}>{n.title}</Text></View>)}
+        </Pressable>
       )}
 
       {appList && (

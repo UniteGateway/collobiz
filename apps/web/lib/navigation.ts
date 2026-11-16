@@ -22,6 +22,8 @@ export const MODULES: Module[] = [
   { key: 'powertek', label: 'Powertek products', icon: 'package', home: '/powertek', match: ['/powertek'], tabs: [['/powertek', 'All products'], ['/powertek/enquiries', 'My enquiries']] },
   { key: 'ventures', label: 'Unite businesses', icon: 'building', home: '/ventures', match: ['/ventures', '/solar', '/franchise', '/property', '/store/redeem'],
     tabs: [['/ventures', 'Businesses'], ['/solar', 'Solar desk'], ['/franchise', 'Franchise'], ['/property', 'Property sales']] },
+  { key: 'action-os', label: 'Action board', icon: 'bell', home: '/action-os', match: ['/action-os'],
+    tabs: [['/action-os', 'My action board'], ['/action-os/plans', 'Plans'], ['/action-os/settings', 'Schedule & channels']] },
   { key: 'community', label: 'Community', icon: 'teams', home: '/community', match: ['/community'] },
   { key: 'invest', label: 'Invest together', icon: 'building', home: '/invest', match: ['/invest'] },
   { key: 'messages', label: 'Messages', icon: 'messages', home: '/inbox', match: ['/inbox', '/chat', '/meetings', '/announcements', '/notifications'],
@@ -59,7 +61,7 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}): Nav
     ['Money', ['earnings']],
     ['Network & growth', ['community', 'messages', 'global', 'growth']],
   ];
-  sections.push({ items: [item('home')] });
+  sections.push({ items: [item('home'), item('action-os')] });
   for (const [title, keys] of GROUPS) sections.push({ title, collapsible: true, items: keys.filter((k) => byKey[k]).map(item) });
   if (me?.capabilities.includes('commission.approve')) sections.push({ title: 'Finance', items: [{ href: '/commissions/approvals', label: 'Commission approvals', icon: 'verify' }] });
   sections.push({ title: 'Account', collapsible: true, items: [{ href: '/library', label: 'Catalogues & documents', icon: 'package' }, { href: '/vault', label: 'My documents', icon: 'documents' }, { href: '/profile', label: 'Settings', icon: 'settings' }, { href: '/help', label: 'Help & support', icon: 'help' }] });

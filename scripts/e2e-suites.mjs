@@ -2646,3 +2646,33 @@ suites.push({
     await shot('invited-partner');
   },
 });
+
+suites.push({
+  name: 'ACTION OS · notice board on Home, action board ranks real records, Done and filters, generate a plan, channel test',
+  run: async ({ page, WEB, label, expect, shot }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.getByRole('heading', { name: 'My Business Notice Board' }).waitFor();
+    await page.locator('.cz-noticeboard').getByText('Collect invoice INV-2026-900002').first().waitFor();
+    await page.goto(WEB + '/action-os');
+    const card = page.locator('[data-notice="Send revised BOQ to Western Auto"]');
+    await card.waitFor();
+    await card.getByText('Suggested next step:').waitFor();
+    await shot('action-board');
+    await card.getByRole('button', { name: /^Mark done:/ }).click();
+    await card.waitFor({ state: 'detached' });
+    await page.getByLabel('Show', { exact: true }).selectOption('done');
+    await page.locator('[data-notice="Send revised BOQ to Western Auto"]').getByText(/Done here/).waitFor();
+    await page.locator('[data-notice="Send revised BOQ to Western Auto"]').getByRole('button', { name: 'Reopen' }).click();
+    if (label === 'desktop') {
+      await page.getByRole('button', { name: 'Generate my plan now' }).click();
+      await page.waitForURL(/\/action-os\/plans\//);
+      await page.getByText('Executive summary').waitFor();
+      await page.getByRole('heading', { name: 'Top priorities' }).waitFor();
+      await shot('action-plan');
+      await page.goto(WEB + '/action-os/settings');
+      await page.getByRole('button', { name: 'Send a test' }).click();
+      const result = await page.getByText(/inapp: sent/).textContent();
+      expect(!/: delivered/.test(result ?? ''), 'no channel claims delivery without a provider');
+    }
+  },
+});
