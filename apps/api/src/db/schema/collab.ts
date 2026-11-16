@@ -64,6 +64,13 @@ export const businessOffers = pgTable('business_offers', {
   uniteFirstConsent: boolean('unite_first_consent').notNull().default(false),
   uniteReviewUntil: timestamp('unite_review_until', { withTimezone: true }),
   uniteReviewOrgId: uuid('unite_review_org_id').references(() => organizations.id),
+  /** Set when the first-look window ends (the Unite company passed, or the window lapsed) and the offer is listed for everyone. */
+  uniteReleasedAt: timestamp('unite_released_at', { withTimezone: true }),
+  uniteDecision: text('unite_decision'), // interested | pass
+  uniteDecisionNote: text('unite_decision_note'),
+  uniteDecidedAt: timestamp('unite_decided_at', { withTimezone: true }),
+  reminded7At: timestamp('reminded_7_at', { withTimezone: true }),
+  reminded1At: timestamp('reminded_1_at', { withTimezone: true }),
   /** What the moderator actually checked, shown to viewers (never a guarantee). */
   checks: text('checks').array().notNull().default(sql`'{}'::text[]`),
   moderationNote: text('moderation_note'),
@@ -90,3 +97,18 @@ export const collabProposals = pgTable('collab_proposals', {
   decidedAt: timestamp('decided_at', { withTimezone: true }),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex('collab_proposals_round_uq').on(t.applicationId, t.round), index('collab_proposals_opp_idx').on(t.opportunityId)]);
+
+/** A publisher invites a specific verified partner to apply to an open offer. One invitation per offer and partner. */
+export const collabInvitations = pgTable('collab_invitations', {
+  id: id(),
+  opportunityId: uuid('opportunity_id').notNull().references(() => opportunities.id),
+  fromOrgId: uuid('from_org_id').notNull().references(() => organizations.id),
+  toOrgId: uuid('to_org_id').notNull().references(() => organizations.id),
+  message: text('message').notNull(),
+  status: text('status').notNull().default('sent'), // sent | declined (applied / closed are derived)
+  declineReason: text('decline_reason'),
+  createdBy: uuid('created_by').notNull().references(() => users.id),
+  respondedBy: uuid('responded_by').references(() => users.id),
+  respondedAt: timestamp('responded_at', { withTimezone: true }),
+  createdAt: createdAt(),
+}, (t) => [uniqueIndex('collab_invitations_uq').on(t.opportunityId, t.toOrgId), index('collab_invitations_to_idx').on(t.toOrgId)]);

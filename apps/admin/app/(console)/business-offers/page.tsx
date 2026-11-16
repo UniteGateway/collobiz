@@ -5,7 +5,7 @@ import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
-interface Offer { id: string; code: string; title: string; summary: string; categoryLabel: string; side: string; status: string; statusLabel: string; publisher: string; publisherKyb: string; city: string | null; region: string | null; expiresOn: string; regulated: boolean; upfrontRequired: boolean; checks: string[] }
+interface Offer { id: string; code: string; title: string; summary: string; categoryLabel: string; side: string; status: string; statusLabel: string; publisher: string; publisherKyb: string; city: string | null; region: string | null; expiresOn: string; regulated: boolean; upfrontRequired: boolean; checks: string[]; uniteFirst: { consent?: boolean; open: boolean; until?: string } | null }
 const CHECKS: [string, string][] = [
   ['publisher_kyb_verified', 'Publisher’s business verification (KYB) is complete'], ['authority_to_offer_confirmed', 'Publisher confirmed authority to make this offer'],
   ['documents_reviewed', 'Supporting documents were reviewed'], ['duplicate_check_done', 'Checked for duplicate listings'], ['category_permitted', 'Category is permitted on COLLABIZ'],
@@ -36,6 +36,8 @@ function Review({ o, onDone }: { o: Offer; onDone: () => void }) {
       <div data-review={o.code} className="cz-stack" style={{ gap: 8 }}>
         <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{o.summary}</p>
         <p className="cz-muted" style={{ margin: 0, fontSize: 13 }}>Publisher KYB: <strong>{o.publisherKyb}</strong> · Expires {o.expiresOn} · {o.upfrontRequired ? 'Upfront payment required' : 'No upfront payment'}{o.regulated ? ' · Regulated category: discovery only' : ''}</p>
+        {o.uniteFirst?.consent && o.status === 'pending_verification' && <p className="cz-muted" style={{ margin: 0, fontSize: 13 }}>Publisher asked for a Unite first look: on approval the matching Unite company sees it alone for 48 hours, then it is listed for everyone.</p>}
+        {o.uniteFirst?.open && <p className="cz-muted" style={{ margin: 0, fontSize: 13 }}>In Unite first look until {new Date(o.uniteFirst.until ?? '').toLocaleString('en-IN')}.</p>}
         {act.error && <Alert tone="danger">{act.error}</Alert>}
         {o.status === 'pending_verification' && (
           <fieldset style={{ border: 0, padding: 0, margin: 0 }}><legend className="cz-muted" style={{ fontSize: 13, marginBottom: 4 }}>Checks you completed</legend>

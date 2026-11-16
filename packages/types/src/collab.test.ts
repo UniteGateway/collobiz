@@ -78,3 +78,33 @@ describe('Offers and proposals', () => {
     expect(nextProposalTurn([{ fromOrgId: 'A', status: 'superseded' }, { fromOrgId: 'O', status: 'sent' }], 'O', 'A').canAccept).toEqual(['A']);
   });
 });
+
+import { CollabInvitationSchema, UniteDecisionSchema, dueExpiryReminder, inUniteWindow, invitationStatus } from './collab';
+describe('collab follow-ups', () => {
+  const now = new Date('2026-11-16T10:00:00Z');
+  it('Unite first-look window: open until the deadline, closed once released or passed', () => {
+    expect(inUniteWindow({ uniteReviewUntil: null }, now)).toBe(false);
+    expect(inUniteWindow({ uniteReviewUntil: '2026-11-17T10:00:00Z' }, now)).toBe(true);
+    expect(inUniteWindow({ uniteReviewUntil: '2026-11-17T10:00:00Z', uniteReleasedAt: '2026-11-16T09:00:00Z' }, now)).toBe(false);
+    expect(inUniteWindow({ uniteReviewUntil: '2026-11-16T09:59:00Z' }, now)).toBe(false);
+  });
+  it('expiry reminders: 7 days, then 1 day, each once; none after expiry', () => {
+    const o = (expiresOn: string, r7: unknown = null, r1: unknown = null) => ({ expiresOn, reminded7At: r7, reminded1At: r1 });
+    expect(dueExpiryReminder(o('2026-12-01'), '2026-11-16')).toBeNull();
+    expect(dueExpiryReminder(o('2026-11-23'), '2026-11-16')).toBe(7);
+    expect(dueExpiryReminder(o('2026-11-23', 'x'), '2026-11-16')).toBeNull();
+    expect(dueExpiryReminder(o('2026-11-17', 'x'), '2026-11-16')).toBe(1);
+    expect(dueExpiryReminder(o('2026-11-16'), '2026-11-16')).toBe(1);
+    expect(dueExpiryReminder(o('2026-11-17', null, 'x'), '2026-11-16')).toBeNull();
+    expect(dueExpiryReminder(o('2026-11-15'), '2026-11-16')).toBeNull();
+  });
+  it('invitation status and inputs', () => {
+    expect(invitationStatus('sent', true, false)).toBe('applied');
+    expect(invitationStatus('declined', false, true)).toBe('declined');
+    expect(invitationStatus('sent', false, false)).toBe('closed');
+    expect(invitationStatus('sent', false, true)).toBe('sent');
+    expect(CollabInvitationSchema.safeParse({ orgId: '00000000-0000-4000-8000-000000000000', message: 'hi' }).success).toBe(false);
+    expect(UniteDecisionSchema.safeParse({ decision: 'interested' }).success).toBe(false);
+    expect(UniteDecisionSchema.safeParse({ decision: 'pass' }).success).toBe(true);
+  });
+});

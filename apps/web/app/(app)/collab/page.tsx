@@ -21,9 +21,12 @@ const QUICK: AssetKind[] = ['store', 'office', 'team', 'factory', 'land', 'skill
 const sectorOptions = SECTORS.map((s) => ({ value: s.code, label: s.name }));
 
 /** COLLAB — the universal entry: what do you have, what do you need, and who could you work with. */
+interface Invitation { id: string; offerId: string; code: string; title: string; expiresOn: string; message: string; status: string; statusLabel: string; from?: string; organization?: string }
+
 export default function Collab() {
   const p = useQuery<Profile>('/collab/profile');
   const m = useQuery<Matches>('/collab/matches');
+  const inv = useQuery<{ received: Invitation[]; sent: Invitation[] }>('/collab/invitations');
   const [assetKind, setAssetKind] = useState<AssetKind | null>(null);
   const [needOpen, setNeedOpen] = useState(false);
   const reload = () => { p.reload(); m.reload(); };
@@ -36,6 +39,15 @@ export default function Collab() {
         <div className="cz-stack" style={{ gap: 20 }}>
           {!d.canEdit && <Alert tone="info">Only your business owner or an admin can change what it offers and needs. You can still browse matches.</Alert>}
           {archive.error && <Alert tone="danger">{archive.error}</Alert>}
+          {(inv.data?.received ?? []).some((i) => i.status === 'sent') && (
+            <section className="cz-collab-step" aria-labelledby="inv-h">
+              <header><span className="cz-collab-num">✉</span><div><h2 id="inv-h">You are invited</h2><p className="cz-muted">Publishers who think you would fit their offer.</p></div></header>
+              <ul className="cz-collab-items">{inv.data!.received.filter((i) => i.status === 'sent').map((i) => (
+                <li key={i.id}><div><strong>{i.title}</strong><span className="cz-muted"> · {i.code} · from {i.from} · open until {new Date(i.expiresOn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span><p>{i.message}</p></div>
+                  <ButtonLink size="sm" href={`/business-offers/${i.offerId}`}>View and apply</ButtonLink></li>
+              ))}</ul>
+            </section>
+          )}
 
           <section className="cz-collab-step" aria-labelledby="have-h">
             <header><span className="cz-collab-num">1</span><div><h2 id="have-h">What do you have?</h2><p className="cz-muted">A store, an office and team, machinery, land, skills, customers — anything you can put to work.</p></div></header>

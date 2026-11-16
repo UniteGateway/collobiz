@@ -2586,3 +2586,63 @@ suites.push({
     await shot('invest-interest');
   },
 });
+
+suites.push({
+  name: 'COLLAB follow-ups · Unite first look, Unite passes, publisher invites a partner, partner sees the invitation',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, expect, shot }) => {
+    const title = `Rooftop solar crews for residential partners ${Date.now().toString(36)}`;
+    const exp = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/business-offers/new');
+    await page.getByLabel('Category', { exact: true }).selectOption('strategic_partnership');
+    await page.getByLabel('Sector', { exact: true }).selectOption('solar');
+    await page.getByLabel('Title', { exact: true }).fill(title);
+    await page.getByLabel('Describe the offer').fill('Three trained rooftop crews and a Hyderabad warehouse. Seeking partners who bring residential solar customers.');
+    await page.getByLabel('City', { exact: true }).fill('Hyderabad');
+    await page.getByLabel('State / region').fill('Telangana');
+    await page.getByLabel('Offer expires on').fill(exp);
+    await page.getByLabel(/Offer Unite companies the first look/).check();
+    await page.getByRole('button', { name: 'Submit for checks' }).click();
+    await page.getByText('COLLABIZ is checking this offer').waitFor();
+    const offerUrl = page.url();
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/business-offers');
+    const card = page.locator('[data-review]').filter({ hasText: 'Three trained rooftop crews' }).first();
+    await card.getByLabel('Publisher’s business verification (KYB) is complete').check();
+    await card.getByRole('button', { name: 'Approve and publish' }).click();
+    await card.waitFor({ state: 'detached' });
+    // The publisher sees the first-look window; another partner cannot open the offer yet.
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(offerUrl);
+    await page.getByText('The matching Unite company sees this offer first').waitFor();
+    expect(await page.getByRole('heading', { name: /^Invitations/ }).count() === 0, 'no invitations during the first look');
+    await webLogin(page, WEB, 'deepak@deccan.example');
+    await page.goto(offerUrl);
+    await page.getByText(/not found|Not found|could not be found/i).first().waitFor();
+    // Unite Solar gets the first look and passes.
+    await webLoginMfa(page, WEB, 'unite.admin@collabiz.local');
+    await page.goto(offerUrl);
+    await page.getByText('First look for your Unite company').waitFor();
+    await shot('unite-first-look');
+    await page.getByRole('button', { name: 'Pass — list it for everyone' }).click();
+    await page.getByText('First look for your Unite company').waitFor({ state: 'detached' });
+    // The publisher invites Deccan Distributors.
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(offerUrl);
+    await page.getByLabel('Partner business').fill('Decc');
+    await page.getByRole('list', { name: 'Matching partners' }).getByRole('button', { name: 'Choose' }).first().click();
+    await page.getByLabel('Your message').fill('Your dealer network would suit our rooftop crews.');
+    await page.getByRole('button', { name: 'Send invitation' }).click();
+    await page.getByText('Invited', { exact: true }).waitFor();
+    await shot('offer-invitations');
+    // Deccan sees the invitation on Collab and on the offer.
+    await webLogin(page, WEB, 'deepak@deccan.example');
+    await page.goto(WEB + '/collab');
+    const inv = page.locator('section', { hasText: 'You are invited' }).locator('li', { hasText: title });
+    await inv.waitFor();
+    await inv.getByRole('link', { name: 'View and apply' }).click();
+    await page.getByText('You are invited to apply').waitFor();
+    await shot('invited-partner');
+  },
+});

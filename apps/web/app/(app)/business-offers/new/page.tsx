@@ -12,12 +12,12 @@ const inAMonth = () => new Date(Date.now() + 60 * 86400000).toISOString().slice(
 export default function PublishOffer() {
   const router = useRouter();
   const p = useQuery<{ assets: { id: string; kind: AssetKind; title: string }[]; verified: boolean; canEdit: boolean }>('/collab/profile');
-  const [f, setF] = useState({ side: 'offering', category: 'idle_capacity', title: '', summary: '', sector: 'technology', city: '', region: '', territory: '', value: '', upfront: false, upfrontAmount: '', eligibility: '', confidential: false, expiresOn: inAMonth(), assetIds: [] as string[] });
+  const [f, setF] = useState({ side: 'offering', category: 'idle_capacity', title: '', summary: '', sector: 'technology', city: '', region: '', territory: '', value: '', upfront: false, upfrontAmount: '', eligibility: '', confidential: false, uniteFirst: false, expiresOn: inAMonth(), assetIds: [] as string[] });
   const save = useMutation(async (submit: boolean) => {
     const o = await send<{ id: string }>('/business-offers', {
       category: f.category, side: f.side, title: f.title, summary: f.summary, sector: f.sector, city: f.city || undefined, region: f.region || undefined, territory: f.territory || undefined,
       estimatedValue: f.value ? Math.round(Number(f.value) * 100) : undefined, upfrontRequired: f.upfront, upfrontAmount: f.upfront && f.upfrontAmount ? Math.round(Number(f.upfrontAmount) * 100) : undefined,
-      eligibility: f.eligibility || undefined, confidential: f.confidential, expiresOn: f.expiresOn, assetIds: f.assetIds, submit,
+      eligibility: f.eligibility || undefined, confidential: f.confidential, uniteFirstConsent: f.uniteFirst, expiresOn: f.expiresOn, assetIds: f.assetIds, submit,
     });
     router.push(`/business-offers/${o.id}`); return o;
   });
@@ -56,6 +56,7 @@ export default function PublishOffer() {
           <Card title="Who can apply and privacy">
             <TextArea label="Eligibility (optional)" rows={2} placeholder="Experience, licences, languages or capacity a partner needs" value={f.eligibility} onChange={(ev) => setF({ ...f, eligibility: ev.target.value })} />
             <Checkbox label="Keep my business name confidential until I accept an applicant" checked={f.confidential} onChange={(ev) => setF({ ...f, confidential: ev.target.checked })} />
+            <Checkbox label="Offer Unite companies the first look (48 hours) before it is listed for all partners" checked={f.uniteFirst} onChange={(ev) => setF({ ...f, uniteFirst: ev.target.checked })} />
           </Card>
           <div className="cz-row" style={{ gap: 10 }}>
             <Button type="submit" loading={save.pending} disabled={!p.data.canEdit || !p.data.verified || !f.title || f.summary.length < 30}>Submit for checks</Button>

@@ -301,3 +301,36 @@ export function nextProposalTurn(rounds: { fromOrgId: string; status: string }[]
   const other = live.fromOrgId === ownerOrgId ? applicantOrgId : ownerOrgId;
   return { canPropose: [other], canAccept: [other] };
 }
+
+// ---------------------------------------------------------------- Collab follow-ups: Unite first look, invitations, reminders
+/** Hours a consenting offer is shown only to the matching Unite company before it is listed for everyone. */
+export const UNITE_FIRST_HOURS = 48;
+/** Days before expiry at which the publisher is reminded (once each). */
+export const EXPIRY_REMINDER_DAYS = [7, 1] as const;
+/** Most invitations one offer can send in 24 hours (stops spam). */
+export const INVITES_PER_DAY = 25;
+export const UniteDecisionSchema = z.object({ decision: z.enum(['interested', 'pass']), note: z.string().trim().max(1000).optional() })
+  .refine((x) => x.decision === 'pass' || (x.note?.length ?? 0) >= 5, { message: 'Tell the publisher what interests you', path: ['note'] });
+export const CollabInvitationSchema = z.object({ orgId: z.string().uuid(), message: z.string().trim().min(10, 'Write at least a line about why you are inviting them').max(1000) });
+export const INVITATION_STATUS_LABELS: Record<string, string> = { sent: 'Invited', declined: 'Declined', applied: 'Applied', closed: 'Offer closed' };
+
+/** Whether an offer is still inside its Unite first-look window. */
+export function inUniteWindow(o: { uniteReviewUntil: Date | string | null; uniteReleasedAt?: Date | string | null }, now = new Date()) {
+  return !!o.uniteReviewUntil && !o.uniteReleasedAt && new Date(o.uniteReviewUntil) > now;
+}
+
+/** Which expiry reminder is due today, if any: the 1-day reminder wins over the 7-day one; each is sent once. */
+export function dueExpiryReminder(o: { expiresOn: string; reminded7At: unknown; reminded1At: unknown }, today: string): 7 | 1 | null {
+  const days = Math.round((Date.parse(o.expiresOn) - Date.parse(today)) / 86400000);
+  if (days < 0) return null;
+  if (days <= 1) return o.reminded1At ? null : 1;
+  if (days <= 7) return o.reminded7At ? null : 7;
+  return null;
+}
+
+/** What an invitation shows: an application or a closed offer overrides the stored status. */
+export function invitationStatus(stored: string, applied: boolean, offerOpen: boolean) {
+  if (applied) return 'applied';
+  if (stored === 'declined') return 'declined';
+  return offerOpen ? 'sent' : 'closed';
+}

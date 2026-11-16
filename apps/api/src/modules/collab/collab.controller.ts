@@ -14,18 +14,20 @@
  *    milestones, invoices and payments use the existing Projects flow.
  *  - Earnings for a collaboration separate pipeline value, contract value, invoiced and collected — never mixed.
  */
-import { BadRequestException, Body, ConflictException, Controller, Delete, ForbiddenException, Get, HttpCode, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, ForbiddenException, Get, HttpCode, Logger, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { and, desc, eq, inArray, isNull, lt, ne, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   ASSET_LABELS, BusinessOfferSchema, CollabAssetSchema, CollabNeedSchema, CollabProposalSchema, NEED_LABELS, OFFER_CATEGORY_CODES, OFFER_OPEN, OFFER_STATUS_LABELS, PRICING_LABELS,
+  CollabInvitationSchema, EXPIRY_REMINDER_DAYS, INVITATION_STATUS_LABELS, INVITES_PER_DAY, UNITE_FIRST_HOURS, UniteDecisionSchema, dueExpiryReminder, inUniteWindow, invitationStatus,
   canOfferMove, isRegulatedCategory, nextProposalTurn, offerCategoryLabel, reverseMatches, scoreOffer, scoreProgram, sectorName,
   type AssetKind, type MatchAsset, type MatchNeed, type NeedKind, type OfferCategory, type OfferStatus,
 } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
+import { config } from '../../config';
 import {
-  businessOffers, collabAssets, collabNeeds, collabProposals, contractVersions, contracts, memberships, notifications, opportunities, opportunityApplications, opportunityEvents, organizations,
+  businessOffers, collabAssets, collabInvitations, groupCompanies, collabNeeds, collabProposals, contractVersions, contracts, memberships, notifications, opportunities, opportunityApplications, opportunityEvents, organizations,
   partnerCapacity, projectInvoices, projects, uniteVentures,
 } from '../../db/schema';
 import { body } from '../../common/http';
@@ -54,8 +56,17 @@ const ModerateSchema = z.object({ decision: z.enum(['approve', 'reject', 'suspen
 
 @ApiTags('collab')
 @Controller()
-export class CollabController {
+export class CollabController implements OnModuleInit, OnModuleDestroy {
   constructor(@InjectDb() private db: Db, private audit: AuditService, private opps: OpportunitiesService) {}
+  private readonly log = new Logger('Collab');
+  private timer?: NodeJS.Timeout;
+  /** Hourly: expire offers, end lapsed Unite first-look windows and send expiry reminders (also runnable via POST /admin/business-offers/sweep). */
+  onModuleInit() {
+    if (config().NODE_ENV === 'test') return;
+    this.timer = setInterval(() => void this.sweepAll().catch((e) => this.log.error(`collab sweep failed: ${e}`)), 3600_000);
+    this.timer.unref();
+  }
+  onModuleDestroy() { if (this.timer) clearInterval(this.timer); }
 
   // ------------------------------------------------------------------ helpers
   private org(ctx: RequestContext) {
@@ -75,13 +86,63 @@ export class CollabController {
   /** Offers past their expiry stop being listed. Run before every read; cheap and idempotent. */
   private async sweepExpired() {
     const gone = await this.db.update(businessOffers).set({ status: 'expired', updatedAt: new Date() }).where(and(inArray(businessOffers.status, ['active', 'negotiating', 'verified', 'under_review']), lt(businessOffers.expiresOn, today()))).returning({ id: businessOffers.opportunityId });
-    if (gone.length) await this.db.update(opportunities).set({ listed: false, updatedAt: new Date() }).where(inArray(opportunities.id, gone.map((g) => g.id)));
+    if (!gone.length) return 0;
+    const os = await this.db.update(opportunities).set({ listed: false, updatedAt: new Date() }).where(inArray(opportunities.id, gone.map((g) => g.id))).returning({ id: opportunities.id, code: opportunities.code, title: opportunities.title, owner: opportunities.ownerOrgId });
+    for (const o of os) await this.notifyOrg(o.owner, `Your offer ${o.code} has expired`, `“${o.title}” is no longer listed. Renew it to list it again.`, `/business-offers/${o.id}`);
+    return os.length;
+  }
+  /** Ends Unite first-look windows that have lapsed: the offer is listed for everyone and the publisher is told. */
+  private async releaseLapsed() {
+    const due = await this.db.select({ id: businessOffers.opportunityId }).from(businessOffers)
+      .where(and(inArray(businessOffers.status, OFFER_OPEN), isNull(businessOffers.uniteReleasedAt), lt(businessOffers.uniteReviewUntil, new Date())));
+    for (const d of due) await this.releaseToAll(d.id, 'The Unite company’s first-look window ended');
+    return due.length;
+  }
+  private async releaseToAll(id: string, why: string) {
+    const [b] = await this.db.update(businessOffers).set({ uniteReleasedAt: new Date(), updatedAt: new Date() }).where(and(eq(businessOffers.opportunityId, id), isNull(businessOffers.uniteReleasedAt))).returning();
+    if (!b) return;
+    const [o] = await this.db.update(opportunities).set({ listed: OFFER_OPEN.includes(b.status as OfferStatus), updatedAt: new Date() }).where(eq(opportunities.id, id)).returning();
+    await this.notifyOrg(o.ownerOrgId, `Your offer ${o.code} is now listed for all verified partners`, `${why}. Partners can now find and apply to “${o.title}”.`, `/business-offers/${id}`);
+  }
+  /** 7-day and 1-day expiry reminders to the publisher, each sent once. */
+  private async remindExpiring() {
+    const horizon = new Date(Date.now() + Math.max(...EXPIRY_REMINDER_DAYS) * 86400000).toISOString().slice(0, 10);
+    const rows = await this.db.select({ b: businessOffers, o: opportunities }).from(businessOffers).innerJoin(opportunities, eq(opportunities.id, businessOffers.opportunityId))
+      .where(and(inArray(businessOffers.status, OFFER_OPEN), sql`${businessOffers.expiresOn} <= ${horizon}`, sql`${businessOffers.expiresOn} >= ${today()}`));
+    let sent = 0;
+    for (const r of rows) {
+      const due = dueExpiryReminder({ expiresOn: r.b.expiresOn, reminded7At: r.b.reminded7At, reminded1At: r.b.reminded1At }, today());
+      if (!due) continue;
+      const [won] = await this.db.update(businessOffers).set(due === 1 ? { reminded1At: new Date(), reminded7At: r.b.reminded7At ?? new Date() } : { reminded7At: new Date() })
+        .where(and(eq(businessOffers.opportunityId, r.o.id), due === 1 ? isNull(businessOffers.reminded1At) : isNull(businessOffers.reminded7At))).returning({ id: businessOffers.opportunityId });
+      if (!won) continue; // another sweep sent it
+      const when = due === 1 ? (r.b.expiresOn === today() ? 'today' : 'tomorrow') : `on ${new Date(r.b.expiresOn).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' })}`;
+      await this.notifyOrg(r.o.ownerOrgId, `Offer ${r.o.code} expires ${when}`, `“${r.o.title}” stops being listed after ${r.b.expiresOn}. Close it if it is done, or renew it once it expires.`, `/business-offers/${r.o.id}`);
+      sent++;
+    }
+    return sent;
+  }
+  async sweepAll() {
+    const expired = await this.sweepExpired();
+    const released = await this.releaseLapsed();
+    const reminders = await this.remindExpiring();
+    return { expired, released, reminders };
+  }
+  /** The Unite company that gets first look: an active group company covering the sector, never the publisher itself. */
+  private async uniteReviewerFor(o: Opp) {
+    const [gc] = await this.db.select({ id: groupCompanies.organizationId }).from(groupCompanies).innerJoin(organizations, eq(organizations.id, groupCompanies.organizationId))
+      .where(and(sql`${o.sector} = any(${groupCompanies.sectors})`, eq(groupCompanies.status, 'active'), eq(groupCompanies.receivesLeads, true), ne(groupCompanies.organizationId, o.ownerOrgId)))
+      .orderBy(organizations.createdAt).limit(1);
+    return gc?.id ?? null;
+  }
+  private isReviewer(ctx: RequestContext | null, b: Offer) {
+    return !!ctx?.orgId && !!b.uniteReviewOrgId && ctx.orgId === b.uniteReviewOrgId;
   }
   private async setOfferStatus(ctx: RequestContext, o: Offer, to: OfferStatus, extra: Partial<Offer> = {}, tx: Db = this.db) {
     if (!canOfferMove(o.status, to)) throw new ConflictException(`An offer cannot move from ${OFFER_STATUS_LABELS[o.status as OfferStatus]} to ${OFFER_STATUS_LABELS[to]}`);
     const [u] = await tx.update(businessOffers).set({ ...extra, status: to, updatedAt: new Date() }).where(and(eq(businessOffers.opportunityId, o.opportunityId), eq(businessOffers.status, o.status))).returning();
     if (!u) throw new ConflictException('This offer was changed by someone else. Reload and try again.');
-    const listed = OFFER_OPEN.includes(to);
+    const listed = OFFER_OPEN.includes(to) && !inUniteWindow(u);
     await tx.update(opportunities).set({ listed, ...(listed ? { publishedAt: sql`coalesce(${opportunities.publishedAt}, now())` } : {}), updatedAt: new Date() } as never).where(eq(opportunities.id, o.opportunityId));
     await this.audit.record(ctx, { action: `business_offer.${to}`, objectType: 'opportunity', objectId: o.opportunityId, before: { status: o.status }, after: { status: to } }, tx);
     return u;
@@ -100,6 +161,8 @@ export class CollabController {
       expiresOn: r.b.expiresOn, upfrontRequired: r.b.upfrontRequired, upfrontAmount: r.b.upfrontAmount, eligibility: r.b.eligibility, territory: r.b.territory, regulated: isRegulatedCategory(r.b.category),
       checks: r.b.checks.map((c) => CHECK_LABELS[c] ?? c), publisher: own || !r.o.buyerConfidential ? r.owner : 'Confidential — revealed after the publisher accepts your application',
       confidential: r.o.buyerConfidential, isOwner: own, publishedAt: r.o.publishedAt, moderationNote: own ? r.b.moderationNote : null, renewals: r.b.renewals,
+      uniteFirst: own || this.isReviewer(ctx, r.b) || (!!ctx && this.moderator(ctx)) ? (r.b.uniteReviewUntil ? { until: r.b.uniteReviewUntil, open: inUniteWindow(r.b), releasedAt: r.b.uniteReleasedAt, decision: r.b.uniteDecision, note: r.b.uniteDecisionNote, decidedAt: r.b.uniteDecidedAt } : { consent: r.b.uniteFirstConsent, open: false }) : null,
+      uniteReview: this.isReviewer(ctx, r.b) && inUniteWindow(r.b),
     };
   }
   private async myProfile(orgId: string) {
@@ -223,17 +286,22 @@ export class CollabController {
   }
 
   // ------------------------------------------------------------------ 4. business offers
+  /** Offers inside a Unite first-look window are visible only to that Unite company (and the publisher, via “mine”). */
+  private visibleNow(ctx: RequestContext) {
+    return or(isNull(businessOffers.uniteReviewUntil), sql`${businessOffers.uniteReleasedAt} is not null`, lt(businessOffers.uniteReviewUntil, new Date()), ctx.orgId ? eq(businessOffers.uniteReviewOrgId, ctx.orgId) : undefined);
+  }
+
   @Get('business-offers')
   async listOffers(@Ctx() ctx: RequestContext, @Query('category') category?: string, @Query('q') q?: string, @Query('region') region?: string, @Query('side') side?: string, @Query('zeroUpfront') zero?: string, @Query('sector') sector?: string) {
     await this.sweepExpired();
     if (category && !(OFFER_CATEGORY_CODES as readonly string[]).includes(category)) throw new BadRequestException('Unknown category');
     const rows = await this.db.select({ b: businessOffers, o: opportunities, owner: organizations.displayName }).from(businessOffers)
       .innerJoin(opportunities, eq(opportunities.id, businessOffers.opportunityId)).innerJoin(organizations, eq(organizations.id, opportunities.ownerOrgId))
-      .where(and(inArray(businessOffers.status, OFFER_OPEN), category ? eq(businessOffers.category, category) : undefined, side ? eq(businessOffers.side, side) : undefined,
+      .where(and(inArray(businessOffers.status, OFFER_OPEN), this.visibleNow(ctx), category ? eq(businessOffers.category, category) : undefined, side ? eq(businessOffers.side, side) : undefined,
         region ? eq(opportunities.region, region) : undefined, sector ? eq(opportunities.sector, sector) : undefined, zero === '1' ? eq(businessOffers.upfrontRequired, false) : undefined,
         q ? or(sql`${opportunities.title} ilike ${'%' + q + '%'}`, sql`${opportunities.summary} ilike ${'%' + q + '%'}`, eq(opportunities.code, q.toUpperCase())) : undefined))
       .orderBy(desc(opportunities.publishedAt)).limit(200);
-    const counts = await this.db.select({ c: businessOffers.category, n: sql<number>`count(*)::int` }).from(businessOffers).where(inArray(businessOffers.status, OFFER_OPEN)).groupBy(businessOffers.category);
+    const counts = await this.db.select({ c: businessOffers.category, n: sql<number>`count(*)::int` }).from(businessOffers).where(and(inArray(businessOffers.status, OFFER_OPEN), this.visibleNow(ctx))).groupBy(businessOffers.category);
     return { items: rows.map((r) => this.present(r, ctx)), counts: Object.fromEntries(counts.map((c) => [c.c, Number(c.n)])) };
   }
 
@@ -326,21 +394,25 @@ export class CollabController {
     const own = ctx.memberships.some((m) => m.organizationId === r.o.ownerOrgId);
     const party = ctx.orgId ? (await this.db.select({ id: opportunityApplications.id }).from(opportunityApplications).where(and(eq(opportunityApplications.opportunityId, id), eq(opportunityApplications.organizationId, ctx.orgId))).limit(1))[0] : undefined;
     if (!own && !this.moderator(ctx) && !OFFER_OPEN.includes(r.b.status as OfferStatus) && !party) throw new NotFoundException('Offer not found');
+    if (!own && !this.moderator(ctx) && !party && inUniteWindow(r.b) && !this.isReviewer(ctx, r.b)) throw new NotFoundException('Offer not found');
     const view = this.present(r, ctx);
     const assets = r.b.assetIds.length ? await this.db.select().from(collabAssets).where(and(inArray(collabAssets.id, r.b.assetIds), isNull(collabAssets.archivedAt))) : [];
     const applyCheck = ctx.orgId && !own ? await this.opps.eligibility(ctx, r.o) : null;
     const myApplication = ctx.orgId && !own ? (await this.db.select().from(opportunityApplications).where(and(eq(opportunityApplications.opportunityId, id), eq(opportunityApplications.organizationId, ctx.orgId), ne(opportunityApplications.status, 'withdrawn'))).limit(1))[0] ?? null : null;
-    let applications: unknown[] = [], suggested: unknown[] = [];
+    let applications: unknown[] = [], suggested: unknown[] = [], invitations: unknown[] = [];
+    const myInvitation = ctx.orgId && !own ? (await this.db.select().from(collabInvitations).where(and(eq(collabInvitations.opportunityId, id), eq(collabInvitations.toOrgId, ctx.orgId))).limit(1))[0] ?? null : null;
     if (own) {
       applications = await this.opps.applicants(ctx, r.o);
+      invitations = await this.invitationRows(eq(collabInvitations.opportunityId, id), 'sent');
       if (viewerOf(ctx).verified && OFFER_OPEN.includes(r.b.status as OfferStatus)) {
         const others = await this.db.select({ a: collabAssets, org: organizations.displayName }).from(collabAssets).innerJoin(organizations, eq(organizations.id, collabAssets.orgId))
           .where(and(isNull(collabAssets.archivedAt), eq(collabAssets.visibility, 'verified_partners'), ne(collabAssets.orgId, r.o.ownerOrgId), eq(organizations.verificationStatus, 'verified'))).limit(1000);
         suggested = reverseMatches([{ category: r.b.category as OfferCategory, side: r.b.side as 'offering' | 'seeking', sectors: [r.o.sector], regions: r.o.region ? [r.o.region] : [], orgId: r.o.ownerOrgId }], others.map((o) => this.asMatchAsset(o.a)), 8)
-          .map((f) => { const o = others.find((x) => x.a.id === f.item.id)!; return { organization: o.org, resource: { kind: o.a.kind, kindLabel: ASSET_LABELS[o.a.kind as AssetKind], title: o.a.title, city: o.a.city, capacity: o.a.capacity, verification: o.a.verification }, score: f.score, reasons: f.reasons }; });
+          .map((f) => { const o = others.find((x) => x.a.id === f.item.id)!; return { orgId: o.a.orgId, organization: o.org, resource: { kind: o.a.kind, kindLabel: ASSET_LABELS[o.a.kind as AssetKind], title: o.a.title, city: o.a.city, capacity: o.a.capacity, verification: o.a.verification }, score: f.score, reasons: f.reasons }; });
       }
     }
-    return { ...view, assets: assets.map((a) => ({ id: a.id, kind: a.kind, kindLabel: ASSET_LABELS[a.kind as AssetKind], title: a.title, capacity: a.capacity, verification: a.verification })), applyCheck, myApplication, applications, suggested,
+    return { ...view, invitations, invitation: myInvitation ? { id: myInvitation.id, message: myInvitation.message, status: invitationStatus(myInvitation.status, !!myApplication, OFFER_OPEN.includes(r.b.status as OfferStatus)), createdAt: myInvitation.createdAt } : null,
+      assets: assets.map((a) => ({ id: a.id, kind: a.kind, kindLabel: ASSET_LABELS[a.kind as AssetKind], title: a.title, capacity: a.capacity, verification: a.verification })), applyCheck, myApplication, applications, suggested,
       notice: view.regulated ? 'Business sales, acquisitions, exits and investments are listed for discovery only. COLLABIZ does not arrange or execute these transactions; they continue through an appropriately licensed channel.' : null };
   }
 
@@ -362,6 +434,7 @@ export class CollabController {
     const r = await this.loadOffer(id);
     if (ctx.memberships.some((m) => m.organizationId === r.o.ownerOrgId)) throw new ForbiddenException('You cannot moderate your own organisation’s offer');
     const stamp = { moderatedBy: ctx.userId, moderatedAt: new Date(), moderationNote: b.note ?? null };
+    let firstLook: string | null = null;
     await this.db.transaction(async (tx) => {
       const t = tx as unknown as Db;
       if (b.decision === 'approve') {
@@ -370,12 +443,118 @@ export class CollabController {
         const v = await this.setOfferStatus(ctx, r.b, 'verified', { ...stamp, checks: b.checks }, t);
         await this.setOfferStatus(ctx, v, 'active', {}, t);
         if (r.o.status === 'draft') await this.opps.transition(ctx, id, 'qualification', 'Business offer verified and published', t, undefined, { listed: true, publishedAt: new Date() });
+        // Unite first: with the publisher's consent, the matching Unite company gets a first look before everyone else.
+        const reviewer = r.b.uniteFirstConsent && !r.b.uniteReviewUntil ? await this.uniteReviewerFor(r.o) : null;
+        if (reviewer) {
+          await t.update(businessOffers).set({ uniteReviewOrgId: reviewer, uniteReviewUntil: new Date(Date.now() + UNITE_FIRST_HOURS * 3600_000) }).where(eq(businessOffers.opportunityId, id));
+          await t.update(opportunities).set({ listed: false }).where(eq(opportunities.id, id));
+          await this.audit.record(ctx, { action: 'business_offer.unite_first_started', objectType: 'opportunity', objectId: id, after: { reviewer, hours: UNITE_FIRST_HOURS } }, t);
+          firstLook = reviewer;
+        }
       } else if (b.decision === 'reject') await this.setOfferStatus(ctx, r.b, 'rejected', stamp, t);
       else if (b.decision === 'suspend') await this.setOfferStatus(ctx, r.b, 'suspended', stamp, t);
       else await this.setOfferStatus(ctx, r.b, 'active', stamp, t);
     });
-    await this.notifyOrg(r.o.ownerOrgId, `Your offer ${r.o.code}: ${b.decision === 'approve' ? 'published' : b.decision === 'reinstate' ? 'reinstated' : b.decision === 'reject' ? 'not approved' : 'suspended'}`, b.note ?? 'Your business offer has been reviewed.', `/business-offers/${id}`);
+    if (firstLook) await this.notifyOrg(firstLook, `First look: ${r.o.title}`, `A verified partner offered Unite companies the first look at ${r.o.code} for ${UNITE_FIRST_HOURS} hours before it is listed for everyone. Say whether you are interested or pass.`, `/business-offers/${id}`);
+    await this.notifyOrg(r.o.ownerOrgId, `Your offer ${r.o.code}: ${b.decision === 'approve' ? (firstLook ? `approved — Unite first look for ${UNITE_FIRST_HOURS} hours, then listed` : 'published') : b.decision === 'reinstate' ? 'reinstated' : b.decision === 'reject' ? 'not approved' : 'suspended'}`, b.note ?? 'Your business offer has been reviewed.', `/business-offers/${id}`);
     return this.offerDetail(ctx, id);
+  }
+
+  /** Runs the offer housekeeping now (for an external scheduler; the API also runs it hourly). */
+  @Post('admin/business-offers/sweep')
+  @HttpCode(200)
+  async sweepNow(@Ctx() ctx: RequestContext) {
+    if (!this.moderator(ctx)) throw new ForbiddenException('Moderators only');
+    return this.sweepAll();
+  }
+
+  // ------------------------------------------------------------------ Unite first look
+  /** The Unite company says it is interested (the publisher is told and can talk to them) or passes (listed for everyone now). */
+  @Post('business-offers/:id/unite-decision')
+  @RequireOrg()
+  @HttpCode(200)
+  async uniteDecision(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Body(body(UniteDecisionSchema)) b: z.infer<typeof UniteDecisionSchema>) {
+    const r = await this.loadOffer(id);
+    if (!this.isReviewer(ctx, r.b) || !ctx.memberships.some((m) => m.organizationId === ctx.orgId && ['org_owner', 'org_admin', 'unite_admin'].includes(m.role))) throw new ForbiddenException('Only the Unite company given the first look can decide');
+    if (!inUniteWindow(r.b)) throw new ConflictException('The first-look window has ended');
+    await this.db.update(businessOffers).set({ uniteDecision: b.decision === 'pass' ? 'pass' : 'interested', uniteDecisionNote: b.note ?? null, uniteDecidedAt: new Date(), updatedAt: new Date() }).where(eq(businessOffers.opportunityId, id));
+    await this.audit.record(ctx, { action: `business_offer.unite_${b.decision}`, objectType: 'opportunity', objectId: id, after: { note: b.note ?? null } });
+    const [me] = await this.db.select({ n: organizations.displayName }).from(organizations).where(eq(organizations.id, ctx.orgId!));
+    if (b.decision === 'pass') await this.releaseToAll(id, `${me?.n ?? 'The Unite company'} passed on the first look`);
+    else await this.notifyOrg(r.o.ownerOrgId, `${me?.n ?? 'A Unite company'} is interested in ${r.o.code}`, `${b.note}\n\nThey will contact you through COLLABIZ messages. The offer is listed for everyone when the first-look window ends.`, `/business-offers/${id}`);
+    return this.offerDetail(ctx, id);
+  }
+
+  // ------------------------------------------------------------------ invitations
+  private async invitationRows(where: ReturnType<typeof eq>, side: 'sent' | 'received') {
+    const rows = await this.db.select({ i: collabInvitations, o: opportunities, b: businessOffers, to: organizations.displayName,
+      applied: sql<boolean>`exists(select 1 from opportunity_applications x where x.opportunity_id = ${collabInvitations.opportunityId} and x.organization_id = ${collabInvitations.toOrgId} and x.status <> 'withdrawn')`,
+      from: sql<string>`(select display_name from organizations f where f.id = ${collabInvitations.fromOrgId})` })
+      .from(collabInvitations).innerJoin(opportunities, eq(opportunities.id, collabInvitations.opportunityId)).innerJoin(businessOffers, eq(businessOffers.opportunityId, collabInvitations.opportunityId))
+      .innerJoin(organizations, eq(organizations.id, collabInvitations.toOrgId)).where(where).orderBy(desc(collabInvitations.createdAt)).limit(200);
+    return rows.map((r) => {
+      const status = invitationStatus(r.i.status, !!r.applied, OFFER_OPEN.includes(r.b.status as OfferStatus));
+      return { id: r.i.id, offerId: r.o.id, code: r.o.code, title: r.o.title, expiresOn: r.b.expiresOn, message: r.i.message, status, statusLabel: INVITATION_STATUS_LABELS[status],
+        declineReason: r.i.declineReason, createdAt: r.i.createdAt, respondedAt: r.i.respondedAt, ...(side === 'sent' ? { organization: r.to } : { from: r.o.buyerConfidential ? 'A verified business (name shared after it accepts your application)' : r.from }) };
+    });
+  }
+
+  /** Verified partner businesses the publisher can invite (name search). */
+  @Get('collab/partners')
+  @RequireOrg()
+  async partners(@Ctx() ctx: RequestContext, @Query('q') q = '') {
+    if (q.trim().length < 2) return [];
+    const rows = await this.db.select({ id: organizations.id, name: organizations.displayName, city: organizations.city }).from(organizations)
+      .where(and(eq(organizations.verificationStatus, 'verified'), inArray(organizations.type, ['partner_company', 'partner_individual']), ne(organizations.id, ctx.orgId!), sql`${organizations.displayName} ilike ${'%' + q.trim() + '%'}`))
+      .orderBy(organizations.displayName).limit(10);
+    return rows;
+  }
+
+  /** The publisher invites a verified partner to apply. Open offers only; not during the Unite first look; 25 a day per offer. */
+  @Post('business-offers/:id/invitations')
+  @RequireOrg()
+  @HttpCode(201)
+  async invite(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Body(body(CollabInvitationSchema)) b: z.infer<typeof CollabInvitationSchema>) {
+    const r = await this.loadOffer(id);
+    if (ctx.orgId !== r.o.ownerOrgId || !this.manager(ctx, r.o.ownerOrgId)) throw new ForbiddenException('Only the owner or an admin of the publishing business can invite');
+    if (!OFFER_OPEN.includes(r.b.status as OfferStatus)) throw new ConflictException('Invite partners once the offer is published');
+    if (inUniteWindow(r.b)) throw new ConflictException('The Unite first look is still running. Invite partners once the offer is listed for everyone.');
+    if (b.orgId === r.o.ownerOrgId) throw new BadRequestException('You cannot invite your own business');
+    const [to] = await this.db.select().from(organizations).where(eq(organizations.id, b.orgId)).limit(1);
+    if (!to || to.verificationStatus !== 'verified' || !['partner_company', 'partner_individual'].includes(to.type)) throw new BadRequestException('Only verified partner businesses can be invited');
+    const [applied] = await this.db.select({ id: opportunityApplications.id }).from(opportunityApplications).where(and(eq(opportunityApplications.opportunityId, id), eq(opportunityApplications.organizationId, b.orgId), ne(opportunityApplications.status, 'withdrawn'))).limit(1);
+    if (applied) throw new ConflictException(`${to.displayName} has already applied`);
+    const [{ n }] = await this.db.select({ n: sql<number>`count(*)::int` }).from(collabInvitations).where(and(eq(collabInvitations.opportunityId, id), sql`${collabInvitations.createdAt} > now() - interval '24 hours'`));
+    if (Number(n) >= INVITES_PER_DAY) throw new ConflictException(`You can send up to ${INVITES_PER_DAY} invitations a day for one offer`);
+    const [inv] = await this.db.insert(collabInvitations).values({ opportunityId: id, fromOrgId: r.o.ownerOrgId, toOrgId: b.orgId, message: b.message, createdBy: ctx.userId }).onConflictDoNothing().returning();
+    if (!inv) throw new ConflictException(`${to.displayName} is already invited`);
+    await this.audit.record(ctx, { action: 'business_offer.invited', objectType: 'opportunity', objectId: id, after: { to: b.orgId } });
+    await this.notifyOrg(b.orgId, `${r.o.buyerConfidential ? 'A verified business' : r.owner} invited you to apply: ${r.o.title}`, b.message, `/business-offers/${id}`);
+    return { id: inv.id, organization: to.displayName, status: 'sent', statusLabel: INVITATION_STATUS_LABELS.sent };
+  }
+
+  /** Invitations my business received and sent. */
+  @Get('collab/invitations')
+  @RequireOrg()
+  async invitations(@Ctx() ctx: RequestContext) {
+    const orgId = this.org(ctx);
+    const [received, sent] = await Promise.all([this.invitationRows(eq(collabInvitations.toOrgId, orgId), 'received'), this.invitationRows(eq(collabInvitations.fromOrgId, orgId), 'sent')]);
+    return { received, sent };
+  }
+
+  @Post('collab/invitations/:id/decline')
+  @RequireOrg()
+  @HttpCode(200)
+  async declineInvitation(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) invId: string, @Body(body(z.object({ reason: z.string().trim().max(500).optional() }))) b: { reason?: string }) {
+    const [inv] = await this.db.select().from(collabInvitations).where(eq(collabInvitations.id, invId)).limit(1);
+    if (!inv || inv.toOrgId !== ctx.orgId) throw new NotFoundException('Invitation not found');
+    if (!this.manager(ctx, inv.toOrgId)) throw new ForbiddenException('Only an owner or admin can decline for your business');
+    if (inv.status !== 'sent') throw new ConflictException('Already answered');
+    await this.db.update(collabInvitations).set({ status: 'declined', declineReason: b.reason ?? null, respondedBy: ctx.userId, respondedAt: new Date() }).where(eq(collabInvitations.id, invId));
+    const [me] = await this.db.select({ n: organizations.displayName }).from(organizations).where(eq(organizations.id, inv.toOrgId));
+    const [o] = await this.db.select({ code: opportunities.code }).from(opportunities).where(eq(opportunities.id, inv.opportunityId));
+    await this.notifyOrg(inv.fromOrgId, `${me?.n ?? 'A partner'} declined your invitation for ${o?.code}`, b.reason ?? 'No reason given.', `/business-offers/${inv.opportunityId}`);
+    return { ok: true };
   }
 
   // ------------------------------------------------------------------ 5–7. proposal room and agreement
