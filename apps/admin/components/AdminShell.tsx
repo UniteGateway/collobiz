@@ -31,7 +31,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [loading, me, router, path]);
   if (loading || !me) return <LoadingState label="Checking administrator session…" />;
   const sections = GROUPS.map((g) => ({
-    title: g.title,
+    title: g.title, collapsible: true,
     items: [
       ...g.ids.map((id) => SCREENS.find((s) => s.id === id)!).filter((s) => LIVE.has(SCREEN_STATUS[s.id]?.status ?? '')).map((s) => ({ href: s.route, label: LABELS[s.id]?.[0] ?? s.title, icon: LABELS[s.id]?.[1] })),
       // Supporting queues that are not registry screens of their own.
@@ -41,7 +41,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const initials = me.fullName.split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
   return (
     <AppShell product="Administration"
-      sections={[{ items: [{ href: '/workspace', label: 'Workspace', icon: 'sector' }, { href: '/', label: 'Overview', icon: 'home' }, { href: '/analytics/revenue', label: 'Opportunity to revenue', icon: 'crm' }, { href: '/opportunities', label: 'Opportunity publishing', icon: 'opportunities' }, { href: '/ventures', label: 'Unite businesses', icon: 'building' }, { href: '/offers', label: 'Direct offers', icon: 'briefcase' }, { href: '/business-offers', label: 'Business offer checks', icon: 'verify' }, { href: '/growth', label: 'Growth Desk', icon: 'opportunities' }, { href: '/pilot', label: 'Pilot feedback', icon: 'messages' }, { href: '/tender-reviews', label: 'Tender reviews', icon: 'tenders' }, { href: '/tender-feed', label: 'Tender feed', icon: 'tenders' }, { href: '/resolution', label: 'Resolution centre', icon: 'warning' }, { href: '/reconciliation', label: 'Payment reconciliation', icon: 'earnings' }, { href: '/bank-statements', label: 'Bank statements', icon: 'documents' }, { href: '/billing', label: 'Plans & billing', icon: 'earnings' }, { href: '/integrations', label: 'Integrations', icon: 'external' }] }, ...sections]} currentPath={path}
+      sections={[
+        { items: [{ href: '/workspace', label: 'Workspace', icon: 'sector' }, { href: '/', label: 'Overview', icon: 'home' }, { href: '/analytics/revenue', label: 'Opportunity to revenue', icon: 'crm' }] },
+        { title: 'Business', collapsible: true, items: [{ href: '/opportunities', label: 'Opportunity publishing', icon: 'opportunities' }, { href: '/ventures', label: 'Unite businesses', icon: 'building' }, { href: '/offers', label: 'Direct offers', icon: 'briefcase' }, { href: '/business-offers', label: 'Business offer checks', icon: 'verify' }, { href: '/growth', label: 'Growth Desk', icon: 'opportunities' }] },
+        { title: 'Unite programmes', collapsible: true, items: [{ href: '/workspace/network', label: 'Unite Solar network', icon: 'value' }, { href: '/workspace/product-sales', label: 'Powertek sales desk', icon: 'package' }, { href: '/workspace/franchise', label: 'Franchise management', icon: 'location' }, { href: '/workspace/library', label: 'Document library', icon: 'documents' }, { href: '/workspace/dashboard-content', label: 'Dashboard ads & videos', icon: 'eye' }] },
+        { title: 'Operations', collapsible: true, items: [{ href: '/pilot', label: 'Pilot feedback', icon: 'messages' }, { href: '/tender-reviews', label: 'Tender reviews', icon: 'tenders' }, { href: '/tender-feed', label: 'Tender feed', icon: 'tenders' }, { href: '/resolution', label: 'Resolution centre', icon: 'warning' }] },
+        { title: 'Finance', collapsible: true, items: [{ href: '/reconciliation', label: 'Payment reconciliation', icon: 'earnings' }, { href: '/bank-statements', label: 'Bank statements', icon: 'documents' }, { href: '/billing', label: 'Plans & billing', icon: 'earnings' }, { href: '/integrations', label: 'Integrations', icon: 'external' }] },
+        ...sections]} currentPath={path}
       userMenu={
         <div className="cz-row" style={{ gap: 10, flexWrap: 'nowrap' }}>
           <div className="cz-user"><div className="cz-user-text"><strong>{me.fullName}</strong><span>{me.platformRoles.map((r) => r.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase())).join(', ') || 'No platform role'}</span></div><span className="cz-avatar" aria-hidden>{initials}</span></div>

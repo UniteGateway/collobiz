@@ -1832,3 +1832,132 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
 .cz-hero .cz-btn-primary:hover { background: #eef4ff; }
 .cz-hero .cz-btn-secondary, .cz-hero .cz-btn-ghost { background: rgba(255, 255, 255, .16); color: #fff; border-color: rgba(255, 255, 255, .35); backdrop-filter: blur(8px); }
 .cz-hero .cz-btn:disabled { opacity: .7; }
+
+/* ===================== Collapsible grouped sidebar ===================== */
+.cz-nav-sec + .cz-nav-sec { margin-top: 6px; }
+.cz-nav-sec-h { all: unset; box-sizing: border-box; display: flex; width: 100%; align-items: center; justify-content: space-between; cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--cz-grey-600); padding: 12px 12px 6px; border-radius: 8px; }
+.cz-nav-sec-h:hover { color: var(--cz-navy-900); }
+.cz-nav-sec-h:focus-visible, .cz-nav-exp:focus-visible { outline: 3px solid #1E6BFF; outline-offset: 1px; }
+.cz-nav-chev { transition: transform .2s var(--cz-ease, ease); }
+.cz-nav-sec[data-open="true"] > .cz-nav-sec-h .cz-nav-chev, .cz-nav-exp[aria-expanded="true"] .cz-nav-chev { transform: rotate(90deg); }
+.cz-nav-row { display: flex; align-items: center; gap: 2px; }
+.cz-nav-row > a { flex: 1; min-width: 0; }
+.cz-nav-exp { all: unset; box-sizing: border-box; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; cursor: pointer; color: var(--cz-grey-600); flex: none; }
+.cz-nav-exp:hover { background: #fff; color: var(--cz-navy-900); }
+.cz-nav-item[data-holds] > .cz-nav-row > a:not([aria-current]) { color: var(--cz-navy-900); }
+.cz-nav-sub { display: flex; flex-direction: column; margin: 2px 0 6px 22px; padding-left: 12px; border-left: 2px solid var(--cz-grey-200, #e4e7ec); animation: cz-rise .2s ease both; }
+.cz-sidebar .cz-nav-sub a { padding: 5px 10px; font-size: 13.5px; font-weight: 450; }
+
+/* ===================== Dashboard hero by business domain ===================== */
+.cz-dhero { position: relative; isolation: isolate; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: center; gap: 12px; border-radius: 28px; padding: 30px 32px; margin-bottom: 20px; color: #fff; background: var(--dh-bg); box-shadow: 0 24px 50px -30px rgba(1, 30, 72, .6); }
+.cz-dhero::before { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(600px 300px at 85% 10%, rgba(255, 255, 255, .22), transparent 60%), radial-gradient(400px 260px at 10% 110%, rgba(255, 255, 255, .12), transparent 60%); }
+.cz-dhero[data-theme="energy"] { --dh-bg: linear-gradient(130deg, #062a5a 0%, #0b4fa0 50%, #f59e0b 135%); --dh-acc: #fbbf24; --dh-soft: rgba(251, 191, 36, .35); }
+.cz-dhero[data-theme="build"] { --dh-bg: linear-gradient(130deg, #0b2530 0%, #155e75 55%, #64748b 120%); --dh-acc: #fb923c; --dh-soft: rgba(148, 163, 184, .45); }
+.cz-dhero[data-theme="trade"] { --dh-bg: linear-gradient(130deg, #1e1b4b 0%, #4c1d95 50%, #db2777 130%); --dh-acc: #f9a8d4; --dh-soft: rgba(196, 181, 253, .45); }
+.cz-dhero[data-theme="industry"] { --dh-bg: linear-gradient(130deg, #1c1917 0%, #44403c 45%, #ea580c 130%); --dh-acc: #fdba74; --dh-soft: rgba(253, 186, 116, .35); }
+.cz-dhero[data-theme="advisory"] { --dh-bg: linear-gradient(130deg, #042f2e 0%, #0f766e 55%, #22d3ee 130%); --dh-acc: #a5f3fc; --dh-soft: rgba(153, 246, 228, .4); }
+.cz-dhero[data-theme="collabiz"] { --dh-bg: linear-gradient(130deg, #011E48 0%, #0B3D91 55%, #2E7D32 130%); --dh-acc: #86efac; --dh-soft: rgba(147, 197, 253, .4); }
+.cz-dhero h1 { color: #fff; margin: 4px 0 6px; font-size: clamp(26px, 3.2vw, 38px); letter-spacing: -0.025em; }
+.cz-dhero-eyebrow { font-size: 13px; color: rgba(255, 255, 255, .78); font-weight: 500; }
+.cz-dhero-sub { margin: 0; color: rgba(255, 255, 255, .88); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.cz-dhero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.cz-dhero .cz-btn-secondary { background: rgba(255, 255, 255, .16); color: #fff; border-color: rgba(255, 255, 255, .35); backdrop-filter: blur(8px); }
+.cz-dhero-chip { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 12px; padding: 5px 10px; border-radius: 999px; background: rgba(255, 255, 255, .14); color: rgba(255, 255, 255, .9); }
+.cz-dhero-art { justify-self: end; width: 100%; max-width: 380px; }
+.cz-scene { width: 100%; height: auto; display: block; }
+.cz-scene .cz-ground { fill: rgba(255, 255, 255, .1); }
+.cz-scene .cz-sun { fill: var(--dh-acc); filter: drop-shadow(0 0 18px var(--dh-acc)); animation: cz-glow 5s ease-in-out infinite; }
+.cz-scene .cz-ray { stroke: var(--dh-acc); stroke-width: 2; stroke-linecap: round; opacity: .55; stroke-dasharray: 4 30; animation: cz-flow 6s linear infinite; }
+.cz-scene .cz-panel { fill: rgba(255, 255, 255, .2); stroke: rgba(255, 255, 255, .7); stroke-width: 1.5; }
+.cz-scene .cz-panel-line { stroke: rgba(255, 255, 255, .45); stroke-width: 1; fill: none; }
+.cz-scene .cz-mast, .cz-crane line { stroke: rgba(255, 255, 255, .8); stroke-width: 3; stroke-linecap: round; }
+.cz-scene .cz-turbine path, .cz-scene .cz-turbine circle { fill: #fff; }
+.cz-scene .cz-blades { animation: cz-spin 6s linear infinite; transform-box: view-box; }
+.cz-scene .cz-bldg { fill: rgba(255, 255, 255, .16); stroke: rgba(255, 255, 255, .35); }
+.cz-scene .cz-win { fill: var(--dh-acc); opacity: .35; animation: cz-blink 4s ease-in-out infinite; }
+.cz-scene .cz-hook { stroke-width: 1.5 !important; animation: cz-sway 5s ease-in-out infinite; transform-origin: 270px 34px; }
+.cz-scene .cz-load { fill: var(--dh-acc); animation: cz-sway 5s ease-in-out infinite; transform-origin: 270px 34px; }
+.cz-scene .cz-route { fill: none; stroke: rgba(255, 255, 255, .55); stroke-width: 2; stroke-dasharray: 7 9; animation: cz-flow 10s linear infinite; }
+.cz-scene .cz-node, .cz-scene .cz-hub { fill: var(--dh-acc); animation: cz-pulse 2.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.cz-scene .cz-hub { fill: #fff; animation: none; }
+.cz-scene .cz-truck { fill: rgba(255, 255, 255, .85); animation: cz-drive 9s ease-in-out infinite; }
+.cz-scene .cz-truck .cz-cab { fill: var(--dh-acc); }
+.cz-scene .cz-truck circle { fill: #1e1b4b; stroke: #fff; stroke-width: 2; }
+.cz-scene .cz-box { fill: var(--dh-soft); stroke: rgba(255, 255, 255, .6); }
+.cz-scene .cz-smoke { fill: rgba(255, 255, 255, .25); animation: cz-smoke 4s ease-out infinite; }
+.cz-scene .cz-gear { fill: var(--dh-acc); animation: cz-spin 10s linear infinite; transform-box: fill-box; transform-origin: center; }
+.cz-scene .cz-gear-hole { fill: #44403c; }
+.cz-scene .cz-board { fill: rgba(255, 255, 255, .12); stroke: rgba(255, 255, 255, .4); }
+.cz-scene .cz-chart-line { fill: none; stroke: var(--dh-acc); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 300; animation: cz-draw 4s ease-out both; }
+.cz-scene .cz-link { stroke: rgba(255, 255, 255, .4); stroke-width: 1.5; stroke-dasharray: 5 6; animation: cz-flow 8s linear infinite; }
+.cz-scene .cz-person { fill: rgba(255, 255, 255, .85); }
+@keyframes cz-glow { 50% { filter: drop-shadow(0 0 30px var(--dh-acc)); } }
+@keyframes cz-spin { to { transform: rotate(360deg); } }
+@keyframes cz-blink { 50% { opacity: .85; } }
+@keyframes cz-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes cz-drive { 0% { transform: translate(-110px, 160px); } 45%, 55% { transform: translate(110px, 160px); } 100% { transform: translate(-110px, 160px); } }
+@keyframes cz-smoke { from { transform: translateY(0); opacity: .5; } to { transform: translateY(-30px); opacity: 0; } }
+@keyframes cz-draw { from { stroke-dashoffset: 300; } to { stroke-dashoffset: 0; } }
+
+/* ===================== Dashboard grid additions ===================== */
+.cz-dash-ad { grid-column: span 5; }
+.cz-dash-trend { grid-column: span 7; }
+.cz-dash-news { grid-column: span 7; }
+.cz-dash-video { grid-column: span 5; }
+.cz-dash-ad > *, .cz-dash-news > *, .cz-dash-video > * { height: 100%; margin: 0; }
+.cz-trend-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.cz-trend-label { display: block; font-size: 12.5px; color: var(--cz-grey-600); }
+.cz-trend-total { display: block; font-size: 22px; letter-spacing: -0.02em; margin: 2px 0 6px; }
+.cz-area { margin: 0; }
+.cz-area svg { width: 100%; height: auto; display: block; overflow: visible; }
+.cz-area-grid { stroke: var(--cz-grey-100, #eef0f4); stroke-width: 1; }
+.cz-area-line { fill: none; stroke: var(--ar); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.cz-area-dot { fill: #fff; stroke: var(--ar); stroke-width: 2; }
+.cz-area-top { stop-color: var(--ar); stop-opacity: .35; } .cz-area-bot { stop-color: var(--ar); stop-opacity: 0; }
+.cz-area[data-tone="navy"] { --ar: #1E6BFF; } .cz-area[data-tone="green"] { --ar: #16a34a; } .cz-area[data-tone="sun"] { --ar: #f59e0b; }
+.cz-area-x { display: flex; justify-content: space-between; font-size: 11px; color: var(--cz-grey-500, #8a94a6); margin-top: 4px; }
+.cz-area-empty { font-size: 12px; color: var(--cz-grey-500, #8a94a6); margin: 4px 0 0; }
+
+.cz-ad { position: relative; overflow: hidden; border-radius: 24px; min-height: 200px; padding: 24px; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; background: var(--dh-bg, linear-gradient(135deg, #011E48, #1E6BFF)); }
+.cz-ad[data-theme="energy"] { --dh-bg: linear-gradient(140deg, #0b4fa0, #f59e0b); } .cz-ad[data-theme="build"] { --dh-bg: linear-gradient(140deg, #155e75, #fb923c); }
+.cz-ad[data-theme="trade"] { --dh-bg: linear-gradient(140deg, #4c1d95, #db2777); } .cz-ad[data-theme="industry"] { --dh-bg: linear-gradient(140deg, #44403c, #ea580c); }
+.cz-ad[data-theme="advisory"] { --dh-bg: linear-gradient(140deg, #0f766e, #22d3ee); } .cz-ad[data-theme="collabiz"] { --dh-bg: linear-gradient(140deg, #0B3D91, #2E7D32); }
+.cz-ad::after { content: ''; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px; border-radius: 50%; background: rgba(255, 255, 255, .14); animation: cz-float 12s ease-in-out infinite alternate; }
+.cz-ad-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+.cz-ad-img + .cz-ad-body { background: linear-gradient(180deg, transparent, rgba(0, 0, 0, .55)); margin: -24px; padding: 60px 24px 24px; }
+.cz-ad-body { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.cz-ad-body h2 { color: #fff; margin: 0; font-size: 21px; letter-spacing: -0.02em; }
+.cz-ad-body p { margin: 0 0 6px; color: rgba(255, 255, 255, .88); font-size: 14px; }
+.cz-ad-tag { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: rgba(255, 255, 255, .75); }
+.cz-ad .cz-btn-primary { background: #fff; color: var(--cz-navy-900, #011E48); }
+.cz-ad-dots { position: absolute; z-index: 2; top: 18px; right: 18px; display: flex; gap: 6px; }
+.cz-ad-dots button { all: unset; width: 8px; height: 8px; border-radius: 999px; background: rgba(255, 255, 255, .45); cursor: pointer; transition: width .2s; }
+.cz-ad-dots button[aria-selected="true"] { width: 22px; background: #fff; }
+.cz-ad-dots button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+.cz-news ul { list-style: none; margin: 0; padding: 0; }
+.cz-news li { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--cz-grey-100, #eef0f4); }
+.cz-news li:last-child { border-bottom: 0; }
+.cz-news li > span:last-child { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; min-width: 0; }
+.cz-news-date { flex: none; width: 52px; text-align: center; font-size: 12px; font-weight: 600; color: var(--cz-navy-700, #03325D); background: #eef4ff; border-radius: 10px; padding: 6px 0; height: fit-content; }
+.cz-video-frame { position: relative; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, #011E48, #0B3D91); }
+.cz-video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.cz-video-poster { all: unset; position: absolute; inset: 0; display: grid; place-items: center; cursor: pointer; background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .18), transparent 60%); }
+.cz-video-poster:focus-visible { outline: 3px solid #fff; outline-offset: -6px; }
+.cz-play { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .92); color: var(--cz-navy-900, #011E48); box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .5); animation: cz-pulse-ring 2.6s ease-out infinite; }
+.cz-play-muted { background: #eef4ff; animation: none; box-shadow: none; }
+.cz-video-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 26px 10px; border-radius: 16px; background: linear-gradient(180deg, #f7f9fd, #eef4ff); }
+.cz-video-empty p { margin: 0; font-size: 13.5px; max-width: 260px; }
+@keyframes cz-pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, .55); } 100% { box-shadow: 0 0 0 18px rgba(255, 255, 255, 0); } }
+
+@media (max-width: 1100px) {
+  .cz-dash-ad, .cz-dash-trend, .cz-dash-news, .cz-dash-video { grid-column: span 12; }
+  .cz-dhero { grid-template-columns: 1fr; } .cz-dhero-art { max-width: 300px; justify-self: center; order: -1; margin-bottom: -8px; }
+}
+@media (max-width: 640px) {
+  .cz-dhero { padding: 22px 18px; border-radius: 22px; } .cz-dhero-art { max-width: 220px; }
+  .cz-trend-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cz-scene *, .cz-ad::after, .cz-play, .cz-nav-sub, .cz-nav-chev { animation: none !important; transition: none !important; }
+}

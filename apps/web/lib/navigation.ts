@@ -47,10 +47,20 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}): Nav
   const sections: NavSection[] = [];
   if (me?.activeOrg && !verified) sections.push({ title: 'Get started', items: [{ href: '/onboarding/status', label: 'Complete verification', icon: 'verify' }] });
   if (!me?.activeOrg) sections.push({ title: 'Get started', items: [{ href: '/onboarding/account-type', label: 'Create partner account', icon: 'verify' }] });
-  const work = MODULES.filter((m) => !['account', 'documents', 'help'].includes(m.key)).map((m) => ({ href: m.home, label: m.label, icon: m.icon, count: m.key === 'home' ? undefined : undefined }));
-  sections.push({ title: 'Workspace', items: work });
+  // Modules grouped by what partners do; each module's own pages appear as an expandable sub-menu.
+  const byKey = Object.fromEntries(MODULES.map((m) => [m.key, m]));
+  const item = (k: string) => { const m = byKey[k]; return { href: m.home, label: m.label, icon: m.icon, children: m.tabs?.filter(([h]) => h !== m.home).map(([href, label]) => ({ href, label })) }; };
+  const GROUPS: [string, string[]][] = [
+    ['Grow your business', ['collab', 'business-offers', 'opportunities', 'leads', 'collaboration']],
+    ['Unite programmes', ['unite-solar', 'powertek', 'ventures']],
+    ['Deliver & trade', ['tenders', 'projects', 'trading']],
+    ['Money', ['earnings']],
+    ['Network & growth', ['messages', 'global', 'growth']],
+  ];
+  sections.push({ items: [item('home')] });
+  for (const [title, keys] of GROUPS) sections.push({ title, collapsible: true, items: keys.filter((k) => byKey[k]).map(item) });
   if (me?.capabilities.includes('commission.approve')) sections.push({ title: 'Finance', items: [{ href: '/commissions/approvals', label: 'Commission approvals', icon: 'verify' }] });
-  sections.push({ title: 'Account', items: [{ href: '/library', label: 'Catalogues & documents', icon: 'package' }, { href: '/vault', label: 'My documents', icon: 'documents' }, { href: '/profile', label: 'Settings', icon: 'settings' }, { href: '/help', label: 'Help & support', icon: 'help' }] });
+  sections.push({ title: 'Account', collapsible: true, items: [{ href: '/library', label: 'Catalogues & documents', icon: 'package' }, { href: '/vault', label: 'My documents', icon: 'documents' }, { href: '/profile', label: 'Settings', icon: 'settings' }, { href: '/help', label: 'Help & support', icon: 'help' }] });
   void counts;
   return sections;
 }

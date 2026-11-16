@@ -6,6 +6,7 @@ import { Alert, ButtonLink, EmptyState, Icon, Skeleton, StatusBadge, type IconNa
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { useQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
+import { AdCarousel, AreaChart, NewsCard, ThemeHero, VideoCard, type Ad, type News, type Theme, type Video } from '@/components/DashboardKit';
 
 interface Home {
   figures: Record<string, number>;
@@ -31,6 +32,8 @@ const ago = (d: string) => {
   const m = Math.round((Date.now() - new Date(d).getTime()) / 60000);
   return m < 1 ? 'Just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 };
+interface Feed { theme: Theme; themeLabel: string; ads: Ad[]; videos: Video[]; news: News[]; trend: { months: string[]; earnings: number[]; leads: number[]; deals: number[] } }
+const mon = (m: string) => new Date(`${m}-01T00:00:00Z`).toLocaleDateString('en-IN', { month: 'short', timeZone: 'UTC' });
 const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
 
 /** Screen 023 — Partner Home: what needs you today, how the business is doing, and what to pursue next. */
@@ -41,13 +44,17 @@ export default function DashboardPage() {
   useEffect(() => { setToday({ date: new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' }), greet: greeting() }); }, []);
   const org = me?.activeOrg;
   const q = useQuery<Home>(org ? '/me/home' : null);
+  const feed = useQuery<Feed>(org ? '/me/home/feed' : null);
+  const fd = feed.data;
   const d = q.data;
   const f = d?.figures ?? {};
   const maxStage = Math.max(1, ...(d?.pipeline ?? []).map((p) => p.value));
   return (
-    <Screen id="023" eyebrow={today?.date ?? '\u00a0'} title={me && today ? `${today.greet}, ${me.fullName.split(' ')[0]}` : 'Welcome'}
-      description={org ? <span className="cz-row" style={{ gap: 8 }}>{org.name}<StatusBadge status={org.verificationStatus} label={org.verificationStatus === 'verified' ? (org.membershipLevel === 'verified' ? 'Verified partner' : `Verified · ${org.membershipLevel.replace('_', ' ')} level`) : undefined} /></span> : undefined}
-      actions={org && <><ButtonLink href="/marketplace" variant="secondary">Find opportunities</ButtonLink><ButtonLink href="/leads/new" variant="accent"><Icon name="leads" size={16} />Register a lead</ButtonLink></>}>
+    <Screen id="023" header={false} title={me && today ? `${today.greet}, ${me.fullName.split(' ')[0]}` : 'Welcome'}>
+      <ThemeHero theme={fd?.theme ?? 'collabiz'} themeLabel={fd?.themeLabel ?? 'COLLABIZ'} eyebrow={today?.date ?? '\u00a0'} title={me && today ? `${today.greet}, ${me.fullName.split(' ')[0]}` : 'Welcome'}
+        actions={org && <><ButtonLink href="/marketplace" variant="secondary">Find opportunities</ButtonLink><ButtonLink href="/leads/new" variant="accent"><Icon name="leads" size={16} />Register a lead</ButtonLink></>}>
+        {org && <p className="cz-dhero-sub">{org.name} <StatusBadge status={org.verificationStatus} label={org.verificationStatus === 'verified' ? (org.membershipLevel === 'verified' ? 'Verified partner' : `Verified · ${org.membershipLevel.replace('_', ' ')} level`) : undefined} /></p>}
+      </ThemeHero>
       {me && !me.emailVerified && <Alert tone="warning" title="Verify your email.">Some actions stay locked until your email is verified. <Link href="/verify">Verify now</Link></Alert>}
       {me && !org ? (
         <div className="cz-card"><EmptyState icon="verify" title="Set up your partner account" action={<ButtonLink href="/onboarding/account-type" variant="accent">Get started</ButtonLink>}>Create your company profile to discover opportunities, register protected leads and collaborate with verified partners.</EmptyState></div>
@@ -82,6 +89,21 @@ export default function DashboardPage() {
             <p className="cz-muted" style={{ margin: '2px 0 18px', fontSize: 13.5 }}>Earned and awaiting payment</p>
             <div className="cz-earn-row"><span>Projected</span><strong>{d ? inr(f.projected) : '—'}</strong></div>
             <p className="cz-muted" style={{ fontSize: 12.5, margin: '14px 0 0' }}>{d && !f.earnedUnpaid && !f.projected ? 'No commission yet. Introductions you register earn commission once the customer pays for the work.' : 'Commission is earned only when the customer pays the milestone.'}</p>
+          </section>
+
+          {/* ---------- Ad space ---------- */}
+          <div className="cz-dash-ad">{fd ? <AdCarousel ads={fd.ads} theme={fd.theme} /> : <Skeleton height={180} />}</div>
+
+          {/* ---------- Trends ---------- */}
+          <section className="cz-card cz-dash-trend" aria-labelledby="trend-h">
+            <div className="cz-card-head"><div><h2 id="trend-h">Last six months</h2><p>Commission earned and leads you registered</p></div><Link href="/earnings" className="cz-link-arrow">Earnings<Icon name="arrow" size={14} /></Link></div>
+            {!fd ? <Skeleton height={150} /> : (
+              <div className="cz-trend-grid">
+                <div><span className="cz-trend-label">Commission earned</span><strong className="cz-trend-total">{inr(fd.trend.earnings.reduce((a, b) => a + b, 0))}</strong><AreaChart label="Commission earned" labels={fd.trend.months.map(mon)} values={fd.trend.earnings} format={(n) => inr(n)} tone="green" /></div>
+                <div><span className="cz-trend-label">Leads registered</span><strong className="cz-trend-total">{fd.trend.leads.reduce((a, b) => a + b, 0)}</strong><AreaChart label="Leads registered" labels={fd.trend.months.map(mon)} values={fd.trend.leads} format={(n) => String(n)} tone="navy" /></div>
+                <div><span className="cz-trend-label">New deal value</span><strong className="cz-trend-total">{inr(fd.trend.deals.reduce((a, b) => a + b, 0))}</strong><AreaChart label="New deal value" labels={fd.trend.months.map(mon)} values={fd.trend.deals} format={(n) => inr(n)} tone="sun" /></div>
+              </div>
+            )}
           </section>
 
           {/* ---------- Figures ---------- */}
@@ -139,6 +161,10 @@ export default function DashboardPage() {
               </ul>
             )}
           </section>
+
+          {/* ---------- News & video ---------- */}
+          <div className="cz-dash-news">{fd ? <NewsCard news={fd.news} /> : <Skeleton height={200} />}</div>
+          <div className="cz-dash-video">{fd ? <VideoCard videos={fd.videos} /> : <Skeleton height={200} />}</div>
 
           {/* ---------- Activity ---------- */}
           <section className="cz-card cz-dash-activity" aria-labelledby="act-h">

@@ -49,8 +49,9 @@ export function Logo({ src = '/brand/collabiz-mark.png', label = 'collabiz', hre
 }
 
 // ---------------- Shell ----------------
-export interface NavItem { href: string; label: string; screen?: string; icon?: IconName; count?: number }
-export interface NavSection { title?: string; items: NavItem[] }
+export interface NavItem { href: string; label: string; screen?: string; icon?: IconName; count?: number; children?: { href: string; label: string }[] }
+/** A titled section can be collapsed; items with children show an expandable sub-menu. Open/closed state is remembered. */
+export interface NavSection { title?: string; items: NavItem[]; collapsible?: boolean }
 export function AppShell({
   topNav = [], sections, currentPath, userInitials, userMenu, children, brandLabel, logoSrc, product, tools, banner, sidebarFooter,
 }: {
@@ -58,10 +59,15 @@ export function AppShell({
   children: React.ReactNode; brandLabel?: string; logoSrc?: string; product?: string; tools?: React.ReactNode; banner?: React.ReactNode; sidebarFooter?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const all = [...topNav, ...sections.flatMap((s) => s.items)].map((n) => n.href);
+  const all = [...topNav, ...sections.flatMap((s) => s.items.flatMap((n) => [n, ...(n.children ?? [])]))].map((n) => n.href);
   // Longest matching prefix wins, so /projects/123/milestones highlights "Projects", not "Home".
   const best = all.filter((h) => h === '/' ? currentPath === '/' : currentPath === h || currentPath.startsWith(h + '/')).sort((a, b) => b.length - a.length)[0];
   const isActive = (href: string) => href === best;
+  const holds = (it: NavItem) => isActive(it.href) || !!it.children?.some((c) => isActive(c.href));
+  // Remembered expand / collapse state (per browser). Sections and modules holding the current page always open.
+  const [fold, setFold] = useState<Record<string, boolean>>({});
+  useEffect(() => { try { setFold(JSON.parse(localStorage.getItem('cz-nav') ?? '{}')); } catch { /* storage unavailable */ } }, []);
+  const toggle = (k: string, now: boolean) => setFold((f) => { const n = { ...f, [k]: !now }; try { localStorage.setItem('cz-nav', JSON.stringify(n)); } catch { /* ignore */ } return n; });
   return (
     <>
       <a href="#main" className="cz-skip">Skip to content</a>
@@ -82,16 +88,33 @@ export function AppShell({
       <div className="cz-layout">
         <div className="cz-scrim" data-open={open} onClick={() => setOpen(false)} aria-hidden />
         <aside id="cz-sidebar" className="cz-sidebar" data-open={open} aria-label="Section navigation">
-          {sections.map((s, i) => (
-            <div key={i}>
-              {s.title && <h4>{s.title}</h4>}
-              {s.items.map((it) => (
-                <UiLink key={it.href} href={it.href} aria-current={isActive(it.href) ? 'page' : undefined} onClick={() => setOpen(false)}>
-                  {it.icon && <Icon name={it.icon} />}{it.label}{it.count ? <span className="cz-count" aria-label={`${it.count} new`}>{it.count > 99 ? '99+' : it.count}</span> : null}
-                </UiLink>
-              ))}
-            </div>
-          ))}
+          {sections.map((s, i) => {
+            const sk = `s:${s.title ?? i}`;
+            const sOpen = !s.collapsible || s.items.some(holds) || fold[sk] !== false;
+            return (
+              <div key={i} className="cz-nav-sec" data-open={sOpen}>
+                {s.title && (s.collapsible
+                  ? <button type="button" className="cz-nav-sec-h" aria-expanded={sOpen} onClick={() => toggle(sk, sOpen)}><span>{s.title}</span><Icon name="next" size={12} className="cz-nav-chev" /></button>
+                  : <h4>{s.title}</h4>)}
+                {sOpen && s.items.map((it) => {
+                  const ik = `i:${it.href}`;
+                  const sub = !!it.children?.length;
+                  const iOpen = sub && (it.children!.some((c) => isActive(c.href)) || fold[ik] === true);
+                  return (
+                    <div key={it.href} className="cz-nav-item" data-holds={holds(it) || undefined}>
+                      <div className="cz-nav-row">
+                        <UiLink href={it.href} aria-current={isActive(it.href) ? 'page' : undefined} onClick={() => setOpen(false)}>
+                          {it.icon && <Icon name={it.icon} />}{it.label}{it.count ? <span className="cz-count" aria-label={`${it.count} new`}>{it.count > 99 ? '99+' : it.count}</span> : null}
+                        </UiLink>
+                        {sub && <button type="button" className="cz-nav-exp" aria-expanded={iOpen} aria-label={`${iOpen ? 'Hide' : 'Show'} ${it.label} pages`} onClick={() => toggle(ik, iOpen)}><Icon name="next" size={12} className="cz-nav-chev" /></button>}
+                      </div>
+                      {iOpen && <div className="cz-nav-sub" role="group" aria-label={`${it.label} pages`}>{it.children!.map((c) => <UiLink key={c.href} href={c.href} aria-current={isActive(c.href) ? 'page' : undefined} onClick={() => setOpen(false)}>{c.label}</UiLink>)}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
           {sidebarFooter && <div className="cz-sidebar-foot">{sidebarFooter}</div>}
         </aside>
         <main id="main" className="cz-main" tabIndex={-1}>{children}</main>

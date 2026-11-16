@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { colors, toneForStatus } from './tokens';
-import { DataTable, StatusBadge, PermissionDenied, TextInput, ChipSelect, Stepper } from './index';
+import { AppShell, DataTable, StatusBadge, PermissionDenied, TextInput, ChipSelect, Stepper } from './index';
 
 describe('design token parity (web CSS ↔ tokens.ts used by mobile)', () => {
   const css = readFileSync(join(__dirname, 'styles.css'), 'utf8');
@@ -50,5 +50,37 @@ describe('components', () => {
     expect(v).toEqual([]);
     rerender(<Stepper steps={['Submitted', 'Reviewed']} current={1} />);
     expect(screen.getByText('Reviewed').getAttribute('aria-current')).toBe('step');
+  });
+});
+
+describe('AppShell grouped navigation', () => {
+  const sections = [
+    { items: [{ href: '/dashboard', label: 'Home' }] },
+    { title: 'Grow your business', collapsible: true, items: [{ href: '/collab', label: 'Collab', children: [{ href: '/collab/workspace', label: 'My collaborations' }] }] },
+    { title: 'Money', collapsible: true, items: [{ href: '/earnings', label: 'Earnings' }] },
+  ];
+  beforeEach(() => localStorage.clear());
+  it('collapses and expands sections, remembering the choice', () => {
+    const { unmount } = render(<AppShell sections={sections} currentPath="/dashboard"><p>x</p></AppShell>);
+    expect(screen.getByRole('link', { name: 'Earnings' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Money/ }));
+    expect(screen.queryByRole('link', { name: 'Earnings' })).toBeNull();
+    unmount();
+    render(<AppShell sections={sections} currentPath="/dashboard"><p>x</p></AppShell>);
+    expect(screen.queryByRole('link', { name: 'Earnings' })).toBeNull(); // remembered
+  });
+  it('shows a module sub-menu on demand, and always when you are on one of its pages', () => {
+    const { unmount } = render(<AppShell sections={sections} currentPath="/dashboard"><p>x</p></AppShell>);
+    expect(screen.queryByRole('link', { name: 'My collaborations' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Show Collab pages' }));
+    expect(screen.getByRole('link', { name: 'My collaborations' })).toBeTruthy();
+    unmount(); localStorage.clear();
+    render(<AppShell sections={sections} currentPath="/collab/workspace"><p>x</p></AppShell>);
+    expect(screen.getByRole('link', { name: 'My collaborations' }).getAttribute('aria-current')).toBe('page');
+  });
+  it('a collapsed section still opens when it holds the current page', () => {
+    localStorage.setItem('cz-nav', JSON.stringify({ 's:Money': false }));
+    render(<AppShell sections={sections} currentPath="/earnings"><p>x</p></AppShell>);
+    expect(screen.getByRole('link', { name: 'Earnings' }).getAttribute('aria-current')).toBe('page');
   });
 });
