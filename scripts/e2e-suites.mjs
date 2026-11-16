@@ -2652,17 +2652,20 @@ suites.push({
   run: async ({ page, WEB, label, expect, shot }) => {
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.getByRole('heading', { name: 'My Business Notice Board' }).waitFor();
-    await page.locator('.cz-noticeboard').getByText('Collect invoice INV-2026-900002').first().waitFor();
+    await page.locator('.cz-noticeboard .cz-notice').first().waitFor(); // whatever is open now: records change as other journeys run
     await page.goto(WEB + '/action-os');
-    const card = page.locator('[data-notice="Send revised BOQ to Western Auto"]');
-    await card.waitFor();
+    const first = page.locator('[data-notice]').first();
+    await first.waitFor();
+    const title = await first.getAttribute('data-notice');
+    const card = page.locator(`[data-notice="${title}"]`).first();
     await card.getByText('Suggested next step:').waitFor();
     await shot('action-board');
     await card.getByRole('button', { name: /^Mark done:/ }).click();
-    await card.waitFor({ state: 'detached' });
+    await page.locator(`[data-notice="${title}"]`).first().waitFor({ state: 'detached' });
     await page.getByLabel('Show', { exact: true }).selectOption('done');
-    await page.locator('[data-notice="Send revised BOQ to Western Auto"]').getByText(/Done here/).waitFor();
-    await page.locator('[data-notice="Send revised BOQ to Western Auto"]').getByRole('button', { name: 'Reopen' }).click();
+    const done = page.locator(`[data-notice="${title}"]`).first();
+    await done.getByText(/Done here/).waitFor();
+    await done.getByRole('button', { name: 'Reopen' }).click();
     if (label === 'desktop') {
       await page.getByRole('button', { name: 'Generate my plan now' }).click();
       await page.waitForURL(/\/action-os\/plans\//);

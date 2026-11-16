@@ -1915,8 +1915,8 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
 .cz-area-dot { fill: #fff; stroke: var(--ar); stroke-width: 2; }
 .cz-area-top { stop-color: var(--ar); stop-opacity: .35; } .cz-area-bot { stop-color: var(--ar); stop-opacity: 0; }
 .cz-area[data-tone="navy"] { --ar: #1E6BFF; } .cz-area[data-tone="green"] { --ar: #16a34a; } .cz-area[data-tone="sun"] { --ar: #f59e0b; }
-.cz-area-x { display: flex; justify-content: space-between; font-size: 11px; color: var(--cz-grey-500, #8a94a6); margin-top: 4px; }
-.cz-area-empty { font-size: 12px; color: var(--cz-grey-500, #8a94a6); margin: 4px 0 0; }
+.cz-area-x { display: flex; justify-content: space-between; font-size: 11px; color: #667085; margin-top: 4px; }
+.cz-area-empty { font-size: 12px; color: #667085; margin: 4px 0 0; }
 
 .cz-ad { position: relative; overflow: hidden; border-radius: 24px; min-height: 200px; padding: 24px; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; background: var(--dh-bg, linear-gradient(135deg, #011E48, #1E6BFF)); }
 .cz-ad[data-theme="energy"] { --dh-bg: linear-gradient(140deg, #0b4fa0, #f59e0b); } .cz-ad[data-theme="build"] { --dh-bg: linear-gradient(140deg, #155e75, #fb923c); }
@@ -1930,8 +1930,8 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
 .cz-ad-body p { margin: 0 0 6px; color: rgba(255, 255, 255, .88); font-size: 14px; }
 .cz-ad-tag { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: rgba(255, 255, 255, .75); }
 .cz-ad .cz-btn-primary { background: #fff; color: var(--cz-navy-900, #011E48); }
-.cz-ad-dots { position: absolute; z-index: 2; top: 18px; right: 18px; display: flex; gap: 6px; }
-.cz-ad-dots button { all: unset; width: 8px; height: 8px; border-radius: 999px; background: rgba(255, 255, 255, .45); cursor: pointer; transition: width .2s; }
+.cz-ad-dots { position: absolute; z-index: 2; top: 10px; right: 10px; display: flex; gap: 0; }
+.cz-ad-dots button { all: unset; box-sizing: content-box; width: 8px; height: 8px; padding: 8px; border-radius: 999px; background: rgba(255, 255, 255, .45); background-clip: content-box; cursor: pointer; transition: width .2s; }
 .cz-ad-dots button[aria-selected="true"] { width: 22px; background: #fff; }
 .cz-ad-dots button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
@@ -2006,8 +2006,8 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
 .cz-apps-grid a:focus-visible { outline: 3px solid #1E6BFF; }
 .cz-app-ic { width: 52px; height: 52px; border-radius: 15px; display: grid; place-items: center; font-weight: 800; font-size: 17px; color: #fff; letter-spacing: -0.02em; background: linear-gradient(140deg, var(--hue), color-mix(in srgb, var(--hue) 55%, #011E48)); box-shadow: 0 8px 18px -10px var(--hue); }
 .cz-app-name { font-size: 12.5px; font-weight: 600; line-height: 1.2; color: var(--cz-navy-900, #011E48); }
-.cz-app-state { font-size: 10.5px; color: #16a34a; font-weight: 600; }
-.cz-app-state.cz-soon { color: var(--cz-grey-500, #8a94a6); font-weight: 500; }
+.cz-app-state { font-size: 10.5px; color: #15803d; font-weight: 600; }
+.cz-app-state.cz-soon { color: #667085; font-weight: 500; }
 .cz-avatars { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .cz-avatars .cz-person-av { width: 34px; height: 34px; font-size: 12px; margin-left: -8px; border: 2px solid #fff; }
 .cz-avatars .cz-person-av:first-child { margin-left: 0; }
