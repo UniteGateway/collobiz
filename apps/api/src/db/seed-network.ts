@@ -89,5 +89,7 @@ export async function networkDemo(db: Db, refs: SeedRefs) {
     { moduleKey: 'unite-solar', title: 'Unite Solar product catalogue', kind: 'catalogue', description: 'Modules, inverters, batteries, kits and allied products with partner and customer prices.', url: '/unite-solar/catalogue', visibility: 'partners', sortOrder: 2, createdBy: refs.users.uniteAdmin },
     { moduleKey: 'general', title: 'How COLLABIZ works', kind: 'guide', description: 'Have → need → match → apply → proposal → agreement → execution → earnings.', url: '/how-it-works', visibility: 'public', sortOrder: 1, createdBy: refs.users.uniteAdmin },
   ]);
+  // Group investment: one SAMPLE offer to show the experience. Interest only; regulatory clearance not recorded.
+  await db.insert(s.investmentOffers).values({ code: 'INV-DEMO-001', title: 'Sample offer — office floor share, Gachibowli (demonstration)', kind: 'property_share', summary: 'DEMONSTRATION ONLY — not a real offer. Shows how a leased office floor could be offered in square-foot shares with rent shared pro rata once the required regulatory clearance is in place.', location: 'Gachibowli, Hyderabad', unitLabel: 'sq ft', totalUnits: 10000, unitPrice: 9_000_00, minUnits: 100, projectedMonthlyRent: 6_00_000_00, lockInMonths: 36, sponsor: 'ProDeal (sample)', status: 'interest_open', createdBy: refs.users.uniteAdmin }).onConflictDoNothing();
   console.log('Unite Solar network demo in place');
 }

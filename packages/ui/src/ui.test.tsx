@@ -72,7 +72,7 @@ describe('AppShell grouped navigation', () => {
   it('shows a module sub-menu on demand, and always when you are on one of its pages', () => {
     const { unmount } = render(<AppShell sections={sections} currentPath="/dashboard"><p>x</p></AppShell>);
     expect(screen.queryByRole('link', { name: 'My collaborations' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Show Collab pages' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Show more pages' }));
     expect(screen.getByRole('link', { name: 'My collaborations' })).toBeTruthy();
     unmount(); localStorage.clear();
     render(<AppShell sections={sections} currentPath="/collab/workspace"><p>x</p></AppShell>);

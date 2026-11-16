@@ -6,6 +6,7 @@ import { Alert, ButtonLink, EmptyState, Icon, Skeleton, StatusBadge, type IconNa
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { useQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
+import { AppsTray, InvestHighlight, LatestOpportunities, OnlineStrip } from '@/components/HomeExtras';
 import { AdCarousel, AreaChart, NewsCard, ThemeHero, VideoCard, type Ad, type News, type Theme, type Video } from '@/components/DashboardKit';
 
 interface Home {
@@ -91,6 +92,10 @@ export default function DashboardPage() {
             <p className="cz-muted" style={{ fontSize: 12.5, margin: '14px 0 0' }}>{d && !f.earnedUnpaid && !f.projected ? 'No commission yet. Introductions you register earn commission once the customer pays for the work.' : 'Commission is earned only when the customer pays the milestone.'}</p>
           </section>
 
+          {/* ---------- Apps, people, investments ---------- */}
+          <div className="cz-dash-apps"><AppsTray /></div>
+          <div className="cz-dash-side"><OnlineStrip /><InvestHighlight /></div>
+
           {/* ---------- Ad space ---------- */}
           <div className="cz-dash-ad">{fd ? <AdCarousel ads={fd.ads} theme={fd.theme} /> : <Skeleton height={180} />}</div>
 
@@ -142,6 +147,9 @@ export default function DashboardPage() {
               </ul>
             ) : <EmptyState icon="search" title="No matches yet">Add sectors and coverage to your profile to receive explainable recommendations.</EmptyState>}
           </section>
+
+          {/* ---------- Latest opportunities ---------- */}
+          <div className="cz-dash-latest"><LatestOpportunities /></div>
 
           {/* ---------- Pipeline ---------- */}
           <section className="cz-card cz-dash-pipe" aria-labelledby="pipe-h">

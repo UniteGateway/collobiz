@@ -106,9 +106,9 @@ export function AppShell({
                         <UiLink href={it.href} aria-current={isActive(it.href) ? 'page' : undefined} onClick={() => setOpen(false)}>
                           {it.icon && <Icon name={it.icon} />}{it.label}{it.count ? <span className="cz-count" aria-label={`${it.count} new`}>{it.count > 99 ? '99+' : it.count}</span> : null}
                         </UiLink>
-                        {sub && <button type="button" className="cz-nav-exp" aria-expanded={iOpen} aria-label={`${iOpen ? 'Hide' : 'Show'} ${it.label} pages`} onClick={() => toggle(ik, iOpen)}><Icon name="next" size={12} className="cz-nav-chev" /></button>}
+                        {sub && <button type="button" className="cz-nav-exp" aria-expanded={iOpen} aria-label={iOpen ? 'Hide more pages' : 'Show more pages'} aria-controls={`sub-${it.href.replace(/\W/g, '')}`} onClick={() => toggle(ik, iOpen)}><Icon name="next" size={12} className="cz-nav-chev" /></button>}
                       </div>
-                      {iOpen && <div className="cz-nav-sub" role="group" aria-label={`${it.label} pages`}>{it.children!.map((c) => <UiLink key={c.href} href={c.href} aria-current={isActive(c.href) ? 'page' : undefined} onClick={() => setOpen(false)}>{c.label}</UiLink>)}</div>}
+                      {iOpen && <div className="cz-nav-sub" id={`sub-${it.href.replace(/\W/g, '')}`}>{it.children!.map((c) => <UiLink key={c.href} href={c.href} aria-current={isActive(c.href) ? 'page' : undefined} onClick={() => setOpen(false)}>{c.label}</UiLink>)}</div>}
                     </div>
                   );
                 })}

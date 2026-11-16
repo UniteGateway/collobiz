@@ -22,6 +22,8 @@ export const MODULES: Module[] = [
   { key: 'powertek', label: 'Powertek products', icon: 'package', home: '/powertek', match: ['/powertek'], tabs: [['/powertek', 'All products'], ['/powertek/enquiries', 'My enquiries']] },
   { key: 'ventures', label: 'Unite businesses', icon: 'building', home: '/ventures', match: ['/ventures', '/solar', '/franchise', '/property', '/store/redeem'],
     tabs: [['/ventures', 'Businesses'], ['/solar', 'Solar desk'], ['/franchise', 'Franchise'], ['/property', 'Property sales']] },
+  { key: 'community', label: 'Community', icon: 'teams', home: '/community', match: ['/community'] },
+  { key: 'invest', label: 'Invest together', icon: 'building', home: '/invest', match: ['/invest'] },
   { key: 'messages', label: 'Messages', icon: 'messages', home: '/inbox', match: ['/inbox', '/chat', '/meetings', '/announcements', '/notifications'],
     tabs: [['/inbox', 'Inbox'], ['/meetings', 'Meetings'], ['/announcements', 'Announcements'], ['/notifications', 'Notifications']] },
   { key: 'tenders', label: 'Tenders', icon: 'tenders', home: '/tenders', match: ['/tenders'], ownTabs: true },
@@ -52,10 +54,10 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}): Nav
   const item = (k: string) => { const m = byKey[k]; return { href: m.home, label: m.label, icon: m.icon, children: m.tabs?.filter(([h]) => h !== m.home).map(([href, label]) => ({ href, label })) }; };
   const GROUPS: [string, string[]][] = [
     ['Grow your business', ['collab', 'business-offers', 'opportunities', 'leads', 'collaboration']],
-    ['Unite programmes', ['unite-solar', 'powertek', 'ventures']],
+    ['Unite programmes', ['unite-solar', 'powertek', 'invest', 'ventures']],
     ['Deliver & trade', ['tenders', 'projects', 'trading']],
     ['Money', ['earnings']],
-    ['Network & growth', ['messages', 'global', 'growth']],
+    ['Network & growth', ['community', 'messages', 'global', 'growth']],
   ];
   sections.push({ items: [item('home')] });
   for (const [title, keys] of GROUPS) sections.push({ title, collapsible: true, items: keys.filter((k) => byKey[k]).map(item) });

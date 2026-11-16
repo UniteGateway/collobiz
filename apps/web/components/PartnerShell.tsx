@@ -1,10 +1,11 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { AppShell, Button, Icon, UiLink } from '@collabiz/ui';
 import { partnerNav } from '@/lib/navigation';
 import { useQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
+import { api } from '@/lib/api';
 
 export function DemoRibbon() {
   const f = useQuery<{ demoMode?: boolean }>('/meta/features');
@@ -19,6 +20,14 @@ export function PartnerShell({ children }: { children: React.ReactNode }) {
   const initials = me?.fullName.split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
   const orgs = me?.memberships.filter((m, i, a) => a.findIndex((x) => x.organizationId === m.organizationId) === i) ?? [];
   const unread = alerts.data?.unread ?? 0;
+  // Presence for the Community "online now" list: a heartbeat each minute while the app is open and visible.
+  useEffect(() => {
+    if (!me) return;
+    const beat = () => { if (document.visibilityState === 'visible') api.post('/community/heartbeat').catch(() => undefined); };
+    beat();
+    const t = setInterval(beat, 60_000);
+    return () => clearInterval(t);
+  }, [me]);
   const tools = me ? (
     <>
       <UiLink href="/marketplace/search" className="cz-icon-btn" aria-label="Advanced search"><Icon name="search" /></UiLink>
