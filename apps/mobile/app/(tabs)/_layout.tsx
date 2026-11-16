@@ -1,4 +1,7 @@
+import { useEffect } from 'react';
+import { AppState } from 'react-native';
 import { Tabs } from 'expo-router';
+import { api } from '@/api';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@collabiz/ui/tokens';
 
@@ -11,6 +14,14 @@ const tab = (title: string, icon: Name, active: Name) => ({
 
 /** Partner tab bar: Home · Collab · Post · Inbox · Profile. Discover, leads, projects and earnings are one tap from Home or Profile. */
 export default function TabsLayout() {
+  // Presence for Community "online now": a heartbeat each minute while the app is in the foreground.
+  useEffect(() => {
+    const beat = () => { if (AppState.currentState === 'active') api.post('/community/heartbeat').catch(() => undefined); };
+    beat();
+    const t = setInterval(beat, 60_000);
+    const sub = AppState.addEventListener('change', (st) => { if (st === 'active') beat(); });
+    return () => { clearInterval(t); sub.remove(); };
+  }, []);
   return (
     <Tabs screenOptions={{
       headerShown: false,

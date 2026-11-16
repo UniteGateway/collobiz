@@ -5,6 +5,7 @@ import { sectorName } from '@collabiz/types';
 import { Button, Card, Empty, ErrorView, Icon, Kpi, Loading, Notice, Row, ScreenView, Section, Tag, inrShort, s, theme, type IconName } from '@/components/ui';
 import { useApi } from '@/hooks';
 import { useSession } from '@/session';
+import { HomeFeed } from '@/components/HomeFeed';
 
 interface Home {
   figures: Record<string, number>;
@@ -74,6 +75,8 @@ export default function Home() {
                 <Text style={{ fontSize: 34, fontWeight: '700', color: theme.colors.navy900, letterSpacing: -0.8, marginTop: 8 }}>{inrShort(f.earnedUnpaid ?? 0)}</Text>
                 <Text style={s.hint}>Earned and awaiting payment · {inrShort(f.projected ?? 0)} projected</Text>
               </Pressable>
+
+              <HomeFeed />
 
               {/* Figures */}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: theme.space.xl }}>
