@@ -320,7 +320,7 @@ suites.push({
     await page.getByLabel('GSTIN (optional)').fill('INVALID');
     await page.getByLabel('City').fill('Bengaluru');
     await page.getByRole('button', { name: 'Save and continue' }).click();
-    await page.getByText('Invalid GSTIN').waitFor();
+    await page.getByText(/Not a valid GSTIN/).waitFor();
     await page.getByLabel('GSTIN (optional)').fill('');
     await page.getByRole('button', { name: 'Save and continue' }).click();
     // 016
@@ -1492,7 +1492,7 @@ suites.push({
   run: async ({ page, WEB, shot }) => {
     const one = async (q, p = []) => (await sqlExec(q, p)).rows[0];
     await webLogin(page, WEB, 'asha@voltepc.example');
-    const visit = async (path, ...texts) => { await page.goto(WEB + path); for (const t of texts) await page.getByText(t).first().waitFor(); };
+    const visit = async (path, ...texts) => { await page.goto(WEB + path); for (const t of texts) await page.locator('main').getByText(t).first().waitFor(); }; // page content only, not the menu
     await visit('/onboarding/individual', 'Individual Partner Registration'); // 014
     await page.getByLabel('Name shown to partners').waitFor();
     await page.goto(WEB + '/dashboard'); // 023
@@ -1523,7 +1523,8 @@ suites.push({
     await visit('/finance/disputes', 'Report a payment problem'); // 104
     await page.goto(WEB + '/inbox'); // 107 — project chats are created for members on first visit
     await page.getByRole('heading', { name: /Messages|Inbox/ }).first().waitFor();
-    const thread = await one("select id from message_threads where kind = 'project' order by created_at limit 1");
+    let thread; // the inbox creates project chats as it loads; wait for the row rather than racing it
+    for (let i = 0; i < 20 && !(thread = await one("select id from message_threads where kind = 'project' order by created_at limit 1")); i++) await page.waitForTimeout(500);
     await page.goto(`${WEB}/chat/groups/${thread.id}`);
     await page.getByText(/PRJ-2026-000001/).first().waitFor();
     const note = `Crane booked for Thursday 8 am (${Date.now().toString().slice(-5)})`;
