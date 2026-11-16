@@ -36,3 +36,4 @@ export * from './module-documents';
 export * from './dashboard';
 export * from './community';
 export * from './app-brands';
+export * from './action-os';
