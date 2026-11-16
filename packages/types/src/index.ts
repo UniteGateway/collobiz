@@ -35,3 +35,4 @@ export * from './product-sales';
 export * from './module-documents';
 export * from './dashboard';
 export * from './community';
+export * from './app-brands';

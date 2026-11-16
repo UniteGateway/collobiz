@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { INDIA_STATES, sectorName } from '@collabiz/types';
+import { INDIA_STATES, appBrand, sectorName } from '@collabiz/types';
 import { Alert, Button, Card, ChipSelect, DescriptionList, Icon, LoadingState, StatusBadge, TextArea } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { INTEREST, VentureMark, roleLabel, stageLabel, type Venture } from '@/components/Ventures';
@@ -11,6 +11,8 @@ import { useMutation, useQuery } from '@/lib/hooks';
 
 type Detail = Venture & { roles: string[]; myInterest: { status: string; roles: string[]; regions: string[]; message: string; decisionNote: string | null } | null; offers: { id: string; code: string; title: string; deadline: string; status: string; myStatus: string }[]; promoters: number };
 const PAGE = { key: 'venture', title: 'Unite business', access: 'partner' as const };
+/** Feature icons in the brand data map onto the design-system icon set. */
+const IC: Record<string, string> = { doc: 'documents', globe: 'map', search: 'search', sparkle: 'award', chart: 'earnings', grid: 'package', shield: 'verify', flag: 'bookmark', people: 'users', clock: 'clock', bell: 'bell', check: 'check', map: 'location' };
 
 /** One Unite business: what it is, what partners can do, offers from it, and the request to promote it. */
 export default function VenturePage() {
@@ -23,15 +25,50 @@ export default function VenturePage() {
   if (q.error) return <Screen page={PAGE}><ApiErrorView error={q.error} onRetry={q.reload} /></Screen>;
   const v = q.data!;
   const mine = v.myInterest && v.myInterest.status !== 'withdrawn' ? v.myInterest : null;
+  const brand = appBrand(v.slug);
   return (
     <Screen page={{ ...PAGE, title: v.name }} eyebrow="Unite businesses" description={v.tagline}
       actions={<StatusBadge status={v.open ? 'open' : 'pending'} label={v.availability} />}>
       <p style={{ marginTop: -6 }}><Link href="/ventures" className="cz-back"><Icon name="prev" size={14} />All Unite businesses</Link></p>
+      <section className="cz-app-hero" style={{ ['--a1' as string]: brand?.accent[0] ?? '#0B3D91', ['--a2' as string]: brand?.accent[1] ?? '#1F9D55' }} aria-labelledby="app-h">
+        <div className="cz-app-hero-logo">{brand?.logo ? <img src={brand.logo} alt={`${v.name} logo`} /> : <VentureMark name={v.name} sector={v.sector} size={88} />}</div>
+        <div className="cz-app-hero-text">
+          <span className="cz-app-hero-eyebrow">{v.category} · {stageLabel(v.stage)}</span>
+          <h2 id="app-h">{v.tagline}</h2>
+          <p>{v.summary.replace(/\s*www\.[^\s]+$/, '')}</p>
+          <div className="cz-row" style={{ gap: 8, flexWrap: 'wrap' }}>
+            {brand?.website && <a className="cz-btn cz-btn-light" href={brand.website} target="_blank" rel="noopener noreferrer">Open {brand.website.replace(/^https?:\/\//, '')}<Icon name="external" size={14} /></a>}
+            {v.open && !mine && <a className="cz-btn cz-btn-ghost-light" href="#promote">Promote {v.name}</a>}
+          </div>
+        </div>
+      </section>
+      <div className="cz-app-stats">
+        <div><span>Stage</span><strong>{stageLabel(v.stage)}</strong></div>
+        <div><span>Partners promoting</span><strong>{v.promoters}</strong></div>
+        <div><span>Offers for you</span><strong>{v.offers.length}</strong></div>
+        <div><span>Your status</span><strong>{mine ? INTEREST[mine.status]?.[0] ?? mine.status : v.open ? 'Not joined' : 'Coming soon'}</strong></div>
+      </div>
+      <section className="cz-app-section" aria-labelledby="feat-h">
+        <h2 id="feat-h">Features</h2>
+        <div className="cz-app-features">{(brand?.features ?? v.roles.map((r) => ({ title: roleLabel(r), text: `Partners can ${roleLabel(r).toLowerCase()} for ${v.name}.`, icon: 'people' }))).map((x) => (
+          <article key={x.title}><span className="cz-app-feat-ic" aria-hidden><Icon name={(IC[x.icon] ?? 'check') as never} size={18} /></span><h3>{x.title}</h3><p>{x.text}</p></article>
+        ))}</div>
+      </section>
+      {brand?.workflow && (
+        <section className="cz-app-section" aria-labelledby="flow-h"><h2 id="flow-h">How {v.name} works</h2>
+          <ol className="cz-app-flow">{brand.workflow.map((w, i) => <li key={w.title}><span>{String(i + 1).padStart(2, '0')}</span><strong>{w.title}</strong><p>{w.text}</p></li>)}</ol>
+        </section>
+      )}
+      {brand?.plans && (
+        <section className="cz-app-section" aria-labelledby="plans-h"><h2 id="plans-h">Plans</h2>
+          <div className="cz-app-plans">{brand.plans.map((pl) => <article key={pl.name} className={pl.featured ? 'cz-featured' : ''}><span>{pl.name}</span><strong>{pl.price}</strong><em>{pl.per}</em><p>{pl.text}</p></article>)}</div>
+          {brand.planNote && <p className="cz-muted" style={{ fontSize: 12.5 }}>{brand.planNote}</p>}
+        </section>
+      )}
+      {brand?.integration && <Alert tone={brand.integration.status === 'connected' ? 'success' : 'info'} title={brand.integration.status === 'connected' ? 'Connected to COLLABIZ' : 'Integration'}>{brand.integration.text}</Alert>}
       <div className="cz-grid cz-grid-2" style={{ alignItems: 'start' }}>
         <div className="cz-stack">
-          <Card>
-            <div className="cz-venture-head" style={{ marginBottom: 12 }}><VentureMark name={v.name} sector={v.sector} size={56} /><div><strong style={{ fontSize: 18 }}>{v.name}</strong><span className="cz-muted">{v.category}</span></div></div>
-            <p style={{ marginTop: 0 }}>{v.summary}</p>
+          <Card title="About">
             <DescriptionList items={[['Sector', sectorName(v.sector)], ['Stage', stageLabel(v.stage)], ['Run by', v.company ?? 'Unite Group'], ['Partners promoting it', String(v.promoters)], ['Rewards', v.rewardNote ?? 'Set in each offer']]} />
           </Card>
           <Card title="How partners help">
@@ -51,7 +88,7 @@ export default function VenturePage() {
             </Card>
           ) : null}
           {(!mine || mine.status === 'declined') && (v.open ? (
-            <Card title={`Promote ${v.name}`}>
+            <Card title={`Promote ${v.name}`}><span id="promote" />
               <form noValidate onSubmit={(e) => { e.preventDefault(); ask.run(); }}>
                 {ask.error && <Alert tone="danger">{ask.error}</Alert>}
                 <ChipSelect legend="How you will help" options={v.roles.map((r) => ({ value: r, label: roleLabel(r) }))} value={f.roles} onChange={(roles) => setF({ ...f, roles })} />

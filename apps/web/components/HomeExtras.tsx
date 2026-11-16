@@ -1,7 +1,7 @@
 'use client';
 /** Partner Home extras: Unite apps tray, members online, group-investment highlight and the newest opportunities. */
 import Link from 'next/link';
-import { sectorName } from '@collabiz/types';
+import { appBrand, sectorName } from '@collabiz/types';
 import { Icon, Skeleton } from '@collabiz/ui';
 import { useQuery } from '@/lib/hooks';
 import { inr, type Offer } from '@/components/InvestKit';
@@ -19,7 +19,7 @@ export function AppsTray() {
       {!q.data ? <Skeleton height={120} /> : (
         <ul className="cz-apps-grid">{apps.slice(0, 18).map((v) => (
           <li key={v.id}><Link href={`/ventures/${v.slug}`} title={`${v.name} — ${v.tagline}`}>
-            <span className="cz-app-ic" style={{ ['--hue' as string]: SECTOR_HUE[v.sector] ?? '#0B3D91' }} aria-hidden>{(() => { const w = v.name.split(/[\s/·-]+/).filter(Boolean); return (w.length > 1 ? w[0][0] + w[1][0] : v.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 2)).toUpperCase(); })()}</span>
+            {appBrand(v.slug)?.logo ? <span className="cz-app-ic cz-app-ic-logo" aria-hidden><img src={appBrand(v.slug)!.mark ?? appBrand(v.slug)!.logo} alt="" /></span> : <span className="cz-app-ic" style={{ ['--hue' as string]: SECTOR_HUE[v.sector] ?? '#0B3D91' }} aria-hidden>{(() => { const w = v.name.split(/[\s/·-]+/).filter(Boolean); return (w.length > 1 ? w[0][0] + w[1][0] : v.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 2)).toUpperCase(); })()}</span>}
             <span className="cz-app-name">{v.name}</span>
             <span className={`cz-app-state${v.open ? '' : ' cz-soon'}`}>{v.myInterest === 'approved' ? 'Joined' : v.open ? 'Open' : 'Coming soon'}</span>
           </Link></li>

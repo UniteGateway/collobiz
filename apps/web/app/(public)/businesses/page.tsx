@@ -18,7 +18,7 @@ export default function BusinessesPage() {
           {q.data.map((v) => (
             <li key={v.id}>
               <section className="cz-card cz-venture" aria-label={v.name}>
-                <div className="cz-venture-head"><VentureMark name={v.name} sector={v.sector} /><div><h2 style={{ margin: 0, fontSize: 16 }}>{v.name}</h2><span className="cz-muted">{v.category}</span></div></div>
+                <div className="cz-venture-head"><VentureMark name={v.name} sector={v.sector} slug={v.slug} /><div><h2 style={{ margin: 0, fontSize: 16 }}>{v.name}</h2><span className="cz-muted">{v.category}</span></div></div>
                 <span className="cz-venture-tag">{v.tagline}</span>
                 <p className="cz-venture-sum">{v.summary}</p>
                 <div className="cz-venture-foot"><span className="cz-tag">{sectorName(v.sector)}</span><span className="cz-muted">{stageLabel(v.stage)}{v.company ? ` · ${v.company}` : ''}</span></div>

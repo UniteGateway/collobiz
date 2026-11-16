@@ -104,4 +104,6 @@ export const VENTURES: VentureSeed[] = [
     summary: 'Bio-CNG and waste-to-energy plants that turn Napier grass, organic waste and other local feedstock into green fuel. Partners help find sites, feedstock and fuel buyers.' },
   { num: 47, slug: 'unite-aqua', name: 'Unite Aqua', category: 'Aquaculture · Products', sector: 'agri_food', tagline: 'Aquaculture feed and container-system concepts', stage: 'pilot', open: false, roles: ['sell_products', 'refer_customers'],
     summary: 'Fish and shrimp feed products and container-based feed-production systems for aquaculture farmers.' },
+  { num: 48, slug: 'bizo', name: 'BIZO', category: 'Business Intelligence · Software', sector: 'technology', tagline: 'Business Operating System — business intelligence that adapts', stage: 'pilot', open: true, roles: ['refer_customers', 'sell_products'],
+    summary: 'One corporate workspace that combines market research, prospect discovery, source-backed qualification, AI proposals and CRM. The dashboard configures itself around each company’s industry, products, target markets and goals, with a dedicated AI Growth Agent. www.bizo.one' },
 ];

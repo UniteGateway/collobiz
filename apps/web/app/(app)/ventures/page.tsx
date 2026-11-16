@@ -37,7 +37,7 @@ export default function VenturesPage() {
           {list.map((v) => (
             <li key={v.id}>
               <Link href={`/ventures/${v.slug}`} className="cz-card cz-venture" data-venture={v.slug}>
-                <div className="cz-venture-head"><VentureMark name={v.name} sector={v.sector} /><div><strong>{v.name}</strong><span className="cz-muted">{v.category}</span></div></div>
+                <div className="cz-venture-head"><VentureMark name={v.name} sector={v.sector} slug={v.slug} /><div><strong>{v.name}</strong><span className="cz-muted">{v.category}</span></div></div>
                 <span className="cz-venture-tag">{v.tagline}</span>
                 <p className="cz-venture-sum">{v.summary}</p>
                 <div className="cz-venture-foot">
