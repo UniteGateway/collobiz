@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { Badge, Button, Card, Field, Notice, Select } from '@/components/ui';
 import { PageTitle } from '@/components/Shell';
 import { api, useApi } from '@/lib/client';
@@ -11,7 +11,7 @@ interface Row { id: string; solarAcMw: number; windMw: number; bessMw: number; b
 interface Run { id: string; result: { ranked: Row[]; pruned: Row[]; screeningDays: number; note: string } }
 
 /** Combination builder: enumerate solar, wind and BESS sizes around a base scenario, prune the impossible, screen and rank. */
-export default function Combinations() {
+function CombinationsInner() {
   const from = useSearchParams().get('from');
   const router = useRouter();
   const list = useApi<{ id: string; name: string }[]>('/api/hybrid/scenarios');
@@ -69,3 +69,6 @@ export default function Combinations() {
     </>
   );
 }
+
+/** useSearchParams needs a Suspense boundary for the production build. */
+export default function Combinations() { return <Suspense fallback={null}><CombinationsInner /></Suspense>; }

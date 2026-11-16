@@ -17,7 +17,7 @@ const pages = [['/', 'Developer revenue'], ['/config', 'Five different capacitie
 for (const [p, text] of pages) {
   const t0 = Date.now();
   await page.goto(B + p);
-  try { await page.getByText(text).first().waitFor({ timeout: 90000 }); } catch { errs.push(`${p}: "${text}" not shown`); }
+  try { await page.locator('main').getByText(text).first().waitFor({ timeout: 90000 }); } catch { errs.push(`${p}: "${text}" not shown`); }
   await page.waitForTimeout(800);
   await page.screenshot({ path: `/tmp/claude-0/upd-shots/${p === '/' ? 'dashboard' : p.slice(1)}.png`, fullPage: true });
   console.log(p, Date.now() - t0, 'ms');

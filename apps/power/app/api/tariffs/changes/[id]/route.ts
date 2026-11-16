@@ -27,6 +27,6 @@ export const POST = handle(async (req: Request, ctx: { params: Promise<{ id: str
     } });
     return tx.regulatoryChange.update({ where: { id }, data: { status: 'approved', reviewer: s.email, reviewNote: b.note, decidedAt: new Date() } });
   });
-  await audit(s, `tariff.change_${b.decision}d`, 'regulatoryChange', id, undefined, { key: c.key, value: p.value });
+  await audit(s, b.decision === 'approve' ? 'tariff.change_approved' : 'tariff.change_rejected', 'regulatoryChange', id, undefined, { key: c.key, value: p.value });
   return result;
 });

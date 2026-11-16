@@ -1,4 +1,5 @@
 'use client';
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Badge, Card, Notice, Skeleton } from '@/components/ui';
@@ -7,7 +8,7 @@ import { useApi } from '@/lib/client';
 import { DECISION_TEXT, DECISION_TONE, cr, gwh, pctN } from '@/lib/hybridClient';
 
 /** Up to six scenarios side by side. Only results computed for the current inputs are compared. */
-export default function Compare() {
+function CompareInner() {
   const ids = (useSearchParams().get('ids') ?? '').split(',').filter(Boolean);
   const q = useApi<any[]>('/api/hybrid/scenarios');
   const rows = (q.data ?? []).filter((r) => ids.includes(r.id));
@@ -49,3 +50,6 @@ export default function Compare() {
     </>
   );
 }
+
+/** useSearchParams needs a Suspense boundary for the production build. */
+export default function Compare() { return <Suspense fallback={null}><CompareInner /></Suspense>; }
