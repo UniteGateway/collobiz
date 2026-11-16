@@ -302,6 +302,20 @@
       "when": 1794795814764,
       "tag": "0042_community_investments",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1794798045948,
+      "tag": "0043_push_tokens",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1794798047462,
+      "tag": "0044_live_notify",
+      "breakpoints": true
     }
   ]
 }

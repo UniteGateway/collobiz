@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, EmptyState, Icon, Skeleton, type IconName } from '@collabiz/ui';
 import { ApiErrorView } from './Screen';
 import { api } from '@/lib/api';
+import { useLive } from '@/lib/live';
 import { useMutation, useQuery } from '@/lib/hooks';
 
 export const KIND_META: Record<string, { label: string; icon: IconName }> = {
@@ -44,7 +45,9 @@ export function ChatThread({ id, me }: { id: string; me?: { id: string } | null 
   const [reason, setReason] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
   const end = useRef<HTMLDivElement>(null);
-  useEffect(() => { const t = setInterval(() => q.reload(), 8000); return () => clearInterval(t); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { const t = setInterval(() => q.reload(), 15000); return () => clearInterval(t); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+  // A message in this conversation arrives as a notification linking here: reload straight away.
+  useLive((e) => { if (e.type === 'notification' && typeof e.data.link === 'string' && e.data.link.endsWith(`/${id}`)) q.reload(); });
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [q.data?.messages.length]);
   const send = useMutation(async () => { const body = text.trim(); if (!body) return false; await api.post(`/chat/threads/${id}/messages`, { body }); setText(''); await q.reload(); return true; });
   const unsend = useMutation(async (m: Msg) => { await api.post(`/chat/messages/${m.id}/delete`); await q.reload(); return true; });

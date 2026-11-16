@@ -2033,3 +2033,6 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
 .cz-search-h { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 16px; }
 .cz-search-h .cz-muted { margin-left: auto; font-size: 13px; font-weight: 500; }
 @media (max-width: 640px) { .cz-search-groups { grid-template-columns: 1fr; } }
+.cz-toast-wrap { position: fixed; right: 20px; bottom: 20px; z-index: 60; }
+.cz-toast { display: flex; align-items: center; gap: 10px; max-width: 360px; padding: 12px 16px; border-radius: 14px; background: rgba(1, 30, 72, .94); color: #fff !important; text-decoration: none; font-size: 14px; box-shadow: 0 18px 40px -18px rgba(0, 0, 0, .6); backdrop-filter: blur(10px); animation: cz-rise .25s ease both; }
+.cz-toast:focus-visible { outline: 3px solid #93c5fd; }

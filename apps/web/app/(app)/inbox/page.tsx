@@ -6,6 +6,7 @@ import { Alert, Button, EmptyState, Icon, SearchInput, Segmented, Skeleton } fro
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { initials, when } from '@/components/Comms';
 import { api } from '@/lib/api';
+import { useLive } from '@/lib/live';
 import { useMutation, useQuery } from '@/lib/hooks';
 
 interface Row { id: string; kind: 'direct' | 'project'; title: string; lastMessageAt: string | null; unread: number; preview: { author: string; text: string; at: string } | null }
@@ -18,7 +19,8 @@ export default function Inbox() {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [composing, setComposing] = useState(false);
-  useEffect(() => { const t = setInterval(() => q.reload(), 15000); return () => clearInterval(t); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { const t = setInterval(() => q.reload(), 30000); return () => clearInterval(t); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useLive((e) => { if (e.type === 'notification' && e.data.kind === 'message') q.reload(); });
   const rows = useMemo(() => (q.data ?? []).filter((r) => (filter === 'all' || (filter === 'unread' ? r.unread > 0 : r.kind === filter)) && (!search || `${r.title} ${r.preview?.text ?? ''}`.toLowerCase().includes(search.toLowerCase()))), [q.data, filter, search]);
   const unread = (q.data ?? []).reduce((s, r) => s + r.unread, 0);
   return (

@@ -7,6 +7,7 @@ import { Screen, ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
+import { useLive } from '@/lib/live';
 
 interface Member { userId: string; name: string; org: string; city: string | null; verified: boolean; sectors: string[]; unite: boolean }
 interface Post { id: string; body: string; topic: string; topicLabel: string; likes: number; comments: number; liked: boolean; author: string; authorUserId: string; org: string; mine: boolean; createdAt: string }
@@ -20,6 +21,7 @@ export default function Community() {
   const [topic, setTopic] = useState('');
   const wall = useQuery<Post[]>('/community/posts', { topic: topic || undefined });
   const [draft, setDraft] = useState({ body: '', topic: 'general' });
+  useLive((e) => { if (e.type === 'presence') online.reload(); if (e.type === 'notification' && e.data.link === '/community') wall.reload(); });
   const [to, setTo] = useState<Member | null>(null);
   const verified = me?.activeOrg?.verificationStatus === 'verified';
   const share = useMutation(async () => { await api.post('/community/posts', draft); setDraft({ body: '', topic: draft.topic }); wall.reload(); });

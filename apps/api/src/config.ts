@@ -40,6 +40,9 @@ const Env = z.object({
   ESIGN_PROVIDER: z.string().default('local'),
   /** Video provider for meeting rooms: local/none (scheduling, agenda, minutes only) or jitsi. */
   MEETING_PROVIDER: z.string().default('local'),
+  /** Mobile push: 'none' (default) or 'expo'. EXPO_ACCESS_TOKEN is optional (needed when the Expo project enforces it). */
+  PUSH_PROVIDER: z.enum(['none', 'expo']).default('none'),
+  EXPO_ACCESS_TOKEN: z.string().optional(),
   MEETING_JITSI_BASE_URL: z.string().url().default('https://meet.jit.si'),
   /** Shows the 'demonstration environment' ribbon; demo seeds are refused in production regardless. */
   DEMO_MODE: bool.default(false),

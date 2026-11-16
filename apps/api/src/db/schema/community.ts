@@ -71,3 +71,12 @@ export const investmentInterests = pgTable('investment_interests', {
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (t) => [uniqueIndex('investment_interests_uq').on(t.offerId, t.userId)]);
+
+/** Mobile push tokens (Expo). Sending stays off until a push provider is configured. */
+export const pushTokens = pgTable('push_tokens', {
+  token: text('token').primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  platform: text('platform').notNull(), // ios | android
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (t) => [index('push_tokens_user_idx').on(t.userId)]);
