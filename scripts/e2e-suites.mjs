@@ -2556,3 +2556,33 @@ suites.push({
     await shot('powertek-sales-desk');
   },
 });
+suites.push({
+  name: 'Community, Invest together and Search · post and comment, register interest with the pro-rata calculator, find it from search',
+  run: async ({ page, WEB, label, expect, shot }) => {
+    const text = pick(label, 'Looking for a structural engineer in Pune for a 2 MW rooftop — any referrals?', 'Anyone supplying 250 kVA transformers in Hyderabad this month?');
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/community');
+    await page.getByLabel('Share a thought, question or opportunity').fill(text);
+    await page.getByLabel('Topic', { exact: true }).selectOption('opportunity');
+    await page.getByRole('button', { name: 'Post', exact: true }).click();
+    const post = page.locator('article', { hasText: text });
+    await post.waitFor();
+    await post.getByRole('button', { name: /comment/ }).click();
+    await post.getByLabel('Write a comment').fill('Following — happy to help.');
+    await post.getByRole('button', { name: 'Reply' }).click();
+    await post.getByText('Following — happy to help.').waitFor();
+    await shot('community-wall');
+    await page.goto(WEB + '/search?q=Gachibowli');
+    await page.getByRole('heading', { name: /Invest together/ }).waitFor();
+    await page.locator('main').getByRole('link', { name: /office floor share/ }).first().click();
+    await page.waitForURL(/\/invest/);
+    const card = page.locator('article', { hasText: 'Gachibowli' }).first();
+    const units = pick(label, '600', '1200');
+    await card.getByLabel(/How many sq ft/).fill(units);
+    await card.getByText(`₹${(Number(units) * 60).toLocaleString('en-IN')} / month`).waitFor(); // ₹60 per sq ft per month, pro rata
+    await card.getByRole('button', { name: /Register interest|Update my interest/ }).click();
+    await card.getByText(`Your interest: ${Number(units).toLocaleString('en-IN')} sq ft`).waitFor();
+    expect(await page.getByText(/does not take money or allot units|COLLABIZ records your non-binding interest only/).count() > 0, 'interest-only notice shown');
+    await shot('invest-interest');
+  },
+});

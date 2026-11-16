@@ -43,9 +43,9 @@ describe('Community and group investments', () => {
     const o = { title: 'Grade-A office floor share — Gachibowli', kind: 'property_share', summary: 'A leased office floor offered in square-foot shares; rent shared pro rata.', location: 'Gachibowli, Hyderabad', totalUnits: 10000, unitPrice: 9_000_00, minUnits: 100, projectedMonthlyRent: 6 * L, lockInMonths: 36, sponsor: 'ProDeal (sample offer)' };
     await post('/admin/invest/offers', t.asha, o).expect(403);
     offer = (await post('/admin/invest/offers', t.uniteAdmin, o).expect(201)).body.id;
-    expect((await get('/invest/offers', t.asha)).body).toHaveLength(0); // drafts are not shown
+    expect((await get('/invest/offers', t.asha)).body.some((x: { id: string }) => x.id === offer)).toBe(false); // drafts are not shown
     await post(`/admin/invest/offers/${offer}/status`, t.uniteAdmin, { to: 'interest_open' }).expect(200);
-    const list = (await get('/invest/offers', t.asha).expect(200)).body;
+    const list = (await get('/invest/offers', t.asha).expect(200)).body.filter((x: { id: string }) => x.id === offer);
     expect(list[0]).toMatchObject({ rentPerUnitMonth: 6000, grossYieldPct: 8, regulatoryStatus: 'pending', assetValue: 9 * 100 * L });
     expect(list[0].notice).toMatch(/does not take money or allot units/);
     await post(`/invest/offers/${offer}/interest`, t.vikram, { units: 200 }).expect(403); // KYC first
@@ -64,5 +64,22 @@ describe('Community and group investments', () => {
     expect(book.reduce((a: number, b: { monthlyRentShare: number }) => a + b.monthlyRentShare, 0)).toBe(6 * L);
     await post(`/invest/offers/${offer}/withdraw`, t.meera).expect(200);
     expect((await get(`/invest/offers/${offer}`, t.asha)).body.availableUnits).toBe(7500);
+  });
+
+  it('one search box finds opportunities, apps, products, documents, offers and posts — within each item’s visibility', async () => {
+    await api(app).post('/v1/admin/documents').set(auth(t.uniteAdmin)).field('moduleKey', 'unite-solar').field('title', 'Rooftop DPR template (verified partners)').field('kind', 'dpr').field('url', '/library').field('visibility', 'verified_partners').expect(201);
+    const solar = (await get('/search?q=solar', t.asha).expect(200)).body;
+    const keys = solar.groups.map((g: { key: string }) => g.key);
+    expect(keys).toEqual(expect.arrayContaining(['opportunities', 'apps']));
+    expect(solar.groups.flatMap((g: { items: { href: string }[] }) => g.items).every((i: { href: string }) => i.href.startsWith('/'))).toBe(true);
+    const dpr = (await get('/search?q=Rooftop%20DPR', t.asha).expect(200)).body;
+    expect(dpr.groups.find((g: { key: string }) => g.key === 'documents')?.items).toHaveLength(1);
+    await post('/community/heartbeat', t.vikram);
+    const v = await get('/search?q=Rooftop%20DPR', t.vikram);
+    if (v.status === 200) expect(v.body.groups.find((g: { key: string }) => g.key === 'documents')).toBeUndefined(); // unverified: no verified-only documents
+    expect((await get('/search?q=Gachibowli', t.meera).expect(200)).body.groups.map((g: { key: string }) => g.key)).toContain('invest');
+    expect((await get('/search?q=a', t.asha).expect(200)).body.groups).toEqual([]);
+    const admin = (await get('/admin/workspace/search?q=Gachibowli', t.uniteAdmin).expect(200)).body;
+    expect(admin.groups.map((g: { key: string }) => g.key)).toContain('invest');
   });
 });

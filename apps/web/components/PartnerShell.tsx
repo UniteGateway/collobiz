@@ -30,7 +30,7 @@ export function PartnerShell({ children }: { children: React.ReactNode }) {
   }, [me]);
   const tools = me ? (
     <>
-      <UiLink href="/marketplace/search" className="cz-icon-btn" aria-label="Advanced search"><Icon name="search" /></UiLink>
+      <UiLink href="/search" className="cz-icon-btn" aria-label="Search"><Icon name="search" /></UiLink>
       <UiLink href="/notifications" className="cz-icon-btn" aria-label={unread ? `${unread} unread notifications` : 'Notifications'}><Icon name="bell" />{unread > 0 && <span className="cz-dot">{unread > 99 ? '99+' : unread}</span>}</UiLink>
     </>
   ) : null;

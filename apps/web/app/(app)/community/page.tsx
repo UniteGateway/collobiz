@@ -54,7 +54,7 @@ export default function Community() {
               </form>
             ) : <Alert tone="info">Posting opens once your organisation is verified. You can read and like posts now.</Alert>}
           </section>
-          <div className="cz-scroll-x"><Segmented label="Topic" value={topic} onChange={setTopic} options={[{ value: '', label: 'Everything' }, ...POST_TOPICS.map((t) => ({ value: t, label: POST_TOPIC_LABELS[t] }))]} /></div>
+          <div className="cz-scroll-x"><Segmented label="Filter posts by topic" value={topic} onChange={setTopic} options={[{ value: '', label: 'Everything' }, ...POST_TOPICS.map((t) => ({ value: t, label: POST_TOPIC_LABELS[t] }))]} /></div>
           {wall.error ? <ApiErrorView error={wall.error} onRetry={wall.reload} /> : !wall.data ? <Skeleton height={300} /> : !wall.data.length ? <div className="cz-card"><EmptyState icon="messages" title="No posts yet">Be the first to share something with the network.</EmptyState></div>
             : wall.data.map((p) => <PostCard key={p.id} p={p} onLike={() => like.run(p)} onChange={wall.reload} />)}
         </div>

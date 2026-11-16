@@ -22,6 +22,8 @@ import { body } from '../../common/http';
 import { Ctx, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
 import { randomDigits } from '../../common/crypto';
+import { OpportunitiesModule } from '../opportunities/opportunities.controller';
+import { SearchController } from './search.controller';
 
 const staff = (ctx: RequestContext) => ctx.platformRoles.some((r) => r === 'super_admin' || r === 'unite_admin' || r === 'moderator');
 const superAdmin = (ctx: RequestContext) => ctx.platformRoles.includes('super_admin');
@@ -237,5 +239,5 @@ export class CommunityController {
   }
 }
 
-@Module({ controllers: [CommunityController] })
+@Module({ imports: [OpportunitiesModule], controllers: [CommunityController, SearchController] })
 export class CommunityModule {}

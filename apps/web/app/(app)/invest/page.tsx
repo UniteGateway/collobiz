@@ -51,8 +51,11 @@ function OfferCard({ o, onChange }: { o: Offer; onChange: () => void }) {
       <p className="cz-muted" style={{ fontSize: 12.5, margin: '6px 0 12px' }}>{o.interestUnits.toLocaleString('en-IN')} of {o.totalUnits.toLocaleString('en-IN')} {o.unitLabel} · {o.interestedMembers} member{o.interestedMembers === 1 ? '' : 's'} interested</p>
       {o.status === 'interest_open' && max >= o.minUnits ? (
         <div className="cz-offer-calc">
-          <label htmlFor={`u-${o.id}`} style={{ fontWeight: 600, fontSize: 14 }}>How many {o.unitLabel}? <strong>{units.toLocaleString('en-IN')}</strong></label>
-          <input id={`u-${o.id}`} type="range" min={o.minUnits} max={max} step={Math.max(1, Math.round(o.minUnits / 2))} value={units} onChange={(e) => setUnits(Number(e.target.value))} />
+          <label htmlFor={`u-${o.id}`} style={{ fontWeight: 600, fontSize: 14 }}>How many {o.unitLabel}?</label>
+          <div className="cz-row" style={{ gap: 12, alignItems: 'center' }}>
+            <input aria-hidden tabIndex={-1} type="range" min={o.minUnits} max={max} step={Math.max(1, Math.round(o.minUnits / 2))} value={units} onChange={(e) => setUnits(Number(e.target.value))} style={{ flex: 1 }} />
+            <input id={`u-${o.id}`} className="cz-input" style={{ width: 120 }} inputMode="numeric" value={units} onChange={(e) => setUnits(Math.min(max, Number(e.target.value.replace(/\D/g, '')) || 0))} />
+          </div>
           <div className="cz-offer-out"><div><span className="cz-muted">You would invest</span><strong>{inr(units * o.unitPrice)}</strong></div><div><span className="cz-muted">Your rent share (projected)</span><strong>{inr(share)} / month</strong></div></div>
           {!verified && <Alert tone="info">Complete your verification (KYC) to register interest.</Alert>}
           {(save.error || withdraw.error) && <Alert tone="danger">{save.error ?? withdraw.error}</Alert>}

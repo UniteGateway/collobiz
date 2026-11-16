@@ -15,6 +15,7 @@ import { InjectDb, type Db } from '../../db/client';
 import {
   catalogItems, commissionEntries, directOffers, groupCompanies, growthContacts, growthMessages, meetingAttendees, meetings, memberships, offerSales, opportunities,
   growthAgents, growthRuns, kybReviews, organizations, pilotFeedback, projects, supportTickets, uniteVentures, users, ventureInterests,
+  communityPosts, investmentOffers, moduleDocuments,
 } from '../../db/schema';
 import { Ctx, type RequestContext } from '../../common/context';
 import { config } from '../../config';
@@ -148,6 +149,9 @@ export class WorkspaceController {
       .where(or(ilike(growthContacts.organizationName, like), ilike(growthContacts.contactName, like), ilike(growthContacts.email, like))).limit(6) : [];
     const people = await this.db.selectDistinct({ id: users.id, name: users.fullName, org: organizations.displayName }).from(users).innerJoin(memberships, eq(memberships.userId, users.id)).innerJoin(organizations, eq(organizations.id, memberships.organizationId))
       .where(and(ilike(users.fullName, like), inArray(organizations.type, ['platform', 'group_company']), eq(memberships.status, 'active'))).limit(6);
+    const posts = await this.db.select({ id: communityPosts.id, body: communityPosts.body, status: communityPosts.status }).from(communityPosts).where(ilike(communityPosts.body, like)).limit(5);
+    const invest = await this.db.select({ id: investmentOffers.id, title: investmentOffers.title, code: investmentOffers.code }).from(investmentOffers).where(or(ilike(investmentOffers.title, like), ilike(investmentOffers.code, like))).limit(5);
+    const docs = await this.db.select({ id: moduleDocuments.id, title: moduleDocuments.title, moduleKey: moduleDocuments.moduleKey }).from(moduleDocuments).where(ilike(moduleDocuments.title, like)).limit(5);
     const groups = [
       { key: 'companies', label: 'Companies and partners', items: orgs.map((o) => ({ id: o.id, title: o.name, subtitle: `${o.type === 'group_company' ? 'Unite Group company' : o.status === 'verified' ? 'Verified partner' : 'Partner'} · ${[o.city, countryLabel(o.country)].filter(Boolean).join(', ')}`, href: o.type === 'group_company' ? '/workspace/companies' : `/verification/${o.id}` })) },
       { key: 'businesses', label: 'Unite businesses', items: vens.map((v) => ({ id: v.id, title: v.name, subtitle: v.tagline, href: `/ventures/${v.id}` })) },
@@ -155,6 +159,9 @@ export class WorkspaceController {
       { key: 'projects', label: 'Projects', items: projs.map((p) => ({ id: p.id, title: p.title, subtitle: p.code, href: `web:/projects/${p.id}` })) },
       { key: 'offers', label: 'Direct offers', items: offs.map((o) => ({ id: o.id, title: o.title, subtitle: o.code, href: `/offers/${o.id}` })) },
       { key: 'leads', label: 'Lead database', items: leads.map((l) => ({ id: l.id, title: l.name, subtitle: l.optedOut ? 'Opted out' : l.city ?? 'Contact', href: `/growth/contacts?q=${encodeURIComponent(l.name)}` })) },
+      { key: 'documents', label: 'Document library', items: docs.map((d) => ({ id: d.id, title: d.title, subtitle: d.moduleKey, href: '/workspace/library' })) },
+      { key: 'invest', label: 'Investment offers', items: invest.map((o) => ({ id: o.id, title: o.title, subtitle: o.code, href: '/workspace/invest' })) },
+      { key: 'community', label: 'Community posts', items: posts.map((p) => ({ id: p.id, title: p.body.slice(0, 90), subtitle: p.status, href: '/workspace/invest' })) },
       { key: 'people', label: 'Unite Group people', items: people.map((p) => ({ id: p.id, title: p.name, subtitle: p.org, href: null })) },
     ].filter((g) => g.items.length);
     return { q, groups };
