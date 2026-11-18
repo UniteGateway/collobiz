@@ -13,6 +13,12 @@ One line per module: where it lives and where it is documented. Earlier modules 
 | Catalogues & documents library | `/library` | `modules/module-documents` | — |
 | Unite apps (48 businesses incl. **BIZO**, logos, app dashboards) | `/ventures`, `/ventures/[slug]` | `modules/ventures` | `packages/types/src/app-brands.ts` |
 | **ACTION OS** (notice board, action plans, channels, integrations) | `/action-os` | `modules/action-os` | [action-os/](action-os/README.md) |
+| Unite Green Park (energy marketplace) | `/energy` | `modules/energy` | [live-site-comparison.md](live-site-comparison.md) |
+| Launch (have → business model → plan) | `/launch` | `modules/collab-ops/launch.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
+| Capacity calendar | `/capacity` | `modules/collab-ops/capacity.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
+| Micro-contracts | `/micro` | `modules/collab-ops/micro.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
+| Demand pools | `/pools` | `modules/collab-ops/pools.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
+| Commit (conditional multi-party agreements) | `/commit` | `modules/collab-ops/commit.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
 | Unite Power Lab (separate app, port 3002) | `apps/power` | Next API routes | [power/PROGRESS.md](power/PROGRESS.md) |
 
 BIZO (www.bizo.one) is listed as Unite business #48 with its brochure features, indicative plans and a link-out. Single

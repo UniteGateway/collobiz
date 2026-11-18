@@ -26,12 +26,12 @@ export default function CapacityCalendar() {
         <span className="cz-cal-legend">{(Object.keys(LABEL) as (keyof typeof LABEL)[]).map((k) => <span key={k}><i className={`cz-cal-${k}`} />{LABEL[k]}</span>)}</span>
       </div>
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !q.data ? <Skeleton height={420} /> : (
-        <div className="cz-cal" role="grid" aria-label="Capacity calendar">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => <div key={d} className="cz-cal-dow" role="columnheader">{d}</div>)}
+        <div className="cz-cal" aria-label="Capacity calendar" role="group">
+          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => <div key={d} className="cz-cal-dow" aria-hidden>{d}</div>)}
           {days.map((d) => {
             const items = q.data!.entries.filter((e) => e.from <= d && e.to >= d);
             return (
-              <div key={d} role="gridcell" className={`cz-cal-day${d.slice(0, 7) !== month ? ' cz-cal-out' : ''}${d === today ? ' cz-cal-today' : ''}`} aria-label={`${d}: ${items.length} entries`}>
+              <div key={d} role="group" className={`cz-cal-day${d.slice(0, 7) !== month ? ' cz-cal-out' : ''}${d === today ? ' cz-cal-today' : ''}`} aria-label={`${d}: ${items.length} entries`}>
                 <span className="cz-cal-num">{Number(d.slice(8))}</span>
                 {items.slice(0, 3).map((e) => <span key={e.kind + e.id} className={`cz-cal-item cz-cal-${e.kind}`} title={`${LABEL[e.kind]}: ${e.title} (${e.units})`}>{e.title}</span>)}
                 {items.length > 3 && <span className="cz-cal-more">+{items.length - 3} more</span>}

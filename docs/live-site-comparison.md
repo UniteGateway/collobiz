@@ -10,15 +10,22 @@ The live site is built from a **newer version of this same codebase**: it alread
 demo data) **plus the modules below that this branch does not have**. This branch's `main` holds only an initial
 commit, so the live site's source is elsewhere (another repository or branch).
 
-## In the live site, missing here
+## Rebuilt in this branch (the live source is not on GitHub)
+| Module | Routes here | Verified by |
+|---|---|---|
+| **Unite Green Park — energy marketplace** | `/energy`, `/energy/map`, `/energy/register`, `/energy/calculator`, `/energy/traders`, `/energy/mine`, `/energy/listings/:id`; admin `/energy` | `energy.e2e.ts`, types `energy.test.ts`, browser suite "Unite Green Park" |
+| **Launch** | `/launch`, `/launch/plans`, `/launch/plans/:id` | `collab-ops.e2e.ts`, types `collab-ops.test.ts`, browser suite "Launch, Capacity, …" |
+| **Capacity calendar** | `/capacity`, `/capacity/calendar`, `/capacity/mine` | same; never double-books (free units checked per day on accept) |
+| **Micro-contracts** | `/micro`, `/micro/new`, `/micro/mine`, `/micro/:id` | same; open → assigned → submitted → accepted → paid → receipt confirmed |
+| **Demand pools** | `/pools`, `/pools/new`, `/pools/mine`, `/pools/:id` | same; suppliers see totals only, learn a buyer's name only when it accepts their quote |
+| **Commit** | `/commit`, `/commit/new`, `/commit/:id` | same; binding only when all pledges and independently verified conditions are in before the deadline |
+
+All six feed ACTION OS (booking requests, work to review/pay/deliver, pledges and conditions to verify, energy introductions).
+Demo rows are flagged and labelled as sample data.
+
+## In the live site, still missing here
 | Live module | Route(s) | What it does on the live site |
 |---|---|---|
-| **Unite Green Park — energy marketplace** | `/energy`, `/energy/register` | Solar, wind, hybrid and storage capacity vs industrial demand; 15 listing categories (solar power available/required, operational plants for sale, under-development projects, solar parks, group captive, open-access PPA, wind, hybrid, BESS, RE EPC, investment/JV, land & transmission, consultants, licensed traders); plant and buyer registration checked before publishing; state map; delivered-cost calculator; licensed-trader directory; live counters (7 plants, 202 MW available, 4 buyers, 45 MW demanded); introduction-and-brokerage disclaimer |
-| **Launch** | `/launch`, `/launch/plans` | "Have something? Start something." — pick what you have (store, office, team, factory, machinery, warehouse, land, vehicles, skills, capital, network, products, services, contracts), state, budget band, time commitment, skills, languages → business models → real offers/programmes; saved launch plans |
-| **Capacity calendar** | `/capacity`, `/capacity/calendar`, `/capacity/mine` | Publish and book spare capacity for exact dates — workers, seats, vehicles, machines, production lines, sq ft, pallet positions, shifts; price per unit per day/month; booking requests |
-| **Micro-contracts** | `/micro`, `/micro/new` | Small fixed-price work packages (calling, site survey, quotation, demo, design, data, field visit, content); accepted and paid ones become Proof records |
-| **Demand pools** | `/pools`, `/pools/new` | Buyers combine requirements for bulk pricing; suppliers see the combined quantity, not the buyers; each buyer contracts separately |
-| **Commit** | `/commit` | Conditional multi-party agreements that bind only when every party pledges and every condition (orders, capacity, permits, financing) is verified before a deadline |
 | **Proof — performance passport** | `/proof` | Track record only from both-side-confirmed records: milestones, paid invoices, signed contracts, deliveries, micro-contracts, capacity bookings, disputes; levels New → Emerging → Established → Proven |
 | **Business QR** | `/business-qr` | One QR for counter, truck or card, linked to the Proof passport |
 | **Invoices & P&L** | `/finance/pnl`, `/finance/credit-notes` | Profit report separating pipeline, contract value, invoiced revenue, royalty, collected cash, direct costs, gross/net profit, commission liability; expenses; credit notes issued/received |
@@ -32,6 +39,7 @@ Real photography (heroes, programme tiles, landing industries, sign-in), the Hom
 (voltage, open access, interstate, finance, reports, automation, settings), collab follow-ups (Unite first look,
 invitations, expiry reminders) — to be confirmed against the live source.
 
-## Recommended next step
-Merge rather than rebuild: attach the repository/branch that the live site is deployed from, then bring this branch's
-additions into it (or the reverse). Rebuilding the 14 live modules here would duplicate work that already exists.
+## Next step
+The live site's source is not on GitHub, so the missing modules are being rebuilt here from the live pages: Proof
+passport, Business QR, Invoices & P&L with credit notes, Collab matches/requests/programmes, the Home intent box and
+setup checklist, and the landing page's "Three ways in".

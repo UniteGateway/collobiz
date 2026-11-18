@@ -2735,3 +2735,135 @@ suites.push({
     await shot('energy-deal-room');
   },
 });
+
+suites.push({
+  name: 'Launch, Capacity, Micro-contracts, Demand pools, Commit · full journeys between three businesses',
+  only: 'desktop',
+  run: async ({ page, WEB, expect, shot }) => {
+    const tag = Date.now().toString(36);
+    const day = (n) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+    // Launch
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/launch');
+    await page.getByRole('button', { name: 'Store or showroom' }).click();
+    await page.getByRole('button', { name: 'Customer network or contacts' }).click();
+    await page.getByRole('button', { name: 'Show me business models' }).click();
+    const model = page.locator('[data-model="store_network"]');
+    await model.getByRole('link', { name: 'SOLCART' }).waitFor();
+    await shot('launch-models');
+    await model.getByRole('button', { name: 'Start this plan' }).click();
+    await page.getByText('Exploring options').first().waitFor();
+    await page.getByText(/^LCH-\d{4}-\d{6}$|Launch plan LCH-/).first().waitFor();
+    // Capacity: Asha publishes, Ravi books, Asha accepts, both calendars show it
+    const cap = `Crimping machines ${tag}`;
+    await page.goto(WEB + '/capacity/mine?publish=1');
+    await page.getByLabel('Type').selectOption('machines');
+    await page.getByLabel('How many').fill('3');
+    await page.getByLabel('Title').fill(cap);
+    await page.getByLabel('Available from').fill(day(2));
+    await page.getByLabel('Available until').fill(day(20));
+    await page.getByLabel('Rate', { exact: true }).selectOption('day');
+    await page.getByLabel('Rate (₹)').fill('800');
+    await page.locator('button[type=submit]', { hasText: 'Publish capacity' }).click();
+    await page.getByRole('table', { name: 'My capacity' }).getByText(cap).waitFor();
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/capacity');
+    await page.getByLabel('Capacity type').selectOption('machines');
+    const card = page.locator('[data-testid="capacity-card"]').filter({ hasText: cap });
+    await shot('capacity-find');
+    await card.getByRole('button', { name: 'Request booking' }).click();
+    const dlg = page.getByRole('dialog');
+    await dlg.getByLabel('How many (machines)').fill('2');
+    await dlg.getByLabel('From', { exact: true }).fill(day(3));
+    await dlg.getByLabel('To', { exact: true }).fill(day(6));
+    await dlg.getByRole('button', { name: 'Send booking request' }).click();
+    await page.getByText(/Booking requested from/).waitFor();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/capacity/mine');
+    await page.getByRole('button', { name: /^Requests to me/ }).click();
+    const req = page.getByRole('table', { name: 'Requests to me' }).getByRole('row').filter({ hasText: cap });
+    await req.getByRole('button', { name: 'Accept' }).click();
+    await req.getByText('Accepted').waitFor();
+    await page.goto(WEB + '/capacity/calendar');
+    if (day(3).slice(0, 7) !== new Date().toISOString().slice(0, 7)) await page.getByRole('button', { name: 'Next month' }).click();
+    await page.locator('.cz-cal-booking').filter({ hasText: cap }).first().waitFor();
+    await shot('capacity-calendar');
+    // Micro-contract: post → apply → choose → submit → accept → pay → confirm
+    const job = `Follow-up calls to rooftop leads ${tag}`;
+    await page.goto(WEB + '/micro/new');
+    await page.getByLabel('Title').fill(job);
+    await page.getByLabel('What needs doing').fill('Call the leads we share, confirm interest and book site visits.');
+    await page.getByLabel('How you will accept it').fill('Call log with an outcome for each lead');
+    await page.getByLabel('Quantity').fill('80');
+    await page.getByLabel('Unit').fill('calls');
+    await page.getByLabel('Fixed price for the whole job (₹)').fill('2400');
+    await page.getByRole('button', { name: 'Post micro-contract' }).click();
+    await page.getByText('No applicants yet.').waitFor();
+    const microUrl = page.url();
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/micro');
+    await page.locator('[data-testid="micro-card"]').filter({ hasText: job }).click();
+    await page.getByLabel('Why you, and by when').fill('Our Ahmedabad calling team can finish this in two days.');
+    await page.getByRole('button', { name: 'Apply' }).click();
+    await page.getByText('Waiting for the poster').waitFor();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(microUrl);
+    await page.getByRole('button', { name: 'Choose' }).click();
+    await page.getByText(/is working on it/).waitFor();
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(microUrl);
+    await page.getByLabel('What you delivered and where to find it').fill('Call log uploaded to the shared folder, 80 rows.');
+    await page.getByRole('button', { name: 'Submit the work' }).click();
+    await page.getByText(/waiting for the poster to check it/).waitFor();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(microUrl);
+    await page.getByRole('button', { name: 'Accept the work' }).click();
+    await page.getByLabel('UTR / payment reference').fill('UTR77001234');
+    await page.getByRole('button', { name: 'Record payment' }).click();
+    await page.getByText(/waiting for the worker to confirm receipt/).waitFor();
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(microUrl);
+    await page.getByRole('button', { name: 'Confirm payment received' }).click();
+    await page.getByText('Payment confirmed. This job is in your Proof passport.').waitFor();
+    await shot('micro-paid');
+    // Demand pool: supplier never sees buyers; buyer accepts once the pool meets the minimum
+    await webLogin(page, WEB, 'deepak@deccan.example');
+    await page.goto(WEB + '/pools');
+    await page.locator('[data-testid="pool-card"]').filter({ hasText: 'Copper armoured cable' }).click();
+    await page.getByLabel(/^Price per metre/).fill('395');
+    await page.getByLabel(/^Applies when the pool reaches/).fill('10000');
+    await page.getByLabel('Terms (delivery, payment, warranty)').fill('Delivered Pune and Ahmedabad, 50% advance, balance on delivery');
+    await page.getByRole('button', { name: 'Send quote' }).click();
+    await page.getByText('Your quote', { exact: true }).waitFor();
+    expect(await page.getByText(/Volt|Sunrise/).count() === 0, 'supplier does not see buyer names');
+    const poolUrl = page.url();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(poolUrl);
+    await page.getByRole('button', { name: /^Accept for my/ }).click();
+    await page.getByText('You accepted').waitFor();
+    await shot('pool-accepted');
+    // Commit: pledge, evidence, independent verification → binding
+    const deal = `Kurnool rooftop cluster ${tag}`;
+    await page.goto(WEB + '/commit/new');
+    await page.getByLabel('Title').fill(deal);
+    await page.getByLabel('What happens if everything lines up').fill('Install 2 MW across five factories if orders and modules line up.');
+    await page.getByLabel('Our role').fill('EPC');
+    await page.getByLabel('What we pledge').fill('Install and commission within 60 days');
+    await page.getByLabel('Business').selectOption({ label: 'Sunrise Traders · Ahmedabad' });
+    await page.getByLabel('Role', { exact: true }).fill('Panel supplier');
+    await page.getByLabel('What they pledge').fill('Supply 2 MW of modules at the agreed price');
+    await page.getByLabel('Condition', { exact: true }).fill('Purchase orders from five factories');
+    await page.getByRole('button', { name: 'Create and request pledges' }).click();
+    await page.getByText('Pledging').first().waitFor();
+    const commitUrl = page.url();
+    await page.getByLabel('Post evidence').fill('PO numbers 4411 to 4415 uploaded to the vault');
+    await page.getByRole('button', { name: 'Post', exact: true }).click();
+    await page.getByText('Evidence posted', { exact: true }).waitFor();
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(commitUrl);
+    await page.getByRole('button', { name: 'Pledge', exact: true }).click();
+    await page.getByRole('button', { name: 'Verify this condition' }).click();
+    await page.getByText('Binding — all conditions met').waitFor();
+    await shot('commit-binding');
+  },
+});

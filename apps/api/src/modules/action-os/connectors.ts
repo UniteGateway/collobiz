@@ -167,4 +167,45 @@ export const CONNECTORS: { key: string; app: string; label: string; collect: (db
       ];
     },
   },
+  {
+    key: 'capacity_bookings', app: 'capacity', label: 'Capacity booking requests',
+    async collect(db, p) {
+      const orgs = p.memberships.filter((m) => MANAGER.includes(m.role)).map((m) => m.orgId); if (!orgs.length) return [];
+      const r = await rows<{ id: string; org: string; title: string; units: number; from_date: string; to_date: string }>(db, sql`
+        select b.id, o.org_id as org, o.title, b.units, b.from_date::text, b.to_date::text from capacity_bookings b join capacity_offers o on o.id = b.offer_id
+        where b.status = 'requested' and o.org_id in (${list(orgs)})`);
+      return r.map((x) => c({ sourceApp: 'capacity', sourceModule: 'bookings', sourceRecordId: x.id, organizationId: x.org, kind: 'decision', title: `Booking request: ${x.title}`, summary: `${x.units} for ${x.from_date} – ${x.to_date}`, recordUrl: '/capacity/mine', dueAt: endOfDay(x.from_date), commitment: true, sourceStatus: 'requested' }));
+    },
+  },
+  {
+    key: 'micro_contracts', app: 'micro', label: 'Micro-contracts to deliver, review or pay',
+    async collect(db, p) {
+      const orgs = p.memberships.map((m) => m.orgId); if (!orgs.length) return [];
+      const r = await rows<{ id: string; code: string; title: string; status: string; org_id: string; worker_org_id: string | null; due: string; price_rs: number }>(db, sql`
+        select id, code, title, status, org_id, worker_org_id, due::text, price_rs from micro_contracts
+        where (status in ('submitted', 'accepted') and org_id in (${list(orgs)})) or (status = 'assigned' and worker_org_id in (${list(orgs)}))`);
+      return r.map((m) => {
+        const mine = orgs.includes(m.org_id) && m.status !== 'assigned';
+        const title = m.status === 'submitted' ? `Review submitted work ${m.code}` : m.status === 'accepted' ? `Pay and record payment for ${m.code}` : `Deliver ${m.code}`;
+        return c({ sourceApp: 'micro', sourceModule: 'contracts', sourceRecordId: m.id, organizationId: mine ? m.org_id : m.worker_org_id!, kind: m.status === 'accepted' ? 'payment' : m.status === 'submitted' ? 'approval' : 'deadline', title, summary: m.title,
+          recordUrl: `/micro/${m.id}`, dueAt: m.status === 'assigned' ? endOfDay(m.due) : null, valuePaise: Number(m.price_rs) * 100, commitment: true, sourceStatus: m.status });
+      });
+    },
+  },
+  {
+    key: 'commitments', app: 'commit', label: 'Commitments awaiting your pledge or verification',
+    async collect(db, p) {
+      const orgs = p.memberships.filter((m) => MANAGER.includes(m.role)).map((m) => m.orgId); if (!orgs.length) return [];
+      const pledges = await rows<{ id: string; cid: string; code: string; title: string; org: string; deadline: string }>(db, sql`
+        select cp.id, c.id as cid, c.code, c.title, cp.org_id as org, c.deadline::text from commitment_parties cp join commitments c on c.id = cp.commitment_id
+        where cp.pledged_at is null and not cp.declined and not c.withdrawn and c.bound_at is null and c.deadline >= current_date and cp.org_id in (${list(orgs)})`);
+      const verify = await rows<{ id: string; cid: string; code: string; text: string; org: string; deadline: string }>(db, sql`
+        select distinct on (x.id, cp.org_id) x.id, c.id as cid, c.code, x.text, cp.org_id as org, c.deadline::text from commitment_conditions x join commitments c on c.id = x.commitment_id join commitment_parties cp on cp.commitment_id = c.id
+        where x.evidence is not null and x.verified_at is null and not c.withdrawn and c.deadline >= current_date and cp.org_id <> x.owner_org_id and cp.org_id in (${list(orgs)})`);
+      return [
+        ...pledges.map((x) => c({ sourceApp: 'commit', sourceModule: 'pledges', sourceRecordId: x.id, organizationId: x.org, kind: 'decision', title: `Pledge or decline ${x.code}`, summary: x.title, recordUrl: `/commit/${x.cid}`, dueAt: endOfDay(x.deadline), commitment: true, risk: 'contractual', sourceStatus: 'awaiting_pledge' })),
+        ...verify.map((x) => c({ sourceApp: 'commit', sourceModule: 'conditions', sourceRecordId: `${x.id}:${x.org}`, organizationId: x.org, kind: 'approval', title: `Verify condition on ${x.code}`, summary: x.text, recordUrl: `/commit/${x.cid}`, dueAt: endOfDay(x.deadline), sourceStatus: 'evidence_posted' })),
+      ];
+    },
+  },
 ];

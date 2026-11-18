@@ -18,7 +18,7 @@ export interface Notice {
   escalatedAt: string | null; doneAt: string | null; doneNote: string | null; sourceStatus: string; external: boolean; dueKnown: boolean; firstSeenAt: string; seenAt: string;
 }
 export const BAND: Record<string, { label: string; cls: string }> = { P0: { label: 'Urgent', cls: 'cz-band-p0' }, P1: { label: 'High', cls: 'cz-band-p1' }, P2: { label: 'Normal', cls: 'cz-band-p2' }, P3: { label: 'Low', cls: 'cz-band-p3' } };
-export const APP_LABEL: Record<string, string> = { crm: 'CRM', 'business-offers': 'Business Offers', collab: 'Collab', projects: 'Projects', tenders: 'Tenders', powertek: 'Powertek', xchange: 'XCHANGE', energy: 'Energy (Green Park)' };
+export const APP_LABEL: Record<string, string> = { crm: 'CRM', 'business-offers': 'Business Offers', collab: 'Collab', projects: 'Projects', tenders: 'Tenders', powertek: 'Powertek', xchange: 'XCHANGE', energy: 'Energy (Green Park)', capacity: 'Capacity', micro: 'Micro-contracts', commit: 'Commit' };
 export const appLabel = (a: string) => APP_LABEL[a] ?? a.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 export const inr = (p: number) => `₹${Math.round(p / 100).toLocaleString('en-IN')}`;
 export function dueText(iso: string | null) {

@@ -37,6 +37,9 @@ describe('Collaboration operations', () => {
     await post(`/capacity/offers/${o.id}/book`, t.ravi, { units: 4, from: day(3), to: day(4) }).expect(409);
     const b1 = (await post(`/capacity/offers/${o.id}/book`, t.ravi, { units: 2, from: day(3), to: day(6), note: 'Cable lugs job' }).expect(201)).body;
     const b2 = (await post(`/capacity/offers/${o.id}/book`, t.deepak, { units: 2, from: day(5), to: day(8) }).expect(201)).body;
+    const board = (await get('/action-os/dashboard', t.asha).expect(200)).body;
+    expect(board.items.filter((i: any) => i.sourceApp === 'capacity' && i.kind === 'decision')).toHaveLength(2);
+    expect(board.sources.every((x: any) => x.ok)).toBe(true);
     await post(`/capacity/bookings/${b1.id}/decide`, t.ravi, { decision: 'accept' }).expect(404);
     await post(`/capacity/bookings/${b1.id}/decide`, t.asha, { decision: 'accept' }).expect(200);
     await post(`/capacity/bookings/${b2.id}/decide`, t.asha, { decision: 'accept' }).expect(409); // only 1 free on day 5–6
@@ -117,6 +120,8 @@ describe('Collaboration operations', () => {
     await post(`/commit/conditions/${fin.id}/evidence`, t.ravi, { evidence: 'Sanction letter ref WC/2026/118' }).expect(200);
     let s = (await post(`/commit/conditions/${fin.id}/verify`, t.deepak).expect(200)).body;
     expect(s.state).toBe('pledging'); // Deccan has not pledged
+    const dk = (await get('/action-os/dashboard', t.deepak).expect(200)).body;
+    expect(dk.items.find((i: any) => i.sourceApp === 'commit')).toMatchObject({ kind: 'decision', recordUrl: `/commit/${c.id}` });
     s = (await post(`/commit/${c.id}/pledge`, t.deepak, { decision: 'pledge' }).expect(200)).body;
     expect(s).toMatchObject({ state: 'binding', pledged: 3, verified: 2 }); expect(s.boundAt).toBeTruthy();
     await post(`/commit/${c.id}/withdraw`, t.asha, { reason: 'Changed our mind' }).expect(409);
