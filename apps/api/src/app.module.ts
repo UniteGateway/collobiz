@@ -39,6 +39,7 @@ import { DashboardContentModule } from './modules/home/dashboard-content.control
 import { CommunityModule } from './modules/community/community.controller';
 import { ActionOsModule } from './modules/action-os/action-os.controller';
 import { EnergyModule } from './modules/energy/energy.controller';
+import { CollabOpsModule } from './modules/collab-ops/collab-ops.module';
 import { LiveModule } from './modules/community/live';
 import { PropertyModule } from './modules/property/property.controller';
 import { config } from './config';
@@ -52,7 +53,7 @@ import { ImportsModule } from './modules/imports/imports.controller';
 import { GstModule } from './modules/gst/gst.controller';
 import { ChannelsModule } from './modules/channels/channels.controller';
 import { BillingModule } from './modules/billing/billing.controller';
-export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule, GrowthDeskModule, WorkspaceModule, ErpModule, FranchiseModule, UniteNetworkModule, ProductSalesModule, ModuleDocumentsModule, DashboardContentModule, CommunityModule, LiveModule, ActionOsModule, EnergyModule, PropertyModule, SolarModule, PromotionsModule, V2Module, XchangeModule, ImportsModule, GstModule, ChannelsModule, BillingModule, CollabModule];
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule, GrowthDeskModule, WorkspaceModule, ErpModule, FranchiseModule, UniteNetworkModule, ProductSalesModule, ModuleDocumentsModule, DashboardContentModule, CommunityModule, LiveModule, ActionOsModule, EnergyModule, CollabOpsModule, PropertyModule, SolarModule, PromotionsModule, V2Module, XchangeModule, ImportsModule, GstModule, ChannelsModule, BillingModule, CollabModule];
 
 @Module({
   imports: [

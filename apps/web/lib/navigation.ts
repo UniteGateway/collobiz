@@ -22,6 +22,11 @@ export const MODULES: Module[] = [
   { key: 'powertek', label: 'Powertek products', icon: 'package', home: '/powertek', match: ['/powertek'], tabs: [['/powertek', 'All products'], ['/powertek/enquiries', 'My enquiries']] },
   { key: 'ventures', label: 'Unite businesses', icon: 'building', home: '/ventures', match: ['/ventures', '/solar', '/franchise', '/property', '/store/redeem'],
     tabs: [['/ventures', 'Businesses'], ['/solar', 'Solar desk'], ['/franchise', 'Franchise'], ['/property', 'Property sales']] },
+  { key: 'launch', label: 'Launch', icon: 'plus', home: '/launch', match: ['/launch'], tabs: [['/launch', 'Start a business'], ['/launch/plans', 'My launch plans']] },
+  { key: 'micro', label: 'Micro-contracts', icon: 'check', home: '/micro', match: ['/micro'], tabs: [['/micro', 'Open work'], ['/micro/new', 'Post work'], ['/micro/mine', 'My micro-contracts']] },
+  { key: 'capacity', label: 'Capacity', icon: 'calendar', home: '/capacity', match: ['/capacity'], tabs: [['/capacity', 'Find capacity'], ['/capacity/calendar', 'Calendar'], ['/capacity/mine', 'My capacity & bookings']] },
+  { key: 'pools', label: 'Demand pools', icon: 'users', home: '/pools', match: ['/pools'], tabs: [['/pools', 'Open pools'], ['/pools/new', 'Start a pool'], ['/pools/mine', 'My pools & quotes']] },
+  { key: 'commit', label: 'Commit', icon: 'contracts', home: '/commit', match: ['/commit'], tabs: [['/commit', 'My commitments'], ['/commit/new', 'New commitment']] },
   { key: 'energy', label: 'Energy · Green Park', icon: 'value', home: '/energy', match: ['/energy'],
     tabs: [['/energy', 'Marketplace'], ['/energy/map', 'State map'], ['/energy/register', 'Register'], ['/energy/calculator', 'Cost calculator'], ['/energy/traders', 'Licensed traders'], ['/energy/mine', 'My listings & deals']] },
   { key: 'action-os', label: 'Action board', icon: 'bell', home: '/action-os', match: ['/action-os'],
@@ -57,9 +62,9 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}): Nav
   const byKey = Object.fromEntries(MODULES.map((m) => [m.key, m]));
   const item = (k: string) => { const m = byKey[k]; return { href: m.home, label: m.label, icon: m.icon, children: m.tabs?.filter(([h]) => h !== m.home).map(([href, label]) => ({ href, label })) }; };
   const GROUPS: [string, string[]][] = [
-    ['Grow your business', ['collab', 'business-offers', 'opportunities', 'leads', 'collaboration']],
+    ['Grow your business', ['collab', 'business-offers', 'launch', 'opportunities', 'leads', 'collaboration']],
     ['Unite programmes', ['energy', 'unite-solar', 'powertek', 'invest', 'ventures']],
-    ['Deliver & trade', ['tenders', 'projects', 'trading']],
+    ['Deliver & trade', ['tenders', 'projects', 'micro', 'capacity', 'trading', 'pools', 'commit']],
     ['Money', ['earnings']],
     ['Network & growth', ['community', 'messages', 'global', 'growth']],
   ];

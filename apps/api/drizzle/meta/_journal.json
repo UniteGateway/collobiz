@@ -337,6 +337,13 @@
       "when": 1795024830257,
       "tag": "0047_energy_marketplace",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1795025804574,
+      "tag": "0048_collab_ops",
+      "breakpoints": true
     }
   ]
 }

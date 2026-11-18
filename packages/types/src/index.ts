@@ -38,3 +38,4 @@ export * from './community';
 export * from './app-brands';
 export * from './action-os';
 export * from './energy';
+export * from './collab-ops';
