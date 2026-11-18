@@ -20,6 +20,7 @@ await p.goto(WEB + '/login'); await p.getByLabel('Email').fill('asha@voltepc.exa
 await p.getByRole('button', { name: 'Sign in' }).last().click(); await p.waitForURL(/dashboard/);
 for (const u of ['/dashboard', '/company/team', '/onboarding/kyc', '/settings/privacy', '/profile', '/tenders', '/tenders/new', '/vault']) await scan(WEB + u);
 for (const u of ['/launch', '/launch/plans', '/capacity', '/capacity/calendar', '/capacity/mine?publish=1', '/micro', '/micro/new', '/micro/mine', '/pools', '/pools/new', '/pools/mine', '/commit', '/commit/new']) await scan(WEB + u);
+for (const u of ['/proof', '/business-qr', '/finance/pnl', '/finance/credit-notes', '/collab/matches', '/collab/requests', '/collab/programs']) await scan(WEB + u);
 const tid = await p.evaluate(async () => (await (await fetch('/api/v1/tenders')).json()).open?.[0]?.id);
 if (tid) for (const u of ['documents', 'bid']) await scan(`${WEB}/tenders/${tid}/${u}`);
 await scan(WEB + '/projects');

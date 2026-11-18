@@ -8,7 +8,7 @@ import { useQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
 import { AppsTray, InvestHighlight, LatestOpportunities, OnlineStrip } from '@/components/HomeExtras';
 import { NoticeBoard } from '@/components/ActionOS';
-import { BusinessNews, EnergyDesk, ProgrammeTiles } from '@/components/HomeLive';
+import { BusinessNews, EnergyDesk, IntentBox, ProgrammeTiles, SetupChecklist } from '@/components/HomeLive';
 import { AdCarousel, AreaChart, NewsCard, ThemeHero, VideoCard, type Ad, type News, type Theme, type Video } from '@/components/DashboardKit';
 
 interface Home {
@@ -64,6 +64,7 @@ export default function DashboardPage() {
       ) : org && org.verificationStatus !== 'verified' ? (
         <Alert tone="info" title="Finish verification to unlock the network.">Applying to opportunities and registering leads open once your company is verified. <Link href="/onboarding/status">See what’s left</Link></Alert>
       ) : null}
+      {org && <div className="cz-home-start"><IntentBox /><SetupChecklist /></div>}
       {org && <ProgrammeTiles />}
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : org && (
         <div className="cz-dash">

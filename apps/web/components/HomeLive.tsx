@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Icon, Skeleton } from '@collabiz/ui';
 import { useQuery } from '@/lib/hooks';
 import { PROGRAMMES, photo } from '@/lib/photos';
+import { routeIntent } from '@collabiz/types';
 
 const inr = (paise: number) => { const r = paise / 100; return r >= 1e7 ? `₹${(r / 1e7).toFixed(2)} Cr` : r >= 1e5 ? `₹${(r / 1e5).toFixed(1)} L` : `₹${Math.round(r).toLocaleString('en-IN')}`; };
 const mon = (m: string) => new Date(`${m}-01T00:00:00Z`).toLocaleDateString('en-IN', { month: 'short', timeZone: 'UTC' });
@@ -114,6 +115,48 @@ export function BusinessNews({ fallback }: { fallback?: { id: string; title: str
           <p className="cz-muted" style={{ fontSize: 12.5, margin: '8px 0 0' }}>Live headlines are not available right now{d.feeds.length ? ` — ${d.feeds.filter((f) => !f.ok).length} of ${d.feeds.length} news sources could not be reached from the server` : ''}. They load automatically once the server can reach them.</p>
         </>
       )}
+    </section>
+  );
+}
+
+/** "What do you want to do today?" — free text routed to the right tool (rules shared with the API types). */
+export function IntentBox() {
+  const [text, setText] = useState('');
+  const hit = routeIntent(text);
+  const go = (t: string) => { const r = routeIntent(t); if (r) window.location.assign(r.href); };
+  const EXAMPLES = ['I have an office with 30 seats', 'Start a business with my warehouse', 'Buy cables together in bulk', 'Find spare installation crews', 'Post a franchise offer'];
+  return (
+    <section className="cz-card cz-intent" aria-labelledby="intent-h">
+      <h2 id="intent-h">What do you want to do today?</h2>
+      <p className="cz-muted">Tell us what you have, need or want to start — we take you to the right tool.</p>
+      <form className="cz-intent-form" role="search" onSubmit={(e) => { e.preventDefault(); go(text); }}>
+        <label className="cz-sr-only" htmlFor="intent-q">What do you want to do?</label>
+        <input id="intent-q" value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. I have an office with 30 seats" autoComplete="off" />
+        <button type="submit" className="cz-btn cz-btn-primary" disabled={!hit}>Go</button>
+      </form>
+      <p className="cz-intent-hint" aria-live="polite">{hit ? <>Takes you to <strong>{hit.label}</strong></> : 'Takes you to the right tool — Launch, Collab, Offers, Pools, Capacity or search.'}</p>
+      <div className="cz-chips">{EXAMPLES.map((x) => <button key={x} type="button" className="cz-chip" onClick={() => go(x)}>{x}</button>)}</div>
+    </section>
+  );
+}
+
+interface Setup { steps: { key: string; title: string; text: string; href: string; done: boolean }[]; done: number; total: number; next: { title: string } | null }
+/** "Get set up" — each step read from real records; can be hidden for this browser. */
+export function SetupChecklist() {
+  const q = useQuery<Setup>('/me/setup-checklist');
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => { try { setHidden(localStorage.getItem('cz-setup-hidden') === '1'); } catch { /* storage unavailable */ } }, []);
+  const d = q.data;
+  if (!d || hidden || d.done === d.total) return null;
+  return (
+    <section className="cz-card cz-setup" aria-labelledby="setup-h">
+      <div className="cz-card-head"><div><h2 id="setup-h">Get set up</h2><p>{d.done} of {d.total} done{d.next ? ` · next: ${d.next.title.toLowerCase()}` : ''}</p></div>
+        <button type="button" className="cz-link-arrow" onClick={() => { setHidden(true); try { localStorage.setItem('cz-setup-hidden', '1'); } catch { /* ignore */ } }}>Hide</button></div>
+      <div className="cz-ops-meter" role="meter" aria-valuemin={0} aria-valuemax={d.total} aria-valuenow={d.done} aria-label="Setup progress"><span style={{ width: `${(d.done / d.total) * 100}%` }} /></div>
+      <ol className="cz-setup-list">{d.steps.map((s) => (
+        <li key={s.key} className={s.done ? 'done' : ''}><span className="cz-setup-dot" aria-hidden>{s.done ? '✓' : ''}</span>
+          <div>{s.done ? <strong>{s.title}</strong> : <Link href={s.href}><strong>{s.title}</strong></Link>}<span>{s.text}</span></div><em>{s.done ? 'Done' : 'To do'}</em></li>
+      ))}</ol>
     </section>
   );
 }

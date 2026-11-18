@@ -177,3 +177,21 @@ export function commitmentState(c: { withdrawn?: boolean; deadline: string; part
   if (today > c.deadline) return 'lapsed';
   return c.parties.some((p) => p.pledgedAt) ? 'pledging' : 'draft';
 }
+
+// ============================================================================ Home intent box
+/** Route a free-text "What do you want to do?" to the right tool. Rules are keyword-based and shown to the user as a suggestion. */
+export const INTENT_RULES: { href: string; label: string; words: RegExp }[] = [
+  { href: '/pools', label: 'Demand pools — buy together in bulk', words: /\b(bulk|together|pool|group buy|combine)\b/i },
+  { href: '/capacity', label: 'Capacity — book spare people, seats, vehicles or machines', words: /\b(spare|crew|crews|book|rent|hire|seats? for|machines?|vehicles?|trucks?|capacity)\b/i },
+  { href: '/launch', label: 'Launch — start a business with what you have', words: /\b(start|launch|new business|side business|earn from|use my)\b/i },
+  { href: '/business-offers/new', label: 'Post a business offer', words: /\b(post|publish|franchise offer|sell my business|offer)\b/i },
+  { href: '/micro', label: 'Micro-contracts — small fixed-price jobs', words: /\b(calls?|survey|quotation|design|small job|gig|micro)\b/i },
+  { href: '/energy', label: 'Unite Green Park — energy marketplace', words: /\b(mw|solar park|open access|ppa|power purchase|wind|renewable)\b/i },
+  { href: '/collab', label: 'Collab — tell us what you have and need', words: /\b(i have|we have|office|warehouse|factory|land|team|showroom|store)\b/i },
+];
+export function routeIntent(text: string) {
+  const t = text.trim();
+  if (t.length < 3) return null;
+  const hit = INTENT_RULES.find((r) => r.words.test(t));
+  return hit ? { href: hit.href, label: hit.label } : { href: `/search?q=${encodeURIComponent(t)}`, label: 'Search COLLABIZ' };
+}

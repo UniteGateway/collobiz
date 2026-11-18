@@ -55,3 +55,16 @@ describe('micro, pools, commit', () => {
     expect(commitmentState({ ...c, parties: [{ pledgedAt: null }, { pledgedAt: null }] }, '2026-11-25')).toBe('draft');
   });
 });
+
+import { routeIntent } from './collab-ops';
+describe('home intent box', () => {
+  it('routes the live examples to the right tool and falls back to search', () => {
+    expect(routeIntent('I have an office with 30 seats')?.href).toBe('/collab');
+    expect(routeIntent('Start a business with my warehouse')?.href).toBe('/launch');
+    expect(routeIntent('Buy cables together in bulk')?.href).toBe('/pools');
+    expect(routeIntent('Find spare installation crews')?.href).toBe('/capacity');
+    expect(routeIntent('Post a franchise offer')?.href).toBe('/business-offers/new');
+    expect(routeIntent('mcb 63a price')?.href).toBe('/search?q=mcb%2063a%20price');
+    expect(routeIntent('a')).toBeNull();
+  });
+});

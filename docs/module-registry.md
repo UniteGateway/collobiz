@@ -19,6 +19,9 @@ One line per module: where it lives and where it is documented. Earlier modules 
 | Micro-contracts | `/micro` | `modules/collab-ops/micro.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
 | Demand pools | `/pools` | `modules/collab-ops/pools.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
 | Commit (conditional multi-party agreements) | `/commit` | `modules/collab-ops/commit.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
+| Proof passport + Business QR | `/proof`, `/business-qr`, `/b/:token` | `modules/trust-finance/proof.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
+| Invoices & P&L, credit notes, expenses | `/finance/pnl`, `/finance/credit-notes` | `modules/trust-finance/books.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
+| Unite programmes + setup checklist | `/collab/programs`, Home | `modules/trust-finance/programmes.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
 | Unite Power Lab (separate app, port 3002) | `apps/power` | Next API routes | [power/PROGRESS.md](power/PROGRESS.md) |
 
 BIZO (www.bizo.one) is listed as Unite business #48 with its brochure features, indicative plans and a link-out. Single

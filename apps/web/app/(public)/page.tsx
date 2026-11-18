@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { SECTORS, sectorName } from '@collabiz/types';
+import { OFFER_CATEGORIES, SECTORS, sectorName } from '@collabiz/types';
 import { Icon, Skeleton, type IconName } from '@collabiz/ui';
 import { useQuery } from '@/lib/hooks';
 
@@ -92,6 +92,27 @@ export default function HomePage() {
               </ol>
             </div>
             <span className="cz-preview-caption">Live listing · status cards are illustrative</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- Three ways in ---------- */}
+      <section className="cz-section" aria-labelledby="ways-h">
+        <div className="cz-container">
+          <div className="cz-home-head"><span className="cz-eyebrow">Get started</span><h2 id="ways-h">Three ways in. One network behind them.</h2></div>
+          <div className="cz-ways">
+            {[
+              { tag: 'COLLAB', title: 'Resource-first matching', text: 'Describe what you have and need once. COLLABIZ matches you with business offers, Unite Group programmes and other businesses — and tells you why.', points: ['What I have / What I need profiles', 'Reverse matching between businesses', 'Private rooms, proposals and counters'], href: '/login?next=/collab', cta: 'Start a Collab', photo: 'team-desk' },
+              { tag: 'BUSINESS OFFERS', title: 'A marketplace both sides publish to', text: 'Partnerships, franchises, dealerships, BPO and EPC contracts, idle capacity and businesses for sale — checked by COLLABIZ before they go live.', points: [`${OFFER_CATEGORIES.length} categories, zero-upfront filter`, 'Confidential listings', 'Optional Unite-first review'], href: '/login?next=/business-offers', cta: 'Explore offers', photo: 'deal-handshake' },
+              { tag: 'UNITE GREEN PARK', title: 'Renewable energy marketplace', text: 'Solar, wind, hybrid and storage capacity meets industrial demand — with delivered-cost estimates, protected introductions and a 19-stage deal room.', points: ['Plant and buyer registration', 'Landed-cost calculator by state', 'Licensed trader directory'], href: '/login?next=/energy', cta: 'Enter the marketplace', photo: 'energy-wind-solar' },
+            ].map((w) => (
+              <article key={w.tag} className="cz-way">
+                <img src={`/photos/${w.photo}.webp`} alt="" aria-hidden loading="lazy" />
+                <div className="cz-way-body"><span className="cz-way-tag">{w.tag}</span><h3>{w.title}</h3><p>{w.text}</p>
+                  <ul>{w.points.map((x) => <li key={x}><Icon name="check" size={15} />{x}</li>)}</ul>
+                  <Link className="cz-btn cz-btn-primary" href={w.href}>{w.cta}<Icon name="arrow" size={15} /></Link></div>
+              </article>
+            ))}
           </div>
         </div>
       </section>

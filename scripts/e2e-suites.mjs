@@ -2867,3 +2867,68 @@ suites.push({
     await shot('commit-binding');
   },
 });
+
+suites.push({
+  name: 'Proof, Business QR, profit report, credit notes, Collab sub-pages, Home intent box and setup, landing ways in',
+  only: 'desktop',
+  run: async ({ page, WEB, expect, shot }) => {
+    await page.context().clearCookies();
+    await page.goto(WEB + '/');
+    await page.getByRole('heading', { name: 'Three ways in. One network behind them.' }).waitFor();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.getByRole('heading', { name: 'What do you want to do today?' }).waitFor();
+    await page.getByRole('heading', { name: 'Get set up' }).waitFor();
+    await shot('home-intent-setup');
+    await page.getByLabel('What do you want to do?').fill('Buy cables together in bulk');
+    await page.getByText('Demand pools — buy together in bulk').waitFor();
+    await page.getByRole('button', { name: 'Go', exact: true }).click();
+    await page.waitForURL(/\/pools$/);
+    // Proof and Business QR
+    await page.goto(WEB + '/proof');
+    await page.getByText(/Emerging record/).waitFor();
+    await page.getByRole('table', { name: 'Delivery' }).getByText('PRJ-2025-000014', { exact: true }).waitFor();
+    await shot('proof');
+    await page.goto(WEB + '/business-qr');
+    await page.getByRole('button', { name: 'Publish my Business QR' }).click();
+    const img = page.getByRole('img', { name: /QR code linking to the COLLABIZ Proof record of Volt EPC/ });
+    await img.waitFor();
+    const link = await page.locator('.cz-qr-url a').getAttribute('href');
+    await shot('business-qr');
+    const anon = await page.context().browser().newContext(); const pub = await anon.newPage();
+    await pub.goto(link);
+    await pub.getByRole('heading', { name: 'Volt EPC' }).waitFor();
+    expect(await pub.getByText(/PRJ-2025|₹/).count() === 0, 'public Proof shows no codes or amounts');
+    await anon.close();
+    // Profit report, expenses, credit notes
+    await page.goto(WEB + '/finance/pnl');
+    await page.locator('[data-measure="invoicedRevenue"]').waitFor();
+    await shot('profit-report');
+    await page.getByRole('button', { name: 'Expenses' }).click();
+    await page.getByLabel('Amount (₹)').fill('148000');
+    await page.getByLabel('Description').fill('Office rent, November');
+    await page.getByRole('button', { name: 'Record expense' }).click();
+    await page.getByRole('table', { name: 'Expenses' }).getByText('Office rent, November').waitFor();
+    await page.goto(WEB + '/finance/credit-notes');
+    await page.getByRole('button', { name: 'My invoices' }).click();
+    const row = page.getByRole('table', { name: 'My invoices' }).getByRole('row').filter({ hasText: 'INV-2026-900003' });
+    await row.getByRole('button', { name: 'Issue credit note' }).click();
+    const dlg = page.getByRole('dialog');
+    await dlg.getByLabel('Credit amount (₹)').fill('50000');
+    await dlg.getByLabel('Explanation').fill('Agreed rate revision on cabling');
+    await dlg.getByRole('button', { name: 'Issue credit note' }).click();
+    await page.getByText(/Credit note CN-\d{4}-\d{6} issued/).waitFor();
+    await page.getByRole('button', { name: 'Credit notes I issued' }).click();
+    await page.getByRole('table', { name: 'Credit notes I issued' }).getByText('INV-2026-900003', { exact: false }).waitFor();
+    // Collab sub-pages
+    await page.goto(WEB + '/collab/programs');
+    const prizo = page.locator('[data-programme="prizo"]');
+    await prizo.getByRole('button', { name: 'Notify me when it opens' }).click();
+    await prizo.getByText('We will tell you when it opens').waitFor();
+    await shot('collab-programmes');
+    await page.goto(WEB + '/collab/matches');
+    await page.getByRole('heading', { name: 'Matches for you' }).waitFor();
+    await page.getByText(/Business offers that fit|Tell us what you have and need first/).first().waitFor();
+    await page.goto(WEB + '/collab/requests');
+    await page.getByRole('button', { name: /^Received \(/ }).waitFor();
+  },
+});

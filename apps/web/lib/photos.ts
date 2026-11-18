@@ -14,7 +14,7 @@ export const MODULE_PHOTO: Record<string, string> = {
   collab: 'team-desk', 'business-offers': 'deal-handshake', opportunities: 'team-laptop', leads: 'person-laptop', collaboration: 'team-meeting',
   energy: 'energy-solar-field', 'unite-solar': 'energy-rooftop-install', powertek: 'energy-control-room', ventures: 'global-skyline', tenders: 'build-site-team', projects: 'build-engineers',
   trading: 'trade-warehouse', earnings: 'finance-analysis', global: 'trade-ship', growth: 'growth-seedling', help: 'office-open', community: 'team-startup',
-  invest: 'property-tower', launch: 'team-startup', micro: 'person-laptop', capacity: 'trade-warehouse', pools: 'trade-port', commit: 'deal-handshake', 'action-os': 'team-boardroom', messages: 'office-loft', crm: 'person-laptop', franchise: 'property-solar-home', property: 'property-modern-house',
+  invest: 'property-tower', launch: 'team-startup', micro: 'person-laptop', capacity: 'trade-warehouse', pools: 'trade-port', commit: 'deal-handshake', books: 'finance-analysis', proof: 'team-handshake', 'action-os': 'team-boardroom', messages: 'office-loft', crm: 'person-laptop', franchise: 'property-solar-home', property: 'property-modern-house',
 };
 
 /** Programme tiles on Home. */

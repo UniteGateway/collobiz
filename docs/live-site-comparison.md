@@ -20,18 +20,18 @@ commit, so the live site's source is elsewhere (another repository or branch).
 | **Demand pools** | `/pools`, `/pools/new`, `/pools/mine`, `/pools/:id` | same; suppliers see totals only, learn a buyer's name only when it accepts their quote |
 | **Commit** | `/commit`, `/commit/new`, `/commit/:id` | same; binding only when all pledges and independently verified conditions are in before the deadline |
 
-All six feed ACTION OS (booking requests, work to review/pay/deliver, pledges and conditions to verify, energy introductions).
+| **Proof — performance passport** | `/proof` | `trust-finance.e2e.ts`, types `trust-finance.test.ts`; counts only both-side-confirmed records |
+| **Business QR** | `/business-qr`, public `/b/:token` | same; opt-in public link shows level and counts only, stops working when sharing is turned off |
+| **Invoices & P&L** | `/finance/pnl`, `/finance/credit-notes` | same; credit notes capped at what is left on the invoice, refunds count only when paid, expenses recorded |
+| **Collab sub-pages** | `/collab/matches`, `/collab/requests`, `/collab/programs` | browser suite "Proof, Business QR, …"; programmes open only after a staff-recorded approval, watchers are notified |
+| **Home additions** | `/dashboard` | intent box (rules tested in `collab-ops.test.ts`) and "Get set up" checklist read from real records |
+| **Landing "Three ways in"** | `/` | Collab, Business Offers, Unite Green Park |
+Launch, Capacity, Micro-contracts, Commit and Green Park feed ACTION OS (booking requests, work to review/pay/deliver, pledges and conditions to verify, energy introductions).
 Demo rows are flagged and labelled as sample data.
 
 ## In the live site, still missing here
-| Live module | Route(s) | What it does on the live site |
-|---|---|---|
-| **Proof — performance passport** | `/proof` | Track record only from both-side-confirmed records: milestones, paid invoices, signed contracts, deliveries, micro-contracts, capacity bookings, disputes; levels New → Emerging → Established → Proven |
-| **Business QR** | `/business-qr` | One QR for counter, truck or card, linked to the Proof passport |
-| **Invoices & P&L** | `/finance/pnl`, `/finance/credit-notes` | Profit report separating pipeline, contract value, invoiced revenue, royalty, collected cash, direct costs, gross/net profit, commission liability; expenses; credit notes issued/received |
-| **Collab sub-pages** | `/collab/matches`, `/collab/requests`, `/collab/programs` | Ranked matches across offers, Unite programmes and businesses; requests & deals; Unite Group programmes with "notify me when it opens" |
-| **Home additions** | `/dashboard` | "What do you want to do today?" intent box routing to Launch, Collab, Offers, Pools, Capacity or search; "Get set up" checklist (verify, have/need, first offer, invite team, Business QR) |
-| **Public landing** | `/` | "What can we build together?" hero with I-have/you-could-be-matched examples, 8-step journey, "Three ways in" (Collab, Business Offers, Unite Green Park), live counters incl. MW listed |
+None of the 14 modules found on 18 Nov 2026. Still to check against the live site: the public landing's
+"What can we build together?" hero examples, its 8-step journey and live counters including MW listed.
 
 ## In this branch, not seen on the live site
 Real photography (heroes, programme tiles, landing industries, sign-in), the Home **Energy desk** charts, the live
@@ -40,6 +40,4 @@ Real photography (heroes, programme tiles, landing industries, sign-in), the Hom
 invitations, expiry reminders) — to be confirmed against the live source.
 
 ## Next step
-The live site's source is not on GitHub, so the missing modules are being rebuilt here from the live pages: Proof
-passport, Business QR, Invoices & P&L with credit notes, Collab matches/requests/programmes, the Home intent box and
-setup checklist, and the landing page's "Three ways in".
+Compare again with the live site once it is updated, and fill any newly found gaps here.

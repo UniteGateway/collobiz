@@ -47,3 +47,19 @@ export function PoolCard({ p }: { p: Pool }) {
       foot={<Meter value={p.committed} max={p.targetQty} label={`${p.committed} of ${p.targetQty} ${p.unit} committed`} />} />
   );
 }
+
+export interface ProofMeasure { label: string; value: number | null; hint: string }
+export const PROOF_LEVEL_LIST = ['New', 'Emerging', 'Established', 'Proven'];
+/** Level ladder + three headline measures, shared by the private and public Proof pages. */
+export function ProofHeader({ name, city, verified, since, level, records, measures }: { name: string; city: string | null; verified: boolean; since: string; level: string; records: number; measures: ProofMeasure[] }) {
+  const idx = PROOF_LEVEL_LIST.indexOf(level);
+  return (
+    <section className="cz-proof-head" aria-label="Proof summary">
+      <p className="cz-proof-badge">{verified ? '✓ Verified business' : 'Business not yet verified'}{city ? ` · ${city}` : ''} · on COLLABIZ since {new Date(since).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}</p>
+      <h2>{name}</h2>
+      <p className="cz-proof-level"><strong>{level} record</strong> · {records} confirmed record{records === 1 ? '' : 's'}</p>
+      <ol className="cz-proof-ladder" aria-label={`Level ${level}`}>{PROOF_LEVEL_LIST.map((l, i) => <li key={l} className={i <= idx ? 'on' : ''} aria-current={i === idx ? 'step' : undefined}>{l}</li>)}</ol>
+      <div className="cz-proof-measures">{measures.map((m) => <div key={m.label}><span>{m.label}</span><strong>{m.value == null ? '—' : `${m.value}%`}</strong><em>{m.hint}</em></div>)}</div>
+    </section>
+  );
+}

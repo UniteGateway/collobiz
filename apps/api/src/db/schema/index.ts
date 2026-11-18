@@ -33,3 +33,4 @@ export * from './community';
 export * from './action-os';
 export * from './energy';
 export * from './collab-ops';
+export * from './trust-finance';

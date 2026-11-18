@@ -9,7 +9,7 @@ export interface Module { key: string; label: string; icon: IconName; home: stri
 
 export const MODULES: Module[] = [
   { key: 'home', label: 'Home', icon: 'home', home: '/dashboard', match: ['/dashboard'] },
-  { key: 'collab', label: 'Collab', icon: 'teams', home: '/collab', match: ['/collab'], tabs: [['/collab', 'Find collaborations'], ['/collab/workspace', 'My collaborations']] },
+  { key: 'collab', label: 'Collab', icon: 'teams', home: '/collab', match: ['/collab'], tabs: [['/collab', 'Start'], ['/collab/matches', 'Matches'], ['/collab/requests', 'Requests & deals'], ['/collab/programs', 'Unite programmes'], ['/collab/workspace', 'My collaborations']] },
   { key: 'business-offers', label: 'Business Offers', icon: 'briefcase', home: '/business-offers', match: ['/business-offers'], tabs: [['/business-offers', 'Browse'], ['/business-offers/new', 'Publish'], ['/business-offers/mine', 'My offers']] },
   { key: 'opportunities', label: 'Opportunities', icon: 'opportunities', home: '/marketplace', match: ['/marketplace', '/opportunities', '/my/opportunities', '/feed', '/rfq', '/ai/matching', '/offers', '/one', '/radar'],
     tabs: [['/marketplace', 'Browse'], ['/one', 'COLLABIZ ONE'], ['/radar', 'Radar'], ['/offers', 'Offers for you'], ['/ai/matching', 'AI matches'], ['/feed', 'Recommended'], ['/my/opportunities', 'My applications'], ['/marketplace/saved', 'Saved & alerts'], ['/marketplace/categories', 'Categories'], ['/marketplace/map', 'Map']] },
@@ -22,6 +22,8 @@ export const MODULES: Module[] = [
   { key: 'powertek', label: 'Powertek products', icon: 'package', home: '/powertek', match: ['/powertek'], tabs: [['/powertek', 'All products'], ['/powertek/enquiries', 'My enquiries']] },
   { key: 'ventures', label: 'Unite businesses', icon: 'building', home: '/ventures', match: ['/ventures', '/solar', '/franchise', '/property', '/store/redeem'],
     tabs: [['/ventures', 'Businesses'], ['/solar', 'Solar desk'], ['/franchise', 'Franchise'], ['/property', 'Property sales']] },
+  { key: 'books', label: 'Invoices & P&L', icon: 'value', home: '/finance/pnl', match: ['/finance/pnl', '/finance/credit-notes'], tabs: [['/finance/pnl', 'Profit report'], ['/finance/credit-notes', 'Invoices & credit notes']] },
+  { key: 'proof', label: 'Proof', icon: 'award', home: '/proof', match: ['/proof', '/business-qr'], tabs: [['/proof', 'Performance passport'], ['/business-qr', 'Business QR']] },
   { key: 'launch', label: 'Launch', icon: 'plus', home: '/launch', match: ['/launch'], tabs: [['/launch', 'Start a business'], ['/launch/plans', 'My launch plans']] },
   { key: 'micro', label: 'Micro-contracts', icon: 'check', home: '/micro', match: ['/micro'], tabs: [['/micro', 'Open work'], ['/micro/new', 'Post work'], ['/micro/mine', 'My micro-contracts']] },
   { key: 'capacity', label: 'Capacity', icon: 'calendar', home: '/capacity', match: ['/capacity'], tabs: [['/capacity', 'Find capacity'], ['/capacity/calendar', 'Calendar'], ['/capacity/mine', 'My capacity & bookings']] },
@@ -65,7 +67,7 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}): Nav
     ['Grow your business', ['collab', 'business-offers', 'launch', 'opportunities', 'leads', 'collaboration']],
     ['Unite programmes', ['energy', 'unite-solar', 'powertek', 'invest', 'ventures']],
     ['Deliver & trade', ['tenders', 'projects', 'micro', 'capacity', 'trading', 'pools', 'commit']],
-    ['Money', ['earnings']],
+    ['Money', ['earnings', 'books', 'proof']],
     ['Network & growth', ['community', 'messages', 'global', 'growth']],
   ];
   sections.push({ items: [item('home'), item('action-os')] });
