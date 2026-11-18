@@ -65,6 +65,7 @@ export default function HomePage() {
 
           {/* Product preview built from live data */}
           <div className="cz-home-preview" aria-label="Product preview">
+            <img className="cz-home-hero-photo" src="/photos/team-handshake.webp" alt="" aria-hidden fetchPriority="high" />
             <div className="cz-preview-card cz-preview-main">
               <div className="cz-preview-head"><span className="cz-tag">Featured opportunity</span><span className="cz-badge" style={{ color: '#2F6F25', background: '#E7F4E3' }}>Open</span></div>
               {opp ? (
@@ -91,6 +92,20 @@ export default function HomePage() {
               </ol>
             </div>
             <span className="cz-preview-caption">Live listing · status cards are illustrative</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- Industries (real photography) ---------- */}
+      <section className="cz-section">
+        <div className="cz-container">
+          <div className="cz-home-head"><span className="cz-eyebrow">Industries</span><h2>Built for the businesses that build India</h2><p className="cz-muted">Partners in every sector find work, team up and get paid on one platform.</p></div>
+          <div className="cz-ind-grid">
+            {[['Solar & renewable energy', 'Rooftop, EPC, PPA, BESS and open access', 'energy-solar-field'], ['EPC & infrastructure', 'Tenders, consortiums and milestone billing', 'build-engineers'],
+              ['Trade & logistics', 'RFQs, exports, barter and part-cash deals', 'trade-port'], ['Manufacturing', 'Capacity sharing, supply and procurement', 'industry-worker'],
+              ['Real estate', 'Property sales, franchise outlets and group investment', 'property-modern-house'], ['Consulting & services', 'Advisory teams, BPO and professional services', 'team-meeting']].map(([t, d, ph]) => (
+              <article key={t} className="cz-ind-tile"><img src={`/photos/${ph}.webp`} alt="" aria-hidden loading="lazy" /><div><h3>{t}</h3><p>{d}</p></div></article>
+            ))}
           </div>
         </div>
       </section>

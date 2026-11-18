@@ -14,6 +14,8 @@ import { announcements, dashboardContent, partnerProfiles } from '../../db/schem
 import { Ctx, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
 import { MAX_UPLOAD_BYTES, StorageService } from '../../common/adapters';
+import { BusinessNewsService } from './business-news';
+import { HomeLiveController } from './home-live.controller';
 
 type Row = Record<string, unknown>;
 const rows = (r: unknown) => ((r as { rows?: Row[] }).rows ?? (r as Row[]));
@@ -129,5 +131,5 @@ export class DashboardContentController {
   }
 }
 
-@Module({ controllers: [DashboardContentController] })
+@Module({ controllers: [DashboardContentController, HomeLiveController], providers: [BusinessNewsService], exports: [BusinessNewsService] })
 export class DashboardContentModule {}

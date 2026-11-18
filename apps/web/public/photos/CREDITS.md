@@ -1,0 +1,47 @@
+# Photos
+
+All photos are from Pexels (https://www.pexels.com) under the Pexels License: free to use, no attribution required. Pexels photo ID per file:
+
+- `energy-installer.webp` — https://www.pexels.com/photo/4254168/
+- `energy-solar-field.webp` — https://www.pexels.com/photo/2800832/
+- `energy-solar-sky.webp` — https://www.pexels.com/photo/356036/
+- `energy-wind-solar.webp` — https://www.pexels.com/photo/433308/
+- `energy-rooftop-install.webp` — https://www.pexels.com/photo/8853502/
+- `energy-panel-roof.webp` — https://www.pexels.com/photo/9875441/
+- `energy-ev-carport.webp` — https://www.pexels.com/photo/9800029/
+- `energy-control-room.webp` — https://www.pexels.com/photo/3862132/
+- `build-engineers.webp` — https://www.pexels.com/photo/1216589/
+- `build-site-team.webp` — https://www.pexels.com/photo/2219024/
+- `build-excavator.webp` — https://www.pexels.com/photo/1078884/
+- `industry-engineer.webp` — https://www.pexels.com/photo/2760241/
+- `industry-worker.webp` — https://www.pexels.com/photo/3846508/
+- `trade-port.webp` — https://www.pexels.com/photo/1427107/
+- `trade-ship.webp` — https://www.pexels.com/photo/262353/
+- `trade-forklift.webp` — https://www.pexels.com/photo/1267338/
+- `trade-warehouse.webp` — https://www.pexels.com/photo/4483610/
+- `trade-warehouse-team.webp` — https://www.pexels.com/photo/4481259/
+- `trade-airport.webp` — https://www.pexels.com/photo/2026324/
+- `team-handshake.webp` — https://www.pexels.com/photo/3184291/
+- `team-meeting.webp` — https://www.pexels.com/photo/3184339/
+- `team-laptop.webp` — https://www.pexels.com/photo/3182812/
+- `deal-handshake.webp` — https://www.pexels.com/photo/3184465/
+- `team-desk.webp` — https://www.pexels.com/photo/3183150/
+- `team-boardroom.webp` — https://www.pexels.com/photo/1181406/
+- `team-startup.webp` — https://www.pexels.com/photo/1595391/
+- `deal-signing.webp` — https://www.pexels.com/photo/3760067/
+- `person-laptop.webp` — https://www.pexels.com/photo/3769021/
+- `finance-charts.webp` — https://www.pexels.com/photo/159888/
+- `finance-analysis.webp` — https://www.pexels.com/photo/6801648/
+- `finance-report.webp` — https://www.pexels.com/photo/7681091/
+- `finance-mobile.webp` — https://www.pexels.com/photo/6347724/
+- `property-modern-house.webp` — https://www.pexels.com/photo/323780/
+- `property-tower.webp` — https://www.pexels.com/photo/323705/
+- `property-solar-home.webp` — https://www.pexels.com/photo/2850347/
+- `property-interior.webp` — https://www.pexels.com/photo/534151/
+- `global-skyline.webp` — https://www.pexels.com/photo/618079/
+- `global-city.webp` — https://www.pexels.com/photo/1105766/
+- `growth-seedling.webp` — https://www.pexels.com/photo/1072824/
+- `growth-green-energy.webp` — https://www.pexels.com/photo/1108572/
+- `office-open.webp` — https://www.pexels.com/photo/1170412/
+- `office-loft.webp` — https://www.pexels.com/photo/380768/
+- `tech-data.webp` — https://www.pexels.com/photo/3861969/

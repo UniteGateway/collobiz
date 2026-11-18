@@ -1,4 +1,5 @@
 'use client';
+import { THEME_PHOTO, photo } from '@/lib/photos';
 /**
  * Dashboard building blocks: a business-domain hero with a code-drawn illustration, a dependency-free area chart,
  * the ad carousel, news and video cards. All decoration is hidden from screen readers and stops moving for users who
@@ -75,7 +76,7 @@ export function ThemeHero({ theme, themeLabel, eyebrow, title, children, actions
         {actions && <div className="cz-dhero-actions">{actions}</div>}
         <span className="cz-dhero-chip"><Icon name="sector" size={14} />{themeLabel}</span>
       </div>
-      <div className="cz-dhero-art"><Scene theme={theme} /></div>
+      <img className="cz-dhero-photo" src={photo(THEME_PHOTO[theme] ?? THEME_PHOTO.collabiz)} alt="" aria-hidden fetchPriority="high" />
     </section>
   );
 }

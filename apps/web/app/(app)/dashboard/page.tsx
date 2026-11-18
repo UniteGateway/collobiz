@@ -8,6 +8,7 @@ import { useQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
 import { AppsTray, InvestHighlight, LatestOpportunities, OnlineStrip } from '@/components/HomeExtras';
 import { NoticeBoard } from '@/components/ActionOS';
+import { BusinessNews, EnergyDesk, ProgrammeTiles } from '@/components/HomeLive';
 import { AdCarousel, AreaChart, NewsCard, ThemeHero, VideoCard, type Ad, type News, type Theme, type Video } from '@/components/DashboardKit';
 
 interface Home {
@@ -63,8 +64,15 @@ export default function DashboardPage() {
       ) : org && org.verificationStatus !== 'verified' ? (
         <Alert tone="info" title="Finish verification to unlock the network.">Applying to opportunities and registering leads open once your company is verified. <Link href="/onboarding/status">See what’s left</Link></Alert>
       ) : null}
+      {org && <ProgrammeTiles />}
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : org && (
         <div className="cz-dash">
+          {/* ---------- ACTION OS notice board (always on the home dashboard) ---------- */}
+          <div className="cz-dash-notice"><NoticeBoard /></div>
+
+          {/* ---------- Energy desk (energy partners, or anyone with solar quotes) ---------- */}
+          <div className="cz-dash-energy"><EnergyDesk show={fd?.theme === 'energy'} /></div>
+
           {/* ---------- Today ---------- */}
           <section className="cz-card cz-dash-today" aria-labelledby="today-h">
             <div className="cz-card-head"><div><h2 id="today-h">Needs your attention</h2><p>{d ? (d.actions.length ? `${d.actions.length} item${d.actions.length > 1 ? 's' : ''} across your workspace` : 'You’re all caught up') : 'Checking your workspace…'}</p></div></div>
@@ -84,8 +92,6 @@ export default function DashboardPage() {
             ) : <EmptyState icon="success" title="Nothing waiting on you">New invitations, signatures, certifications and payouts will appear here.</EmptyState>}
           </section>
 
-          {/* ---------- ACTION OS notice board (always on the home dashboard) ---------- */}
-          <div className="cz-dash-notice"><NoticeBoard /></div>
 
           {/* ---------- Earnings ---------- */}
           <section className="cz-card cz-dash-earn" aria-labelledby="earn-h">
@@ -175,6 +181,7 @@ export default function DashboardPage() {
           </section>
 
           {/* ---------- News & video ---------- */}
+          <div className="cz-dash-bnews"><BusinessNews fallback={fd?.news.map((n) => ({ id: n.id, title: n.title, publishedAt: n.publishedAt }))} /></div>
           <div className="cz-dash-news">{fd ? <NewsCard news={fd.news} /> : <Skeleton height={200} />}</div>
           <div className="cz-dash-video">{fd ? <VideoCard videos={fd.videos} /> : <Skeleton height={200} />}</div>
 

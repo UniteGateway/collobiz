@@ -42,6 +42,7 @@ function Field({ label, error, hint, trailing, ...rest }: React.InputHTMLAttribu
 function Showcase({ mode }: { mode: Mode }) {
   return (
     <aside className="cz-auth-show" aria-hidden="true">
+      <img className="cz-auth-photo" src="/photos/energy-installer.webp" alt="" />
       <div className="cz-auth-aurora"><span /><span /><span /></div>
       <div className="cz-auth-show-inner">
         <div className="cz-auth-brand"><img src="/brand/collabiz-mark.png" alt="" width={36} height={36} /><span>collabiz</span></div>

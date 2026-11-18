@@ -7,6 +7,7 @@ import { moduleFor } from '@/lib/navigation';
 import { useSession, type Me } from '@/lib/session';
 import { isForbidden } from '@/lib/hooks';
 import { HeroArt, MODULE_EXTRAS, ModuleDocuments } from '@/components/ModuleExtras';
+import { MODULE_PHOTO, photo } from '@/lib/photos';
 
 /** Client-side gate (UX only — the API enforces every permission server-side). */
 export function accessDenial(access: ScreenAccess, me: Me | null): { reason: string; action?: { href: string; label: string } } | null {
@@ -62,7 +63,11 @@ export function Screen({ id, page, children, actions, description, title, eyebro
     <div data-screen={sid}>
       {header && (() => {
         const head = <PageHeader title={title ?? def.title} screenId={sid} eyebrow={(() => { const e = eyebrow ?? mod?.label ?? (def.access === 'public' ? undefined : family); return e && e.toLowerCase() === (title ?? def.title).toLowerCase() ? undefined : e; })()} showScreenId={SHOW_IDS} actions={!denial ? actions : undefined} description={description} />;
-        return extras ? <div className="cz-hero" data-palette={extras.palette}><HeroArt icon={extras.icon} />{head}</div> : head;
+        const pic = mod ? MODULE_PHOTO[mod.key] : undefined;
+        if (extras) return <div className="cz-hero cz-hero-photo" data-palette={extras.palette}>{pic ? <img className="cz-hero-img" src={photo(pic)} alt="" aria-hidden /> : <HeroArt icon={extras.icon} />}{head}</div>;
+        // Other pages of a module with a photo get a compact photo band behind the title.
+        if (pic && mod?.tabs?.some(([h]) => h === path)) return <div className="cz-hero cz-hero-photo cz-hero-compact" data-palette={MODULE_EXTRAS[mod.key]?.palette ?? 'navy'}><img className="cz-hero-img" src={photo(pic)} alt="" aria-hidden />{head}</div>;
+        return head;
       })()}
       {mod?.tabs && !mod.ownTabs && mod.tabs.some(([h]) => h === path) && (
         <nav aria-label={`${mod.label} sections`} className="cz-tabs">{mod.tabs.map(([h, l]) => <UiLink key={h} href={h} aria-current={h === path ? 'page' : undefined}>{l}</UiLink>)}</nav>
