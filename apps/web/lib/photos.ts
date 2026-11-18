@@ -12,7 +12,7 @@ export const THEME_PHOTO: Record<string, string> = {
 /** Page hero by module (menu key). */
 export const MODULE_PHOTO: Record<string, string> = {
   collab: 'team-desk', 'business-offers': 'deal-handshake', opportunities: 'team-laptop', leads: 'person-laptop', collaboration: 'team-meeting',
-  'unite-solar': 'energy-rooftop-install', powertek: 'energy-control-room', ventures: 'global-skyline', tenders: 'build-site-team', projects: 'build-engineers',
+  energy: 'energy-solar-field', 'unite-solar': 'energy-rooftop-install', powertek: 'energy-control-room', ventures: 'global-skyline', tenders: 'build-site-team', projects: 'build-engineers',
   trading: 'trade-warehouse', earnings: 'finance-analysis', global: 'trade-ship', growth: 'growth-seedling', help: 'office-open', community: 'team-startup',
   invest: 'property-tower', 'action-os': 'team-boardroom', messages: 'office-loft', crm: 'person-laptop', franchise: 'property-solar-home', property: 'property-modern-house',
 };
@@ -24,5 +24,5 @@ export const PROGRAMMES: { title: string; text: string; href: string; photo: str
   { title: 'Business offers', text: 'Share capacity, find partners, close collaborations.', href: '/business-offers', photo: 'deal-handshake' },
   { title: 'Tenders & projects', text: 'Bid together, deliver milestones, get paid on certification.', href: '/tenders', photo: 'build-site-team' },
   { title: 'Trade & XCHANGE', text: 'RFQs, purchase orders, barter and part-cash deals.', href: '/xchange', photo: 'trade-port' },
-  { title: 'Invest together', text: 'Group investment offers — register interest only.', href: '/invest', photo: 'property-tower' },
+  { title: 'Energy marketplace', text: 'Unite Green Park — plants, buyers, delivered cost and licensed traders.', href: '/energy', photo: 'energy-wind-solar' },
 ];

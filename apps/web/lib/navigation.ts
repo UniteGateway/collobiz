@@ -22,6 +22,8 @@ export const MODULES: Module[] = [
   { key: 'powertek', label: 'Powertek products', icon: 'package', home: '/powertek', match: ['/powertek'], tabs: [['/powertek', 'All products'], ['/powertek/enquiries', 'My enquiries']] },
   { key: 'ventures', label: 'Unite businesses', icon: 'building', home: '/ventures', match: ['/ventures', '/solar', '/franchise', '/property', '/store/redeem'],
     tabs: [['/ventures', 'Businesses'], ['/solar', 'Solar desk'], ['/franchise', 'Franchise'], ['/property', 'Property sales']] },
+  { key: 'energy', label: 'Energy · Green Park', icon: 'value', home: '/energy', match: ['/energy'],
+    tabs: [['/energy', 'Marketplace'], ['/energy/map', 'State map'], ['/energy/register', 'Register'], ['/energy/calculator', 'Cost calculator'], ['/energy/traders', 'Licensed traders'], ['/energy/mine', 'My listings & deals']] },
   { key: 'action-os', label: 'Action board', icon: 'bell', home: '/action-os', match: ['/action-os'],
     tabs: [['/action-os', 'My action board'], ['/action-os/plans', 'Plans'], ['/action-os/settings', 'Schedule & channels']] },
   { key: 'community', label: 'Community', icon: 'teams', home: '/community', match: ['/community'] },
@@ -56,7 +58,7 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}): Nav
   const item = (k: string) => { const m = byKey[k]; return { href: m.home, label: m.label, icon: m.icon, children: m.tabs?.filter(([h]) => h !== m.home).map(([href, label]) => ({ href, label })) }; };
   const GROUPS: [string, string[]][] = [
     ['Grow your business', ['collab', 'business-offers', 'opportunities', 'leads', 'collaboration']],
-    ['Unite programmes', ['unite-solar', 'powertek', 'invest', 'ventures']],
+    ['Unite programmes', ['energy', 'unite-solar', 'powertek', 'invest', 'ventures']],
     ['Deliver & trade', ['tenders', 'projects', 'trading']],
     ['Money', ['earnings']],
     ['Network & growth', ['community', 'messages', 'global', 'growth']],

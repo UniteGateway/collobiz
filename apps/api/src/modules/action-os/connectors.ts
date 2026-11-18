@@ -140,6 +140,16 @@ export const CONNECTORS: { key: string; app: string; label: string; collect: (db
     },
   },
   {
+    key: 'energy_introductions', app: 'energy', label: 'Energy introduction requests',
+    async collect(db, p) {
+      const orgs = p.memberships.filter((m) => MANAGER.includes(m.role)).map((m) => m.orgId); if (!orgs.length) return [];
+      const r = await rows<{ id: string; listing: string; code: string; title: string; org: string }>(db, sql`
+        select i.id, l.id as listing, l.code, l.title, l.org_id as org from energy_introductions i join energy_listings l on l.id = i.listing_id
+        where i.status = 'requested' and l.org_id in (${list(orgs)})`);
+      return r.map((x) => c({ sourceApp: 'energy', sourceModule: 'introductions', sourceRecordId: x.id, organizationId: x.org, kind: 'decision', title: `Introduction request on ${x.code}`, summary: x.title, recordUrl: `/energy/listings/${x.listing}`, commitment: true, strategic: 0.5, sourceStatus: 'requested' }));
+    },
+  },
+  {
     key: 'xchange', app: 'xchange', label: 'Barter deals and deliveries',
     async collect(db, p) {
       const orgs = p.memberships.filter((m) => MANAGER.includes(m.role)).map((m) => m.orgId); if (!orgs.length) return [];

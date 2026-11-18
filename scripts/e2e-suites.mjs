@@ -2679,3 +2679,59 @@ suites.push({
     }
   },
 });
+
+suites.push({
+  name: 'Unite Green Park · marketplace, map, register demand → staff check → introduction → accept → deal stage; calculator; traders',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, expect, shot }) => {
+    const title = `5 MW solar power required — Karnataka ${Date.now().toString(36)}`;
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/energy');
+    await page.getByText('Plants & capacity listings').waitFor();
+    await page.locator('[data-listing="40 MW solar power available — Andhra Pradesh"]').waitFor();
+    await shot('energy-marketplace');
+    await page.goto(WEB + '/energy/map');
+    await page.getByRole('listitem', { name: /^Telangana:/ }).click();
+    await page.locator('[data-listing="15 MW solar power required — Telangana"]').waitFor();
+    await page.goto(WEB + '/energy/calculator');
+    await page.getByRole('button', { name: 'Calculate' }).click();
+    await page.getByText('Saving vs DISCOM').waitFor();
+    await shot('energy-calculator');
+    await page.goto(WEB + '/energy/traders');
+    await page.getByRole('table', { name: 'Licensed traders' }).getByText('DEMO/CERC/TL/0001').waitFor();
+    await page.goto(WEB + '/energy/register?side=buyer');
+    await page.getByLabel('Headline').fill(title);
+    await page.getByLabel('Company / factory').fill('Volt Fabrication Unit');
+    await page.getByLabel('Industry sector').fill('Fabrication');
+    await page.getByLabel('State', { exact: true }).selectOption('KA');
+    await page.getByLabel('District').fill('Tumakuru');
+    await page.getByLabel('Distribution company (DISCOM)').fill('BESCOM');
+    await page.getByLabel('Consumer category').fill('HT-2a');
+    await page.getByLabel('Renewable power required (MW)').fill('5');
+    await page.getByLabel('Current energy tariff (₹/kWh)').fill('7.9');
+    await page.getByLabel('Description').fill('Two-shift fabrication unit seeking daytime open-access solar.');
+    await page.getByRole('button', { name: 'Submit for verification' }).click();
+    await page.getByText('COLLABIZ is checking this listing').waitFor();
+    const url = page.url();
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/energy');
+    const card = page.locator('[data-energy-review]').filter({ hasText: title });
+    await card.getByRole('button', { name: 'Approve and publish' }).click();
+    await card.waitFor({ state: 'detached' });
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(url);
+    await page.getByText('Confidential buyer').first().waitFor();
+    expect(await page.getByText('Volt Fabrication Unit').count() === 0, 'buyer identity hidden before introduction');
+    await page.getByLabel('Your proposal').fill('Sunrise can supply 5 MW from our Kutch plant through open access.');
+    await page.getByRole('button', { name: 'Request introduction' }).click();
+    await page.getByText('Waiting for the owner').waitFor();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(url);
+    await page.getByRole('button', { name: 'Accept and share details' }).click();
+    await page.getByText(/Stage 2 of 19/).waitFor();
+    await page.getByLabel('Note for this step').fill('Mutual NDA signed');
+    await page.getByRole('button', { name: /Mark “NDA signed” done/ }).click();
+    await page.getByText(/Stage 3 of 19/).waitFor();
+    await shot('energy-deal-room');
+  },
+});

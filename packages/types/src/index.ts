@@ -37,3 +37,4 @@ export * from './dashboard';
 export * from './community';
 export * from './app-brands';
 export * from './action-os';
+export * from './energy';

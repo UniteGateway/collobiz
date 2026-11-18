@@ -65,7 +65,7 @@ export function EnergyDesk({ show }: { show: boolean }) {
     <section className="cz-card cz-energy" aria-labelledby="en-h">
       <div className="cz-energy-head" style={{ backgroundImage: `linear-gradient(95deg, rgba(4,30,66,.92), rgba(4,30,66,.55) 60%, rgba(245,158,11,.25)), url(${photo('energy-solar-field')})` }}>
         <div><span className="cz-energy-eyebrow">ENERGY DESK</span><h2 id="en-h">Solar and power business at a glance</h2><p>Your quotes, kilowatts, pipeline and the energy market on COLLABIZ</p></div>
-        <div className="cz-row" style={{ gap: 8, flexWrap: 'wrap' }}><Link className="cz-btn cz-btn-light" href="/solar/new">New solar quote</Link><Link className="cz-btn cz-btn-ghost-light" href="/powertek">Powertek products</Link></div>
+        <div className="cz-row" style={{ gap: 8, flexWrap: 'wrap' }}><Link className="cz-btn cz-btn-light" href="/energy">Energy marketplace</Link><Link className="cz-btn cz-btn-ghost-light" href="/solar/new">New solar quote</Link><Link className="cz-btn cz-btn-ghost-light" href="/powertek">Powertek products</Link></div>
       </div>
       {!e ? <Skeleton height={220} /> : <>
         <div className="cz-energy-kpis">

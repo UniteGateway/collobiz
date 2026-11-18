@@ -2205,3 +2205,45 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
 .cz-prog-tile .cz-prog-text strong { color: #fff; text-shadow: 0 1px 8px rgba(0, 0, 0, .45); }
 .cz-prog-tile .cz-prog-text span { color: rgba(255, 255, 255, .92); text-shadow: 0 1px 6px rgba(0, 0, 0, .4); }
 .cz-prog-tile::after { background: linear-gradient(180deg, rgba(1, 20, 48, .1) 10%, rgba(1, 20, 48, .55) 45%, rgba(1, 20, 48, .94) 100%); }
+
+/* ===================== Unite Green Park (energy marketplace) ===================== */
+.cz-energy-disclaimer { display: flex; gap: 6px; align-items: flex-start; font-size: 12.5px; color: #475467; background: #F8FAFC; border: 1px solid #E4E7EC; border-radius: 12px; padding: 8px 12px; margin: 0 0 14px; }
+.cz-ugp-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.cz-ugp-stats > div { border-radius: 16px; padding: 14px 16px; background: linear-gradient(135deg, #ECFDF3, #FFFBEB); border: 1px solid #D1FADF; display: flex; flex-direction: column; }
+.cz-ugp-stats strong { font-size: 28px; letter-spacing: -0.02em; color: #0B1F3A; } .cz-ugp-stats span { font-size: 13px; color: #344054; } .cz-ugp-stats em { font-style: normal; font-size: 11.5px; color: #667085; }
+.cz-ugp-filters { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px; }
+.cz-ugp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+.cz-ugp-card { display: flex; flex-direction: column; border-radius: 18px; overflow: hidden; background: #fff; border: 1px solid var(--cz-border, #E4E7EC); text-decoration: none; color: inherit; transition: transform .2s var(--cz-ease, ease), box-shadow .2s; }
+.cz-ugp-card:hover { transform: translateY(-3px); box-shadow: 0 18px 36px -22px rgba(1, 30, 72, .45); }
+.cz-ugp-card-img, .cz-ugp-detail-img { position: relative; height: 130px; overflow: hidden; }
+.cz-ugp-detail-img { height: 220px; border-radius: 20px; }
+.cz-ugp-card-img img, .cz-ugp-detail-img img { width: 100%; height: 100%; object-fit: cover; }
+.cz-ugp-side { position: absolute; top: 10px; left: 10px; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; color: #fff; }
+.cz-ugp-plant { background: #16A34A; } .cz-ugp-buyer { background: #EA580C; }
+.cz-ugp-demo { position: absolute; top: 10px; right: 10px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: rgba(255, 255, 255, .9); color: #B54708; }
+.cz-ugp-card-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; }
+.cz-ugp-cat { font-size: 11.5px; font-weight: 600; color: #175CD3; text-transform: uppercase; letter-spacing: .04em; }
+.cz-ugp-card h3 { margin: 0; font-size: 16px; line-height: 1.3; color: #0B1F3A; }
+.cz-ugp-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; margin: 4px 0; }
+.cz-ugp-facts dt { font-size: 11px; color: #667085; } .cz-ugp-facts dd { margin: 0; font-size: 13.5px; font-weight: 600; color: #101828; }
+.cz-ugp-where { display: flex; align-items: center; gap: 4px; margin: 0; font-size: 12.5px; color: #475467; }
+.cz-ugp-tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 0; } .cz-ugp-tags span { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #F2F4F7; color: #475467; }
+.cz-ugp-mapwrap { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+.cz-ugp-map { display: grid; grid-template-columns: repeat(8, 72px); grid-auto-rows: 62px; gap: 6px; padding: 16px; background: #fff; border: 1px solid var(--cz-border, #E4E7EC); border-radius: 20px; }
+.cz-ugp-tile { all: unset; box-sizing: border-box; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #0B1F3A; border: 2px solid transparent; transition: transform .15s; }
+.cz-ugp-tile:hover { transform: scale(1.06); } .cz-ugp-tile:focus-visible { outline: 3px solid #1E6BFF; outline-offset: 2px; } .cz-ugp-tile.cz-on { border-color: #0B1F3A; }
+.cz-ugp-tile strong { font-size: 14px; } .cz-ugp-tile span { font-size: 11px; font-weight: 600; }
+.cz-ugp-legend { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; font-size: 13px; } .cz-ugp-legend li { display: flex; align-items: center; gap: 8px; } .cz-ugp-legend i { width: 16px; height: 16px; border-radius: 4px; }
+@media (max-width: 760px) { .cz-ugp-map { grid-template-columns: repeat(8, 38px); grid-auto-rows: 38px; gap: 3px; padding: 8px; } .cz-ugp-tile span { display: none; } .cz-ugp-tile strong { font-size: 11px; } .cz-ugp-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.cz-ugp-result { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cz-ugp-result > div { border-radius: 14px; padding: 12px 14px; background: #F8FAFC; border: 1px solid #E4E7EC; display: flex; flex-direction: column; }
+.cz-ugp-result span { font-size: 12px; color: #667085; } .cz-ugp-result strong { font-size: 22px; letter-spacing: -0.02em; color: #0B1F3A; } .cz-ugp-result em { font-style: normal; font-size: 12px; color: #475467; }
+.cz-ugp-result .cz-good { background: #ECFDF3; border-color: #ABEFC6; } .cz-ugp-result .cz-good strong { color: #067647; }
+.cz-ugp-result .cz-bad { background: #FEF3F2; border-color: #FECDCA; } .cz-ugp-result .cz-bad strong { color: #B42318; }
+.cz-ugp-stages { list-style: none; margin: 0 0 12px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
+.cz-ugp-stages li { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 6px 8px; border-radius: 10px; background: #F8FAFC; color: #667085; }
+.cz-ugp-stages li span { width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; background: #E4E7EC; color: #475467; }
+.cz-ugp-stages li[data-state="done"] { background: #ECFDF3; color: #067647; } .cz-ugp-stages li[data-state="done"] span { background: #16A34A; color: #fff; }
+.cz-ugp-stages li[data-state="now"] { background: #EFF8FF; color: #175CD3; font-weight: 600; } .cz-ugp-stages li[data-state="now"] span { background: #1E6BFF; color: #fff; }
+.cz-ugp-history { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; font-size: 13px; } .cz-ugp-history span { color: #475467; }
+.cz-ugp-intro { border-top: 1px solid #F2F4F7; padding: 12px 0; display: grid; gap: 8px; } .cz-ugp-intro p { margin: 4px 0 0; font-size: 13.5px; }
