@@ -19,13 +19,13 @@ commit, so the live site's source is elsewhere (another repository or branch).
 | **Micro-contracts** | `/micro`, `/micro/new`, `/micro/mine`, `/micro/:id` | same; open → assigned → submitted → accepted → paid → receipt confirmed |
 | **Demand pools** | `/pools`, `/pools/new`, `/pools/mine`, `/pools/:id` | same; suppliers see totals only, learn a buyer's name only when it accepts their quote |
 | **Commit** | `/commit`, `/commit/new`, `/commit/:id` | same; binding only when all pledges and independently verified conditions are in before the deadline |
-
 | **Proof — performance passport** | `/proof` | `trust-finance.e2e.ts`, types `trust-finance.test.ts`; counts only both-side-confirmed records |
 | **Business QR** | `/business-qr`, public `/b/:token` | same; opt-in public link shows level and counts only, stops working when sharing is turned off |
 | **Invoices & P&L** | `/finance/pnl`, `/finance/credit-notes` | same; credit notes capped at what is left on the invoice, refunds count only when paid, expenses recorded |
 | **Collab sub-pages** | `/collab/matches`, `/collab/requests`, `/collab/programs` | browser suite "Proof, Business QR, …"; programmes open only after a staff-recorded approval, watchers are notified |
 | **Home additions** | `/dashboard` | intent box (rules tested in `collab-ops.test.ts`) and "Get set up" checklist read from real records |
 | **Landing "Three ways in"** | `/` | Collab, Business Offers, Unite Green Park |
+
 Launch, Capacity, Micro-contracts, Commit and Green Park feed ACTION OS (booking requests, work to review/pay/deliver, pledges and conditions to verify, energy introductions).
 Demo rows are flagged and labelled as sample data.
 
