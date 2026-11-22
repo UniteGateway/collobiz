@@ -9,7 +9,7 @@ import { AppModule } from './app.module';
 import { config } from './config';
 
 export async function createApp(opts: { logger?: boolean } = {}) {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { logger: opts.logger === false ? false : ['error', 'warn', 'log'] });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true, logger: opts.logger === false ? false : ['error', 'warn', 'log'] });
   app.set('trust proxy', 1);
   app.use(helmet());
   app.use(cookieParser());

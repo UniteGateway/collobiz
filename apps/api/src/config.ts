@@ -26,6 +26,10 @@ const Env = z.object({
   AI_PROVIDER: z.enum(['rules', 'anthropic']).default('rules'),
   /** Growth Desk outreach sending. Off until a separate marketing e-mail domain/service is configured; approved drafts wait. */
   GROWTH_SENDING_ENABLED: bool.default(false),
+  /** SOLBID (Unite's sealed-bid solar marketplace): origin only, e.g. https://solbid.example — no path. Off when unset. */
+  SOLBID_API_URL: z.string().url().optional(),
+  /** Shared secret for signed calls both ways; must equal COLLABIZ_SHARED_SECRET on SOLBID. */
+  SOLBID_SHARED_SECRET: z.string().min(16).optional(),
   /** ERPNext (HR, payroll, accounting — Phases B and C). Base URL of the site, and token auth for a dedicated integration user. */
   ERPNEXT_URL: z.string().url().optional(),
   ERPNEXT_API_KEY: z.string().optional(),

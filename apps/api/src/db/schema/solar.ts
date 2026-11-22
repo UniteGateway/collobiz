@@ -79,6 +79,12 @@ export const solarReferrals = pgTable('solar_referrals', {
   billId: uuid('bill_id'), // solar_bills row (deleted after the retention period)
   roofPhotoId: uuid('roof_photo_id'), // solar_bills row holding the roof photo (same retention)
   consentAt: timestamp('consent_at', { withTimezone: true }),
+  /** SOLBID hand-off: our reference there, its status (invited | confirmed | awarded | completed), outcome as shared, and the consent note. */
+  solbidRef: text('solbid_ref'),
+  solbidStatus: text('solbid_status'),
+  solbidOutcome: jsonb('solbid_outcome'),
+  solbidConsentNote: text('solbid_consent_note'),
+  solbidSentAt: timestamp('solbid_sent_at', { withTimezone: true }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (t) => [uniqueIndex('solar_referrals_phone_uq').on(t.phone10), index('solar_referrals_code_idx').on(t.codeId)]);

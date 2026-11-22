@@ -421,7 +421,7 @@ export class SolarController {
         referrals: refs.length, rewardsDue: refs.filter((x) => x.r.status === 'installed').reduce((a, x) => a + (x.r.reward ?? 0), 0),
       },
       quotes: quotes.map(({ q, partner }) => ({ id: q.id, code: q.code, customer: (q.customer as { name: string }).name, city: (q.customer as { city: string }).city, partner, model: q.model, system: q.system, capacityKw: q.capacityW / 1000, total: q.total, commission: q.commission, status: q.status, createdAt: q.createdAt })),
-      referrals: refs.map(({ r, by, code }) => ({ id: r.id, name: r.name, phone: maskPhone(r.phone10), city: r.city, segment: r.segment, status: r.status, reward: r.reward, by, code, createdAt: r.createdAt, quoteId: r.quoteId, source: r.source, siteType: (r.details as { siteType?: string } | null)?.siteType ?? null, hasBill: !!r.billId, hasRoofPhoto: !!r.roofPhotoId })),
+      referrals: refs.map(({ r, by, code }) => ({ id: r.id, name: r.name, phone: maskPhone(r.phone10), city: r.city, segment: r.segment, status: r.status, reward: r.reward, by, code, createdAt: r.createdAt, quoteId: r.quoteId, source: r.source, siteType: (r.details as { siteType?: string } | null)?.siteType ?? null, hasBill: !!r.billId, hasRoofPhoto: !!r.roofPhotoId, region: r.region, solbid: r.solbidRef ? { ref: r.solbidRef, status: r.solbidStatus, outcome: r.solbidOutcome } : null })),
       kits: await this.svc.kits(true), config: cfg, canEditMoney: money(ctx),
     };
   }

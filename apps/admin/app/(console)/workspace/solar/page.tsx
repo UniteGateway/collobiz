@@ -9,7 +9,7 @@ import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
 interface Q { id: string; code: string; customer: string; city: string; partner: string | null; model: string; system: string; capacityKw: number; total: number; commission: number; status: string; createdAt: string }
-interface R { id: string; name: string; phone: string; city: string; segment: string; status: string; reward: number | null; by: string; code: string; createdAt: string; quoteId: string | null; source: string | null; siteType: string | null; hasBill: boolean; hasRoofPhoto: boolean }
+interface R { id: string; name: string; phone: string; city: string; segment: string; status: string; reward: number | null; by: string; code: string; createdAt: string; quoteId: string | null; source: string | null; siteType: string | null; hasBill: boolean; hasRoofPhoto: boolean; solbid: { ref: string; status: string; outcome: { project?: { code?: string; bids?: number; status?: string } | null; contractValue?: number | null } | null } | null }
 interface K { id: string; code: string; name: string; system: string; capacityKw: number; price: number; batteryKwh: number | null; status: string }
 interface Res { totals: { quotes: number; open: number; openValue: number; won: number; wonKw: number; wonValue: number; commission: number; referrals: number; rewardsDue: number }; quotes: Q[]; referrals: R[]; kits: K[]; config: SolarConfig; canEditMoney: boolean }
 const TONE: Record<string, 'success' | 'info' | 'warning' | 'neutral' | 'danger'> = { draft: 'neutral', sent: 'info', accepted: 'info', won: 'success', installed: 'success', paid: 'success', declined: 'danger', expired: 'warning', new: 'info', quoted: 'info', rewarded: 'success', lost: 'neutral' };
@@ -48,6 +48,7 @@ export default function SolarAdmin() {
             ))}
             {tab === 'referrals' && (
               <>
+                <SolbidBoard />
                 {ref.error && <Alert tone="danger">{ref.error}</Alert>}
                 {!d.referrals.length ? <EmptyState icon="users" title="No referrals yet" /> : (
                   <ul className="cz-ws-list">{d.referrals.map((r) => (
@@ -55,6 +56,7 @@ export default function SolarAdmin() {
                       <StatusBadge status={r.status} tone={TONE[r.status]} label={REFERRAL_STATUS_LABELS[r.status]} />
                       {r.status === 'installed' && d.canEditMoney && <Button size="sm" onClick={() => ref.run(r.id, 'rewarded')}>Reward paid</Button>}
                       {['new', 'quoted'].includes(r.status) && <Button size="sm" variant="ghost" onClick={() => ref.run(r.id, 'lost')}>Not going ahead</Button>}
+                      <SolbidCell r={r} onDone={q.reload} />
                     </li>
                   ))}</ul>
                 )}
@@ -157,4 +159,46 @@ const HOUSE = ['SUNX', 'SUNGATE', 'SOLARVM', 'SOLCART'];
 function refLine(r: R) {
   if (!r.source) return `referred by ${r.by} (${r.code})`;
   return HOUSE.includes(r.code) ? `from the ${r.by} page` : `from the ${r.source} page via ${r.by}'s link (${r.code})`;
+}
+
+const SOLBID_LABEL: Record<string, string> = { invited: 'Invited on SOLBID', confirmed: 'Live on SOLBID', awarded: 'Awarded on SOLBID', completed: 'Completed on SOLBID' };
+/** Hand a referral to SOLBID for sealed bids (customer's agreement recorded), or show where it is on SOLBID. */
+function SolbidCell({ r, onDone }: { r: R; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [f, setF] = useState({ capacityKw: '', model: 'EPC', consentNote: '' });
+  const send = useMutation(async () => { await api.post(`/admin/solbid/referrals/${r.id}`, { capacityKw: Number(f.capacityKw), model: f.model, consentNote: f.consentNote }); setOpen(false); onDone(); return true; });
+  const refresh = useMutation(async () => { await api.get(`/admin/solbid/referrals/${r.id}`); onDone(); return true; });
+  if (r.solbid) {
+    const pj = r.solbid.outcome?.project;
+    return <span className="cz-row" style={{ gap: 6, flexWrap: 'wrap', alignItems: 'center' }} data-solbid={r.solbid.ref}>
+      <StatusBadge status={r.solbid.status} tone={r.solbid.status === 'awarded' || r.solbid.status === 'completed' ? 'success' : 'info'} label={SOLBID_LABEL[r.solbid.status] ?? r.solbid.status} />
+      <span className="cz-muted" style={{ fontSize: 12.5 }}>{r.solbid.ref}{pj?.code ? ` · ${pj.code}` : ''}{pj?.bids !== undefined ? ` · ${pj.bids} bid${pj.bids === 1 ? '' : 's'}` : ''}{r.solbid.outcome?.contractValue ? ` · contract ₹${Math.round(r.solbid.outcome.contractValue).toLocaleString('en-IN')}` : ''}</span>
+      <Button size="sm" variant="ghost" loading={refresh.pending} onClick={() => refresh.run()}>Refresh</Button>
+      {refresh.error && <span className="cz-error-text">{refresh.error}</span>}
+    </span>;
+  }
+  if (!['new', 'quoted'].includes(r.status)) return null;
+  return <>
+    <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>Send to SOLBID</Button>
+    <Dialog open={open} onClose={() => setOpen(false)} title={`Get sealed bids for ${r.name} on SOLBID`}>
+      <p className="cz-muted" style={{ marginTop: 0 }}>SOLBID receives the name, mobile, city and the requirement — never the bill or roof photo. It invites the customer, who confirms in their own SOLBID account before any vendor sees it.</p>
+      {send.error && <Alert tone="danger">{send.error}</Alert>}
+      <div className="cz-grid cz-grid-2">
+        <TextInput label="System size (kW)" inputMode="decimal" value={f.capacityKw} onChange={(e) => setF({ ...f, capacityKw: e.target.value.replace(/[^\d.]/g, '') })} error={send.fieldErrors.capacityKw} />
+        <Select label="Model" value={f.model} onChange={(e) => setF({ ...f, model: e.target.value })} options={[{ value: 'EPC', label: 'EPC — customer buys the plant' }, { value: 'PPA', label: 'PPA — developer owns, customer pays per unit' }]} />
+      </div>
+      <TextArea label="How and when did the customer agree to receive bids on SOLBID?" rows={3} value={f.consentNote} onChange={(e) => setF({ ...f, consentNote: e.target.value })} error={send.fieldErrors.consentNote} />
+      <div className="cz-row" style={{ gap: 8, marginTop: 12 }}><Button loading={send.pending} onClick={() => send.run()}>Send to SOLBID</Button><Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button></div>
+    </Dialog>
+  </>;
+}
+
+/** SOLBID's anonymised public board (open requirements and capacity), when SOLBID is connected. */
+function SolbidBoard() {
+  const b = useQuery<{ connected: boolean; available?: boolean; openProjects?: number; openCapacityKw?: number; verifiedVendors?: number; bidsSubmitted?: number }>('/public/solbid/board');
+  if (!b.data?.connected) return <p className="cz-muted" style={{ fontSize: 13 }}>SOLBID is not connected yet. Set SOLBID_API_URL and SOLBID_SHARED_SECRET to hand referrals over for sealed bids.</p>;
+  if (!b.data.available) return <p className="cz-muted" style={{ fontSize: 13 }}>SOLBID is connected, but its public board did not answer just now.</p>;
+  return <Card title="SOLBID live board" className="cz-mt">
+    <p style={{ margin: 0 }}>{b.data.openProjects ?? 0} open requirements · {(b.data.openCapacityKw ?? 0).toLocaleString('en-IN')} kW open for bids{b.data.verifiedVendors !== undefined ? ` · ${b.data.verifiedVendors} verified vendors` : ''}{b.data.bidsSubmitted !== undefined ? ` · ${b.data.bidsSubmitted} bids placed` : ''}</p>
+  </Card>;
 }
