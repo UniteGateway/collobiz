@@ -68,18 +68,23 @@ describe('GO EB5', () => {
     expect(inv.newAccount).toBe(true);
     await api(app).post('/v1/auth/invitations/accept').send({ token: inv.devInviteToken, password: 'Collabiz#2026x' }).expect((r) => expect([200, 201]).toContain(r.status));
     const c = await login(app, 'rohan.kapoor@example.com', { password: 'Collabiz#2026x' });
-    await put('/eb5/applications/mine', c, { data: { applicant: { fullName: 'Rohan Kapoor' } } }).expect(200);
+    await put('/eb5/applications/mine', c, { data: { fullName: 'Rohan Kapoor' } }).expect(200);
     await api(app).post('/v1/eb5/applications/mine/photo').set(auth(c)).attach('file', PNG, { filename: 'p.png', contentType: 'image/png' }).expect(200);
     await post('/eb5/applications/mine/submit', c).expect(400);
-    const full = { applicant: { fullName: 'Rohan Kapoor', dateOfBirth: '1980-05-01', gender: 'Male', nationality: 'Indian', countryOfResidence: 'India' }, contact: { email: 'rohan.kapoor@example.com', phone: '+91 98111 22233' },
-      address: { line1: '12 Marine Drive', city: 'Mumbai', country: 'India' }, profession: { occupation: 'Business owner', yearsInBusiness: 15 }, family: { maritalStatus: 'Married', childrenUnder21: 2 },
-      investment: { budgetUsd: 1_000_000, sourceOfFunds: ['Business income'], objectives: ['Education for children'] }, history: { priorUsVisas: true, priorDenials: false }, preferences: { consultationMode: 'Online', timezone: 'Asia/Kolkata' },
-      consents: { privacy: true, declaration: true }, signature: 'Rohan Kapoor' };
+    const full = { fullName: 'Rohan Kapoor',
+      personal: { dateOfBirth: '1980-05-01', nationality: 'Indian', countryOfResidence: 'India', cityState: 'Mumbai, Maharashtra', residentialAddress: '12 Marine Drive, Mumbai 400020', mobile: '+91 98111 22233', email: 'rohan.kapoor@example.com' },
+      professional: { occupation: 'Business owner', designation: 'Managing Director', companyName: 'Kapoor Textiles', natureOfBusiness: 'Textile exports' },
+      family: { maritalStatus: 'Married', spouseName: 'Anita Kapoor', numberOfChildren: 2, childrenAges: '12, 9', familyMembersProposed: 'Spouse and two children' },
+      purpose: { objectives: ["Children's education in the USA", 'U.S. permanent residency through EB-5'] },
+      readiness: { budgetBand: '$800,000 - $1,049,999', timeline: 'Within 6 months', sourceOfFunds: ['Business income'] },
+      history: { visitedUsa: true, holdsUsVisa: true, appliedPermanentResidency: false, visaRefusal: false, workingWithOther: false, currentVisaCategory: 'B1/B2' },
+      preferences: { meetingMode: 'Video call', preferredDateTime: 'Weekday evenings IST', referralSource: 'Sunrise Traders' },
+      consents: { preliminaryAssessment: true, authorizeContact: true, finalizeFeesBeforePaidServices: true }, signature: 'Rohan Kapoor', datePlace: '20 Nov 2026, Mumbai' };
     await put('/eb5/applications/mine', c, { data: full }).expect(200);
     const sub = (await post('/eb5/applications/mine/submit', c).expect(200)).body;
     await put('/eb5/applications/mine', c, { data: full }).expect(409);
     await get(`/eb5/applications/${sub.id}`, t.ravi).expect(404);
-    expect((await get(`/eb5/applications/${sub.id}`, s.manager).expect(200)).body.data.applicant.fullName).toBe('Rohan Kapoor');
+    expect((await get(`/eb5/applications/${sub.id}`, s.manager).expect(200)).body.data.fullName).toBe('Rohan Kapoor');
     await get(`/eb5/applications/${sub.id}/photo`, s.manager).expect(200).expect('content-type', /image\/png/);
     await post(`/eb5/applications/${sub.id}/review`, s.manager, { note: 'Complete; book attorney review' }).expect(200);
     s.rohan = c;
@@ -95,7 +100,7 @@ describe('GO EB5', () => {
   it('agreements and invoices stay blocked until counsel approves; then sign, invoice, verify activates', async () => {
     const ag = (await post('/eb5/agreements', s.manager, { leadId }).expect(201)).body;
     const d = (await get(`/eb5/agreements/${ag.id}`, s.manager).expect(200)).body;
-    expect(d.body).toMatch(/^DRAFT — NOT FOR SIGNATURE/); expect(d.body).toMatch(/CITRUS360 LLC/); expect(d.body).toMatch(/never paid to, received or held/);
+    expect(d.body).toMatch(/^LEGAL DRAFT — NOT FOR EXECUTION/); expect(d.body).toMatch(/between CITRUS360 LLC, USA, operating the GO EB5 brand/); expect(d.body).toMatch(/No instruction in this Agreement authorizes payment of investment capital to Consultant/); expect(d.body).toMatch(/Client address: 12 Marine Drive/); expect(d.body).toMatch(/SCHEDULE B — FEE MILESTONES/);
     await get(`/eb5/agreements/${ag.id}`, s.rohan).expect(404); // not sent yet
     await post(`/eb5/agreements/${ag.id}/transition`, s.manager, { to: 'Internal Review' }).expect(200);
     await post(`/eb5/agreements/${ag.id}/transition`, t.compliance, { to: 'Legal Approved' }).expect(409); // gates closed
@@ -164,5 +169,37 @@ describe('GO EB5', () => {
     const csv = await get('/eb5/reports?format=csv', s.admin).expect(200);
     expect(csv.text).toMatch(/^Partner,Introduced/);
     expect((await get('/eb5/audit', t.compliance).expect(200)).body.length).toBeGreaterThan(10);
+  });
+
+  it('public website: enquiries and the online application create protected leads; spam trap; duplicates create nothing new', async () => {
+    const enq = { kind: 'consultation', fullName: 'Website Visitor', email: 'visitor.web@example.com', phone: '+91 90909 80808', country: 'India', interest: 'Texas solar project', readiness: 'Funds available now', consent: true };
+    await api(app).post('/v1/eb5/public/enquiries').send({ ...enq, website: 'spam.example' }).expect(400);
+    await api(app).post('/v1/eb5/public/enquiries').send({ ...enq, consent: false }).expect(400);
+    expect((await api(app).post('/v1/eb5/public/enquiries').send(enq).expect(201)).body.reference).toMatch(/^EB5L-/);
+    const form = { fullName: 'Lakshmi Iyer', personal: { dateOfBirth: '1979-02-02', nationality: 'Indian', countryOfResidence: 'India', cityState: 'Chennai, Tamil Nadu', residentialAddress: '4 Boat Club Road, Chennai', mobile: '+91 94444 11111', email: 'lakshmi.iyer@example.com' },
+      professional: { occupation: 'Doctor' }, family: { maritalStatus: 'Married', numberOfChildren: 1 }, purpose: { objectives: ['Family relocation'] },
+      readiness: { budgetBand: '$1,050,000 and above', timeline: 'Within 12 months', sourceOfFunds: ['Personal savings', 'Property sale'] },
+      history: { visitedUsa: true, holdsUsVisa: false, appliedPermanentResidency: false, visaRefusal: false, workingWithOther: false }, preferences: { meetingMode: 'Video call' },
+      consents: { preliminaryAssessment: true, authorizeContact: true, finalizeFeesBeforePaidServices: true }, signature: 'Lakshmi Iyer', datePlace: 'Chennai' };
+    await api(app).post('/v1/eb5/public/applications').send({ ...form, consents: { ...form.consents, finalizeFeesBeforePaidServices: false } }).expect(400);
+    const r = (await api(app).post('/v1/eb5/public/applications').send(form).expect(201)).body;
+    expect(r.reference).toMatch(/^EB5A-/); expect(r.devInviteToken).toBeTruthy();
+    const apps = (await get('/eb5/applications', s.manager).expect(200)).body;
+    expect(apps.find((a: any) => a.code === r.reference)).toMatchObject({ status: 'submitted', country: 'India' });
+    const again = (await api(app).post('/v1/eb5/public/applications').send(form).expect(201)).body;
+    expect(again.reference).toBeNull();
+    await api(app).post('/v1/auth/invitations/accept').send({ token: r.devInviteToken, password: 'Collabiz#2026y' }).expect(200);
+    const lk = await login(app, 'lakshmi.iyer@example.com', { password: 'Collabiz#2026y' });
+    expect((await get('/eb5/portal', lk).expect(200)).body.application.code).toBe(r.reference);
+  });
+
+  it('settings: changing the contracting entity withdraws the template approval', async () => {
+    const st = (await get('/eb5/settings', s.admin).expect(200)).body;
+    expect(st.gates.find((g: any) => g.key === 'agreementTemplateApproved').approved).toBe(true);
+    const body = { consultancyEntity: 'Unite Group Inc.', entityJurisdiction: 'USA', consultantAddress: '244 Fifth Avenue, Suite #1849, New York, NY 10001', consultantEmail: 'info@goeb5.in', governingLaw: '', disputeForum: '', summaryBusinessDays: 10, indicativeInvestmentUsd: 800000, consultancyFeeUsd: 200000, commencementPct: 10 };
+    const after = (await put('/eb5/settings', s.admin, body).expect(200)).body;
+    expect(after.consultancyEntity).toBe('Unite Group Inc.');
+    expect(after.gates.find((g: any) => g.key === 'agreementTemplateApproved').approved).toBe(false);
+    expect(after.gates.find((g: any) => g.key === 'feesApproved').approved).toBe(true);
   });
 });

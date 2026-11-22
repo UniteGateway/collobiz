@@ -9,7 +9,7 @@ import { Badge, useEb5 } from '@/components/Eb5';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
-interface A { id: string; code: string; status: string; submittedAt: string | null; signedName: string | null; reviewNote: string | null; hasPhoto: boolean; data: Record<string, Record<string, unknown> | string | undefined>; lead: { id: string; code: string }; brand: string; entity: string }
+interface A { office: import('@/components/Eb5Docs').OfficeUse | null; id: string; code: string; status: string; submittedAt: string | null; signedName: string | null; reviewNote: string | null; hasPhoto: boolean; data: Record<string, Record<string, unknown> | string | undefined>; lead: { id: string; code: string }; brand: string; entity: string }
 
 /** Review a preliminary application. */
 export default function Eb5Application() {
@@ -30,7 +30,7 @@ export default function Eb5Application() {
           <div style={{ marginTop: 8 }}><Button onClick={() => review.run()} loading={review.pending}>Mark reviewed</Button></div>
           <p className="cz-muted" style={{ fontSize: 12.5, marginBottom: 0 }}>Eligibility is a legal question for the client's U.S. immigration attorney. <Link href={`/eb5/leads/${a.lead.id}`}>Assign one on the lead</Link>.</p>
         </Card>}
-        <div className="cz-mt"><ApplicationSheet a={a} /></div>
+        <div className="cz-mt"><ApplicationSheet a={a} office={a.office} /></div>
       </>}
     </Screen>
   );

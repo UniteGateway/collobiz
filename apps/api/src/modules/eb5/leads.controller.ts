@@ -7,9 +7,10 @@ import { BadRequestException, Body, ConflictException, Controller, ForbiddenExce
 import { ApiTags } from '@nestjs/swagger';
 import { and, desc, eq, isNull, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { EB5_LEAD_STAGES, EB5_SYSTEM_STAGES, Eb5LeadSchema, eb5Can, normEmail, normPhone } from '@collabiz/types';
+import { EB5_LEAD_STAGES, EB5_SYSTEM_STAGES, Eb5LeadSchema, Eb5PublicApplicationSchema, Eb5PublicEnquirySchema, eb5Can, normEmail, normPhone } from '@collabiz/types';
+import { Throttle } from '@nestjs/throttler';
 import { InjectDb, type Db } from '../../db/client';
-import { eb5Leads, eb5Partners, organizations, otpCodes, users } from '../../db/schema';
+import { eb5Applications, eb5Leads, eb5Partners, organizations, otpCodes, users } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, Public, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
@@ -104,6 +105,61 @@ export class Eb5LeadsController {
     if (!p) throw new NotFoundException('This link is not active');
     const r = await this.register(null, p, b, 'partner_link');
     return { received: true, reference: r.duplicate ? null : r.code, message: 'Thank you. A GO EB5 manager will contact you. This is not legal advice and no fee is due for this enquiry.' };
+  }
+
+  // ------------------------------------------------------------------ public website (GO EB5 micro site and online application)
+  /** Public: brand, contracting entity and the proposed (unapproved) terms shown on the online application. */
+  @Public()
+  @Get('public/info')
+  async publicInfo() {
+    if (!(await this.a.enabled())) throw new NotFoundException('Not found');
+    const s = await this.a.settings();
+    return { brand: s.brand, entity: s.consultancyEntity, jurisdiction: s.entityJurisdiction, termsApproved: s.legal.feesApproved && s.legal.agreementTemplateApproved };
+  }
+
+  /** Booking / early-access forms on the GO EB5 micro site. Creates a protected website lead; nothing else. */
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Post('public/enquiries')
+  @HttpCode(201)
+  async publicEnquiry(@Body(body(Eb5PublicEnquirySchema)) b: z.infer<typeof Eb5PublicEnquirySchema>) {
+    if (!(await this.a.enabled())) throw new NotFoundException('Not found');
+    const notes = [b.kind === 'consultation' ? 'Consultation requested on the GO EB5 website' : 'Registered interest in the investor portal',
+      b.interest && `Interest: ${b.interest}`, b.family && `Family: ${b.family}`, b.currentlyInUs && `In the US: ${b.currentlyInUs}`, b.language && `Language: ${b.language}`,
+      b.preferredDate && `Preferred date: ${b.preferredDate}`, b.message].filter(Boolean).join(' · ');
+    const readiness = /now/i.test(b.readiness ?? '') ? 'Funds ready' : /6/.test(b.readiness ?? '') ? 'Funds identified' : 'Exploring';
+    const r = await this.register(null, null, { fullName: b.fullName, country: b.country, email: b.email, phone: b.phone, readiness, timeline: '6–12 months', contactPreference: b.phone ? 'WhatsApp' : 'Email', notes: notes.slice(0, 1000), consent: true } as never, 'website');
+    return { received: true, reference: r.duplicate ? null : r.code, message: 'Thank you. The GO EB5 India desk will contact you. This is not legal advice and no fee is due for this enquiry.' };
+  }
+
+  /** Online Preliminary Consultancy Application (sections A–J of the paper form). Creates the lead, a submitted application and a client portal invitation. */
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @Post('public/applications')
+  @HttpCode(201)
+  async publicApplication(@Body(body(Eb5PublicApplicationSchema)) b: z.infer<typeof Eb5PublicApplicationSchema>) {
+    if (!(await this.a.enabled())) throw new NotFoundException('Not found');
+    const { website: _hp, ...data } = b; void _hp;
+    const timeline = ({ Immediate: 'Within 3 months', 'Within 3 months': 'Within 3 months', 'Within 6 months': '3–6 months', 'Within 12 months': '6–12 months', 'Exploring opportunities': 'Over 12 months' } as Record<string, string>)[b.readiness.timeline];
+    const readiness = b.readiness.budgetBand === 'Require financial planning' ? 'Not sure' : b.readiness.budgetBand === 'Below $800,000' ? 'Exploring' : 'Funds identified';
+    const r = await this.register(null, null, { fullName: b.fullName, country: b.personal.countryOfResidence, city: b.personal.cityState, email: b.personal.email, phone: b.personal.mobile,
+      familyMembers: b.family.familyMembersProposed, readiness, timeline, contactPreference: b.preferences.meetingMode === 'Video call' ? 'Video call' : 'Phone', consent: true, notes: b.preferences.referralSource ? `Referral: ${b.preferences.referralSource}` : undefined } as never, 'website');
+    if (r.duplicate) return { received: true, reference: null, message: 'Thank you — we already have your details on file. Your GO EB5 manager will contact you; no new application was created.' };
+    const email = b.personal.email.toLowerCase();
+    let [u] = await this.db.select().from(users).where(sql`lower(${users.email}) = ${email}`).limit(1);
+    let token: string | undefined;
+    if (!u) {
+      [u] = await this.db.insert(users).values({ email, fullName: b.fullName }).returning();
+      token = randomToken(32);
+      await this.db.insert(otpCodes).values({ userId: u.id, channel: 'email', purpose: 'invite', codeHash: sha256(`invite:${token}`), expiresAt: new Date(Date.now() + 7 * 86400_000) });
+    }
+    await this.db.update(eb5Leads).set({ clientUserId: u.id, updatedAt: new Date() }).where(eq(eb5Leads.id, r.id));
+    const code = await this.a.code(eb5Applications, 'EB5A');
+    const [ap] = await this.db.insert(eb5Applications).values({ code, leadId: r.id, clientUserId: u.id, status: 'submitted', dataEnc: encryptField(JSON.stringify(data)), signedName: b.signature, submittedAt: new Date() }).returning();
+    await this.audit.record(null, { action: 'eb5.application_submitted', objectType: 'eb5_application', objectId: ap.id, after: { source: 'website' } });
+    await this.mail.send('email', email, 'Your GO EB5 application', token ? `We received application ${code}. Set your password to follow it in your GO EB5 portal: ${config().WEB_BASE_URL}/invite?token=${token}` : `We received application ${code}. Sign in to COLLABIZ to follow it: ${config().WEB_BASE_URL}/eb5/portal`);
+    await this.a.notifyUsers([r.assignedManagerId], `GO EB5 online application ${code}`, `${b.fullName} · ${b.personal.countryOfResidence}`, `/eb5/applications/${ap.id}`);
+    return { received: true, reference: code, message: 'Thank you. Your preliminary application has been received. We have emailed you a link to your GO EB5 portal. This is not a USCIS petition or an investment agreement.', ...(token && (config().DEV_EXPOSE_OTP || config().NODE_ENV === 'test') ? { devInviteToken: token } : {}) };
   }
 
   // ------------------------------------------------------------------ leads

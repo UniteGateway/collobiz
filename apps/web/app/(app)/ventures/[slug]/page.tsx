@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { venturePhoto } from '@/lib/photos';
 import { useParams } from 'next/navigation';
 import { INDIA_STATES, appBrand, sectorName } from '@collabiz/types';
 import { Alert, Button, Card, ChipSelect, DescriptionList, Icon, LoadingState, StatusBadge, TextArea } from '@collabiz/ui';
@@ -31,6 +32,7 @@ export default function VenturePage() {
       actions={<StatusBadge status={v.open ? 'open' : 'pending'} label={v.availability} />}>
       <p style={{ marginTop: -6 }}><Link href="/ventures" className="cz-back"><Icon name="prev" size={14} />All Unite businesses</Link></p>
       <section className="cz-app-hero" style={{ ['--a1' as string]: brand?.accent[0] ?? '#0B3D91', ['--a2' as string]: brand?.accent[1] ?? '#1F9D55' }} aria-labelledby="app-h">
+        <img className="cz-app-hero-photo" src={venturePhoto(v.slug, v.sector)} alt="" />
         <div className="cz-app-hero-logo">{brand?.logo ? <img src={brand.logo} alt={`${v.name} logo`} /> : <VentureMark name={v.name} sector={v.sector} size={88} />}</div>
         <div className="cz-app-hero-text">
           <span className="cz-app-hero-eyebrow">{v.category} · {stageLabel(v.stage)}</span>

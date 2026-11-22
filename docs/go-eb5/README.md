@@ -119,3 +119,11 @@ All routes are under `/v1/eb5/…`:
 - shared rules: `packages/types/src/eb5.ts`
 
 See also: [permission-matrix.md](permission-matrix.md) · [deployment-checklist.md](deployment-checklist.md) · [rollback.md](rollback.md) · [test-summary.md](test-summary.md)
+
+## Application form, agreement and microsite (update)
+
+- The client application follows the **GO EB5 Preliminary Consultancy Application** PDF, sections A–J. The A4 print view adds section K (office use). The form component is `apps/web/components/Eb5ApplicationForm.tsx`; the schema is `Eb5ApplicationSchema`.
+- The public online application is at `/go-eb5/apply`. It uses the same form, a honeypot field and a rate limit.
+- The agreement body follows the **Consultancy Engagement Agreement legal draft** (sections 1–13 and Schedules A–C). While the template is not approved it carries a "LEGAL DRAFT — NOT FOR EXECUTION" banner.
+- These fields in Settings fill the draft's blanks: entity, jurisdiction, address, email, governing law, dispute forum and summary days. Changing any of them withdraws the template approval.
+- Microsite hook-up: see [microsite-integration.md](microsite-integration.md).

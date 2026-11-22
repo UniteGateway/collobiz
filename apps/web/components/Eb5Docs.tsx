@@ -8,24 +8,36 @@ function Rows({ rows }: { rows: [string, unknown][] }) {
   return <dl className="cz-eb5-grid">{rows.map(([k, x]) => <div key={k}><dt>{k}</dt><dd>{v(x)}</dd></div>)}</dl>;
 }
 
-export function ApplicationSheet({ a }: { a: { code: string; status: string; submittedAt: string | null; signedName: string | null; hasPhoto: boolean; id: string; data: Data; brand: string; entity: string } }) {
+export interface OfficeUse { manager: string | null; nextConsultation: string | null; feeReceived: string | null; receipt: string | null; status: string }
+export function ApplicationSheet({ a, office }: { a: { code: string; status: string; submittedAt: string | null; signedName: string | null; hasPhoto: boolean; id: string; data: Data; brand: string; entity: string }; office?: OfficeUse | null }) {
   const s = (k: string) => (a.data[k] as Record<string, unknown>) ?? {};
+  const h = s('history');
+  const STATUS = ['Received', 'Assessment pending', 'Proposal issued', 'Agreement pending', 'Agreement executed', 'Process initiated'];
   return (
     <article className="cz-eb5-a4" aria-label={`Application ${a.code}`}>
       <header className="cz-eb5-a4-head">
-        <div><p style={{ margin: 0, fontSize: 12, letterSpacing: '.08em', textTransform: 'uppercase', color: '#475467' }}>{a.brand} · {a.entity}</p><h1>Preliminary Consultancy Application</h1>
-          <p style={{ margin: '4px 0 0' }}>Reference <strong>{a.code}</strong> · {a.status === 'draft' ? 'Draft' : `Submitted ${a.submittedAt ? new Date(a.submittedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}`}</p></div>
-        {a.hasPhoto ? <img className="cz-eb5-a4-photo" src={`/api/v1/eb5/applications/${a.id}/photo`} alt="Applicant photograph" /> : <div className="cz-eb5-a4-photo">Photograph</div>}
+        <div><img src="/brands/goeb5.png" alt="GO EB5" width={150} height={50} /><h1>Preliminary Consultancy Application</h1>
+          <p style={{ margin: '4px 0 0' }}>Reference <strong>{a.code}</strong> · {a.status === 'draft' ? 'Draft' : `Submitted ${a.submittedAt ? new Date(a.submittedAt).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''}`}</p></div>
+        <div style={{ textAlign: 'right' }}><p style={{ margin: '0 0 6px', fontSize: 12, fontWeight: 700 }}>{a.entity}<br /><span style={{ fontWeight: 400 }}>PRIVATE &amp; CONFIDENTIAL</span></p>
+          {a.hasPhoto ? <img className="cz-eb5-a4-photo" src={`/api/v1/eb5/applications/${a.id}/photo`} alt="Applicant photograph" /> : <div className="cz-eb5-a4-photo">Passport-size photograph<br />35 × 45 mm</div>}</div>
       </header>
-      <h2>1. Applicant</h2><Rows rows={[['Full name', s('applicant').fullName], ['Date of birth', s('applicant').dateOfBirth], ['Gender', s('applicant').gender], ['Nationality', s('applicant').nationality], ['Country of residence', s('applicant').countryOfResidence]]} />
-      <h2>2. Contact and address</h2><Rows rows={[['Email', s('contact').email], ['Phone', s('contact').phone], ['Alternate phone', s('contact').alternatePhone], ['Address', [s('address').line1, s('address').line2].filter(Boolean).join(', ')], ['City', s('address').city], ['State', s('address').state], ['Postal code', s('address').postalCode], ['Country', s('address').country]]} />
-      <h2>3. Profession and family</h2><Rows rows={[['Occupation', s('profession').occupation], ['Employer / business', s('profession').employerOrBusiness], ['Years', s('profession').yearsInBusiness], ['Industry', s('profession').industry], ['Marital status', s('family').maritalStatus], ['Spouse', s('family').spouseName], ['Children under 21', s('family').childrenUnder21]]} />
-      <h2>4. Investment</h2><Rows rows={[['Proposed budget', s('investment').budgetUsd ? `$${Number(s('investment').budgetUsd).toLocaleString('en-US')}` : undefined], ['Source of funds', s('investment').sourceOfFunds], ['Objectives', s('investment').objectives]]} />
-      <h2>5. U.S. immigration history and preferences</h2><Rows rows={[['Prior U.S. visas', s('history').priorUsVisas], ['Prior refusals', s('history').priorDenials], ['Details', s('history').details], ['Consultation', s('preferences').consultationMode], ['Time zone', s('preferences').timezone], ['Language', s('preferences').preferredLanguage]]} />
-      <h2>6. Declaration</h2>
-      <p>Privacy consent: {v(s('consents').privacy)} · Declaration: {v(s('consents').declaration)}. The applicant declares the information true and complete and understands that this is not legal advice and that no visa outcome, timeline or return is promised.</p>
-      <p>Electronic signature: <strong>{a.signedName ?? (typeof a.data.signature === 'string' ? a.data.signature : '—')}</strong></p>
-      <p style={{ fontSize: 11.5, color: '#475467', marginTop: 24 }}>Confidential. Prepared for {a.entity} consultancy assessment only. Investment capital is never paid to or held by {a.brand} or COLLABIZ.</p>
+      <Rows rows={[['Full name (as per passport)', a.data.fullName]]} />
+      <h2>A. Personal information</h2><Rows rows={[['Date of birth', s('personal').dateOfBirth], ['Nationality', s('personal').nationality], ['Country of residence', s('personal').countryOfResidence], ['City / State', s('personal').cityState], ['Residential address', s('personal').residentialAddress], ['Mobile / WhatsApp', s('personal').mobile], ['Email', s('personal').email]]} />
+      <h2>B. Professional & business details</h2><Rows rows={[['Occupation', s('professional').occupation], ['Designation', s('professional').designation], ['Company / business', s('professional').companyName], ['Nature of business', s('professional').natureOfBusiness], ['Annual income range', s('professional').annualIncomeRange], ['Approx. net worth', s('professional').netWorth]]} />
+      <h2>C. Family details</h2><Rows rows={[['Marital status', s('family').maritalStatus], ['Spouse', s('family').spouseName], ['Number of children', s('family').numberOfChildren], ['Age(s) of children', s('family').childrenAges], ['Family members proposed for EB-5', s('family').familyMembersProposed]]} />
+      <h2>D. Purpose of consultancy</h2><Rows rows={[['Objectives', s('purpose').objectives], ['Other objectives', s('purpose').otherObjectives]]} />
+      <h2>E. Investment readiness</h2><Rows rows={[['Indicative budget', s('readiness').budgetBand], ['Expected timeline', s('readiness').timeline], ['Source of funds', s('readiness').sourceOfFunds], ['Other source / comments', s('readiness').otherSourceComments]]} />
+      <h2>F. Previous U.S. immigration history</h2><Rows rows={[['Previously visited the USA', h.visitedUsa], ['Currently hold a U.S. visa', h.holdsUsVisa], ['Applied for U.S. permanent residency', h.appliedPermanentResidency], ['Previous U.S. visa refusal', h.visaRefusal], ['Working with another consultant / attorney', h.workingWithOther], ['Current visa category', h.currentVisaCategory], ['Existing consultant / attorney', h.existingConsultant]]} />
+      <h2>G. Consultation preferences</h2><Rows rows={[['Preferred meeting mode', s('preferences').meetingMode], ['Preferred date / time', s('preferences').preferredDateTime], ['Referral source / name', s('preferences').referralSource]]} />
+      <h2>J. Applicant declaration</h2>
+      <p style={{ margin: '0 0 6px' }}>Consents — preliminary assessment: {v(s('consents').preliminaryAssessment)} · contact about this enquiry: {v(s('consents').authorizeContact)} · finalize fees before paid services: {v(s('consents').finalizeFeesBeforePaidServices)}</p>
+      <Rows rows={[['Applicant signature', a.signedName ?? a.data.signature], ['Date / Place', a.data.datePlace]]} />
+      {office && <>
+        <h2>K. For office use only</h2>
+        <Rows rows={[['Assigned consultant', office.manager], ['Next consultation date', office.nextConsultation], ['Proposed fee / fee received', office.feeReceived], ['Receipt reference', office.receipt]]} />
+        <p style={{ margin: '6px 0 0' }}>Application status: {STATUS.map((x) => <span key={x} style={{ marginRight: 10, fontWeight: x === office.status ? 700 : 400 }}>{x === office.status ? '☑' : '☐'} {x}</span>)}</p>
+      </>}
+      <p style={{ fontSize: 11.5, color: '#475467', marginTop: 24 }}>{a.brand} | Preliminary registration only — not a USCIS petition or investment agreement. Consultancy fees are not EB-5 capital; investment capital is never paid to or held by {a.entity} or COLLABIZ.</p>
     </article>
   );
 }

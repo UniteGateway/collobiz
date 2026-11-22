@@ -11,7 +11,7 @@ export default function Eb5ApplicationPrint() {
   const q = useQuery<Parameters<typeof ApplicationSheet>[0]['a']>(`/eb5/applications/${id}`);
   return (
     <Screen page={{ key: 'eb5-application-print', title: 'Application (A4)', access: 'authenticated' }} eyebrow="GO EB5" actions={<Button variant="secondary" onClick={() => window.print()}>Print / save as PDF</Button>}>
-      {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !q.data ? <LoadingState /> : <ApplicationSheet a={q.data} />}
+      {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !q.data ? <LoadingState /> : <ApplicationSheet a={q.data} office={(q.data as { office?: import("@/components/Eb5Docs").OfficeUse | null }).office ?? null} />}
     </Screen>
   );
 }

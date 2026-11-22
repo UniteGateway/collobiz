@@ -49,6 +49,8 @@ export const eb5Can = (roles: readonly string[], p: Eb5Permission) => (EB5_PERMI
 // ============================================================================ configuration and legal gates
 export const EB5_DEFAULT_SETTINGS = {
   brand: 'GO EB5', consultancyEntity: 'CITRUS360 LLC', entityJurisdiction: 'USA',
+  /** Blanks in the legal draft — completed only after counsel confirms them. */
+  consultantAddress: '', consultantEmail: '', governingLaw: '', disputeForum: '', summaryBusinessDays: 0,
   indicativeInvestmentUsd: 800_000, consultancyFeeUsd: 200_000, commencementPct: 10,
   legal: {
     feesApproved: false, agreementTemplateApproved: false, invoicingApproved: false, compensationApproved: false,
@@ -72,6 +74,9 @@ export function feeSchedule(consultancyFeeUsd: number, commencementPct: number) 
 }
 export const usd = (cents: number) => `$${(cents / 100).toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
 export const Eb5SettingsSchema = z.object({
+  consultancyEntity: z.string().trim().min(3).max(120), entityJurisdiction: z.string().trim().min(2).max(60),
+  consultantAddress: z.string().trim().max(300), consultantEmail: z.union([z.literal(''), z.string().trim().email()]),
+  governingLaw: z.string().trim().max(120), disputeForum: z.string().trim().max(160), summaryBusinessDays: z.number().int().min(0).max(120),
   indicativeInvestmentUsd: z.number().int().positive().max(10_000_000),
   consultancyFeeUsd: z.number().int().positive().max(5_000_000),
   commencementPct: z.number().min(0).max(100),
@@ -111,22 +116,52 @@ export const normEmail = (e?: string | null) => (e ? e.trim().toLowerCase() : nu
 export const normPhone = (p?: string | null) => (p ? p.replace(/\D/g, '').slice(-10) : null);
 
 // ============================================================================ preliminary application
-export const SOURCE_OF_FUNDS = ['Business income', 'Salary and savings', 'Sale of property', 'Sale of business or shares', 'Gift', 'Inheritance', 'Loan secured by own assets', 'Other'] as const;
+export const SOURCE_OF_FUNDS = ['Business income', 'Personal savings', 'Property sale', 'Investment proceeds', 'Gift / inheritance', 'Borrowed funds', 'Other'] as const;
+/** Section D of the GO EB5 Preliminary Consultancy Application. */
+export const EB5_OBJECTIVES = ['U.S. permanent residency through EB-5', "Children's education in the USA", 'Family relocation', 'Business establishment in USA', 'U.S. investment opportunities', 'Renewable energy investment', 'Federal programs / business incentives', 'Other'] as const;
+export const EB5_BUDGET_BANDS = ['Below $800,000', '$800,000 - $1,049,999', '$1,050,000 and above', 'Require financial planning'] as const;
+export const EB5_APP_TIMELINES = ['Immediate', 'Within 3 months', 'Within 6 months', 'Within 12 months', 'Exploring opportunities'] as const;
+export const EB5_MEETING_MODES = ['In person', 'Video call', 'Telephone'] as const;
+export const EB5_HISTORY_QUESTIONS = [
+  { key: 'visitedUsa', label: 'Previously visited the USA?' }, { key: 'holdsUsVisa', label: 'Currently hold a U.S. visa?' },
+  { key: 'appliedPermanentResidency', label: 'Previously applied for U.S. permanent residency?' }, { key: 'visaRefusal', label: 'Previous U.S. visa refusal?' },
+  { key: 'workingWithOther', label: 'Currently working with another consultant or attorney?' },
+] as const;
+export const EB5_APPLICATION_TERMS = [
+  'This application is a preliminary enquiry, not a binding engagement, investment subscription or immigration petition.',
+  'Eligibility, project selection and immigration filings require independent professional assessment. No visa approval, timeline, investment return or capital repayment is guaranteed. EB-5 capital is at risk.',
+  'Information will be handled confidentially under applicable privacy requirements. Do not attach passport copies or financial records at this stage. Additional services and third-party costs require prior approval.',
+  'I confirm that my information is accurate to the best of my knowledge and understand the above conditions.',
+] as const;
+export const EB5_SCOPE_TEXT = 'GO EB5 may facilitate preliminary assessment, introductions to qualified U.S. immigration attorneys, project and regional-center coordination, due diligence, source-of-funds guidance through qualified professionals, tax and financial advisor referrals, site visits and administrative support. Legal advice and petition preparation are reserved for appropriately authorized professionals.';
+const yn = z.boolean({ message: 'Answer yes or no' });
+const opt = (n: number) => z.string().trim().max(n).optional();
+/** GO EB5 Preliminary Consultancy Application — sections A to J of the paper form (K is office use). */
 export const Eb5ApplicationSchema = z.object({
-  applicant: z.object({ fullName: z.string().trim().min(3).max(120), dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), gender: z.enum(['Female', 'Male', 'Other', 'Prefer not to say']), nationality: z.string().trim().min(2).max(60), countryOfResidence: z.string().trim().min(2).max(60) }),
-  contact: z.object({ email: z.string().trim().email(), phone: z.string().trim().min(7).max(20), alternatePhone: z.string().trim().max(20).optional() }),
-  address: z.object({ line1: z.string().trim().min(3).max(160), line2: z.string().trim().max(160).optional(), city: z.string().trim().min(2).max(80), state: z.string().trim().max(80).optional(), postalCode: z.string().trim().max(15).optional(), country: z.string().trim().min(2).max(60) }),
-  profession: z.object({ occupation: z.string().trim().min(2).max(100), employerOrBusiness: z.string().trim().max(120).optional(), yearsInBusiness: z.number().int().min(0).max(80).optional(), industry: z.string().trim().max(80).optional() }),
-  family: z.object({ maritalStatus: z.enum(['Single', 'Married', 'Divorced', 'Widowed']), spouseName: z.string().trim().max(120).optional(), childrenUnder21: z.number().int().min(0).max(15) }),
-  investment: z.object({ budgetUsd: z.number().int().positive().max(50_000_000), sourceOfFunds: z.array(z.enum(SOURCE_OF_FUNDS)).min(1, 'Choose at least one source of funds'), objectives: z.array(z.string()).max(8) }),
-  history: z.object({ priorUsVisas: z.boolean(), priorDenials: z.boolean(), details: z.string().trim().max(1000).optional() }),
-  preferences: z.object({ consultationMode: z.enum(['Online', 'In person']), timezone: z.string().trim().min(2).max(60), preferredLanguage: z.string().trim().max(40).optional() }),
-  consents: z.object({ privacy: z.literal(true), declaration: z.literal(true) }),
-  signature: z.string().trim().min(3).max(120),
+  fullName: z.string().trim().min(3, 'Full name as per passport').max(120),
+  personal: z.object({ dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date of birth'), nationality: z.string().trim().min(2).max(60), countryOfResidence: z.string().trim().min(2).max(60), cityState: z.string().trim().min(2).max(120),
+    residentialAddress: z.string().trim().min(5).max(400), mobile: z.string().trim().min(7, 'Mobile with country code').max(20), email: z.string().trim().email() }),
+  professional: z.object({ occupation: z.string().trim().min(2).max(100), designation: opt(100), companyName: opt(140), natureOfBusiness: opt(140), annualIncomeRange: opt(60), netWorth: opt(60) }),
+  family: z.object({ maritalStatus: z.enum(['Single', 'Married', 'Other']), spouseName: opt(120), numberOfChildren: z.number().int().min(0).max(15), childrenAges: opt(80), familyMembersProposed: opt(200) }),
+  purpose: z.object({ objectives: z.array(z.enum(EB5_OBJECTIVES)).min(1, 'Choose at least one objective'), otherObjectives: opt(1000) }),
+  readiness: z.object({ budgetBand: z.enum(EB5_BUDGET_BANDS), timeline: z.enum(EB5_APP_TIMELINES), sourceOfFunds: z.array(z.enum(SOURCE_OF_FUNDS)).min(1, 'Choose at least one source of funds'), otherSourceComments: opt(1000) }),
+  history: z.object({ visitedUsa: yn, holdsUsVisa: yn, appliedPermanentResidency: yn, visaRefusal: yn, workingWithOther: yn, currentVisaCategory: opt(60), existingConsultant: opt(120) }),
+  preferences: z.object({ meetingMode: z.enum(EB5_MEETING_MODES), preferredDateTime: opt(80), referralSource: opt(120) }),
+  consents: z.object({ preliminaryAssessment: z.literal(true, { message: 'Required' }), authorizeContact: z.literal(true, { message: 'Required' }), finalizeFeesBeforePaidServices: z.literal(true, { message: 'Required' }) }),
+  signature: z.string().trim().min(3, 'Type your full name as your signature').max(120),
+  datePlace: z.string().trim().min(3, 'Date and place').max(120),
 });
 export type Eb5Application = z.infer<typeof Eb5ApplicationSchema>;
 /** A draft may be partial; only submission validates the whole form. */
 export const Eb5ApplicationDraftSchema = z.record(z.string(), z.unknown());
+/** Public online application (no account): the full form plus a consent to create the lead. */
+export const Eb5PublicApplicationSchema = Eb5ApplicationSchema.extend({ website: z.string().max(0).optional() });
+/** Public consultation booking / early-access interest from the GO EB5 micro site. `website` is a honeypot and must stay empty. */
+export const Eb5PublicEnquirySchema = z.object({
+  kind: z.enum(['consultation', 'portal_interest']), fullName: z.string().trim().min(3).max(120), email: z.string().trim().toLowerCase().email(),
+  phone: z.string().trim().min(7).max(20).optional(), country: z.string().trim().min(2).max(60), interest: opt(80), readiness: opt(60), timeline: opt(60), family: opt(80),
+  currentlyInUs: opt(60), language: opt(30), preferredDate: opt(40), message: opt(1000), consent: z.literal(true, { message: 'Consent to be contacted is required' }), website: z.string().max(0).optional(),
+});
 
 // ============================================================================ agreements, invoices, consultations
 export const EB5_AGREEMENT_STATES = ['Draft', 'Internal Review', 'Legal Approved', 'Sent to Client', 'Viewed', 'Signed', 'Counter-Signed', 'Active', 'Terminated'] as const;

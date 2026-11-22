@@ -40,11 +40,12 @@ export class Eb5CoreController {
     await this.a.need(ctx, 'module.configure');
     const s = await this.a.settings();
     const changed = s.consultancyFeeUsd !== b.consultancyFeeUsd || s.commencementPct !== b.commencementPct;
-    // Changing fees withdraws the fee approval: counsel must approve the new numbers.
-    const legal = changed ? { ...s.legal, feesApproved: false } : s.legal;
+    const termsChanged = (['consultancyEntity', 'entityJurisdiction', 'consultantAddress', 'consultantEmail', 'governingLaw', 'disputeForum', 'summaryBusinessDays'] as const).some((k) => s[k] !== b[k]);
+    // Changing fees withdraws the fee approval, and changing the contracting entity or legal terms withdraws the template approval.
+    const legal = { ...s.legal, ...(changed ? { feesApproved: false } : {}), ...(termsChanged ? { agreementTemplateApproved: false } : {}) };
     const values = { ...s, ...b, legal };
     await this.db.insert(eb5Settings).values({ id: 1, values, updatedBy: ctx.userId }).onConflictDoUpdate({ target: eb5Settings.id, set: { values, updatedBy: ctx.userId, updatedAt: new Date() } });
-    await this.audit.record(ctx, { action: 'eb5.settings_changed', objectType: 'eb5_settings', objectId: '1', before: { fee: s.consultancyFeeUsd, pct: s.commencementPct }, after: { fee: b.consultancyFeeUsd, pct: b.commencementPct, feeApprovalWithdrawn: changed } });
+    await this.audit.record(ctx, { action: 'eb5.settings_changed', objectType: 'eb5_settings', objectId: '1', before: { fee: s.consultancyFeeUsd, pct: s.commencementPct }, after: { fee: b.consultancyFeeUsd, pct: b.commencementPct, entity: b.consultancyEntity, feeApprovalWithdrawn: changed, templateApprovalWithdrawn: termsChanged } });
     return this.getSettings(ctx);
   }
 
