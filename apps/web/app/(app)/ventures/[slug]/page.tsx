@@ -41,6 +41,7 @@ export default function VenturePage() {
           <div className="cz-row" style={{ gap: 8, flexWrap: 'wrap' }}>
             {brand?.website && <a className="cz-btn cz-btn-light" href={brand.website} target="_blank" rel="noopener noreferrer">Open {brand.website.replace(/^https?:\/\//, '')}<Icon name="external" size={14} /></a>}
             {v.open && !mine && <a className="cz-btn cz-btn-ghost-light" href="#promote">Promote {v.name}</a>}
+            <Link className="cz-btn cz-btn-ghost-light" href={`/businesses/${v.slug}`}>Public page</Link>
           </div>
         </div>
       </section>

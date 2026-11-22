@@ -143,5 +143,10 @@ export const enquiries = pgTable('enquiries', {
   topic: text('topic').notNull(),
   message: text('message').notNull(),
   status: text('status').notNull().default('open'),
+  /** Set when the enquiry came from a Unite business page (unite_ventures.id). */
+  ventureId: uuid('venture_id'),
+  kind: text('kind'), // customer | partner | interest (business pages only)
+  phone: text('phone'),
+  city: text('city'),
   createdAt: createdAt(),
-}, (t) => [uniqueIndex('enquiries_ref_uq').on(t.reference)]);
+}, (t) => [uniqueIndex('enquiries_ref_uq').on(t.reference), index('enquiries_venture_idx').on(t.ventureId)]);

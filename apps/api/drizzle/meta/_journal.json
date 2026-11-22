@@ -365,6 +365,13 @@
       "when": 1795345200082,
       "tag": "0051_go_eb5",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1795351043130,
+      "tag": "0052_business_pages",
+      "breakpoints": true
     }
   ]
 }

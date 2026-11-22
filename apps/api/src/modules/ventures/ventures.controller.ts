@@ -4,7 +4,9 @@
  * Rules (tested in test/ventures.e2e.ts):
  *  - Regulated ventures (lending, investment, payments, digital currency, prize schemes, health/wealth cards) are hidden from
  *    partners and the public and cannot be opened or used in offers until a super admin records regulatory clearance.
- *  - The public site lists only businesses open to partners. Partners see open and "coming soon" businesses.
+ *  - The public partner directory lists only businesses open to partners. The public product pages (/businesses) show every
+ *    business that is not regulator-locked, with its stage, and take customer/partner enquiries into the enquiries table.
+ *    Partners see open and "coming soon" businesses.
  *  - Only verified partners ask to promote a business, and only an open one. Unite admins of the operating company
  *    (or platform Unite admins) approve or decline; approved partners become the business's promoters and can be reached
  *    with direct offers addressed to "approved promoters".
@@ -12,19 +14,34 @@
  */
 import { BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, HttpCode, Injectable, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { and, asc, desc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { VENTURE_ROLES, VENTURE_STAGES, ventureAvailability } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
-import { directOfferRecipients, directOffers, memberships, notifications, offerSales, organizations, uniteVentures, ventureInterests } from '../../db/schema';
+import { directOfferRecipients, directOffers, enquiries, memberships, notifications, offerSales, organizations, uniteVentures, ventureInterests } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, Public, RequireCaps, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
+import { MailService } from '../../common/adapters';
+import { randomDigits } from '../../common/crypto';
 
 type Venture = typeof uniteVentures.$inferSelect;
 const PARTNER_ORG = ['partner_company', 'partner_individual'];
 const regulatedLocked = (v: Venture) => !!v.regulatedReason && !v.clearedAt;
 const InterestSchema = z.object({ roles: z.array(z.enum(VENTURE_ROLES)).min(1).max(8), regions: z.array(z.string().trim().min(2).max(6)).max(40).default([]), message: z.string().trim().min(20).max(2000) });
+export const BusinessEnquirySchema = z.object({
+  kind: z.enum(['customer', 'partner', 'interest']),
+  name: z.string().trim().min(2, 'Please enter your name').max(120),
+  email: z.string().trim().toLowerCase().email('Enter a valid email'),
+  phone: z.string().trim().max(20).regex(/^[+\d][\d\s-]{6,19}$/, 'Enter a valid phone number').optional().or(z.literal('').transform(() => undefined)),
+  city: z.string().trim().max(80).optional().transform((v) => v || undefined),
+  organization: z.string().trim().max(200).optional().transform((v) => v || undefined),
+  message: z.string().trim().min(10, 'Please tell us a little more (at least 10 characters)').max(2000),
+  consent: z.literal(true, { message: 'Consent is required so we can reply' }),
+  website: z.string().max(0).optional(),
+});
+const EnquiryStatusSchema = z.object({ status: z.enum(['open', 'handled']) });
 const UpdateSchema = z.object({
   open: z.boolean().optional(), stage: z.enum(VENTURE_STAGES).optional(), groupCompanyId: z.string().uuid().nullable().optional(),
   tagline: z.string().trim().min(3).max(160).optional(), summary: z.string().trim().min(30).max(1200).optional(),
@@ -67,7 +84,7 @@ export class VenturesService {
 @ApiTags('ventures')
 @Controller()
 export class VenturesController {
-  constructor(@InjectDb() private db: Db, private svc: VenturesService, private audit: AuditService) {}
+  constructor(@InjectDb() private db: Db, private svc: VenturesService, private audit: AuditService, private mail: MailService) {}
 
   // ---------- Public ----------
   @Public()
@@ -76,6 +93,43 @@ export class VenturesController {
     const rows = await this.db.select({ v: uniteVentures, company: organizations.displayName }).from(uniteVentures).leftJoin(organizations, eq(organizations.id, uniteVentures.groupCompanyOrgId))
       .where(and(eq(uniteVentures.open, true), or(isNull(uniteVentures.regulatedReason), isNotNull(uniteVentures.clearedAt)))).orderBy(asc(uniteVentures.num));
     return rows.map((r) => { const { roles: _r, rewardNote: _n, ...v } = this.svc.view(r.v, r.company); return v; });
+  }
+
+  /** Product directory: every business that is not waiting for regulatory clearance, with its stage. */
+  @Public()
+  @Get('public/products')
+  async products() {
+    const rows = await this.db.select({ v: uniteVentures, company: organizations.displayName }).from(uniteVentures).leftJoin(organizations, eq(organizations.id, uniteVentures.groupCompanyOrgId))
+      .where(or(isNull(uniteVentures.regulatedReason), isNotNull(uniteVentures.clearedAt))).orderBy(asc(uniteVentures.num));
+    return rows.map((r) => { const { roles: _r, rewardNote: _n, ...v } = this.svc.view(r.v, r.company); return v; });
+  }
+
+  @Public()
+  @Get('public/products/:slug')
+  async product(@Param('slug') slug: string) {
+    const r = await this.svc.bySlug(slug);
+    if (!r || regulatedLocked(r.v)) throw new NotFoundException();
+    const { roles: _r, rewardNote: _n, ...v } = this.svc.view(r.v, r.company);
+    const related = await this.db.select().from(uniteVentures)
+      .where(and(eq(uniteVentures.sector, r.v.sector), sql`${uniteVentures.id} <> ${r.v.id}`, or(isNull(uniteVentures.regulatedReason), isNotNull(uniteVentures.clearedAt)))).orderBy(asc(uniteVentures.num)).limit(4);
+    return { ...v, related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
+  }
+
+  /** Enquiry from a business page. Stored with the business; its operating company (or Unite admins) is notified. */
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Post('public/products/:slug/enquiries')
+  @HttpCode(201)
+  async productEnquiry(@Param('slug') slug: string, @Body(body(BusinessEnquirySchema)) b: z.infer<typeof BusinessEnquirySchema>) {
+    const r = await this.svc.bySlug(slug);
+    if (!r || regulatedLocked(r.v)) throw new NotFoundException();
+    const reference = `BIZ-${new Date().getFullYear()}-${randomDigits(6)}`;
+    await this.db.insert(enquiries).values({ reference, name: b.name, email: b.email, organization: b.organization, topic: 'business', message: b.message, ventureId: r.v.id, kind: b.kind, phone: b.phone, city: b.city });
+    const label = b.kind === 'partner' ? 'partnership enquiry' : b.kind === 'interest' ? 'registration of interest' : 'enquiry';
+    await this.mail.send('email', b.email, `${r.v.name} ${label} ${reference}`, `Thank you ${b.name}. ${r.v.name} received your ${label} (${reference}). The team will reply by email.`);
+    const users = await this.svc.deciders(r.v);
+    if (users.length) await this.db.insert(notifications).values(users.map((u) => ({ userId: u, kind: 'venture', title: `New ${label} for ${r.v.name}`, body: `${b.name}${b.city ? ` · ${b.city}` : ''}: ${b.message.slice(0, 160)}`, link: `/ventures/${r.v.id}` })));
+    return { reference };
   }
 
   // ---------- Partners ----------
@@ -166,7 +220,21 @@ export class VenturesController {
       ...this.svc.view(r.v, r.company), num: r.v.num, regulated: !!r.v.regulatedReason, regulatedReason: r.v.regulatedReason, cleared: !!r.v.clearedAt, clearanceNote: r.v.clearanceNote, groupCompanyOrgId: r.v.groupCompanyOrgId,
       interests: interests.map((x) => ({ id: x.i.id, partner: x.org.displayName, city: x.org.city, level: x.org.membershipLevel, roles: x.i.roles, regions: x.i.regions, message: x.i.message, status: x.i.status, decisionNote: x.i.decisionNote, updatedAt: x.i.updatedAt })),
       offers, sales: { leads: sales.leads, won: sales.won, wonValue: Number(sales.wonValue) },
+      enquiries: (await this.db.select().from(enquiries).where(eq(enquiries.ventureId, id)).orderBy(desc(enquiries.createdAt)).limit(100))
+        .map((e) => ({ id: e.id, reference: e.reference, kind: e.kind, name: e.name, email: e.email, phone: e.phone, city: e.city, organization: e.organization, message: e.message, status: e.status, createdAt: e.createdAt })),
     };
+  }
+
+  @Post('admin/ventures/:id/enquiries/:eid/status')
+  @RequireCaps('opportunity.publish')
+  async enquiryStatus(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Param('eid', ParseUUIDPipe) eid: string, @Body(body(EnquiryStatusSchema)) b: z.infer<typeof EnquiryStatusSchema>) {
+    const [v] = await this.db.select().from(uniteVentures).where(eq(uniteVentures.id, id)).limit(1);
+    if (!v) throw new NotFoundException();
+    if (!this.svc.canManage(ctx, v)) throw new ForbiddenException('Only the operating company or a super admin can handle these enquiries');
+    const [e] = await this.db.update(enquiries).set({ status: b.status }).where(and(eq(enquiries.id, eid), eq(enquiries.ventureId, id))).returning();
+    if (!e) throw new NotFoundException();
+    await this.audit.record(ctx, { action: 'venture.enquiry_status', objectType: 'enquiry', objectId: eid, after: { status: b.status } });
+    return { status: e.status };
   }
 
   @Patch('admin/ventures/:id')

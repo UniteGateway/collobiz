@@ -37,7 +37,7 @@ if (agid) { await scan(`${WEB}/commissions/agreements/${agid}`); await scan(`${W
 // GO EB5 — partner, client and staff views
 for (const u of ['/eb5/partner', '/eb5/leads', '/eb5/leads/new']) await scan(WEB + u);
 { const { webLogin, webLoginMfa } = await import('./e2e-suites.mjs');
-await scan(WEB + '/go-eb5/apply');
+await scan(WEB + '/go-eb5/apply'); await scan(WEB + '/businesses'); await scan(WEB + '/businesses/sunite'); await scan(WEB + '/businesses/zuppo');
   await webLogin(p, WEB, 'client@goeb5.example'); for (const u of ['/eb5/portal', '/eb5/apply']) await scan(WEB + u);
   await webLoginMfa(p, WEB, 'manager@goeb5.example');
   for (const u of ['/eb5', '/eb5/leads', '/eb5/applications', '/eb5/consultations', '/eb5/agreements', '/eb5/documents', '/eb5/cases', '/eb5/projects', '/eb5/tasks', '/eb5/reports']) await scan(WEB + u);

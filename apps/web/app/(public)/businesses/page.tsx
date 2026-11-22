@@ -1,33 +1,86 @@
 'use client';
 import Link from 'next/link';
-import { sectorName } from '@collabiz/types';
+import { useMemo, useState } from 'react';
 import { ButtonLink, EmptyState, ErrorState, LoadingState } from '@collabiz/ui';
-import { VentureMark, stageLabel, type Venture } from '@/components/Ventures';
+import { PRODUCT_GROUP_ORDER, ProductTile, groupName, type Product } from '@/components/Products';
+import { venturePhoto } from '@/lib/photos';
 import { useQuery } from '@/lib/hooks';
 
-/** Public directory of Unite Group businesses that are open to partners. */
+const FEATURED = ['sunite', 'unite-powertek', 'wakin'];
+
+/** Unite products — every Unite Group business, grouped by what it is for. */
 export default function BusinessesPage() {
-  const q = useQuery<Venture[]>('/public/ventures');
+  const q = useQuery<Product[]>('/public/products');
+  const [term, setTerm] = useState('');
+  const [group, setGroup] = useState('');
+  const list = useMemo(() => {
+    const t = term.trim().toLowerCase();
+    return (q.data ?? []).filter((p) => (!group || p.sector === group) && (!t || `${p.name} ${p.tagline} ${p.category} ${p.summary}`.toLowerCase().includes(t)));
+  }, [q.data, term, group]);
+  const groups = useMemo(() => {
+    const present = new Set((q.data ?? []).map((p) => p.sector));
+    return [...PRODUCT_GROUP_ORDER.filter((g) => present.has(g)), ...[...present].filter((g) => !PRODUCT_GROUP_ORDER.includes(g))];
+  }, [q.data]);
+  const featured = (q.data ?? []).filter((p) => FEATURED.includes(p.slug));
+  const filtering = !!term.trim() || !!group;
   return (
-    <div className="cz-container cz-section" data-screen="businesses">
-      <h1>Unite Group businesses</h1>
-      <p className="cz-muted" style={{ maxWidth: 780 }}>Unite Group builds businesses across energy, property, commerce, jobs, education, mobility and more. Verified COLLABIZ partners help grow them — by referring customers, bringing merchants and members, selling products or delivering services — and are rewarded on agreed terms.</p>
-      <div className="cz-row" style={{ margin: '12px 0 20px' }}><ButtonLink href="/onboarding/account-type" variant="accent">Become a partner</ButtonLink><Link href="/group-companies">Unite Group companies →</Link></div>
-      {q.loading ? <LoadingState /> : q.error ? <ErrorState error={q.error} onRetry={q.reload} /> : !q.data?.length ? <EmptyState title="No businesses listed yet" /> : (
-        <ul className="cz-venture-grid">
-          {q.data.map((v) => (
-            <li key={v.id}>
-              <section className="cz-card cz-venture" aria-label={v.name}>
-                <div className="cz-venture-head"><VentureMark name={v.name} sector={v.sector} slug={v.slug} /><div><h2 style={{ margin: 0, fontSize: 16 }}>{v.name}</h2><span className="cz-muted">{v.category}</span></div></div>
-                <span className="cz-venture-tag">{v.tagline}</span>
-                <p className="cz-venture-sum">{v.summary}</p>
-                <div className="cz-venture-foot"><span className="cz-tag">{sectorName(v.sector)}</span><span className="cz-muted">{stageLabel(v.stage)}{v.company ? ` · ${v.company}` : ''}</span></div>
+    <div className="cz-gp" data-screen="businesses">
+      <header className="cz-gp-hero">
+        <p className="cz-gp-eyebrow">Unite Group</p>
+        <h1>Products for homes, businesses and communities</h1>
+        <p className="cz-gp-lede">Energy, property, commerce, jobs, learning, media and more — every Unite business in one place, connected through COLLABIZ.</p>
+        <div className="cz-gp-search" role="search">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" /><path d="m20 20-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+          <label htmlFor="gp-q" className="cz-sr-only">Search Unite products</label>
+          <input id="gp-q" type="search" placeholder="Search products" value={term} onChange={(e) => setTerm(e.target.value)} />
+        </div>
+      </header>
+
+      <nav className="cz-gp-chips" aria-label="Product categories">
+        <button type="button" className={!group ? 'is-on' : ''} aria-pressed={!group} onClick={() => setGroup('')}>All products</button>
+        {groups.map((g) => <button key={g} type="button" className={group === g ? 'is-on' : ''} aria-pressed={group === g} onClick={() => setGroup(group === g ? '' : g)}>{groupName(g)}</button>)}
+      </nav>
+
+      <div className="cz-gp-body">
+        {q.loading ? <LoadingState /> : q.error ? <ErrorState error={q.error} onRetry={q.reload} /> : (
+          <>
+            {!filtering && <section aria-labelledby="gp-feat" className="cz-gp-section">
+              <h2 id="gp-feat" className="cz-sr-only">Featured</h2>
+              <ul className="cz-gp-featured">
+                <li><Link href="/go-eb5/apply" className="cz-gp-feature" data-product="go-eb5">
+                  <img src="/photos/global-skyline.webp" alt="" loading="lazy" /><div><span className="cz-gp-feature-logo"><img src="/brands/goeb5-mark.png" alt="" /></span><strong>GO EB5</strong><span>U.S. investor visa consultancy — apply online</span></div>
+                </Link></li>
+                {featured.map((p) => <li key={p.slug}><Link href={`/businesses/${p.slug}`} className="cz-gp-feature">
+                  <img src={venturePhoto(p.slug, p.sector)} alt="" loading="lazy" /><div><strong>{p.name}</strong><span>{p.tagline}</span></div>
+                </Link></li>)}
+              </ul>
+            </section>}
+
+            {filtering ? (
+              list.length ? <ul className="cz-gp-grid" aria-label="Matching products">{list.map((p) => <li key={p.slug}><ProductTile p={p} /></li>)}</ul>
+                : <EmptyState title="No products match">Try another word or category.</EmptyState>
+            ) : groups.map((g) => (
+              <section key={g} className="cz-gp-section" aria-labelledby={`gp-${g}`}>
+                <h2 id={`gp-${g}`}>{groupName(g)}</h2>
+                <ul className="cz-gp-grid">{list.filter((p) => p.sector === g).map((p) => <li key={p.slug}><ProductTile p={p} /></li>)}</ul>
               </section>
-            </li>
-          ))}
-        </ul>
-      )}
-      <p className="cz-muted" style={{ marginTop: 20, fontSize: 13 }}>Businesses marked Pilot or In development are at an early stage and may be available only in some areas. Nothing here is an offer of investment, credit or financial products.</p>
+            ))}
+
+            <section className="cz-gp-band" aria-labelledby="gp-int">
+              <div>
+                <p className="cz-gp-eyebrow">Built to work together</p>
+                <h2 id="gp-int">One network behind every product</h2>
+                <p>Every product page is connected to COLLABIZ. Your enquiry reaches the right team with a reference number. Verified local businesses can partner with a product, and offers, leads and payouts run through one system.</p>
+                <div className="cz-row" style={{ gap: 10, flexWrap: 'wrap' }}><ButtonLink href="/onboarding/account-type" variant="accent">Become a partner</ButtonLink><ButtonLink href="/how-it-works" variant="secondary">How COLLABIZ works</ButtonLink></div>
+              </div>
+              <ul className="cz-gp-hub" aria-label="What connects">
+                <li>Enquiries &amp; CRM</li><li>Partner network</li><li>Offers &amp; promotions</li><li>Solar &amp; energy desks</li><li>Property &amp; products</li><li>Action reminders</li>
+              </ul>
+            </section>
+          </>
+        )}
+        <p className="cz-muted cz-gp-note">“Pilot”, “In development” and “Coming soon” products are at an early stage and may be available only in some areas. Regulated financial products appear only after regulatory clearance. Nothing here is an offer of investment, credit or financial products.</p>
+      </div>
     </div>
   );
 }

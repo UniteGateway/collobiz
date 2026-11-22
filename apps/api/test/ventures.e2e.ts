@@ -93,4 +93,30 @@ describe('Unite Group businesses (ventures)', () => {
     }).expect(201);
     expect(o.body.sector).toBe('education');
   });
+  it('public product pages list every non-locked business and take enquiries that reach the business admin', async () => {
+    const all = await api(app).get('/v1/public/products').expect(200);
+    const admin = await api(app).get('/v1/admin/ventures').set(auth(t.uniteAdmin)).expect(200);
+    expect(all.body.length).toBe(admin.body.filter((v: any) => !v.regulated || v.cleared).length);
+    expect(all.body.some((v: any) => !v.open)).toBe(true); // coming-soon businesses are shown too
+    expect(all.body.some((v: any) => v.slug === 'universal-trade-coin')).toBe(false);
+    expect(all.body.every((v: any) => !('roles' in v) && !('rewardNote' in v))).toBe(true);
+    await api(app).get('/v1/public/products/bestpe').expect(404);
+    const p = await api(app).get('/v1/public/products/sunite').expect(200);
+    expect(p.body.related.every((x: any) => x.sector === p.body.sector && x.slug !== 'sunite')).toBe(true);
+    const good = { kind: 'customer', name: 'Neha Shah', email: 'neha@example.com', phone: '+91 98200 11111', city: 'Surat', message: 'Please share a demo for our EPC team of 12 people.', consent: true };
+    await api(app).post('/v1/public/products/sunite/enquiries').send({ ...good, website: 'spam.example' }).expect(400);
+    await api(app).post('/v1/public/products/sunite/enquiries').send({ ...good, consent: false }).expect(400);
+    await api(app).post('/v1/public/products/bestpe/enquiries').send(good).expect(404);
+    const r = await api(app).post('/v1/public/products/sunite/enquiries').send(good).expect(201);
+    expect(r.body.reference).toMatch(/^BIZ-\d{4}-\d{6}$/);
+    const v = await one("select id from unite_ventures where slug = 'sunite'");
+    const detail = await api(app).get(`/v1/admin/ventures/${v.id}`).set(auth(t.uniteAdmin)).expect(200);
+    const e = detail.body.enquiries.find((x: any) => x.reference === r.body.reference);
+    expect(e).toMatchObject({ kind: 'customer', name: 'Neha Shah', city: 'Surat', status: 'open' });
+    await api(app).post(`/v1/admin/ventures/${v.id}/enquiries/${e.id}/status`).set(auth(t.asha)).send({ status: 'handled' }).expect(403);
+    await api(app).post(`/v1/admin/ventures/${v.id}/enquiries/${e.id}/status`).set(auth(t.uniteAdmin)).send({ status: 'handled' }).expect(201);
+    expect((await one('select status from enquiries where id = $1', [e.id])).status).toBe('handled');
+    const note = await one("select count(*)::int n from notifications where title like 'New enquiry for SUNITE%'");
+    expect(note.n).toBeGreaterThan(0);
+  });
 });

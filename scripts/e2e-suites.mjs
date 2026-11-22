@@ -3060,3 +3060,39 @@ suites.push({
     await shot('eb5-client-portal');
   },
 });
+
+suites.push({
+  name: 'Unite products · directory search, product page, enquiry reaches the business admin and is handled',
+  run: async ({ page, WEB, ADMIN, expect, shot, label }) => {
+    await page.goto(WEB + '/businesses');
+    await page.getByRole('heading', { name: 'Products for homes, businesses and communities' }).waitFor();
+    await page.getByRole('button', { name: 'Solar & Renewable Energy' }).click();
+    await page.locator('[data-product="sunite"]').waitFor();
+    expect(await page.locator('[data-product="wakin"]').count() === 0, 'category chip should hide other categories');
+    await page.getByLabel('Search Unite products').fill('solar operating');
+    await page.locator('[data-product="sunite"]').click();
+    await page.getByRole('heading', { level: 1, name: 'SUNITE' }).waitFor();
+    await page.getByRole('heading', { name: 'Works with' }).waitFor();
+    await shot('product-page');
+    if (label === 'mobile') return;
+    await page.getByLabel('Your name').fill('Neha Shah');
+    await page.getByLabel('Email').fill('neha.e2e@example.com');
+    await page.getByLabel('City (optional)').fill('Surat');
+    await page.getByLabel('How can we help?').fill('Please share a demo for our EPC team of 12 people.');
+    await page.getByRole('button', { name: 'Send' }).click();
+    await page.getByText(/Please check the highlighted fields|Consent is required/).first().waitFor();
+    await page.getByLabel(/I agree that Unite Group may contact me/).check();
+    await page.getByRole('button', { name: 'Send' }).click();
+    const ok = page.getByText(/Thank you — reference BIZ-\d{4}-\d{6}/);
+    await ok.waitFor();
+    const ref = (await ok.textContent()).match(/BIZ-\d{4}-\d{6}/)[0];
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/ventures');
+    await page.getByRole('link', { name: /SUNITE/ }).first().click();
+    const item = page.locator(`[data-enquiry="${ref}"]`);
+    await item.waitFor();
+    await item.getByRole('button', { name: 'Mark handled' }).click();
+    await item.getByText('Handled', { exact: true }).waitFor();
+    await shot('product-enquiry-admin');
+  },
+});
