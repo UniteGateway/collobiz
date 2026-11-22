@@ -2586,3 +2586,7 @@ a.cz-kpi:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(16,24
 @media (prefers-reduced-motion: reduce) { .cz-gp-tile, .cz-gp-feature > img { transition: none; } .cz-gp-tile:hover { transform: none; } .cz-gp-feature:hover > img { transform: none; } }
 .cz-gp-crumb a { text-decoration: underline; text-underline-offset: 3px; }
 .cz-gp-phero-tag { color: color-mix(in srgb, var(--a1, #0B3D91) 62%, #000); }
+.cz-gp-int-next { background: #e8def8; color: #3b1f74; }
+.cz-gp-features .cz-gp-pill { margin-top: 8px; }
+.cz-gp-tile-logo { height: 64px; width: 100%; display: grid; place-items: center; }
+.cz-gp-tile-logo img { max-height: 64px; max-width: min(170px, 90%); object-fit: contain; }

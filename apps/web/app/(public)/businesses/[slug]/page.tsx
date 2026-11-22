@@ -51,16 +51,17 @@ export default function ProductPage() {
           </dl>
         </div>
         <div className="cz-gp-phero-media">
-          <img src={venturePhoto(p.slug, p.sector)} alt="" />
-          <span className="cz-gp-phero-logo">{b?.logo ? <img src={b.logo} alt={`${p.name} logo`} /> : <VentureMark name={p.name} sector={p.sector} size={64} />}</span>
+          <img src={b?.artwork ?? venturePhoto(p.slug, p.sector)} alt={b?.artwork ? `${p.name} artwork` : ''} />
+          {!b?.artwork && <span className="cz-gp-phero-logo">{b?.logo ? <img src={b.logo} alt={`${p.name} logo`} /> : <VentureMark name={p.name} sector={p.sector} size={64} />}</span>}
         </div>
       </section>
 
       <div className="cz-gp-body">
         {b?.features?.length ? (
           <section id="features" className="cz-gp-section" aria-labelledby="f-h">
-            <h2 id="f-h">What you can do with {p.name}</h2>
-            <ul className="cz-gp-features">{b.features.map((x) => <li key={x.title}><span className="cz-gp-ficon"><Icon name={(IC[x.icon] ?? 'check') as never} size={20} /></span><strong>{x.title}</strong><p>{x.text}</p></li>)}</ul>
+            <h2 id="f-h">{b.features.every((x) => x.planned) ? `Planned for ${p.name}` : `What you can do with ${p.name}`}</h2>
+            {b.features.some((x) => x.planned) && <p className="cz-muted" style={{ marginTop: -6 }}>Features marked “Planned” are on the roadmap and not available yet.</p>}
+            <ul className="cz-gp-features">{b.features.map((x) => <li key={x.title}><span className="cz-gp-ficon"><Icon name={(IC[x.icon] ?? 'check') as never} size={20} /></span><strong>{x.title}</strong>{x.text ? <p>{x.text}</p> : null}{x.planned && <span className="cz-gp-pill cz-gp-pill-soon">Planned</span>}</li>)}</ul>
           </section>
         ) : null}
 
@@ -73,7 +74,7 @@ export default function ProductPage() {
 
         <section id="works-with" className="cz-gp-section" aria-labelledby="ww-h">
           <h2 id="ww-h">Works with</h2>
-          <p className="cz-muted" style={{ marginTop: -6 }}>How {p.name} connects to COLLABIZ today. “Not yet” means the connection is planned but not live.</p>
+          <p className="cz-muted" style={{ marginTop: -6 }}>How {p.name} connects to COLLABIZ. “Connected” is live today; “Next” is the planned integration and “Not yet” is waiting on the business, so neither is available yet.</p>
           <ul className="cz-gp-int">{worksWith(p).map((x) => (
             <li key={x.title}><span className="cz-gp-int-icon" aria-hidden>{x.icon}</span><div><strong>{x.title}</strong><p>{x.text}</p></div><span className={`cz-gp-int-st cz-gp-int-${x.status}`}>{STATUS_LABEL[x.status]}</span></li>
           ))}</ul>

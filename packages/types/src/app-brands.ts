@@ -3,13 +3,18 @@
  * Portfolio (Part 1) and the BIZO brochure; features come from each concept's highlights and suggested add-ons. Apps
  * without supplied artwork use a lettered mark. Prices shown for BIZO are the brochure's indicative figures.
  */
-export interface AppFeature { title: string; text: string; icon: string }
+/** `planned` marks a feature that is on the roadmap, not yet built; pages label it "Planned". */
+export interface AppFeature { title: string; text: string; icon: string; planned?: boolean }
 export interface AppBrand {
   logo?: string; mark?: string; accent: [string, string]; website?: string;
+  /** Wide brand artwork (used as the page hero) when there is no standalone logo. */
+  artwork?: string;
   features: AppFeature[]; workflow?: { title: string; text: string }[];
   plans?: { name: string; price: string; per: string; text: string; featured?: boolean }[]; planNote?: string;
   integration?: { status: 'not_connected' | 'link_only' | 'connected'; text: string };
 }
+
+import { PORTFOLIO_BRANDS } from './app-brands-portfolio';
 
 const f = (title: string, text: string, icon = 'check'): AppFeature => ({ title, text, icon });
 
@@ -84,4 +89,5 @@ export const APP_BRANDS: Record<string, AppBrand> = {
     f('Human help', 'Escalate to a human teacher any time.', 'people')] },
 };
 
-export function appBrand(slug: string): AppBrand | undefined { return APP_BRANDS[slug]; }
+/** Brand data for a business: hand-written entries first, then the concept-portfolio entries. */
+export function appBrand(slug: string): AppBrand | undefined { return APP_BRANDS[slug] ?? PORTFOLIO_BRANDS[slug]; }

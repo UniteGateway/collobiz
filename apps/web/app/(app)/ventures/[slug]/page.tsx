@@ -52,9 +52,9 @@ export default function VenturePage() {
         <div><span>Your status</span><strong>{mine ? INTEREST[mine.status]?.[0] ?? mine.status : v.open ? 'Not joined' : 'Coming soon'}</strong></div>
       </div>
       <section className="cz-app-section" aria-labelledby="feat-h">
-        <h2 id="feat-h">Features</h2>
+        <h2 id="feat-h">{brand?.features?.every((x) => x.planned) ? 'Planned features' : 'Features'}</h2>
         <div className="cz-app-features">{(brand?.features ?? v.roles.map((r) => ({ title: roleLabel(r), text: `Partners can ${roleLabel(r).toLowerCase()} for ${v.name}.`, icon: 'people' }))).map((x) => (
-          <article key={x.title}><span className="cz-app-feat-ic" aria-hidden><Icon name={(IC[x.icon] ?? 'check') as never} size={18} /></span><h3>{x.title}</h3><p>{x.text}</p></article>
+          <article key={x.title}><span className="cz-app-feat-ic" aria-hidden><Icon name={(IC[x.icon] ?? 'check') as never} size={18} /></span><h3>{x.title}</h3>{x.text ? <p>{x.text}</p> : null}{'planned' in x && x.planned ? <span className="cz-gp-pill cz-gp-pill-soon">Planned</span> : null}</article>
         ))}</div>
       </section>
       {brand?.workflow && (

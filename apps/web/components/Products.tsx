@@ -24,7 +24,7 @@ export function ProductTile({ p }: { p: Pick<Product, 'slug' | 'name' | 'sector'
   const s = stagePill(p.stage);
   return (
     <Link href={`/businesses/${p.slug}`} className="cz-gp-tile" data-product={p.slug}>
-      <VentureMark name={p.name} sector={p.sector} slug={p.slug} size={56} />
+      {appBrand(p.slug)?.logo ? <span className="cz-gp-tile-logo" aria-hidden><img src={appBrand(p.slug)!.logo} alt="" loading="lazy" /></span> : <VentureMark name={p.name} sector={p.sector} slug={p.slug} size={56} />}
       <strong>{p.name}</strong>
       <span className="cz-gp-tile-tag">{p.tagline}</span>
       {s.tone !== 'live' && <span className={`cz-gp-pill cz-gp-pill-${s.tone}`}>{s.label}</span>}
@@ -46,7 +46,51 @@ const MODULE_FOR: Record<string, string> = {
   'green-wallet': 'energy', 'power-partner': 'energy', powerbank: 'energy', '99offers': 'store',
 };
 
-export function worksWith(p: Product): { title: string; text: string; icon: string; status: 'connected' | 'link_only' | 'not_connected' }[] {
+/**
+ * Integration roadmap: the COLLABIZ module each business plugs into next (docs/unite-products.md has the waves).
+ * Shown as "Next" — planned, not live. Regulated businesses have none until regulatory clearance.
+ */
+export const NEXT_INTEGRATION: Record<string, { title: string; text: string }> = {
+  sunx: { title: 'Unite Solar referrals', text: 'Bill and roof-photo upload with consent, routed to solar partners with duplicate checks.' },
+  solcart: { title: 'Powertek products & Projects', text: 'RFQ comparison and order-to-project handoff into COLLABIZ projects.' },
+  sungate: { title: 'Unite Solar sales desk', text: 'Bill-upload assessment and scenario comparison for housing societies.' },
+  'solar-village-mission': { title: 'Projects & Proof', text: 'Installation milestones and impact reporting on the Proof passport.' },
+  xpert: { title: 'Micro-contracts & Capacity', text: 'Verified skilled teams, standard scopes and milestone acceptance.' },
+  partimer: { title: 'Micro-contracts', text: 'Shift availability, attendance confirmation and settlement tracking.' },
+  wakin: { title: 'Teams & Capacity', text: 'Employer verification and interview scheduling from the partner network.' },
+  'digital-seed': { title: 'Commissions', text: 'Referral attribution and a commission ledger on COLLABIZ commissions.' },
+  leaddna: { title: 'Leads & CRM', text: 'Qualified leads handed straight into the COLLABIZ sales pipeline.' },
+  socpost: { title: 'AI Growth Desk', text: 'Approved social posts and campaigns from the Growth Desk.' },
+  vidplay: { title: 'AI Growth Desk & Commissions', text: 'Creator campaigns with budget caps and payout reconciliation.' },
+  ibrain: { title: 'ACTION OS', text: 'Captured commitments become follow-ups on the action board.' },
+  'u-meet': { title: 'Meetings', text: 'Waiting rooms and host controls inside COLLABIZ meetings.' },
+  'ev-saathi': { title: 'Capacity bookings', text: 'Vehicle availability, handover checklists and settlement records.' },
+  elwin: { title: 'Capacity & Store', text: 'Charger availability and fleet enquiries.' },
+  'green-wallet': { title: 'Data room', text: 'Permission-based project data rooms and EOI tracking.' },
+  'power-partner': { title: 'Data room & Payment assurance', text: 'PPA document room and payment reconciliation.' },
+  unitif: { title: 'Opportunities & Data room', text: 'Industry requirement forms and an investor data room.' },
+  'real-bricks': { title: 'Property sales', text: 'Development proposals and document access permissions.' },
+  prodeal: { title: 'Property sales', text: 'Price evidence, title checklist and bid history.' },
+  'unite-learning': { title: 'Learning', text: 'Course catalogue and verified outcome tracking in COLLABIZ learning.' },
+  startsmart: { title: 'Learning & Launch', text: 'Idea submissions, mentor matching and demo-day scheduling.' },
+  'ai-teacher': { title: 'Learning', text: 'Mastery records alongside COLLABIZ learning.' },
+  '99offers': { title: 'Business offers', text: 'Counteroffer comparison and merchant attribution.' },
+  'nano-bazar': { title: 'Store & Business QR', text: 'Shop storefronts with a Business QR for each seller.' },
+  zuppo: { title: 'Micro-contracts', text: 'Shopper bookings with receipt reconciliation.' },
+  weekend: { title: 'Announcements', text: 'Edition archive and advertiser reporting.' },
+  'help-today': { title: 'Community', text: 'Request triage and outcome updates in COLLABIZ community.' },
+  'goodtime-live': { title: 'Community', text: 'Community events and volunteer sign-ups.' },
+  'unite-biofix': { title: 'Data room & Projects', text: 'Site data room and offtake tracking.' },
+  'unite-aqua': { title: 'Powertek products', text: 'Specification sheets and demonstration booking.' },
+  '99films': { title: 'Data room & Contracts', text: 'Rights ledger and milestone approvals.' },
+  'moveon-video': { title: 'Contracts', text: 'Rights catalogue and revenue statements.' },
+  withme: { title: 'Capacity bookings', text: 'Availability calendar, identity checks and booking scope.' },
+  freeticket: { title: 'Business offers', text: 'Published allocation rules and claim-expiry notifications.' },
+  ugrow: { title: 'Launch', text: 'Entrepreneur launches backed by the partner network.' },
+  roofz: { title: 'Energy · Green Park', text: 'Rooftop space offered for solar projects.' },
+};
+
+export function worksWith(p: Product): { title: string; text: string; icon: string; status: 'connected' | 'link_only' | 'not_connected' | 'next' }[] {
   const list: ReturnType<typeof worksWith> = [
     { title: 'COLLABIZ enquiries', text: `Messages from this page go straight to the ${p.name} team in COLLABIZ, with a reference number for you.`, icon: '✉', status: 'connected' },
     { title: 'COLLABIZ partner network', text: p.open ? `Verified businesses can ask to promote ${p.name} and receive its offers.` : `Partners can promote ${p.name} once it opens to partners.`, icon: '⇄', status: p.open ? 'connected' : 'not_connected' },
@@ -55,9 +99,11 @@ export function worksWith(p: Product): { title: string; text: string; icon: stri
   if (m) list.push({ ...MODULE_LINKS[m], status: 'connected' });
   const b = appBrand(p.slug);
   if (b?.integration) list.push({ title: `${p.name} platform`, text: b.integration.text, icon: '↗', status: b.integration.status });
+  const n = NEXT_INTEGRATION[p.slug];
+  if (n && !list.some((x) => x.title === n.title)) list.push({ ...n, icon: '→', status: 'next' });
   return list;
 }
-export const STATUS_LABEL = { connected: 'Connected', link_only: 'Link only', not_connected: 'Not yet' } as const;
+export const STATUS_LABEL = { connected: 'Connected', link_only: 'Link only', not_connected: 'Not yet', next: 'Next' } as const;
 
 export function ProductEnquiry({ p }: { p: Product }) {
   const kinds: { k: 'customer' | 'partner' | 'interest'; label: string }[] = p.stage === 'live' || p.stage === 'pilot'
