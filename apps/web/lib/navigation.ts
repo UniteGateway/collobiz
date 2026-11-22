@@ -24,6 +24,7 @@ export const MODULES: Module[] = [
     tabs: [['/ventures', 'Businesses'], ['/solar', 'Solar desk'], ['/franchise', 'Franchise'], ['/property', 'Property sales']] },
   { key: 'books', label: 'Invoices & P&L', icon: 'value', home: '/finance/pnl', match: ['/finance/pnl', '/finance/credit-notes'], tabs: [['/finance/pnl', 'Profit report'], ['/finance/credit-notes', 'Invoices & credit notes']] },
   { key: 'proof', label: 'Proof', icon: 'award', home: '/proof', match: ['/proof', '/business-qr'], tabs: [['/proof', 'Performance passport'], ['/business-qr', 'Business QR']] },
+  { key: 'eb5', label: 'GO EB5', icon: 'map', home: '/eb5', match: ['/eb5'], ownTabs: true },
   { key: 'launch', label: 'Launch', icon: 'plus', home: '/launch', match: ['/launch'], tabs: [['/launch', 'Start a business'], ['/launch/plans', 'My launch plans']] },
   { key: 'micro', label: 'Micro-contracts', icon: 'check', home: '/micro', match: ['/micro'], tabs: [['/micro', 'Open work'], ['/micro/new', 'Post work'], ['/micro/mine', 'My micro-contracts']] },
   { key: 'capacity', label: 'Capacity', icon: 'calendar', home: '/capacity', match: ['/capacity'], tabs: [['/capacity', 'Find capacity'], ['/capacity/calendar', 'Calendar'], ['/capacity/mine', 'My capacity & bookings']] },
@@ -55,7 +56,34 @@ export function moduleFor(path: string) {
   return MODULES.map((m) => ({ m, len: Math.max(...m.match.map((p) => (path === p || path.startsWith(p + '/') ? p.length : -1))) })).filter((x) => x.len >= 0).sort((a, b) => b.len - a.len)[0]?.m ?? null;
 }
 
-export function partnerNav(me: Me | null, counts: { alerts?: number } = {}): NavSection[] {
+/** GO EB5 menu — only for people the API says may see the module; items follow their role. */
+export interface Eb5Me { visible: boolean; roles: string[]; partner: { id: string; status: string } | null }
+function eb5Section(e?: Eb5Me | null): NavSection | null {
+  if (!e?.visible) return null;
+  const r = new Set(e.roles); const any = (...x: string[]) => x.some((k) => r.has(k));
+  const staff = any('super_admin', 'citrus_admin', 'business_manager', 'immigration_consultant', 'attorney', 'finance', 'compliance', 'regional_center');
+  const items: { href: string; label: string; icon: IconName; show: boolean }[] = [
+    { href: '/eb5', label: 'Dashboard', icon: 'home', show: staff },
+    { href: '/eb5/portal', label: 'My EB-5 portal', icon: 'home', show: r.has('client') },
+    { href: '/eb5/partner', label: 'Partner desk', icon: 'teams', show: !!e.partner },
+    { href: '/eb5/leads', label: 'Leads', icon: 'leads', show: staff || any('bd_partner', 'referral_consultant') },
+    { href: '/eb5/partners', label: 'Partners', icon: 'teams', show: any('super_admin', 'citrus_admin', 'compliance') },
+    { href: '/eb5/applications', label: 'Applications', icon: 'documents', show: any('super_admin', 'citrus_admin', 'business_manager', 'immigration_consultant') },
+    { href: '/eb5/consultations', label: 'Consultations', icon: 'calendar', show: staff || r.has('client') },
+    { href: '/eb5/agreements', label: 'Agreements', icon: 'contracts', show: any('super_admin', 'citrus_admin', 'business_manager', 'compliance', 'finance') || r.has('client') },
+    { href: '/eb5/invoices', label: 'Invoices & payments', icon: 'value', show: any('citrus_admin', 'finance', 'super_admin', 'business_manager', 'compliance') || r.has('client') },
+    { href: '/eb5/documents', label: 'Documents', icon: 'lock', show: any('citrus_admin', 'business_manager', 'immigration_consultant', 'attorney', 'compliance') },
+    { href: '/eb5/cases', label: 'Case tracking', icon: 'projects', show: any('citrus_admin', 'business_manager', 'immigration_consultant', 'attorney', 'compliance', 'super_admin') },
+    { href: '/eb5/projects', label: 'Projects', icon: 'building', show: any('super_admin', 'citrus_admin', 'business_manager', 'immigration_consultant', 'regional_center', 'compliance') },
+    { href: '/eb5/tasks', label: 'Tasks & follow-ups', icon: 'check', show: any('citrus_admin', 'business_manager', 'immigration_consultant', 'attorney') },
+    { href: '/eb5/reports', label: 'Reports', icon: 'crm', show: any('super_admin', 'citrus_admin', 'business_manager', 'finance', 'compliance') },
+    { href: '/eb5/compliance', label: 'Compliance', icon: 'verify', show: any('super_admin', 'compliance', 'citrus_admin') },
+    { href: '/eb5/settings', label: 'Settings', icon: 'settings', show: any('super_admin', 'citrus_admin', 'compliance') },
+  ];
+  return { title: 'GO EB5', collapsible: true, items: items.filter((i) => i.show).map(({ href, label, icon }) => ({ href, label, icon })) };
+}
+
+export function partnerNav(me: Me | null, counts: { alerts?: number } = {}, eb5?: Eb5Me | null): NavSection[] {
   const verified = me?.activeOrg?.verificationStatus === 'verified';
   const sections: NavSection[] = [];
   if (me?.activeOrg && !verified) sections.push({ title: 'Get started', items: [{ href: '/onboarding/status', label: 'Complete verification', icon: 'verify' }] });
@@ -71,6 +99,7 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}): Nav
     ['Network & growth', ['community', 'messages', 'global', 'growth']],
   ];
   sections.push({ items: [item('home'), item('action-os')] });
+  const eb = eb5Section(eb5); if (eb) sections.push(eb);
   for (const [title, keys] of GROUPS) sections.push({ title, collapsible: true, items: keys.filter((k) => byKey[k]).map(item) });
   if (me?.capabilities.includes('commission.approve')) sections.push({ title: 'Finance', items: [{ href: '/commissions/approvals', label: 'Commission approvals', icon: 'verify' }] });
   sections.push({ title: 'Account', collapsible: true, items: [{ href: '/library', label: 'Catalogues & documents', icon: 'package' }, { href: '/vault', label: 'My documents', icon: 'documents' }, { href: '/profile', label: 'Settings', icon: 'settings' }, { href: '/help', label: 'Help & support', icon: 'help' }] });
