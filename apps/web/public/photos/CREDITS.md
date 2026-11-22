@@ -3,7 +3,6 @@
 All photos are from Pexels (https://www.pexels.com) under the Pexels License: free to use, no attribution required. Pexels photo ID per file:
 
 - `energy-installer.webp` — https://www.pexels.com/photo/4254168/
-- `energy-solar-field.webp` — https://www.pexels.com/photo/2800832/
 - `energy-solar-sky.webp` — https://www.pexels.com/photo/356036/
 - `energy-wind-solar.webp` — https://www.pexels.com/photo/433308/
 - `energy-rooftop-install.webp` — https://www.pexels.com/photo/8853502/
@@ -45,3 +44,8 @@ All photos are from Pexels (https://www.pexels.com) under the Pexels License: fr
 - `office-open.webp` — https://www.pexels.com/photo/1170412/
 - `office-loft.webp` — https://www.pexels.com/photo/380768/
 - `tech-data.webp` — https://www.pexels.com/photo/3861969/
+- `collab-hands.webp` — https://www.pexels.com/photo/3184418/
+- `collab-overhead.webp` — https://www.pexels.com/photo/3183150/
+- `team-success.webp` — https://www.pexels.com/photo/3184338/
+- `energy-wind-sunset.webp` — https://www.pexels.com/photo/414837/
+- `energy-wind-coast.webp` — https://www.pexels.com/photo/1108814/

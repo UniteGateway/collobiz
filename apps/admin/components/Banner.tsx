@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { PageHeader } from '@collabiz/ui';
 
 const ADMIN_PHOTO: [string, string][] = [['/verification', 'team-handshake'], ['/finance', 'finance-analysis'], ['/billing', 'finance-report'], ['/reconciliation', 'finance-report'], ['/bank-statements', 'finance-report'],
-  ['/commission-policy', 'finance-charts'], ['/analytics', 'finance-charts'], ['/growth', 'finance-charts'], ['/energy', 'energy-solar-field'], ['/tender', 'build-site-team'], ['/ventures', 'global-skyline'], ['/group-companies', 'global-skyline'],
+  ['/commission-policy', 'finance-charts'], ['/analytics', 'finance-charts'], ['/growth', 'finance-charts'], ['/energy', 'energy-wind-sunset'], ['/tender', 'build-site-team'], ['/ventures', 'global-skyline'], ['/group-companies', 'global-skyline'],
   ['/country-partners', 'global-skyline'], ['/users', 'tech-data'], ['/audit', 'tech-data'], ['/risk', 'tech-data'], ['/integrations', 'tech-data'], ['/ai', 'tech-data'], ['/business-offers', 'deal-handshake'], ['/offers', 'deal-handshake'],
   ['/opportunities', 'deal-handshake'], ['/routing', 'deal-handshake'], ['/lead-conflicts', 'deal-handshake'], ['/resolution', 'team-boardroom'], ['/reputation-appeals', 'team-boardroom'], ['/cms', 'team-desk'], ['/catalogue', 'team-desk'],
   ['/pilot', 'team-desk'], ['/sla', 'team-desk'], ['/workspace/solar', 'energy-panel-roof'], ['/workspace/franchise', 'team-handshake'], ['/workspace/property', 'global-skyline']];

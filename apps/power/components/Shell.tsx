@@ -76,7 +76,7 @@ export function Shell({ children }: { children: ReactNode }) {
 }
 
 /** Banner photo per Power Lab section (Pexels licence, see /photos/CREDITS.md). */
-const POWER_PHOTO: [string, string][] = [['voltage', 'energy-solar-field'], ['open-access', 'energy-panel-roof'], ['interstate', 'energy-solar-field'], ['finance', 'finance-analysis'], ['reports', 'finance-report'],
+const POWER_PHOTO: [string, string][] = [['voltage', 'energy-wind-sunset'], ['open-access', 'energy-panel-roof'], ['interstate', 'energy-wind-coast'], ['finance', 'finance-analysis'], ['reports', 'finance-report'],
   ['hybrid', 'energy-wind-solar'], ['wind', 'energy-wind-solar'], ['bess', 'energy-ev-carport'], ['battery', 'energy-ev-carport'], ['solar', 'energy-panel-roof'], ['automation', 'tech-data'], ['settings', 'tech-data'], ['dispatch', 'energy-control-room']];
 
 export function PageTitle({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {

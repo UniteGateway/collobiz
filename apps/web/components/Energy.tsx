@@ -10,7 +10,7 @@ export interface EnergyListing {
   capacityMw: number; availableMw: number | null; tariffRsKwh: number | null; targetRsKwh: number | null; ppaYears: number | null; models: string[]; description: string; status: string; demo: boolean; isOwner: boolean;
   owner: string | null; private: Record<string, unknown> | null; moderationNote: string | null; createdAt: string;
 }
-export const SOURCE_PHOTO: Record<string, string> = { solar: 'energy-solar-field', wind: 'energy-wind-solar', hybrid: 'energy-wind-solar', bess: 'energy-control-room', any: 'energy-solar-sky' };
+export const SOURCE_PHOTO: Record<string, string> = { solar: 'energy-wind-sunset', wind: 'energy-wind-solar', hybrid: 'energy-wind-solar', bess: 'energy-control-room', any: 'energy-solar-sky' };
 export const mw = (n: number | null | undefined) => (n == null ? '—' : `${Number(n).toLocaleString('en-IN', { maximumFractionDigits: 1 })} MW`);
 export const rs = (n: number | null | undefined) => (n == null ? 'On request' : `₹${Number(n).toFixed(2)}/kWh`);
 const STAGE: Record<string, string> = { planned: 'Planned', construction: 'Under construction', operational: 'Operational' };
