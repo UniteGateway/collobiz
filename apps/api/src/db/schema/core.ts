@@ -152,5 +152,7 @@ export const enquiries = pgTable('enquiries', {
   referralCodeId: uuid('referral_code_id'),
   /** CRM deal created from this enquiry in the operating company's pipeline. */
   crmDealId: uuid('crm_deal_id'),
+  /** Extra context from a business page, e.g. { projectId, projectName, visitDate } for a property site-visit request. */
+  details: jsonb('details'),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex('enquiries_ref_uq').on(t.reference), index('enquiries_venture_idx').on(t.ventureId)]);

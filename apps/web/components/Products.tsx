@@ -1,7 +1,7 @@
 'use client';
 /** Public Unite product pages (/businesses): directory tiles, "works with" integrations and the enquiry form. */
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { INDIA_STATES, SOLAR_LEAD_SOURCES, SOLAR_SITE_TYPES, MICRO_SOURCES, appBrand, sectorName } from '@collabiz/types';
 import { Alert, Button, Select, TextArea, TextInput } from '@collabiz/ui';
 import { VentureMark, type Venture } from '@/components/Ventures';
@@ -60,12 +60,6 @@ export const NEXT_INTEGRATION: Record<string, { title: string; text: string }> =
   elwin: { title: 'Capacity & Store', text: 'Charger availability and fleet enquiries.' },
   'green-wallet': { title: 'Data room', text: 'Permission-based project data rooms and EOI tracking.' },
   'power-partner': { title: 'Data room & Payment assurance', text: 'PPA document room and payment reconciliation.' },
-  unitif: { title: 'Opportunities & Data room', text: 'Industry requirement forms and an investor data room.' },
-  'real-bricks': { title: 'Property sales', text: 'Development proposals and document access permissions.' },
-  prodeal: { title: 'Property sales', text: 'Price evidence, title checklist and bid history.' },
-  'unite-learning': { title: 'Learning', text: 'Course catalogue and verified outcome tracking in COLLABIZ learning.' },
-  startsmart: { title: 'Learning & Launch', text: 'Idea submissions, mentor matching and demo-day scheduling.' },
-  'ai-teacher': { title: 'Learning', text: 'Mastery records alongside COLLABIZ learning.' },
   '99offers': { title: 'Business offers', text: 'Counteroffer comparison and merchant attribution.' },
   'nano-bazar': { title: 'Store & Business QR', text: 'Shop storefronts with a Business QR for each seller.' },
   weekend: { title: 'Announcements', text: 'Edition archive and advertiser reporting.' },
@@ -78,10 +72,9 @@ export const NEXT_INTEGRATION: Record<string, { title: string; text: string }> =
   withme: { title: 'Capacity bookings', text: 'Availability calendar, identity checks and booking scope.' },
   freeticket: { title: 'Business offers', text: 'Published allocation rules and claim-expiry notifications.' },
   ugrow: { title: 'Launch', text: 'Entrepreneur launches backed by the partner network.' },
-  roofz: { title: 'Energy · Green Park', text: 'Rooftop space offered for solar projects.' },
 };
 
-export function worksWith(p: Product): { title: string; text: string; icon: string; status: 'connected' | 'link_only' | 'not_connected' | 'next' }[] {
+export function worksWith(p: Product & { showcase?: { kind: string } | null }): { title: string; text: string; icon: string; status: 'connected' | 'link_only' | 'not_connected' | 'next'; href?: string }[] {
   const list: ReturnType<typeof worksWith> = [
     { title: 'COLLABIZ enquiries', text: `Messages from this page go straight to the ${p.name} team in COLLABIZ, with a reference number for you.`, icon: '✉', status: 'connected' },
     { title: 'COLLABIZ partner network', text: p.open ? `Verified businesses can ask to promote ${p.name} and receive its offers.` : `Partners can promote ${p.name} once it opens to partners.`, icon: '⇄', status: p.open ? 'connected' : 'not_connected' },
@@ -90,24 +83,61 @@ export function worksWith(p: Product): { title: string; text: string; icon: stri
   if (p.open) list.push({ title: 'Partner links', text: `Each partner gets a personal ${p.name} link; enquiries through it are recorded as introduced by that partner.`, icon: '🔗', status: 'connected' });
   if ((SOLAR_LEAD_SOURCES as readonly string[]).includes(p.slug)) list.push({ title: 'Unite Solar referrals', text: 'Your solar request, bill and roof photo go straight to the Unite Solar desk, with duplicate checks.', icon: '☀', status: 'connected' });
   if ((MICRO_SOURCES as readonly string[]).includes(p.slug)) list.push({ title: 'COLLABIZ micro-contracts', text: `Work posted through ${p.name} becomes a fixed-price micro-contract that verified businesses can apply for.`, icon: '⚒', status: 'connected' });
+  if (p.showcase?.kind === 'property') list.push({ title: 'Unite property projects', text: 'Projects on this page come live from the COLLABIZ property desk; site-visit requests reach the sales team.', icon: '⌂', status: 'connected' });
+  if (p.showcase?.kind === 'courses') list.push({ title: 'COLLABIZ learning', text: 'Courses on this page are the published COLLABIZ courses, with certificates on completion.', icon: '🎓', status: 'connected' });
   const m = MODULE_FOR[p.slug];
-  if (m && !(SOLAR_LEAD_SOURCES as readonly string[]).includes(p.slug)) list.push({ ...MODULE_LINKS[m], status: 'connected' });
+  if (m && !(SOLAR_LEAD_SOURCES as readonly string[]).includes(p.slug) && !(m === 'property' && p.showcase)) list.push({ ...MODULE_LINKS[m], status: 'connected' });
+  const ml = MEMBER_LINKS[p.slug];
+  if (ml && !list.some((x) => x.title === ml.title)) list.push({ title: ml.title, text: ml.text, icon: '↗', status: 'link_only', href: ml.href });
   const b = appBrand(p.slug);
   if (b?.integration) list.push({ title: `${p.name} platform`, text: b.integration.text, icon: '↗', status: b.integration.status });
   const n = NEXT_INTEGRATION[p.slug];
   if (n && !list.some((x) => x.title === n.title)) list.push({ ...n, icon: '→', status: 'next' });
   return list;
 }
+/**
+ * Members-only COLLABIZ modules a product runs on: shown as "Link only" (the link opens the module after sign-in; no data
+ * is exchanged with the product yet).
+ */
+export const MEMBER_LINKS: Record<string, { title: string; href: string; text: string }> = {
+  socpost: { title: 'COLLABIZ Business offers', href: '/business-offers', text: 'Members publish and track offers that SOCPOST campaigns promote.' },
+  vidplay: { title: 'COLLABIZ Business offers', href: '/business-offers', text: 'Advertisers publish the offers that creators promote.' },
+  ibrain: { title: 'ACTION OS', href: '/action-os', text: 'Commitments and follow-ups for members live on the COLLABIZ action board.' },
+  'u-meet': { title: 'COLLABIZ Meetings', href: '/meetings', text: 'Members schedule and join meetings inside COLLABIZ.' },
+  'ev-saathi': { title: 'Capacity calendar', href: '/capacity', text: 'Members publish vehicle and driver availability as bookable capacity.' },
+  elwin: { title: 'Capacity calendar', href: '/capacity', text: 'Charger and service availability published as bookable capacity.' },
+  withme: { title: 'Capacity calendar', href: '/capacity', text: 'Availability and bookings for companions run on the capacity calendar.' },
+  '99offers': { title: 'COLLABIZ Store & BOGO offers', href: '/store', text: 'Promotions and in-store vouchers run on the shared offers engine.' },
+  'nano-bazar': { title: 'Business QR', href: '/business-qr', text: 'Each shop gets a Business QR that opens its COLLABIZ storefront.' },
+  'goodtime-live': { title: 'COLLABIZ Community', href: '/community', text: 'Community posts and events for members.' },
+  'help-today': { title: 'COLLABIZ Community', href: '/community', text: 'Help requests and updates in the members community.' },
+  weekend: { title: 'Announcements', href: '/announcements', text: 'Editions and notices published to members.' },
+  '99films': { title: 'Data room & Contracts', href: '/data-room', text: 'Project documents and rights records for members.' },
+  'moveon-video': { title: 'Contracts', href: '/contracts', text: 'Distribution agreements managed in COLLABIZ contracts.' },
+  'unite-biofix': { title: 'Data room & Projects', href: '/data-room', text: 'Site documents and project milestones for members.' },
+  'unite-aqua': { title: 'Powertek products', href: '/powertek', text: 'Equipment and consumables sold through the Powertek desk.' },
+  startsmart: { title: 'Launch', href: '/launch', text: 'Members turn an idea into a launch plan with partners.' },
+  sunite: { title: 'Unite Solar desk', href: '/unite-solar', text: 'Partners quote, track and install solar projects.' },
+  wakin: { title: 'Teams & partners', href: '/partners', text: 'Members find and invite delivery teams.' },
+  prizo: { title: 'Business offers', href: '/business-offers', text: 'Deals and negotiated offers for members.' },
+  leaddna: { title: 'Leads & CRM', href: '/crm', text: 'Qualified leads in the members sales pipeline.' },
+  'digital-seed': { title: 'Commissions', href: '/commissions', text: 'Referral commissions under signed agreements.' },
+};
+
 export const STATUS_LABEL = { connected: 'Connected', link_only: 'Link only', not_connected: 'Not yet', next: 'Next' } as const;
 
-export function ProductEnquiry({ p, refCode }: { p: Product; refCode?: string }) {
+export interface ShowProject { id: string; name: string; kind: string; city: string; region: string; reraNumber: string | null; available: number; priceFrom: number | null; priceTo: number | null }
+export interface ShowCourse { id: string; title: string; summary: string; level: string; minutes: number; modules: number }
+
+export function ProductEnquiry({ p, refCode, projects, projectId }: { p: Product; refCode?: string; projects?: ShowProject[]; projectId?: string }) {
   const kinds: { k: 'customer' | 'partner' | 'interest'; label: string }[] = p.stage === 'live' || p.stage === 'pilot'
     ? [{ k: 'customer', label: 'I want to use it' }, { k: 'partner', label: 'I want to partner' }]
     : [{ k: 'interest', label: 'Notify me at launch' }, { k: 'partner', label: 'I want to partner' }];
-  const [f, setF] = useState({ kind: kinds[0].k as string, name: '', email: '', phone: '', city: '', organization: '', message: '', consent: false });
+  const [f, setF] = useState({ kind: kinds[0].k as string, name: '', email: '', phone: '', city: '', organization: '', message: '', consent: false, projectId: projectId ?? '', visitDate: '' });
+  useEffect(() => { if (projectId) setF((x) => ({ ...x, projectId })); }, [projectId]);
   const [hp, setHp] = useState('');
   const [ref, setRef] = useState<string | null>(null);
-  const send = useMutation(async () => { const r = await api.post<{ reference: string }>(`/public/products/${p.slug}/enquiries`, { ...f, website: hp || undefined, ref: refCode }); setRef(r.reference); return r; });
+  const send = useMutation(async () => { const r = await api.post<{ reference: string }>(`/public/products/${p.slug}/enquiries`, { ...f, projectId: f.projectId || undefined, visitDate: f.visitDate || undefined, website: hp || undefined, ref: refCode }); setRef(r.reference); return r; });
   if (ref) return <Alert tone="success" title={`Thank you — reference ${ref}`}>The {p.name} team has your message and will reply by email. A confirmation is on its way to {f.email}.</Alert>;
   return (
     <form noValidate className="cz-gp-form" onSubmit={(e) => { e.preventDefault(); send.run(); }}>
@@ -121,6 +151,10 @@ export function ProductEnquiry({ p, refCode }: { p: Product; refCode?: string })
         <TextInput label="Phone (optional)" type="tel" autoComplete="tel" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} error={send.fieldErrors.phone} />
         <TextInput label="City (optional)" autoComplete="address-level2" value={f.city} onChange={(e) => setF({ ...f, city: e.target.value })} />
       </div>
+      {projects?.length ? <div className="cz-grid cz-grid-2">
+        <Select label="Project (optional)" value={f.projectId} onChange={(e) => setF({ ...f, projectId: e.target.value })} options={[{ value: '', label: 'Not sure yet' }, ...projects.map((x) => ({ value: x.id, label: `${x.name} — ${x.city}` }))]} error={send.fieldErrors.projectId} />
+        <TextInput label="Preferred site-visit date (optional)" type="date" value={f.visitDate} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setF({ ...f, visitDate: e.target.value })} disabled={!f.projectId} error={send.fieldErrors.visitDate} />
+      </div> : null}
       {f.kind === 'partner' && <TextInput label="Company (optional)" autoComplete="organization" value={f.organization} onChange={(e) => setF({ ...f, organization: e.target.value })} />}
       <TextArea label="How can we help?" rows={4} value={f.message} onChange={(e) => setF({ ...f, message: e.target.value })} error={send.fieldErrors.message} />
       <label className="cz-hp" aria-hidden="true">Website<input tabIndex={-1} autoComplete="off" value={hp} onChange={(e) => setHp(e.target.value)} /></label>
@@ -136,7 +170,7 @@ export const groupName = (s: string) => sectorName(s);
 /** Solar quote request (SunX, SUNGATE, Solar Village Mission, SOLCART) — creates a Unite Solar referral. */
 export function SolarLeadForm({ p, refCode }: { p: Product; refCode?: string }) {
   const defaultSite = p.slug === 'sungate' ? 'Apartment / housing society' : p.slug === 'solar-village-mission' ? 'Village household' : 'Independent house';
-  const [f, setF] = useState({ name: '', phone: '', city: '', region: 'IN-AP', segment: 'residential', siteType: defaultSite as string, monthlyBill: '', note: '', consent: false });
+  const [f, setF] = useState({ name: '', phone: '', city: '', region: 'IN-AP', segment: 'residential', siteType: defaultSite as string, monthlyBill: '', note: '', consent: false, intent: p.slug === 'roofz' ? 'lease_roof' : '', roofAreaSqft: '' });
   const [bill, setBill] = useState<File | null>(null);
   const [roof, setRoof] = useState<File | null>(null);
   const [hp, setHp] = useState('');
@@ -154,12 +188,16 @@ export function SolarLeadForm({ p, refCode }: { p: Product; refCode?: string }) 
   return (
     <form noValidate className="cz-gp-form" onSubmit={(e) => { e.preventDefault(); send.run(); }} data-form="solar-lead">
       {send.error && <Alert tone="danger" title={send.error}>{Object.keys(send.fieldErrors).length ? 'Please check the highlighted fields.' : null}</Alert>}
+      {p.slug === 'roofz' && <fieldset className="cz-gp-seg"><legend className="cz-sr-only">What would you like?</legend>
+        {[['lease_roof', 'Lease my roof for solar'], ['solar_for_building', 'Solar for my building']].map(([k, l]) => <label key={k} className={f.intent === k ? 'is-on' : ''}><input type="radio" name="intent" value={k} checked={f.intent === k} onChange={() => setF({ ...f, intent: k })} />{l}</label>)}
+      </fieldset>}
       <div className="cz-grid cz-grid-2">
         <TextInput label="Your name" autoComplete="name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} error={send.fieldErrors.name} />
         <TextInput label="Mobile number" type="tel" autoComplete="tel" inputMode="tel" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} error={send.fieldErrors.phone} />
         <TextInput label="City or village" autoComplete="address-level2" value={f.city} onChange={(e) => setF({ ...f, city: e.target.value })} error={send.fieldErrors.city} />
         <Select label="State" value={f.region} onChange={(e) => setF({ ...f, region: e.target.value })} options={INDIA_STATES.map(([v, l]) => ({ value: v, label: l }))} />
         <Select label="Where is the system for?" value={f.siteType} onChange={(e) => { const st = e.target.value; setF({ ...f, siteType: st, segment: st === 'Factory or warehouse' ? 'industrial' : st === 'Shop or office' || st === 'Farm / pump' ? 'commercial' : 'residential' }); }} options={SOLAR_SITE_TYPES.map((x) => ({ value: x, label: x }))} />
+        {p.slug === 'roofz' && <TextInput label="Roof area (sq ft, optional)" inputMode="numeric" value={f.roofAreaSqft} onChange={(e) => setF({ ...f, roofAreaSqft: e.target.value.replace(/\D/g, '') })} error={send.fieldErrors.roofAreaSqft} />}
         <TextInput label="Monthly electricity bill (₹, optional)" inputMode="numeric" value={f.monthlyBill} onChange={(e) => setF({ ...f, monthlyBill: e.target.value.replace(/\D/g, '') })} error={send.fieldErrors.monthlyBill} />
       </div>
       <div className="cz-grid cz-grid-2">
@@ -170,7 +208,7 @@ export function SolarLeadForm({ p, refCode }: { p: Product; refCode?: string }) 
       <label className="cz-hp" aria-hidden="true">Website<input tabIndex={-1} autoComplete="off" value={hp} onChange={(e) => setHp(e.target.value)} /></label>
       <label className="cz-gp-consent"><input type="checkbox" checked={f.consent} onChange={(e) => setF({ ...f, consent: e.target.checked })} />I agree that Unite Solar may call me about solar and use my bill and roof photo to prepare a quote. Files are deleted after 90 days.</label>
       {send.fieldErrors.consent && <p className="cz-error-text">{send.fieldErrors.consent}</p>}
-      <div><Button type="submit" loading={send.pending}>Request a solar quote</Button></div>
+      <div><Button type="submit" loading={send.pending}>{f.intent === 'lease_roof' ? 'Offer my roof' : 'Request a solar quote'}</Button></div>
     </form>
   );
 }
@@ -187,5 +225,41 @@ export function WorkPanel({ p, work }: { p: Product; work: { open: number; done:
       </div>
       <p className="cz-muted" style={{ margin: 0, fontSize: 13 }}>Posting and applying need a verified COLLABIZ business account. You pay the worker directly; COLLABIZ never holds the money.</p>
     </div>
+  );
+}
+
+const inrShort = (paise: number) => { const r = paise / 100; return r >= 1e7 ? `₹${(r / 1e7).toFixed(r >= 1e8 ? 0 : 2)} Cr` : r >= 1e5 ? `₹${(r / 1e5).toFixed(0)} L` : `₹${r.toLocaleString('en-IN')}`; };
+const KIND: Record<string, string> = { industrial_park: 'Industrial park', residential: 'Residential', commercial: 'Commercial', plots: 'Plots' };
+
+/** Live Unite property projects (from the COLLABIZ property desk) with a "book a site visit" action. */
+export function ProjectShowcase({ items, onVisit }: { items: ShowProject[]; onVisit: (id: string) => void }) {
+  if (!items.length) return <p className="cz-muted">No projects are open right now. Leave your details below and the team will tell you when one opens.</p>;
+  return (
+    <ul className="cz-gp-cards">{items.map((x) => (
+      <li key={x.id} data-project={x.name}>
+        <span className="cz-gp-pill cz-gp-pill-pilot">{KIND[x.kind] ?? x.kind}</span>
+        <strong>{x.name}</strong>
+        <span className="cz-muted">{x.city}</span>
+        <span>{x.available} unit{x.available === 1 ? '' : 's'} available{x.priceFrom ? ` · ${inrShort(x.priceFrom)}${x.priceTo && x.priceTo !== x.priceFrom ? ` – ${inrShort(x.priceTo)}` : ''}` : ''}</span>
+        <span className="cz-muted" style={{ fontSize: 12.5 }}>{x.reraNumber ? `RERA ${x.reraNumber}` : x.kind === 'industrial_park' ? 'Industrial project — RERA not applicable' : 'RERA number on request'}</span>
+        <button type="button" className="cz-btn cz-btn-secondary cz-btn-sm" onClick={() => onVisit(x.id)}>Book a site visit</button>
+      </li>
+    ))}</ul>
+  );
+}
+
+/** Published COLLABIZ courses; opening one needs a COLLABIZ account (certificates are issued there). */
+export function CourseShowcase({ items }: { items: ShowCourse[] }) {
+  if (!items.length) return <p className="cz-muted">New courses are being prepared.</p>;
+  return (
+    <ul className="cz-gp-cards">{items.map((c) => (
+      <li key={c.id} data-course={c.title}>
+        <span className="cz-gp-pill cz-gp-pill-pilot">{c.level[0].toUpperCase() + c.level.slice(1)}</span>
+        <strong>{c.title}</strong>
+        <span className="cz-muted">{c.summary}</span>
+        <span>{c.modules} modules · {c.minutes} min · certificate</span>
+        <Link className="cz-btn cz-btn-secondary cz-btn-sm" href={`/learning/assessments/${c.id}`}>Start learning</Link>
+      </li>
+    ))}</ul>
   );
 }

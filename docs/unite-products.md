@@ -63,10 +63,10 @@ Each product page shows its next integration as **Next** in "Works with" (`NEXT_
 | 1 ✅ | SunX, SUNGATE, SOLCART, Solar Village Mission | Unite Solar desk, Powertek products, Projects, Proof | These modules already exist; leads and orders flow straight into solar sales |
 | 1 ✅ | LeadDNA, Digital Seed | Leads & CRM, Commissions | They reuse the existing pipeline and commission ledger |
 | 1 ✅ | XPERT, Partimer, ZUPPO | Micro-contracts, Capacity | Scopes, milestones and settlement are already built |
-| 2 | ProDeal, Real Bricks, ROOFZ | Property sales, Green Park | The property and energy marketplaces exist |
-| 2 | Unite Learning, StartSmart, AI Teacher | Learning, Launch | Course and launch flows exist |
-| 2 | SOCPOST, VIDPLAY | AI Growth Desk, Commissions | Campaign approvals and payouts |
-| 2 | iBrain, U meet | ACTION OS, Meetings | Follow-ups and meetings exist |
+| 2 ✅ | ProDeal, Real Bricks, ROOFZ | Property sales, Green Park | The property and energy marketplaces exist |
+| 2 ✅ | Unite Learning, StartSmart, AI Teacher | Learning, Launch | Course and launch flows exist |
+| 2 (link only) | SOCPOST, VIDPLAY | AI Growth Desk, Commissions | Campaign approvals and payouts |
+| 2 (link only) | iBrain, U meet | ACTION OS, Meetings | Follow-ups and meetings exist |
 | 3 | GREEN WALLET, Power Partner, UNITIF, Unite Biofix, 99Films, MoveOn.video | Data room, Contracts, Payment assurance | Need document rooms and rights records per project |
 | 3 | EV Saathi, ELWIN, WITHME | Capacity bookings, Store | Availability and booking records |
 | 3 | 99OFFERS, FreeTicket, Nano Bazar | Business offers, Store, Business QR | Promotions engine exists; allocation rules need review |
@@ -85,3 +85,17 @@ Migrations 0053–0055 only add columns. Tests:
 - `apps/api/test/ventures.e2e.ts`: Wave 1 case.
 - `solar.e2e.ts` and `collab-ops.e2e.ts`: still pass.
 - Browser suite "Wave 1 · …": partner link → SunX quote → enquiry → CRM → solar desk → XPERT job.
+
+## Wave 2 integrations (built)
+| Business | Connection | How it works |
+|---|---|---|
+| **ProDeal, Real Bricks, UNITIF** | Unite property projects | The page lists projects that are open to partners and selling, live from the property desk. It shows name, type, city, RERA number, units available and price range; commission and buyer data are never shown.<br>**Book a site visit** pre-selects the project in the enquiry form and adds a visit date within 90 days. The project and date are validated and stored in `enquiries.details`.<br>Admins see a "Site visit" badge, and the CRM hand-off notes include the project and date. |
+| **ROOFZ** | Unite Solar desk | The roof form offers "Lease my roof for solar" or "Solar for my building", with roof area, bill and photo. It creates a solar referral under the ROOFZ house code with `details.intent` and `roofAreaSqft`. Any lease or PPA terms are agreed in writing later. |
+| **Unite Learning, StartSmart, AI Teacher** | COLLABIZ learning | The page lists published COLLABIZ courses (title, level, modules, minutes; never the assessment answers). **Start learning** opens the course, which needs a COLLABIZ account; the certificate is issued there. |
+| **SOCPOST, VIDPLAY, iBrain, U meet and 18 others** | Member links (`MEMBER_LINKS`) | "Works with" shows **Link only** with "Open in COLLABIZ (members)". Partner business pages show an **Open \<module\>** button. No data is exchanged yet; deeper integration stays marked **Next**. |
+
+Migration 0056 adds `enquiries.details` only. Tests:
+- `ventures.e2e.ts`: Wave 2 case (8/8 total).
+- `solar.e2e.ts`: 7/7.
+- Browser suite "Wave 2 · …".
+- Accessibility check on the changed pages.

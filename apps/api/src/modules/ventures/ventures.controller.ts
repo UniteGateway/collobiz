@@ -19,7 +19,7 @@ import { and, asc, desc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle
 import { z } from 'zod';
 import { MICRO_SOURCES, VENTURE_ROLES, VENTURE_STAGES, ventureAvailability } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
-import { crmActivities, crmDeals, customers, microContracts, directOfferRecipients, directOffers, enquiries, memberships, solarReferralCodes, notifications, offerSales, organizations, uniteVentures, ventureInterests } from '../../db/schema';
+import { courses, crmActivities, crmDeals, customers, microContracts, propertyProjects, propertyUnits, directOfferRecipients, directOffers, enquiries, memberships, solarReferralCodes, notifications, offerSales, organizations, uniteVentures, ventureInterests } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, Public, RequireCaps, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
@@ -28,6 +28,8 @@ import { randomDigits } from '../../common/crypto';
 import { SolarModule, SolarService } from '../solar/solar.controller';
 
 type Venture = typeof uniteVentures.$inferSelect;
+/** Unite products whose pages show live data from a COLLABIZ module. */
+const SHOWCASE: Record<string, 'property' | 'courses'> = { prodeal: 'property', 'real-bricks': 'property', unitif: 'property', 'unite-learning': 'courses', startsmart: 'courses', 'ai-teacher': 'courses' };
 const PARTNER_ORG = ['partner_company', 'partner_individual'];
 const regulatedLocked = (v: Venture) => !!v.regulatedReason && !v.clearedAt;
 const InterestSchema = z.object({ roles: z.array(z.enum(VENTURE_ROLES)).min(1).max(8), regions: z.array(z.string().trim().min(2).max(6)).max(40).default([]), message: z.string().trim().min(20).max(2000) });
@@ -41,6 +43,8 @@ export const BusinessEnquirySchema = z.object({
   message: z.string().trim().min(10, 'Please tell us a little more (at least 10 characters)').max(2000),
   consent: z.literal(true, { message: 'Consent is required so we can reply' }),
   website: z.string().max(0).optional(),
+  projectId: z.string().uuid().optional().or(z.literal('').transform(() => undefined)),
+  visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date').optional().or(z.literal('').transform(() => undefined)),
   ref: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{4,12}$/).optional().or(z.literal('').transform(() => undefined)),
 });
 const EnquiryStatusSchema = z.object({ status: z.enum(['open', 'handled']) });
@@ -118,7 +122,11 @@ export class VenturesController {
     const work = (MICRO_SOURCES as readonly string[]).includes(slug)
       ? (await this.db.select({ open: sql<number>`count(*) filter (where ${microContracts.status} = 'open')::int`, done: sql<number>`count(*) filter (where ${microContracts.status} in ('paid', 'accepted'))::int` }).from(microContracts).where(eq(microContracts.source, slug)))[0]
       : null;
-    return { ...v, work, related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
+    const showcase = SHOWCASE[slug] === 'property' ? { kind: 'property' as const, items: await this.openProjects() }
+      : SHOWCASE[slug] === 'courses' ? { kind: 'courses' as const, items: (await this.db.select().from(courses).where(eq(courses.status, 'published')).orderBy(courses.level, courses.title).limit(9))
+        .map((c) => ({ id: c.id, title: c.title, summary: c.summary, level: c.level, minutes: c.minutes, modules: (c.modules as unknown[]).length })) }
+      : null;
+    return { ...v, work, showcase, related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
   }
 
   /** Enquiry from a business page. Stored with the business; its operating company (or Unite admins) is notified. */
@@ -129,20 +137,42 @@ export class VenturesController {
   async productEnquiry(@Param('slug') slug: string, @Body(body(BusinessEnquirySchema)) b: z.infer<typeof BusinessEnquirySchema>) {
     const r = await this.svc.bySlug(slug);
     if (!r || regulatedLocked(r.v)) throw new NotFoundException();
+    let details: { projectId: string; projectName: string; visitDate: string | null } | null = null;
+    if (b.projectId || b.visitDate) {
+      if (SHOWCASE[slug] !== 'property') throw new BadRequestException('Site visits are only for property businesses');
+      const project = b.projectId ? (await this.openProjects()).find((x) => x.id === b.projectId) : undefined;
+      if (!project) throw new BadRequestException('Choose one of the projects listed on this page');
+      if (b.visitDate) {
+        const today = new Date().toISOString().slice(0, 10); const max = new Date(Date.now() + 90 * 86400_000).toISOString().slice(0, 10);
+        if (b.visitDate < today || b.visitDate > max) throw new BadRequestException('Choose a visit date in the next 90 days');
+      }
+      details = { projectId: project.id, projectName: project.name, visitDate: b.visitDate ?? null };
+    }
     const reference = `BIZ-${new Date().getFullYear()}-${randomDigits(6)}`;
     // Partner attribution: only a partner's personal code counts (house and customer codes do not).
     const [code] = b.ref ? await this.db.select().from(solarReferralCodes).where(eq(solarReferralCodes.code, b.ref)).limit(1) : [];
     const introducer = code?.ownerUserId ? code : null;
-    await this.db.insert(enquiries).values({ reference, name: b.name, email: b.email, organization: b.organization, topic: 'business', message: b.message, ventureId: r.v.id, kind: b.kind, phone: b.phone, city: b.city, referralCodeId: introducer?.id ?? null });
+    await this.db.insert(enquiries).values({ reference, name: b.name, email: b.email, organization: b.organization, topic: 'business', message: b.message, ventureId: r.v.id, kind: b.kind, phone: b.phone, city: b.city, referralCodeId: introducer?.id ?? null, details });
     if (introducer?.ownerOrgId) {
       const team = await this.db.select({ userId: memberships.userId }).from(memberships).where(and(eq(memberships.organizationId, introducer.ownerOrgId), eq(memberships.status, 'active')));
       if (team.length) await this.db.insert(notifications).values(team.map((m) => ({ userId: m.userId, kind: 'venture', title: `Your ${r.v.name} link brought an enquiry`, body: `${b.name.split(' ')[0]}${b.city ? ` · ${b.city}` : ''} (${reference}). It is recorded as introduced by you.`, link: `/ventures/${r.v.slug}` })));
     }
-    const label = b.kind === 'partner' ? 'partnership enquiry' : b.kind === 'interest' ? 'registration of interest' : 'enquiry';
+    const label = details?.visitDate ? 'site-visit request' : b.kind === 'partner' ? 'partnership enquiry' : b.kind === 'interest' ? 'registration of interest' : 'enquiry';
     await this.mail.send('email', b.email, `${r.v.name} ${label} ${reference}`, `Thank you ${b.name}. ${r.v.name} received your ${label} (${reference}). The team will reply by email.`);
     const users = await this.svc.deciders(r.v);
-    if (users.length) await this.db.insert(notifications).values(users.map((u) => ({ userId: u, kind: 'venture', title: `New ${label} for ${r.v.name}`, body: `${b.name}${b.city ? ` · ${b.city}` : ''}: ${b.message.slice(0, 160)}`, link: `/ventures/${r.v.id}` })));
+    if (users.length) await this.db.insert(notifications).values(users.map((u) => ({ userId: u, kind: 'venture', title: `New ${label} for ${r.v.name}`, body: `${b.name}${b.city ? ` · ${b.city}` : ''}${details ? ` · ${details.projectName}${details.visitDate ? ` on ${details.visitDate}` : ''}` : ''}: ${b.message.slice(0, 160)}`, link: `/ventures/${r.v.id}` })));
     return { reference };
+  }
+
+  /** Unite property projects open to partners and selling: public facts only (no commission, no buyer data). */
+  private async openProjects() {
+    const ps = await this.db.select().from(propertyProjects).where(and(eq(propertyProjects.openToPartners, true), eq(propertyProjects.status, 'selling'))).orderBy(asc(propertyProjects.name)).limit(12);
+    if (!ps.length) return [];
+    const us = await this.db.select({ projectId: propertyUnits.projectId, price: propertyUnits.price, status: propertyUnits.status }).from(propertyUnits).where(inArray(propertyUnits.projectId, ps.map((p) => p.id)));
+    return ps.map((p) => {
+      const avail = us.filter((u) => u.projectId === p.id && u.status === 'available').map((u) => u.price);
+      return { id: p.id, name: p.name, kind: p.kind, city: p.city, region: p.region, reraNumber: p.reraNumber, available: avail.length, priceFrom: avail.length ? Math.min(...avail) : null, priceTo: avail.length ? Math.max(...avail) : null };
+    });
   }
 
   // ---------- Partners ----------
@@ -239,7 +269,7 @@ export class VenturesController {
       enquiries: (await this.db.select({ e: enquiries, by: solarReferralCodes.ownerName, byOrg: organizations.displayName }).from(enquiries)
         .leftJoin(solarReferralCodes, eq(solarReferralCodes.id, enquiries.referralCodeId)).leftJoin(organizations, eq(organizations.id, solarReferralCodes.ownerOrgId))
         .where(eq(enquiries.ventureId, id)).orderBy(desc(enquiries.createdAt)).limit(100))
-        .map(({ e, by, byOrg }) => ({ id: e.id, reference: e.reference, kind: e.kind, name: e.name, email: e.email, phone: e.phone, city: e.city, organization: e.organization, message: e.message, status: e.status, createdAt: e.createdAt, introducedBy: by ? (byOrg ? `${by} · ${byOrg}` : by) : null, crmDealId: e.crmDealId })),
+        .map(({ e, by, byOrg }) => ({ id: e.id, reference: e.reference, kind: e.kind, name: e.name, email: e.email, phone: e.phone, city: e.city, organization: e.organization, message: e.message, status: e.status, createdAt: e.createdAt, introducedBy: by ? (byOrg ? `${by} · ${byOrg}` : by) : null, crmDealId: e.crmDealId, details: e.details })),
     };
   }
 
@@ -278,6 +308,8 @@ export class VenturesController {
     const kind = e.kind === 'partner' ? 'partnership' : e.kind === 'interest' ? 'launch interest' : 'customer enquiry';
     const [d] = await this.db.insert(crmDeals).values({ organizationId: org, customerId: c.id, title: `${v.name}: ${kind} — ${e.name}`, ownerUserId: ctx.userId }).returning();
     const notes = [`Created from website enquiry ${e.reference} on the ${v.name} page.`, `Message: ${e.message}`];
+    const det = e.details as { projectName?: string; visitDate?: string | null } | null;
+    if (det?.projectName) notes.push(`Project: ${det.projectName}${det.visitDate ? ` — preferred site visit ${det.visitDate}` : ''}.`);
     if (code) notes.push(`Introduced by ${code.c.ownerName}${code.org ? ` (${code.org})` : ''} through their partner link. Any reward follows their signed agreement.`);
     await this.db.insert(crmActivities).values(notes.map((body) => ({ organizationId: org, subjectType: 'deal', subjectId: d.id, kind: 'system', body, actorUserId: ctx.userId })));
     await this.db.update(enquiries).set({ crmDealId: d.id, status: 'handled' }).where(eq(enquiries.id, eid));

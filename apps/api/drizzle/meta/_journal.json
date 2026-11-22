@@ -393,6 +393,13 @@
       "when": 1795359953274,
       "tag": "0055_micro_source",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1795364724639,
+      "tag": "0056_enquiry_details",
+      "breakpoints": true
     }
   ]
 }

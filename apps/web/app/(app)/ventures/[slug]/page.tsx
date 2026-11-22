@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { INDIA_STATES, appBrand, sectorName, productUrl } from '@collabiz/types';
 import { Alert, Button, Card, ChipSelect, DescriptionList, Icon, LoadingState, StatusBadge, TextArea } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
+import { MEMBER_LINKS } from '@/components/Products';
 import { INTEREST, VentureMark, roleLabel, stageLabel, type Venture } from '@/components/Ventures';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -42,6 +43,7 @@ export default function VenturePage() {
             {brand?.website && <a className="cz-btn cz-btn-light" href={brand.website} target="_blank" rel="noopener noreferrer">Open {brand.website.replace(/^https?:\/\//, '')}<Icon name="external" size={14} /></a>}
             {v.open && !mine && <a className="cz-btn cz-btn-ghost-light" href="#promote">Promote {v.name}</a>}
             <Link className="cz-btn cz-btn-ghost-light" href={`/businesses/${v.slug}`}>Public page</Link>
+            {MEMBER_LINKS[v.slug] && <Link className="cz-btn cz-btn-light" href={MEMBER_LINKS[v.slug].href}>Open {MEMBER_LINKS[v.slug].title}</Link>}
           </div>
         </div>
       </section>

@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { appBrand } from '@collabiz/types';
 import { ButtonLink, EmptyState, ErrorState, Icon, LoadingState } from '@collabiz/ui';
 import { VentureMark, stageLabel } from '@/components/Ventures';
-import { ProductEnquiry, ProductTile, STATUS_LABEL, SolarLeadForm, WorkPanel, groupName, stagePill, worksWith, type Product } from '@/components/Products';
+import { CourseShowcase, ProductEnquiry, ProductTile, ProjectShowcase, STATUS_LABEL, SolarLeadForm, WorkPanel, type ShowCourse, type ShowProject, groupName, stagePill, worksWith, type Product } from '@/components/Products';
 import { SOLAR_LEAD_SOURCES, productSubdomain } from '@collabiz/types';
 import { useEffect, useState } from 'react';
 import { venturePhoto } from '@/lib/photos';
@@ -12,7 +12,7 @@ import { isNotFound, useQuery } from '@/lib/hooks';
 
 const IC: Record<string, string> = { doc: 'documents', globe: 'map', search: 'search', sparkle: 'award', chart: 'earnings', grid: 'package', shield: 'verify', flag: 'bookmark', people: 'users', clock: 'clock', bell: 'bell', check: 'check', map: 'location' };
 
-type P = Product & { work?: { open: number; done: number } | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
+type P = Product & { showcase?: { kind: 'property'; items: ShowProject[] } | { kind: 'courses'; items: ShowCourse[] } | null; work?: { open: number; done: number } | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
 
 /** A Unite product's own page: overview, features, what it works with, and an enquiry form wired into COLLABIZ. */
 export default function ProductPage() {
@@ -21,6 +21,7 @@ export default function ProductPage() {
   // Partner link: /businesses/<slug>?ref=CODE — kept for this visit so the enquiry is credited to the partner.
   const [ref, setRef] = useState<string | undefined>();
   const [mode, setMode] = useState<'solar' | 'general'>('solar');
+  const [visit, setVisit] = useState<string | undefined>();
   useEffect(() => { const r = new URLSearchParams(window.location.search).get('ref'); if (r && /^[A-Za-z0-9]{4,12}$/.test(r)) setRef(r.toUpperCase()); }, []);
   if (q.loading) return <div className="cz-gp-body"><LoadingState /></div>;
   if (q.error) return <div className="cz-gp-body">{isNotFound(q.error)
@@ -83,13 +84,27 @@ export default function ProductPage() {
           <h2 id="ww-h">Works with</h2>
           <p className="cz-muted" style={{ marginTop: -6 }}>How {p.name} connects to COLLABIZ. “Connected” is live today; “Next” is the planned integration and “Not yet” is waiting on the business, so neither is available yet.</p>
           <ul className="cz-gp-int">{worksWith(p).map((x) => (
-            <li key={x.title}><span className="cz-gp-int-icon" aria-hidden>{x.icon}</span><div><strong>{x.title}</strong><p>{x.text}</p></div><span className={`cz-gp-int-st cz-gp-int-${x.status}`}>{STATUS_LABEL[x.status]}</span></li>
+            <li key={x.title}><span className="cz-gp-int-icon" aria-hidden>{x.icon}</span><div><strong>{x.title}</strong><p>{x.text}</p>{x.href && <a href={x.href}>Open in COLLABIZ (members) →</a>}</div><span className={`cz-gp-int-st cz-gp-int-${x.status}`}>{STATUS_LABEL[x.status]}</span></li>
           ))}</ul>
           {p.related.length > 0 && <>
             <h3 className="cz-gp-h3">More in {groupName(p.sector)}</h3>
             <ul className="cz-gp-grid">{p.related.map((r) => <li key={r.slug}><ProductTile p={r} /></li>)}</ul>
           </>}
         </section>
+
+        {p.showcase?.kind === 'property' && (
+          <section className="cz-gp-section" aria-labelledby="sc-h" id="projects">
+            <h2 id="sc-h">Projects on sale</h2>
+            <ProjectShowcase items={p.showcase.items} onVisit={(id) => { setVisit(id); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }} />
+            <p className="cz-muted" style={{ fontSize: 13 }}>Prices and availability come live from the Unite sales team and can change. Check the project's registration and documents before you book.</p>
+          </section>
+        )}
+        {p.showcase?.kind === 'courses' && (
+          <section className="cz-gp-section" aria-labelledby="sc-h" id="courses">
+            <h2 id="sc-h">Courses you can take now</h2>
+            <CourseShowcase items={p.showcase.items} />
+          </section>
+        )}
 
         {p.work && (
           <section className="cz-gp-section" aria-labelledby="work-h">
@@ -101,8 +116,8 @@ export default function ProductPage() {
         <section id="contact" className="cz-gp-section cz-gp-contact" aria-labelledby="c-h">
           <div>
             {(SOLAR_LEAD_SOURCES as readonly string[]).includes(p.slug) ? <>
-              <h2 id="c-h">Get a solar quote</h2>
-              <p className="cz-muted">{p.name} sends your request to the Unite Solar desk. A solar adviser calls you within two working days to check your roof and bill. There is no charge for the quote.</p>
+              <h2 id="c-h">{p.slug === 'roofz' ? 'Offer your roof, or go solar' : 'Get a solar quote'}</h2>
+              <p className="cz-muted">{p.slug === 'roofz' ? 'Tell us about your roof. The Unite Solar team checks whether it suits a solar project you host (PPA or roof rent) or a system you own, and calls you within two working days. Any lease or PPA terms are agreed in writing before work starts.' : `${p.name} sends your request to the Unite Solar desk. A solar adviser calls you within two working days to check your roof and bill. There is no charge for the quote.`}</p>
             </> : <>
               <h2 id="c-h">{p.stage === 'live' || p.stage === 'pilot' ? `Get in touch with ${p.name}` : `Be first to hear about ${p.name}`}</h2>
               <p className="cz-muted">{stageLabel(p.stage)}. Your message goes to the {p.name} team in COLLABIZ and you get a reference number by email.</p>
@@ -117,7 +132,7 @@ export default function ProductPage() {
               </div>
               {mode === 'solar' ? <SolarLeadForm p={p} refCode={ref} /> : <ProductEnquiry p={p} refCode={ref} />}
             </div>
-          ) : <ProductEnquiry p={p} refCode={ref} />}
+          ) : <ProductEnquiry p={p} refCode={ref} projects={p.showcase?.kind === 'property' ? p.showcase.items : undefined} projectId={visit} />}
         </section>
         <p className="cz-muted cz-gp-note">{p.stage === 'live' ? '' : `${p.name} is at an early stage and may be available only in some areas. `}Nothing on this page is an offer of investment, credit or financial products, and no earnings are guaranteed.</p>
       </div>

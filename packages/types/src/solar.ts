@@ -300,7 +300,9 @@ export function readBill(text: string): BillExtract {
 
 // ---------------- Referrals ----------------
 /** Unite product pages that send solar enquiries into the Unite Solar referral desk. */
-export const SOLAR_LEAD_SOURCES = ['sunx', 'sungate', 'solar-village-mission', 'solcart'] as const;
+export const SOLAR_LEAD_SOURCES = ['sunx', 'sungate', 'solar-village-mission', 'solcart', 'roofz'] as const;
+/** ROOFZ: the owner wants solar for the building, or wants to lease the roof to a solar developer (PPA / rent). */
+export const ROOF_INTENTS = ['solar_for_building', 'lease_roof'] as const;
 export const SOLAR_SITE_TYPES = ['Independent house', 'Apartment / housing society', 'Village household', 'Shop or office', 'Factory or warehouse', 'Farm / pump'] as const;
 /** A solar enquiry from a Unite product page (multipart form fields, coerced). */
 export const SolarProductLeadSchema = z.object({
@@ -314,6 +316,8 @@ export const SolarProductLeadSchema = z.object({
   siteType: z.enum(SOLAR_SITE_TYPES),
   monthlyBill: z.coerce.number().int().min(0).max(1_00_00_000).optional().or(z.literal('').transform(() => undefined)),
   note: z.string().trim().max(600).optional().or(z.literal('').transform(() => undefined)),
+  intent: z.enum(ROOF_INTENTS).optional().or(z.literal('').transform(() => undefined)),
+  roofAreaSqft: z.coerce.number().int().min(50).max(5_000_000).optional().or(z.literal('').transform(() => undefined)),
   consent: z.union([z.literal(true), z.literal('true')], { message: 'Please agree to be contacted about solar' }),
   website: z.string().max(0).optional(),
 });

@@ -172,4 +172,34 @@ describe('Unite Group businesses (ventures)', () => {
     expect(xp.body.work.open).toBeGreaterThanOrEqual(1);
     expect(JSON.stringify(xp.body.work)).not.toContain('Vijayawada'); // counts only
   });
+  it('Wave 2: property projects and site visits, ROOFZ roof offers, courses on learning pages, member links', async () => {
+    const pd = await api(app).get('/v1/public/products/prodeal').expect(200);
+    expect(pd.body.showcase.kind).toBe('property');
+    expect(pd.body.showcase.items.length).toBeGreaterThan(0);
+    const proj = pd.body.showcase.items[0];
+    expect(Object.keys(proj).sort()).toEqual(['available', 'city', 'id', 'kind', 'name', 'priceFrom', 'priceTo', 'reraNumber', 'region'].sort()); // no commission or buyer data
+    const base = { kind: 'customer', name: 'Anil Kumar', email: 'anil@example.com', message: 'Looking for a plot near the highway for a warehouse.', consent: true };
+    const soon = new Date(Date.now() + 5 * 86_400_000).toISOString().slice(0, 10);
+    await api(app).post('/v1/public/products/prodeal/enquiries').send({ ...base, projectId: '00000000-0000-4000-8000-000000000000', visitDate: soon }).expect(400);
+    await api(app).post('/v1/public/products/prodeal/enquiries').send({ ...base, projectId: proj.id, visitDate: '2020-01-01' }).expect(400);
+    await api(app).post('/v1/public/products/wakin/enquiries').send({ ...base, projectId: proj.id }).expect(400); // not a property business
+    const ok = await api(app).post('/v1/public/products/prodeal/enquiries').send({ ...base, projectId: proj.id, visitDate: soon }).expect(201);
+    const v = await one("select id from unite_ventures where slug = 'prodeal'");
+    const d = await api(app).get(`/v1/admin/ventures/${v.id}`).set(auth(t.uniteAdmin)).expect(200);
+    expect(d.body.enquiries.find((x: any) => x.reference === ok.body.reference).details).toMatchObject({ projectId: proj.id, projectName: proj.name, visitDate: soon });
+    expect((await api(app).get('/v1/public/products/unitif').expect(200)).body.showcase.kind).toBe('property');
+    // Learning pages list the published COLLABIZ courses
+    const ul = await api(app).get('/v1/public/products/unite-learning').expect(200);
+    expect(ul.body.showcase.kind).toBe('courses');
+    expect(ul.body.showcase.items.length).toBeGreaterThan(0);
+    expect(ul.body.showcase.items[0]).not.toHaveProperty('questions'); // no answers leak
+    expect((await api(app).get('/v1/public/products/wakin').expect(200)).body.showcase).toBeNull();
+    // ROOFZ: roof owners offer their roof; the lead goes to the Unite Solar desk under the ROOFZ house code
+    let r = api(app).post('/v1/public/solar/leads');
+    for (const [k, val] of Object.entries({ source: 'roofz', name: 'Meena Iyer', phone: '9876577001', city: 'Chennai', region: 'IN-TN', segment: 'commercial', siteType: 'Factory or warehouse', intent: 'lease_roof', roofAreaSqft: '12000', consent: 'true' })) r = r.field(k, val);
+    await r.expect(201);
+    const row = await one("select r.source, r.details, c.code from solar_referrals r join solar_referral_codes c on c.id = r.code_id where r.phone10 = '9876577001'");
+    expect(row).toMatchObject({ source: 'roofz', code: 'ROOFZ' });
+    expect(row.details).toMatchObject({ intent: 'lease_roof', roofAreaSqft: 12000 });
+  });
 });

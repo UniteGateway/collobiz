@@ -3173,3 +3173,50 @@ suites.push({
     await page.getByText('Product not found').waitFor();
   },
 });
+
+suites.push({
+  name: 'Wave 2 · ProDeal site visit reaches admin, ROOFZ roof offer, Unite Learning courses',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, shot }) => {
+    await page.goto(WEB + '/businesses/prodeal');
+    await page.getByRole('heading', { name: 'Projects on sale' }).waitFor();
+    const card = page.locator('[data-project]').first();
+    const projectName = await card.getAttribute('data-project');
+    await card.getByRole('button', { name: 'Book a site visit' }).click();
+    const soon = new Date(Date.now() + 6 * 86_400_000).toISOString().slice(0, 10);
+    await page.getByLabel('Preferred site-visit date (optional)').fill(soon);
+    await page.getByLabel('Your name').fill('Anil Kumar');
+    await page.getByLabel('Email').fill('anil.wave2@example.com');
+    await page.getByLabel('How can we help?').fill('We want to see the plots before deciding.');
+    await page.getByLabel(/I agree that Unite Group may contact me/).check();
+    await page.getByRole('button', { name: 'Send' }).click();
+    const ok = page.getByText(/Thank you — reference BIZ-\d{4}-\d{6}/);
+    await ok.waitFor();
+    const ref = (await ok.textContent()).match(/BIZ-\d{4}-\d{6}/)[0];
+    await shot('wave2-prodeal');
+    // ROOFZ: lease a roof
+    await page.goto(WEB + '/businesses/roofz');
+    await page.getByRole('heading', { name: 'Offer your roof, or go solar' }).waitFor();
+    const f = page.locator('[data-form="solar-lead"]');
+    await f.getByLabel('Lease my roof for solar').check();
+    await f.getByLabel('Your name').fill('Meena Iyer');
+    await f.getByLabel('Mobile number').fill('9876577002');
+    await f.getByLabel('City or village').fill('Chennai');
+    await f.getByLabel('Roof area (sq ft, optional)').fill('12000');
+    await f.getByLabel(/I agree that Unite Solar may call me/).check();
+    await f.getByRole('button', { name: 'Offer my roof' }).click();
+    await page.getByText(/Request received — SOL-/).waitFor();
+    // Learning
+    await page.goto(WEB + '/businesses/unite-learning');
+    await page.getByRole('heading', { name: 'Courses you can take now' }).waitFor();
+    await page.locator('[data-course]').first().getByRole('link', { name: 'Start learning' }).waitFor();
+    // Admin sees the site-visit request with its project
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/ventures');
+    await page.getByRole('link', { name: /ProDeal/ }).first().click();
+    const item = page.locator(`[data-enquiry="${ref}"]`);
+    await item.getByText(projectName).waitFor();
+    await item.getByText('Site visit', { exact: true }).waitFor();
+    await shot('wave2-admin');
+  },
+});

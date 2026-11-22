@@ -42,7 +42,7 @@ const STAFF_ONLY = ['won', 'installed', 'paid'];
 const BILL_KEEP_DAYS = 90;
 type UpFile = { buffer: Buffer; mimetype: string; originalname: string };
 /** House referral codes for Unite product pages (no partner owner, so no referral reward). */
-const HOUSE_CODES: Record<string, [string, string]> = { sunx: ['SUNX', 'SunX'], sungate: ['SUNGATE', 'SUNGATE'], 'solar-village-mission': ['SOLARVM', 'Solar Village Mission'], solcart: ['SOLCART', 'SOLCART'] };
+const HOUSE_CODES: Record<string, [string, string]> = { sunx: ['SUNX', 'SunX'], sungate: ['SUNGATE', 'SUNGATE'], 'solar-village-mission': ['SOLARVM', 'Solar Village Mission'], solcart: ['SOLCART', 'SOLCART'], roofz: ['ROOFZ', 'ROOFZ'] };
 const kitView = (k: typeof solarKits.$inferSelect) => ({
   id: k.id, code: k.code, name: k.name, system: k.system, capacityKw: k.capacityW / 1000, panelW: k.panelW, panelCount: Math.ceil(k.capacityW / k.panelW), inverterKw: k.inverterW / 1000,
   batteryKwh: k.batteryWh != null ? k.batteryWh / 1000 : null, phase: k.phase, price: k.price, warrantyYears: k.warrantyYears, includes: k.includes as string[], description: k.description, status: k.status,
@@ -237,10 +237,10 @@ export class SolarController {
     const readUnits = (bill?.extract as { units?: number } | undefined)?.units;
     const [r] = await this.db.insert(solarReferrals).values({
       codeId: code.id, name: b.name, phone10: p, city: b.city, region: b.region, segment: b.segment, monthlyBill: b.monthlyBill !== undefined ? b.monthlyBill * 100 : null,
-      source: b.source, details: { siteType: b.siteType, note: b.note ?? null }, billId: bill?.id ?? null, roofPhotoId: roof?.id ?? null, consentAt: new Date(),
+      source: b.source, details: { siteType: b.siteType, note: b.note ?? null, intent: b.intent ?? null, roofAreaSqft: b.roofAreaSqft ?? null }, billId: bill?.id ?? null, roofPhotoId: roof?.id ?? null, consentAt: new Date(),
     }).onConflictDoNothing().returning();
     if (!r) throw new ConflictException('This number is already with Unite Solar — we will be in touch');
-    await this.svc.notifyStaff(`New solar lead from ${code.ownerName === 'A COLLABIZ partner' ? 'a partner link' : b.source}: ${b.name}, ${b.city}`, `${b.siteType}${bill ? ' · bill attached' : ''}${roof ? ' · roof photo attached' : ''}.`, '/workspace/solar?tab=referrals');
+    await this.svc.notifyStaff(`New ${b.intent === 'lease_roof' ? 'roof-lease offer' : 'solar lead'} from ${b.source}: ${b.name}, ${b.city}`, `${b.siteType}${b.roofAreaSqft ? ` · ${b.roofAreaSqft} sq ft roof` : ''}${bill ? ' · bill attached' : ''}${roof ? ' · roof photo attached' : ''}.`, '/workspace/solar?tab=referrals');
     if (code.ownerOrgId) await this.svc.notifyOrg(code.ownerOrgId, `Your link brought a solar lead: ${firstName(b.name)}`, `${b.city} via ${b.source}. Unite Solar or your team will call them.`, '/solar?tab=referrals');
     return {
       ok: true, reference: `SOL-${r.id.slice(0, 8).toUpperCase()}`,
