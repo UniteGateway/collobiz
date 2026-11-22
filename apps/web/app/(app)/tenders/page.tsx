@@ -5,6 +5,7 @@ import { Alert, ButtonLink, Card, DataTable, EmptyState, Kpi, Grid, LoadingState
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { fmt, SEALED_NOTE } from '@/components/Tenders';
 import { useQuery } from '@/lib/hooks';
+import { ChartCard, DonutChart, HBarChart } from '@/components/Charts';
 import { useSession } from '@/lib/session';
 
 /** Screen 065 — Tender & RFQ Dashboard. */
@@ -22,6 +23,14 @@ export default function TenderDashboard() {
             <Kpi label="Issued by my organization" value={d.issued.length} />
             <Kpi label="Assigned to me to evaluate" value={d.evaluating.length} accent />
           </Grid>
+          {(d.open.length + d.myBids.length) > 0 && <div className="cz-chart-row">
+            <ChartCard title="Open tenders by sector">
+              <HBarChart caption="Open tenders by sector" data={Object.entries((d.open as any[]).reduce((a: Record<string, number>, t: any) => { const k = sectorName(t.sector); a[k] = (a[k] ?? 0) + 1; return a; }, {})).map(([k, v]) => ({ label: k, value: v as number }))} />
+            </ChartCard>
+            <ChartCard title="My bids by status">
+              <DonutChart caption="My bids by status" centre={{ value: String(d.myBids.length), label: 'bids' }} data={Object.entries((d.myBids as any[]).reduce((a: Record<string, number>, b: any) => { a[b.status] = (a[b.status] ?? 0) + 1; return a; }, {})).map(([k, v]) => ({ label: k.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase()), value: v as number }))} />
+            </ChartCard>
+          </div>}
           <Alert tone="info">{SEALED_NOTE}</Alert>
           <Card title="Open tenders & RFQs">
             <DataTable caption="Open tenders" rows={d.open} empty={<EmptyState title="No open tenders match your organization right now" />} columns={[

@@ -2352,3 +2352,53 @@ a.cz-ops-card:focus-visible { outline: 3px solid #1E6BFF; outline-offset: 2px; }
 .cz-way h3 { margin: 0; font-size: 19px; color: #0B1F3A; } .cz-way p { margin: 0; color: #475467; font-size: 14.5px; }
 .cz-way ul { list-style: none; padding: 0; margin: 0 0 6px; display: grid; gap: 6px; font-size: 14px; } .cz-way li { display: flex; gap: 8px; align-items: center; }
 .cz-way .cz-btn { margin-top: auto; align-self: flex-start; }
+
+/* ---------- Charts kit ---------- */
+.cz-chart-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin: 16px 0; }
+.cz-chart-card { margin: 0; background: #fff; border-radius: var(--cz-radius-lg, 18px); box-shadow: var(--cz-shadow, 0 1px 2px rgba(16,24,40,.06)); padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.cz-chart-card figcaption { display: grid; gap: 2px; } .cz-chart-card figcaption strong { font-size: 15px; color: #0B1F3A; } .cz-chart-card figcaption span { font-size: 12.5px; color: #475467; }
+.cz-colchart { position: relative; }
+.cz-colchart-plot { display: flex; align-items: flex-end; gap: 8px; height: 100%; border-bottom: 1px solid #E4E7EC; padding-top: 18px; }
+.cz-colchart-col { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; cursor: default; }
+.cz-colchart-bar { width: min(36px, 70%); border-radius: 4px 4px 0 0; transition: filter .15s; }
+.cz-colchart-col:hover .cz-colchart-bar { filter: brightness(1.12); }
+.cz-colchart-lbl { position: absolute; bottom: -20px; font-size: 11.5px; color: #475467; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.cz-colchart { margin-bottom: 22px; }
+.cz-chart-tip { position: absolute; top: -6px; transform: translateY(-100%); background: #0B1F3A; color: #fff; font-size: 12px; padding: 5px 8px; border-radius: 8px; white-space: nowrap; z-index: 2; pointer-events: none; }
+.cz-donutchart { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.cz-donut-v { font-size: 17px; font-weight: 700; fill: #0B1F3A; } .cz-donut-l { font-size: 10.5px; fill: #475467; }
+.cz-chart-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; flex: 1; min-width: 170px; font-size: 13px; }
+.cz-chart-legend li { display: grid; grid-template-columns: 12px 1fr auto auto; gap: 8px; align-items: center; padding: 3px 6px; border-radius: 6px; }
+.cz-chart-legend li.on { background: #F2F4F7; } .cz-chart-legend i { width: 12px; height: 12px; border-radius: 3px; }
+.cz-chart-legend strong { color: #101828; font-variant-numeric: tabular-nums; } .cz-chart-legend em { font-style: normal; color: #475467; font-size: 12px; min-width: 34px; text-align: right; }
+.cz-hbarchart { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.cz-hbarchart li { display: grid; grid-template-columns: minmax(90px, 38%) 1fr auto; gap: 10px; align-items: center; font-size: 13px; }
+.cz-hbarchart-l { color: #344054; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cz-hbarchart-track { height: 10px; background: #EEF1F5; border-radius: 999px; overflow: hidden; } .cz-hbarchart-track span { display: block; height: 100%; border-radius: 0 4px 4px 0; }
+.cz-hbarchart strong { font-variant-numeric: tabular-nums; color: #101828; font-size: 13px; }
+
+/* ---------- Design lift v4 (all pages): tiles, empty states, tables, detail lists, cards ---------- */
+.cz-kpi { position: relative; overflow: hidden; transition: transform .18s, box-shadow .18s; }
+.cz-kpi::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, #0B3A7A, #1E6BFF 55%, #22C55E); opacity: .85; }
+a.cz-kpi:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(16,24,40,.10); }
+.cz-kpi:has(.cz-accent) { background: linear-gradient(180deg, #F3FBF6, #fff 70%); }
+.cz-kpi:has(.cz-accent)::before { background: linear-gradient(90deg, #16A34A, #22C55E); }
+.cz-kpi-top { font-size: 13px; color: #475467; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.cz-kpi-top .cz-icon { color: #1E6BFF; background: #EEF4FF; border-radius: 8px; padding: 4px; box-sizing: content-box; }
+.cz-state { border: 1.5px dashed #D0D5DD; border-radius: 18px; background: radial-gradient(circle at 50% 0%, #F3F7FF, #fff 70%); padding: 34px 20px; }
+.cz-card .cz-state, .cz-table-wrap .cz-state { border: 0; background: radial-gradient(circle at 50% 0%, #F5F8FF, transparent 70%); }
+.cz-state-icon { background: linear-gradient(135deg, #E8F0FF, #E7F6EC); color: #0B3A7A; width: 52px; height: 52px; border-radius: 16px; }
+.cz-table th { text-transform: uppercase; letter-spacing: .045em; font-size: 11.5px; color: #475467; }
+.cz-table td a:not(.cz-btn) { font-weight: 600; }
+.cz-table-wrap { border-radius: 14px; }
+.cz-dl { display: grid; grid-template-columns: minmax(130px, 34%) 1fr; margin: 0; border-top: 1px solid #F0F2F5; }
+.cz-dl dt, .cz-dl dd { padding: 10px 0; border-bottom: 1px solid #F0F2F5; margin: 0; font-size: 14px; }
+.cz-dl dt { color: #475467; padding-right: 12px; } .cz-dl dd { color: #101828; font-weight: 500; overflow-wrap: anywhere; }
+.cz-card > h2:first-child, .cz-card-head h2 { font-size: 17px; letter-spacing: -.01em; color: #0B1F3A; }
+.cz-card { transition: box-shadow .18s; }
+.cz-card:hover { box-shadow: 0 1px 2px rgba(16,24,40,.05), 0 10px 26px rgba(16,24,40,.07); }
+.cz-tabs { gap: 4px; }
+.cz-tabs a, .cz-tabs button { border-radius: 10px 10px 0 0; }
+.cz-tabs a:hover, .cz-tabs button:hover { background: #F5F7FA; }
+.cz-hero-compact { min-height: 0; }
+@media (max-width: 640px) { .cz-dl { grid-template-columns: 1fr; } .cz-dl dt { border-bottom: 0; padding-bottom: 0; } }

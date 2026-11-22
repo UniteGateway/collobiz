@@ -4,6 +4,8 @@ import { ButtonLink, Card, DataTable, EmptyState, Grid, Kpi, LoadingState, Progr
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { fmtDate, rupees } from '@/components/Projects';
 import { useQuery } from '@/lib/hooks';
+import { ChartCard, ColumnChart, DonutChart, HBarChart } from '@/components/Charts';
+const short = (minor: number) => { const r = minor / 100; return r >= 1e7 ? `₹${(r / 1e7).toFixed(2)} Cr` : r >= 1e5 ? `₹${(r / 1e5).toFixed(1)} L` : `₹${Math.round(r).toLocaleString('en-IN')}`; };
 
 /** Screen 075 — Active Projects Portfolio. */
 export default function Portfolio() {
@@ -19,6 +21,18 @@ export default function Portfolio() {
             <Kpi label="Completed" value={rows.filter((p) => ['completed', 'closed'].includes(p.status)).length} />
             <Kpi label="As lead or subcontractor" value={rows.filter((p) => p.role !== 'owner').length} />
           </Grid>
+          {rows.length > 0 && <div className="cz-chart-row">
+            <ChartCard title="Certified progress by project" subtitle="Share of milestone value certified by the client">
+              <HBarChart caption="Certified progress by project" max={100} fmt={(v) => `${v}%`} data={rows.map((p) => ({ label: p.code, value: p.certifiedPct ?? 0 }))} />
+            </ChartCard>
+            <ChartCard title="Projects by status">
+              <DonutChart caption="Projects by status" centre={{ value: String(rows.length), label: 'projects' }}
+                data={Object.entries(rows.reduce((a: Record<string, number>, p) => { a[p.status] = (a[p.status] ?? 0) + 1; return a; }, {})).map(([k, v]) => ({ label: k.replace(/^\w/, (c) => c.toUpperCase()), value: v as number }))} />
+            </ChartCard>
+            <ChartCard title="Contract value by project">
+              <ColumnChart caption="Contract value by project" fmt={short} data={rows.map((p) => ({ label: p.code.slice(-6), value: p.value ?? 0 }))} />
+            </ChartCard>
+          </div>}
           <Card>
             <DataTable caption="Projects" rows={rows} empty={<EmptyState title="No projects yet">Projects appear here once a contract is executed and the client starts the project.</EmptyState>} columns={[
               { key: 'title', header: 'Project', render: (p: any) => <><Link href={`/projects/${p.id}`}>{p.title}</Link><div className="cz-mono cz-muted">{p.code}{p.site ? ` · ${p.site}` : ''}</div></> },

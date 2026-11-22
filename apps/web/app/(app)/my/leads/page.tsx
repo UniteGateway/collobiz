@@ -4,12 +4,20 @@ import { sectorName } from '@collabiz/types';
 import { ButtonLink, Card, DataTable, EmptyState, LoadingState, Money, StatusBadge } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { useQuery } from '@/lib/hooks';
+import { ChartCard, DonutChart, HBarChart } from '@/components/Charts';
+import { sectorName as sn } from '@collabiz/types';
+const cap = (k: string) => k.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+const count = (rows: any[], f: (r: any) => string) => Object.entries(rows.reduce((a: Record<string, number>, r) => { const k = f(r); a[k] = (a[k] ?? 0) + 1; return a; }, {})).map(([label, value]) => ({ label, value: value as number }));
 
 /** Screen 026 — My Leads & Pipeline. */
 export default function MyLeads() {
   const q = useQuery<any[]>('/leads');
   return (
     <Screen id="026" actions={<ButtonLink href="/leads/new" variant="accent">Register a lead</ButtonLink>}>
+      {!!q.data?.length && <div className="cz-chart-row" style={{ marginTop: 0 }}>
+        <ChartCard title="Leads by protection status"><DonutChart caption="Leads by protection status" centre={{ value: String(q.data.length), label: 'leads' }} data={count(q.data, (l) => cap(l.claimStatus))} /></ChartCard>
+        <ChartCard title="Leads by sector"><HBarChart caption="Leads by sector" data={count(q.data, (l) => sn(l.sector))} /></ChartCard>
+      </div>}
       <Card>
         {q.loading ? <LoadingState /> : q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : (
           <DataTable caption="My leads" rows={q.data ?? []} empty={<EmptyState title="No leads yet" action={<ButtonLink href="/leads/new">Register your first lead</ButtonLink>}>Registered leads are time-stamped, evidence-sealed and protected once verified.</EmptyState>} columns={[

@@ -33,6 +33,13 @@ export function accessDenial(access: ScreenAccess, me: Me | null): { reason: str
   }
 }
 
+/** Banner photo for an admin page, by path prefix (Pexels licence, see /photos/CREDITS.md). */
+const ADMIN_PHOTO: [string, string][] = [['/verification', 'team-handshake'], ['/finance', 'finance-analysis'], ['/billing', 'finance-report'], ['/reconciliation', 'finance-report'], ['/bank-statements', 'finance-report'],
+  ['/commission-policy', 'finance-charts'], ['/analytics', 'finance-charts'], ['/growth', 'finance-charts'], ['/energy', 'energy-solar-field'], ['/tender', 'build-site-team'], ['/ventures', 'global-skyline'], ['/group-companies', 'global-skyline'],
+  ['/country-partners', 'global-skyline'], ['/users', 'tech-data'], ['/audit', 'tech-data'], ['/risk', 'tech-data'], ['/integrations', 'tech-data'], ['/ai', 'tech-data'], ['/business-offers', 'deal-handshake'], ['/offers', 'deal-handshake'],
+  ['/opportunities', 'deal-handshake'], ['/routing', 'deal-handshake'], ['/lead-conflicts', 'deal-handshake'], ['/resolution', 'team-boardroom'], ['/reputation-appeals', 'team-boardroom'], ['/cms', 'team-desk'], ['/catalogue', 'team-desk'], ['/pilot', 'team-desk'], ['/sla', 'team-desk']];
+const adminPhoto = (path: string) => ADMIN_PHOTO.find(([p]) => path === p || path.startsWith(p + '/') || path.startsWith(p + '-'))?.[1] ?? 'team-boardroom';
+
 export function Screen({ id, children, actions, description, title }: { id: string; children: React.ReactNode; actions?: React.ReactNode; description?: React.ReactNode; title?: string }) {
   const def = SCREENS.find((s) => s.id === id);
   const { me, loading } = useSession();
@@ -45,7 +52,8 @@ export function Screen({ id, children, actions, description, title }: { id: stri
   if (!def) return <ErrorState error={`Unknown screen ${id}`} />;
   return (
     <div data-screen={id}>
-      <PageHeader title={title ?? def.title} screenId={id} eyebrow="Unite Group administration" showScreenId={process.env.NEXT_PUBLIC_SHOW_SCREEN_IDS === 'true'} actions={!denial ? actions : undefined} description={description} />
+      <div className="cz-hero cz-hero-photo cz-hero-compact" data-palette="navy"><img className="cz-hero-img" src={`/photos/${adminPhoto(path)}.webp`} alt="" aria-hidden />
+        <PageHeader title={title ?? def.title} screenId={id} eyebrow="Unite Group administration" showScreenId={process.env.NEXT_PUBLIC_SHOW_SCREEN_IDS === 'true'} actions={!denial ? actions : undefined} description={description} /></div>
       {loading && def.access !== 'public' ? <LoadingState /> : denial ? (
         <div className="cz-card">
           <PermissionDenied reason={denial.reason} />

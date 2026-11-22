@@ -7,7 +7,7 @@ import { moduleFor } from '@/lib/navigation';
 import { useSession, type Me } from '@/lib/session';
 import { isForbidden } from '@/lib/hooks';
 import { HeroArt, MODULE_EXTRAS, ModuleDocuments } from '@/components/ModuleExtras';
-import { MODULE_PHOTO, photo } from '@/lib/photos';
+import { MODULE_PHOTO, bannerPhoto, photo } from '@/lib/photos';
 
 /** Client-side gate (UX only — the API enforces every permission server-side). */
 export function accessDenial(access: ScreenAccess, me: Me | null): { reason: string; action?: { href: string; label: string } } | null {
@@ -65,9 +65,9 @@ export function Screen({ id, page, children, actions, description, title, eyebro
         const head = <PageHeader title={title ?? def.title} screenId={sid} eyebrow={(() => { const e = eyebrow ?? mod?.label ?? (def.access === 'public' ? undefined : family); return e && e.toLowerCase() === (title ?? def.title).toLowerCase() ? undefined : e; })()} showScreenId={SHOW_IDS} actions={!denial ? actions : undefined} description={description} />;
         const pic = mod ? MODULE_PHOTO[mod.key] : undefined;
         if (extras) return <div className="cz-hero cz-hero-photo" data-palette={extras.palette}>{pic ? <img className="cz-hero-img" src={photo(pic)} alt="" aria-hidden /> : <HeroArt icon={extras.icon} />}{head}</div>;
-        // Other pages of a module with a photo get a compact photo band behind the title.
-        if (pic && mod?.tabs?.some(([h]) => h === path)) return <div className="cz-hero cz-hero-photo cz-hero-compact" data-palette={MODULE_EXTRAS[mod.key]?.palette ?? 'navy'}><img className="cz-hero-img" src={photo(pic)} alt="" aria-hidden />{head}</div>;
-        return head;
+        // Every other signed-in page gets a compact photo band behind the title (module photo, else by path).
+        if (def.access === 'public') return head;
+        return <div className="cz-hero cz-hero-photo cz-hero-compact" data-palette={(mod && MODULE_EXTRAS[mod.key]?.palette) ?? 'navy'}><img className="cz-hero-img" src={photo(bannerPhoto(path, mod?.key))} alt="" aria-hidden />{head}</div>;
       })()}
       {mod?.tabs && !mod.ownTabs && mod.tabs.some(([h]) => h === path) && (
         <nav aria-label={`${mod.label} sections`} className="cz-tabs">{mod.tabs.map(([h, l]) => <UiLink key={h} href={h} aria-current={h === path ? 'page' : undefined}>{l}</UiLink>)}</nav>

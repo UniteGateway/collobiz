@@ -26,3 +26,21 @@ export const PROGRAMMES: { title: string; text: string; href: string; photo: str
   { title: 'Trade & XCHANGE', text: 'RFQs, purchase orders, barter and part-cash deals.', href: '/xchange', photo: 'trade-port' },
   { title: 'Energy marketplace', text: 'Unite Green Park — plants, buyers, delivered cost and licensed traders.', href: '/energy', photo: 'energy-wind-solar' },
 ];
+
+/** Banner photo for pages outside a module (or in a module without its own photo), by path prefix. Longest prefix wins. */
+export const PATH_PHOTO: [string, string][] = [
+  ['/profile', 'office-open'], ['/company', 'team-boardroom'], ['/settings', 'office-open'], ['/onboarding', 'team-handshake'], ['/verify', 'team-handshake'],
+  ['/vault', 'finance-report'], ['/library', 'finance-report'], ['/documents', 'finance-report'], ['/inbox', 'office-loft'], ['/messages', 'office-loft'], ['/chat', 'office-loft'],
+  ['/notifications', 'office-loft'], ['/announcements', 'office-loft'], ['/meetings', 'team-boardroom'], ['/search', 'tech-data'], ['/help', 'office-open'], ['/support', 'office-open'],
+  ['/community', 'team-startup'], ['/teams', 'team-meeting'], ['/partners', 'team-handshake'], ['/consortiums', 'team-boardroom'], ['/xchange', 'trade-warehouse-team'],
+  ['/learning', 'team-laptop'], ['/certificates', 'team-laptop'], ['/resources', 'team-desk'], ['/performance', 'growth-green-energy'], ['/reputation', 'growth-green-energy'],
+  ['/finance', 'finance-charts'], ['/commissions', 'finance-analysis'], ['/earnings', 'finance-analysis'], ['/contracts', 'deal-signing'], ['/leads', 'person-laptop'],
+  ['/crm', 'person-laptop'], ['/global', 'global-city'], ['/workspace', 'team-desk'], ['/apps', 'tech-data'], ['/ai', 'tech-data'], ['/erp', 'finance-report'],
+  ['/solar', 'energy-rooftop-install'], ['/franchise', 'property-solar-home'], ['/property', 'property-modern-house'], ['/rfq', 'trade-warehouse'], ['/packages', 'build-site-team'],
+  ['/proof', 'team-handshake'], ['/business-qr', 'team-handshake'], ['/store', 'trade-warehouse'],
+];
+export function bannerPhoto(path: string, moduleKey?: string): string {
+  if (moduleKey && MODULE_PHOTO[moduleKey]) return MODULE_PHOTO[moduleKey];
+  const hit = PATH_PHOTO.filter(([pre]) => path === pre || path.startsWith(pre + '/')).sort((a, b) => b[0].length - a[0].length)[0];
+  return hit ? hit[1] : 'office-open';
+}

@@ -75,6 +75,18 @@ export function Shell({ children }: { children: ReactNode }) {
   );
 }
 
+/** Banner photo per Power Lab section (Pexels licence, see /photos/CREDITS.md). */
+const POWER_PHOTO: [string, string][] = [['voltage', 'energy-solar-field'], ['open-access', 'energy-panel-roof'], ['interstate', 'energy-solar-field'], ['finance', 'finance-analysis'], ['reports', 'finance-report'],
+  ['hybrid', 'energy-wind-solar'], ['wind', 'energy-wind-solar'], ['bess', 'energy-ev-carport'], ['battery', 'energy-ev-carport'], ['solar', 'energy-panel-roof'], ['automation', 'tech-data'], ['settings', 'tech-data'], ['dispatch', 'energy-control-room']];
+
 export function PageTitle({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
-  return <div className="mb-6 flex flex-wrap items-end justify-between gap-3"><div><h1 className="text-[28px] font-semibold tracking-tight">{title}</h1>{subtitle && <p className="mt-1 max-w-3xl text-[14px] text-slate-500 dark:text-slate-400">{subtitle}</p>}</div>{actions}</div>;
+  const path = usePathname();
+  const pic = POWER_PHOTO.find(([k]) => path.includes(k))?.[1] ?? 'energy-control-room';
+  return (
+    <div className="relative mb-6 overflow-hidden rounded-3xl bg-[#04203f] text-white">
+      <img src={`/photos/${pic}.webp`} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-60" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#04203f] via-[#04203f]/85 to-[#04203f]/30" aria-hidden />
+      <div className="relative flex flex-wrap items-end justify-between gap-3 px-7 py-7"><div><h1 className="text-[28px] font-semibold tracking-tight">{title}</h1>{subtitle && <p className="mt-1 max-w-3xl text-[14px] text-slate-200">{subtitle}</p>}</div>{actions}</div>
+    </div>
+  );
 }

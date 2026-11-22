@@ -6,6 +6,8 @@ import { Alert, Button, Dialog, Grid, Kpi, LoadingState, Money, Select, TextArea
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
+import { ChartCard, ColumnChart, HBarChart } from '@/components/Charts';
+const short = (minor: number) => { const r = minor / 100; return r >= 1e7 ? `₹${(r / 1e7).toFixed(2)} Cr` : r >= 1e5 ? `₹${(r / 1e5).toFixed(1)} L` : `₹${Math.round(r).toLocaleString('en-IN')}`; };
 import { toMinor } from '@/lib/regions';
 
 const LABEL = PIPELINE_STAGE_LABELS;
@@ -26,6 +28,14 @@ export default function Pipeline() {
   return (
     <Screen id="053" actions={<><Link href="/crm/customers" className="cz-btn cz-btn-secondary">Customers</Link><Button onClick={() => setCreate(true)}>New deal</Button></>}>
       <Grid cols={3}><Kpi label="Open deals" value={d.metrics.open} /><Kpi label="Open pipeline value" value={<Money minor={d.metrics.openValue} />} accent /><Kpi label="Win rate" value={d.metrics.winRate == null ? '—' : `${d.metrics.winRate}%`} /></Grid>
+      <div className="cz-chart-row">
+        <ChartCard title="Pipeline value by stage" subtitle="Open and closed deals — pipeline is not revenue">
+          <ColumnChart caption="Pipeline value by stage" fmt={short} data={d.columns.map((c: any) => ({ label: LABEL[c.stage], value: c.value }))} />
+        </ChartCard>
+        <ChartCard title="Deals by stage">
+          <HBarChart caption="Deals by stage" data={d.columns.map((c: any) => ({ label: LABEL[c.stage], value: c.deals.length }))} />
+        </ChartCard>
+      </div>
       <div className="cz-kanban" style={{ marginTop: 16 }} role="list" aria-label="Pipeline stages">
         {d.columns.map((c: any) => (
           <section key={c.stage} className="cz-kanban-col" role="listitem" aria-label={`${LABEL[c.stage]}: ${c.deals.length} deals`}>
