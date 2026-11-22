@@ -14,13 +14,13 @@
   --color-green-500: #22c55e;
   --color-amber-500: #f59e0b;
   --color-red-500: #ef4444;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: Roboto, "Segoe UI", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
   --radius-xl2: 1.25rem;
 }
 
 :root { color-scheme: light; }
 .dark { color-scheme: dark; }
-html, body { background: #f7f8fb; }
+html, body { background: #f8fafd; } /* Material canvas */
 .dark body, html.dark { background: #070d1a; }
 body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
 :focus-visible { outline: 2px solid var(--color-blue-500); outline-offset: 2px; }

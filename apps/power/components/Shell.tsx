@@ -43,7 +43,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const signOut = async () => { await api('/api/auth/logout', { method: 'POST' }); router.push('/login'); };
   return (
     <div className="min-h-screen text-navy-900 dark:text-slate-100">
-      <aside className={cn('fixed inset-y-0 left-0 z-40 w-64 overflow-y-auto border-r border-slate-200/70 bg-white/90 px-3 py-5 backdrop-blur-xl transition-transform dark:border-white/10 dark:bg-navy-950/90 lg:translate-x-0 no-print', open ? 'translate-x-0' : '-translate-x-full')}>
+      <aside className={cn('fixed inset-y-0 left-0 z-40 w-64 overflow-y-auto bg-[#f8fafd] px-3 py-5 transition-transform dark:border-white/10 dark:bg-navy-950/90 lg:translate-x-0 no-print', open ? 'translate-x-0' : '-translate-x-full')}>
         <div className="mb-6 flex items-center gap-2 px-3">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-blue-500 to-green-500 text-white"><Zap size={18} /></span>
           <div><div className="text-[15px] font-semibold leading-tight">Unite Power Dispatch</div><div className="text-[11px] text-slate-500">Solar + BESS optimiser</div></div>
@@ -51,13 +51,13 @@ export function Shell({ children }: { children: ReactNode }) {
         <nav aria-label="Main" className="flex flex-col gap-0.5">
           {NAV.map(({ href, label, icon: I }, i) => {
             const active = href === '/' ? path === '/' : path.startsWith(href);
-            return <Link key={href} href={href} onClick={() => setOpen(false)} aria-current={active ? 'page' : undefined} className={cn('flex items-center gap-3 rounded-xl px-3 py-2 text-[14px] transition-colors', active ? 'bg-navy-900 text-white dark:bg-blue-500' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10')}><I size={17} aria-hidden /><span className="flex-1">{label}</span><span className="text-[10px] opacity-50">{i + 1}</span></Link>;
+            return <Link key={href} href={href} onClick={() => setOpen(false)} aria-current={active ? 'page' : undefined} className={cn('flex min-h-10 items-center gap-3 rounded-full px-4 py-2 text-[14px] font-medium transition-colors', active ? 'bg-[#d6e2f5] font-bold text-[#011e48] dark:bg-blue-500/30 dark:text-white' : 'text-[#1f1f1f] hover:bg-[#011e48]/[.06] dark:text-slate-300 dark:hover:bg-white/10')}><I size={17} aria-hidden /><span className="flex-1">{label}</span><span className="text-[10px] opacity-50">{i + 1}</span></Link>;
           })}
         </nav>
         <p className="mt-6 px-3 text-[11px] leading-relaxed text-slate-500">Unite Developers Global Inc. · powered by Unite Group Inc., USA</p>
       </aside>
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-30 flex flex-wrap items-end gap-3 border-b border-slate-200/70 bg-white/80 px-4 py-3 backdrop-blur-xl dark:border-white/10 dark:bg-navy-950/80 sm:px-6 no-print">
+        <header className="sticky top-0 z-30 flex flex-wrap items-end gap-3 bg-[#f8fafd] px-4 py-3 dark:border-white/10 dark:bg-navy-950/80 sm:px-6 no-print">
           <button className="rounded-lg p-2 lg:hidden" aria-label="Open navigation" onClick={() => setOpen(!open)}><BarChart3 size={18} /></button>
           <Select label="Dispatch mode" className="min-w-[200px]" value={s.mode} onChange={(e) => set({ mode: e.target.value as never })} options={[{ value: 'max_reliability', label: 'Maximum reliability' }, { value: 'max_savings', label: 'Maximum customer savings' }, { value: 'max_profit', label: 'Maximum developer profit' }]} />
           <Select label="Weather" className="min-w-[170px]" value={s.scenario} onChange={(e) => set({ scenario: e.target.value as never })} options={[{ value: 'typical', label: 'Typical year' }, { value: 'sunny', label: 'Sunny year' }, { value: 'monsoon_heavy', label: 'Heavy monsoon' }, { value: 'low_production', label: 'Low production' }]} />
