@@ -1,4 +1,5 @@
 import { energyDemo } from './seed-energy';
+import { eb5Demo } from './seed-eb5';
 import { collabOpsDemo } from './seed-collab-ops';
 import { networkDemo } from './seed-network';
 /** Stage-specific demo data, appended as stages are delivered. Must stay idempotent. */
@@ -491,6 +492,7 @@ export async function seedStages(db: Db, refs: SeedRefs) {
   await venturesDemo(db, refs);
   await energyDemo(db, refs);
   await collabOpsDemo(db, refs);
+  await eb5Demo(db, refs);
   await growthDemo(db, refs);
   await groupCompaniesDemo(db, refs);
   await franchiseDemo(db, refs);
