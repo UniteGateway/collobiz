@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { venturePhoto } from '@/lib/photos';
 import { useParams } from 'next/navigation';
-import { INDIA_STATES, appBrand, sectorName } from '@collabiz/types';
+import { INDIA_STATES, appBrand, sectorName, productUrl } from '@collabiz/types';
 import { Alert, Button, Card, ChipSelect, DescriptionList, Icon, LoadingState, StatusBadge, TextArea } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { INTEREST, VentureMark, roleLabel, stageLabel, type Venture } from '@/components/Ventures';
@@ -101,7 +101,7 @@ export default function VenturePage() {
               </form>
             </Card>
           ) : <Card title="Coming soon"><p style={{ margin: 0 }}>{v.name} is not open to partners yet. It will appear under “Open to partners” when Unite Group starts working with partners on it.</p></Card>)}
-          {v.myLink && <PartnerLink name={v.name} link={v.myLink} />}
+          {v.myLink && <PartnerLink name={v.name} slug={v.slug} link={v.myLink} />}
           <Card title={`Offers from ${v.name}`}>
             {!v.offers.length ? <p className="cz-muted" style={{ margin: 0 }}>No offers for you yet.{mine?.status === 'approved' ? ' They will appear here and on your Home page.' : ''}</p> : (
               <ul className="cz-pick-list">{v.offers.map((o) => <li key={o.id} className="cz-row" style={{ justifyContent: 'space-between' }}><Link href={`/offers/${o.id}`}>{o.title}</Link><span className="cz-muted cz-mono" style={{ fontSize: 12.5 }}>{o.code}</span></li>)}</ul>
@@ -114,9 +114,10 @@ export default function VenturePage() {
 }
 
 /** Personal tracked link to the public product page; enquiries through it are recorded as introduced by this partner. */
-function PartnerLink({ name, link }: { name: string; link: { code: string; path: string; enquiries: number; converted: number } }) {
+function PartnerLink({ name, slug, link }: { name: string; slug: string; link: { code: string; path: string; enquiries: number; converted: number } }) {
   const [copied, setCopied] = useState(false);
-  const url = typeof window !== 'undefined' ? `${window.location.origin}${link.path}` : link.path;
+  const domain = process.env.NEXT_PUBLIC_PRODUCTS_DOMAIN;
+  const url = domain ? productUrl(slug, { productsDomain: domain, ref: link.code }) : typeof window !== 'undefined' ? `${window.location.origin}${link.path}` : link.path;
   return (
     <Card title="Your partner link" id="partner-link">
       <p style={{ marginTop: 0 }}>Share this link to the {name} page. Enquiries and solar requests sent through it are recorded as introduced by you.</p>

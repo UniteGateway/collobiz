@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { BannerHeader } from '@/components/Banner';
 import Link from 'next/link';
-import { VENTURE_STAGE_LABELS, sectorName } from '@collabiz/types';
+import { VENTURE_STAGE_LABELS, sectorName, productSubdomain, productUrl } from '@collabiz/types';
 import { Alert, Card, EmptyState, LoadingState, SearchInput, Segmented, StatusBadge } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
@@ -36,6 +36,10 @@ export default function VenturesAdmin() {
                 <StatusBadge status={r.regulated && !r.cleared ? 'on_hold' : r.open ? 'open' : 'pending'} label={r.availability} /></div>
               <strong className="cz-offer-title"><Link href={`/ventures/${r.id}`}>{r.name}</Link> <span className="cz-muted" style={{ fontWeight: 400, fontSize: 14 }}>— {r.tagline}</span></strong>
               <span className="cz-muted">{r.category}{r.company ? ` · ${r.company}` : ''}{r.regulated && !r.cleared ? ` · ${r.regulatedReason}` : ''}</span>
+              <span style={{ fontSize: 13.5 }} data-subdomain={productSubdomain(r.slug)}>
+                {r.regulated && !r.cleared ? <span className="cz-muted">Public page ready · published after regulatory clearance · </span> : <span className="cz-muted">Public page live · </span>}
+                <a href={productUrl(r.slug, { productsDomain: process.env.NEXT_PUBLIC_PRODUCTS_DOMAIN || undefined, webUrl: process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000' })} target="_blank" rel="noopener noreferrer">{process.env.NEXT_PUBLIC_PRODUCTS_DOMAIN ? `${productSubdomain(r.slug)}.${process.env.NEXT_PUBLIC_PRODUCTS_DOMAIN}` : `/businesses/${r.slug}`}</a>
+              </span>
               <div className="cz-offer-stats" style={{ alignItems: 'center' }}>
                 <span><strong>{r.promoters}</strong> promoters</span>{r.pending > 0 && <span><strong>{r.pending}</strong> requests</span>}<span><strong>{r.offers}</strong> offers</span>{r.wonValue > 0 && <span><strong>₹{Math.round(r.wonValue / 100).toLocaleString('en-IN')}</strong> won</span>}
                 {!(r.regulated && !r.cleared) && <span className="cz-row" style={{ marginLeft: 'auto', gap: 8, flexWrap: 'nowrap', whiteSpace: 'nowrap' }}><span style={{ fontSize: 13.5, color: 'var(--cz-navy-900)' }}>Open to partners</span><button type="button" role="switch" aria-checked={r.open} aria-label={`${r.name} open to partners`} className="cz-switch" data-on={r.open || undefined} onClick={() => toggle.run(r)}><span /></button></span>}

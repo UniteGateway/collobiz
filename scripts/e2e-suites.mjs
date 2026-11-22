@@ -3149,3 +3149,27 @@ suites.push({
     await shot('wave1-xpert');
   },
 });
+
+suites.push({
+  name: 'Product subdomains · sunx., powertek., goeb5. and a regulated product',
+  only: 'desktop',
+  run: async ({ page, WEB, expect }) => {
+    const host = new URL(WEB).host; // localhost:3000 — Chromium resolves *.localhost to this machine
+    await page.goto(`http://sunx.${host}/`);
+    await page.getByRole('heading', { level: 1, name: 'SunX' }).waitFor();
+    expect(new URL(page.url()).pathname === '/', 'the subdomain home page shows the product without redirecting');
+    const f = page.locator('[data-form="solar-lead"]');
+    await f.getByLabel('Your name').fill('Subdomain Visitor');
+    await f.getByLabel('Mobile number').fill('9811122299');
+    await f.getByLabel('City or village').fill('Guntur');
+    await f.getByLabel(/I agree that Unite Solar/).check();
+    await f.getByRole('button', { name: 'Request a solar quote' }).click();
+    await page.getByText(/Request received — SOL-/).waitFor();
+    await page.goto(`http://powertek.${host}/`);
+    await page.getByRole('heading', { level: 1, name: 'Unite Powertek' }).waitFor();
+    await page.goto(`http://goeb5.${host}/`);
+    await page.getByRole('heading', { name: 'Online preliminary consultancy application' }).waitFor();
+    await page.goto(`http://bestpe.${host}/`);
+    await page.getByText('Product not found').waitFor();
+  },
+});

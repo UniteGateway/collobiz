@@ -5,7 +5,7 @@ import { appBrand } from '@collabiz/types';
 import { ButtonLink, EmptyState, ErrorState, Icon, LoadingState } from '@collabiz/ui';
 import { VentureMark, stageLabel } from '@/components/Ventures';
 import { ProductEnquiry, ProductTile, STATUS_LABEL, SolarLeadForm, WorkPanel, groupName, stagePill, worksWith, type Product } from '@/components/Products';
-import { SOLAR_LEAD_SOURCES } from '@collabiz/types';
+import { SOLAR_LEAD_SOURCES, productSubdomain } from '@collabiz/types';
 import { useEffect, useState } from 'react';
 import { venturePhoto } from '@/lib/photos';
 import { isNotFound, useQuery } from '@/lib/hooks';
@@ -54,6 +54,7 @@ export default function ProductPage() {
             <div><dt>Status</dt><dd><span className={`cz-gp-pill cz-gp-pill-${pill.tone}`}>{pill.label}</span></dd></div>
             <div><dt>Category</dt><dd>{p.category}</dd></div>
             {p.company && <div><dt>Operated by</dt><dd>{p.company}</dd></div>}
+            {process.env.NEXT_PUBLIC_PRODUCTS_DOMAIN && <div><dt>Web address</dt><dd>{productSubdomain(p.slug)}.{process.env.NEXT_PUBLIC_PRODUCTS_DOMAIN}</dd></div>}
           </dl>
         </div>
         <div className="cz-gp-phero-media">

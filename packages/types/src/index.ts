@@ -36,6 +36,7 @@ export * from './module-documents';
 export * from './dashboard';
 export * from './community';
 export * from './app-brands';
+export * from './product-domains';
 export * from './action-os';
 export * from './energy';
 export * from './collab-ops';
