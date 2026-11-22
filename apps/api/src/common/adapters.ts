@@ -11,7 +11,7 @@ import { randomUUID } from 'node:crypto';
 import { InjectDb, type Db } from '../db/client';
 import { outboxMessages } from '../db/schema';
 import { config } from '../config';
-import { sha256, signDownload } from './crypto';
+import { decryptBuffer, encryptBuffer, sha256, signDownload } from './crypto';
 
 export const ALLOWED_MIME: Record<string, string[]> = {
   'application/pdf': ['%PDF'],
@@ -45,6 +45,27 @@ export class StorageService {
     await mkdir(join(path, '..'), { recursive: true });
     await writeFile(path, buf, { mode: 0o600 });
     return { key, sha256: sha256(buf), size: buf.length, mime, scanStatus: 'clean' };
+  }
+
+  /** Same checks as put(), then the file is encrypted before it is written (sensitive personal documents). */
+  async putEncrypted(buf: Buffer, mime: string, prefix: string): Promise<StoredObject> {
+    const checked = await this.validate(buf, mime);
+    const key = `${prefix}/${randomUUID()}.enc`;
+    if (config().STORAGE_DRIVER === 's3') throw new BadRequestException('S3 storage driver requires credentials — see docs/deployment.md (blocker B-03)');
+    const path = join(this.root, key);
+    await mkdir(join(path, '..'), { recursive: true });
+    await writeFile(path, encryptBuffer(buf), { mode: 0o600 });
+    return { ...checked, key };
+  }
+  async getDecrypted(key: string): Promise<Buffer> { return decryptBuffer(await this.get(key)); }
+  private async validate(buf: Buffer, mime: string) {
+    if (buf.length === 0) throw new BadRequestException('File is empty');
+    if (buf.length > MAX_UPLOAD_BYTES) throw new BadRequestException('File exceeds 15 MB limit');
+    const magics = ALLOWED_MIME[mime];
+    if (!magics) throw new BadRequestException('Only PDF, PNG, JPEG or WEBP files are accepted');
+    if (!magics.some((m) => buf.subarray(0, 4).toString('latin1').startsWith(m))) throw new BadRequestException('File content does not match its declared type');
+    if (this.scan(buf) !== 'clean') throw new BadRequestException('File failed security scan');
+    return { key: '', sha256: sha256(buf), size: buf.length, mime, scanStatus: 'clean' as const };
   }
 
   async get(key: string): Promise<Buffer> {

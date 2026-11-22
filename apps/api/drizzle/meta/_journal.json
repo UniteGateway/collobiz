@@ -358,6 +358,13 @@
       "when": 1795027355897,
       "tag": "0050_programme_openings",
       "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1795345200082,
+      "tag": "0051_go_eb5",
+      "breakpoints": true
     }
   ]
 }

@@ -46,6 +46,20 @@ export function decryptField(blob: string): string {
   d.setAuthTag(Buffer.from(tag, 'base64'));
   return Buffer.concat([d.update(Buffer.from(data, 'base64')), d.final()]).toString('utf8');
 }
+/** Whole-file encryption (AES-256-GCM) for sensitive documents: 12-byte IV | 16-byte tag | ciphertext. */
+export function encryptBuffer(plain: Buffer): Buffer {
+  const key = Buffer.from(config().FIELD_ENCRYPTION_KEY, 'hex');
+  const iv = randomBytes(12);
+  const c = createCipheriv('aes-256-gcm', key, iv);
+  const enc = Buffer.concat([c.update(plain), c.final()]);
+  return Buffer.concat([iv, c.getAuthTag(), enc]);
+}
+export function decryptBuffer(blob: Buffer): Buffer {
+  const key = Buffer.from(config().FIELD_ENCRYPTION_KEY, 'hex');
+  const d = createDecipheriv('aes-256-gcm', key, blob.subarray(0, 12));
+  d.setAuthTag(blob.subarray(12, 28));
+  return Buffer.concat([d.update(blob.subarray(28)), d.final()]);
+}
 export const maskTail = (s: string, keep = 4) => (s.length <= keep ? s : '•'.repeat(Math.min(8, s.length - keep)) + s.slice(-keep));
 
 // ---- Minimal HS256 JWT (no external dependency; alg pinned to HS256) ----

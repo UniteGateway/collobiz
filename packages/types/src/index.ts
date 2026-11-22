@@ -41,3 +41,4 @@ export * from './energy';
 export * from './collab-ops';
 export * from './trust-finance';
 export * from './programmes';
+export * from './eb5';
