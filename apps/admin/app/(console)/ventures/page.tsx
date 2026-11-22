@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import Link from 'next/link';
 import { VENTURE_STAGE_LABELS, sectorName } from '@collabiz/types';
-import { Alert, Card, EmptyState, LoadingState, PageHeader, SearchInput, Segmented, StatusBadge } from '@collabiz/ui';
+import { Alert, Card, EmptyState, LoadingState, SearchInput, Segmented, StatusBadge } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -20,7 +21,7 @@ export default function VenturesAdmin() {
   const pending = (q.data ?? []).reduce((s, r) => s + r.pending, 0);
   return (
     <div>
-      <PageHeader title="Unite businesses" breadcrumb="Unite Group Administration"
+      <BannerHeader title="Unite businesses" breadcrumb="Unite Group Administration"
         description="All Unite Group businesses from the master portfolio. Open a business to let partners ask to promote it, approve promoters, then send them direct offers. Finance and investment businesses stay locked until regulatory review." />
       <div className="cz-row" style={{ marginBottom: 14, gap: 12 }}>
         <Segmented label="Filter" value={tab} onChange={setTab} options={[{ value: 'all', label: `All ${q.data?.length ?? ''}` }, { value: 'open', label: 'Open to partners' }, { value: 'requests', label: `Requests ${pending}` }, { value: 'soon', label: 'Coming soon' }, { value: 'regulated', label: 'Regulatory review' }]} />

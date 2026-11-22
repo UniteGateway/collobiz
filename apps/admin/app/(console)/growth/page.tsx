@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
+import { BannerHeader } from '@/components/Banner';
 import { GROWTH_AGENT_STATUS_LABELS, GROWTH_AUDIENCE_LABELS } from '@collabiz/types';
-import { Alert, Button, ButtonLink, Card, EmptyState, Kpi, LoadingState, PageHeader, StatusBadge } from '@collabiz/ui';
+import { Alert, Button, ButtonLink, Card, EmptyState, Kpi, LoadingState, StatusBadge } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -17,7 +18,7 @@ export default function GrowthDesk() {
   const d = q.data;
   return (
     <div>
-      <PageHeader title="Growth Desk" breadcrumb="Unite Group Administration"
+      <BannerHeader title="Growth Desk" breadcrumb="Unite Group Administration"
         description="AI campaign agents, one per Unite product or service. They look through the lead database, score who fits and draft personal messages. Nothing is sent until a person approves it."
         actions={<div className="cz-row" style={{ gap: 8 }}>
           <ButtonLink href="/growth/contacts" variant="secondary">Lead database</ButtonLink>

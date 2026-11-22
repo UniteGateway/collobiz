@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { Alert, Button, Card, Checkbox, EmptyState, LoadingState, PageHeader, Segmented, StatusBadge, TextArea } from '@collabiz/ui';
+import { BannerHeader } from '@/components/Banner';
+import { Alert, Button, Card, Checkbox, EmptyState, LoadingState, Segmented, StatusBadge, TextArea } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -17,7 +18,7 @@ export default function BusinessOfferChecks() {
   const q = useQuery<Offer[]>(`/admin/business-offers?status=${status}`);
   return (
     <div className="cz-stack" style={{ gap: 16 }}>
-      <PageHeader title="Business offer checks" description="Partners’ offers go live only after these checks. Record only the checks you actually did — they are shown to everyone who views the offer." />
+      <BannerHeader title="Business offer checks" description="Partners’ offers go live only after these checks. Record only the checks you actually did — they are shown to everyone who views the offer." />
       <Segmented label="Show" value={status} onChange={setStatus} options={[{ value: 'pending_verification', label: 'Waiting for checks' }, { value: 'active', label: 'Live' }, { value: 'suspended', label: 'Suspended' }, { value: 'all', label: 'All' }]} />
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !q.data ? <LoadingState /> : !q.data.length ? <Card><EmptyState icon="verify" title="Nothing here">No offers in this state.</EmptyState></Card> : (
         q.data.map((o) => <Review key={o.id} o={o} onDone={q.reload} />)

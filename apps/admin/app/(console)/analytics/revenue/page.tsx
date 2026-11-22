@@ -1,6 +1,7 @@
 'use client';
 import { sectorName } from '@collabiz/types';
-import { Alert, Card, LoadingState, PageHeader } from '@collabiz/ui';
+import { BannerHeader } from '@/components/Banner';
+import { Alert, Card, LoadingState } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { useQuery } from '@/lib/hooks';
 
@@ -28,7 +29,7 @@ export default function Revenue() {
   const d = q.data;
   return (
     <div className="cz-stack" style={{ gap: 18 }}>
-      <PageHeader title="Opportunity to revenue" breadcrumb="Overview" description="From registered lead to settled commission. Each figure measures something different — estimates, contracts, invoices and money received are never added together." />
+      <BannerHeader title="Opportunity to revenue" breadcrumb="Overview" description="From registered lead to settled commission. Each figure measures something different — estimates, contracts, invoices and money received are never added together." />
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !d ? <LoadingState /> : (
         <>
           <div className="cz-figures">

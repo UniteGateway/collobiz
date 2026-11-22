@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { useRouter } from 'next/navigation';
 import { COUNTRIES, GROWTH_AUDIENCES, GROWTH_AUDIENCE_LABELS, GROWTH_CADENCES, GROWTH_CADENCE_LABELS, INDIA_STATES, SECTORS, blockedClaimsIn } from '@collabiz/types';
-import { Alert, Button, Card, ChipSelect, PageHeader, Select, TextArea, TextInput } from '@collabiz/ui';
+import { Alert, Button, Card, ChipSelect, Select, TextArea, TextInput } from '@collabiz/ui';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
@@ -30,7 +31,7 @@ export default function NewAgent() {
   const e = save.fieldErrors;
   return (
     <div>
-      <PageHeader title="New agent" breadcrumb="Growth Desk" description="An agent looks for one product or service. It uses only the pitch you approve here — it never invents prices, promises or facts." />
+      <BannerHeader title="New agent" breadcrumb="Growth Desk" description="An agent looks for one product or service. It uses only the pitch you approve here — it never invents prices, promises or facts." />
       <form className="cz-stack" style={{ gap: 16, maxWidth: 860 }} onSubmit={(ev) => { ev.preventDefault(); save.run(); }} noValidate>
         {save.error && <Alert tone="danger">{save.error}</Alert>}
         <Card title="What it promotes">

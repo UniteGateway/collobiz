@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { Alert, Button, Card, Dialog, EmptyState, LoadingState, PageHeader, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
+import { BannerHeader } from '@/components/Banner';
+import { Alert, Button, Card, Dialog, EmptyState, LoadingState, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -19,7 +20,7 @@ export default function Billing() {
   const d = q.data;
   return (
     <div className="cz-stack" style={{ gap: 18 }}>
-      <PageHeader title="Plans & billing" breadcrumb="Finance" description="COLLABIZ’s own plans. Prices are decided by Unite — a plan is offered only after a super admin sets its price and publishes it. Payments arrive by bank transfer until a payment gateway is connected." />
+      <BannerHeader title="Plans & billing" breadcrumb="Finance" description="COLLABIZ’s own plans. Prices are decided by Unite — a plan is offered only after a super admin sets its price and publishes it. Payments arrive by bank transfer until a payment gateway is connected." />
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !d ? <LoadingState /> : (
         <>
           {publish.error && <Alert tone="danger">{publish.error}</Alert>}

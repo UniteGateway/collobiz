@@ -1,8 +1,9 @@
 'use client';
 import Link from 'next/link';
+import { BannerHeader } from '@/components/Banner';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
-import { Alert, Button, Card, LoadingState, PageHeader, Select, StatusBadge } from '@collabiz/ui';
+import { Alert, Button, Card, LoadingState, Select, StatusBadge } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 
 const inr = (p: number) => `₹${(p / 100).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
@@ -26,7 +27,7 @@ export default function BankStatement() {
   const rows = s?.lines.filter((l) => show === 'all' || l.status === 'suggested' || l.status === 'unmatched') ?? [];
   return (
     <div className="cz-stack" style={{ gap: 18 }}>
-      <PageHeader title={s ? s.fileName : 'Bank statement'} breadcrumb="Finance" description={s ? `${s.company} · ${s.lines.length} transactions${s.skippedCount ? ` · ${s.skippedCount} heading or total rows skipped` : ''}` : undefined} />
+      <BannerHeader title={s ? s.fileName : 'Bank statement'} breadcrumb="Finance" description={s ? `${s.company} · ${s.lines.length} transactions${s.skippedCount ? ` · ${s.skippedCount} heading or total rows skipped` : ''}` : undefined} />
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !s ? <LoadingState /> : (
         <>
           {s.payeeReports && <Alert tone="info">Credits you match are recorded as <strong>reported by you</strong>. The client confirms them before the invoice counts as paid.</Alert>}

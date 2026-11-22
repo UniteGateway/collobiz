@@ -27,9 +27,9 @@ export default function TenderDashboard() {
             <ChartCard title="Open tenders by sector">
               <HBarChart caption="Open tenders by sector" data={Object.entries((d.open as any[]).reduce((a: Record<string, number>, t: any) => { const k = sectorName(t.sector); a[k] = (a[k] ?? 0) + 1; return a; }, {})).map(([k, v]) => ({ label: k, value: v as number }))} />
             </ChartCard>
-            <ChartCard title="My bids by status">
+            {d.myBids.length > 0 && <ChartCard title="My bids by status">
               <DonutChart caption="My bids by status" centre={{ value: String(d.myBids.length), label: 'bids' }} data={Object.entries((d.myBids as any[]).reduce((a: Record<string, number>, b: any) => { a[b.status] = (a[b.status] ?? 0) + 1; return a; }, {})).map(([k, v]) => ({ label: k.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase()), value: v as number }))} />
-            </ChartCard>
+            </ChartCard>}
           </div>}
           <Alert tone="info">{SEALED_NOTE}</Alert>
           <Card title="Open tenders & RFQs">

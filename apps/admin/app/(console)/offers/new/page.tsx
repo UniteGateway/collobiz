@@ -1,8 +1,9 @@
 'use client';
 import { Suspense, useEffect, useMemo, useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { COUNTRIES, LOOKING_FOR, LOOKING_FOR_LABELS, OFFER_KINDS, OFFER_KIND_LABELS, OFFER_PRICING, OFFER_PRICING_LABELS, PARTNER_TYPES, PARTNER_TYPE_LABELS, PERCENT_REWARDS, PRICE_UNITS, REWARD_LABELS, REWARD_MODELS, SECTORS, newIdempotencyKey, regionLabel } from '@collabiz/types';
-import { Alert, Button, Card, Checkbox, ChipSelect, PageHeader, SearchInput, Segmented, Select, Tag, TextArea, TextInput } from '@collabiz/ui';
+import { Alert, Button, Card, Checkbox, ChipSelect, SearchInput, Segmented, Select, Tag, TextArea, TextInput } from '@collabiz/ui';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
@@ -53,7 +54,7 @@ function NewOfferForm() {
   const shown = (partners.data ?? []).filter((p) => !search || p.name.toLowerCase().includes(search.toLowerCase()));
   return (
     <div>
-      <PageHeader title="New direct offer" breadcrumb="Unite Group Administration / Direct offers" description="Partners see this in their dashboard and on the app. Only you see their responses." />
+      <BannerHeader title="New direct offer" breadcrumb="Unite Group Administration / Direct offers" description="Partners see this in their dashboard and on the app. Only you see their responses." />
       <form noValidate onSubmit={(ev) => { ev.preventDefault(); create.run(); }} className="cz-stack">
         {create.error && <Alert tone="danger">{create.error}</Alert>}
         <Card title="1. What you are offering">

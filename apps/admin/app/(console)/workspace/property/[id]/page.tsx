@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { useParams } from 'next/navigation';
 import { PROPERTY_KIND_LABELS, UNIT_STATUS_LABELS, UNIT_TYPES, UNIT_TYPE_LABELS } from '@collabiz/types';
-import { Alert, Button, Card, LoadingState, PageHeader, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
+import { Alert, Button, Card, LoadingState, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { WorkspaceNav, inr } from '@/components/Workspace';
 import { api } from '@/lib/api';
@@ -27,7 +28,7 @@ export default function PropertyProjectAdmin() {
   return (
     <div className="cz-ws">
       <WorkspaceNav />
-      <PageHeader title={p.name} breadcrumb="Real estate" description={`${PROPERTY_KIND_LABELS[p.kind]} · ${p.owner} · ${p.city} · ${p.code} · partner commission ${p.commissionBps / 100}%`}
+      <BannerHeader title={p.name} breadcrumb="Real estate" description={`${PROPERTY_KIND_LABELS[p.kind]} · ${p.owner} · ${p.city} · ${p.code} · partner commission ${p.commissionBps / 100}%`}
         actions={<div className="cz-row" style={{ gap: 8 }}><span style={{ fontSize: 14 }}>Open to partners</span><button type="button" role="switch" aria-checked={p.openToPartners} aria-label="Open to partners" className="cz-switch" data-on={p.openToPartners || undefined} onClick={() => act.run(() => api.request('PATCH', `/admin/property/projects/${id}`, { openToPartners: !p.openToPartners }))}><span /></button></div>} />
       {act.error && <Alert tone="danger">{act.error}</Alert>}
       <div className="cz-ws-cols">

@@ -1,7 +1,8 @@
 'use client';
 import { useMemo, useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { SECTORS, sectorName, newIdempotencyKey } from '@collabiz/types';
-import { humanize, Alert, Button, Card, DataTable, Dialog, LoadingState, Money, PageHeader, Select, StatusBadge, Tabs, TextArea, TextInput } from '@collabiz/ui';
+import { humanize, Alert, Button, Card, DataTable, Dialog, LoadingState, Money, Select, StatusBadge, Tabs, TextArea, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -31,7 +32,7 @@ export default function AdminOpportunities() {
   const set = (k: keyof typeof EMPTY) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value });
   return (
     <div>
-      <PageHeader title="Opportunity publishing" breadcrumb="Unite Group Administration / Route A — Unite-owned business" actions={<Button onClick={() => setOpen(true)}>Publish opportunity</Button>} description="Publish Unite-owned products, jobs, RFQs, projects and distributor requests. Partner-originated leads arrive through the routing queue instead." />
+      <BannerHeader title="Opportunity publishing" breadcrumb="Unite Group Administration / Route A — Unite-owned business" actions={<Button onClick={() => setOpen(true)}>Publish opportunity</Button>} description="Publish Unite-owned products, jobs, RFQs, projects and distributor requests. Partner-originated leads arrive through the routing queue instead." />
       {close.error && <Alert tone="danger">{close.error}</Alert>}
       <Tabs value={tab} onChange={setTab} tabs={[{ value: '', label: 'All' }, { value: 'qualification', label: 'Open' }, { value: 'submitted', label: 'Awaiting review (RFQs)' }, { value: 'lost', label: 'Closed' }]} />
       <Card>

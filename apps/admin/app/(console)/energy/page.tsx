@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { ENERGY_STATES } from '@collabiz/types';
-import { Alert, Button, Card, Checkbox, EmptyState, LoadingState, PageHeader, Segmented, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
+import { Alert, Button, Card, Checkbox, EmptyState, LoadingState, Segmented, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -18,7 +19,7 @@ export default function EnergyAdmin() {
   const add = useMutation(async () => { await api.post('/energy/admin/traders', { ...f, state: f.state || undefined, website: f.website || undefined }); setF({ ...f, name: '', licenceNo: '', category: '', validUntil: '', website: '', verified: false }); tr.reload(); return true; });
   return (
     <div className="cz-stack" style={{ gap: 16 }}>
-      <PageHeader title="Unite Green Park" description="Energy listings go live only after a check. Buyer details are visible to you for the check and stay hidden from sellers until the buyer accepts an introduction." />
+      <BannerHeader title="Unite Green Park" description="Energy listings go live only after a check. Buyer details are visible to you for the check and stay hidden from sellers until the buyer accepts an introduction." />
       <Segmented label="Show" value={status} onChange={setStatus} options={[{ value: 'pending', label: 'Waiting for checks' }, { value: 'live', label: 'Live' }, { value: 'rejected', label: 'Rejected' }, { value: 'all', label: 'All' }]} />
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !q.data ? <LoadingState /> : !q.data.length ? <Card><EmptyState icon="verify" title="Nothing here">No energy listings in this state.</EmptyState></Card> : q.data.map((l) => <Review key={l.id} l={l} onDone={q.reload} />)}
       <Card title="Licensed electricity traders" subtitle="Record only licences you have checked against the CERC/SERC register.">

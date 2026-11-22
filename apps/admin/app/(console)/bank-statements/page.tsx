@@ -1,8 +1,9 @@
 'use client';
 import Link from 'next/link';
+import { BannerHeader } from '@/components/Banner';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
-import { Alert, Card, EmptyState, LoadingState, PageHeader } from '@collabiz/ui';
+import { Alert, Card, EmptyState, LoadingState } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -19,7 +20,7 @@ export default function BankStatements() {
   const up = useMutation(async (file: File) => { const fd = new FormData(); fd.append('file', file); const r = await api.upload<{ id: string }>('/finance/bank-statements', fd); router.push(`/bank-statements/${r.id}`); return r; });
   return (
     <div className="cz-stack" style={{ gap: 18 }}>
-      <PageHeader title="Bank statements" breadcrumb="Finance" description="Import a Unite bank statement to match payments against every company’s project invoices. Finance matches count as confirmed. COLLABIZ reads only the uploaded file — it is not connected to any bank." />
+      <BannerHeader title="Bank statements" breadcrumb="Finance" description="Import a Unite bank statement to match payments against every company’s project invoices. Finance matches count as confirmed. COLLABIZ reads only the uploaded file — it is not connected to any bank." />
       <Card title="Import a statement">
         <div className="cz-drop" data-over={over || undefined} onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)} onDrop={(e) => { e.preventDefault(); setOver(false); const f = e.dataTransfer.files[0]; if (f) up.run(f); }}>
           <strong>Drop the statement here</strong>

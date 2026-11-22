@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { useParams } from 'next/navigation';
 import { CONTACT_SOURCE_LABELS, COUNTRIES, GROWTH_AGENT_STATUS_LABELS, GROWTH_AUDIENCE_LABELS, GROWTH_CADENCE_LABELS, GROWTH_LEAD_STATUS_LABELS, GROWTH_MESSAGE_STATUS_LABELS, INDIA_STATES, LAWFUL_BASIS_LABELS, sectorName } from '@collabiz/types';
-import { Alert, Button, Card, DescriptionList, EmptyState, LoadingState, PageHeader, StatusBadge, Tabs, TextArea, TextInput } from '@collabiz/ui';
+import { Alert, Button, Card, DescriptionList, EmptyState, LoadingState, StatusBadge, Tabs, TextArea, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -36,7 +37,7 @@ export default function AgentDetail() {
   const superAdmin = me?.platformRoles.includes('super_admin');
   return (
     <div>
-      <PageHeader title={a.name} breadcrumb="Growth Desk" description={`${a.code} · ${GROWTH_AUDIENCE_LABELS[a.audience]}${a.venture ? ` · ${a.venture.name}` : ''}`}
+      <BannerHeader title={a.name} breadcrumb="Growth Desk" description={`${a.code} · ${GROWTH_AUDIENCE_LABELS[a.audience]}${a.venture ? ` · ${a.venture.name}` : ''}`}
         actions={<div className="cz-row" style={{ gap: 8 }}>
           <StatusBadge status={a.status} tone={a.status === 'active' ? 'success' : a.status === 'paused' ? 'warning' : 'neutral'} label={GROWTH_AGENT_STATUS_LABELS[a.status]} />
           {a.status !== 'active' && <Button variant="secondary" disabled={a.needsClearance} onClick={() => act.run(() => api.request('PATCH', `/admin/growth/agents/${id}`, { status: 'active' }))}>Switch on</Button>}

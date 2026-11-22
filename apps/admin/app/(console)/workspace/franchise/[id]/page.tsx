@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { useParams } from 'next/navigation';
 import { FRANCHISE_FORMAT_LABELS, FRANCHISE_STATUS_LABELS, INDIA_STATES, ORDER_NEXT, ORDER_STATUS_LABELS, STATEMENT_STATUS_LABELS } from '@collabiz/types';
-import { Alert, Button, Card, Checkbox, DescriptionList, Kpi, LoadingState, PageHeader, StatusBadge, TextInput } from '@collabiz/ui';
+import { Alert, Button, Card, Checkbox, DescriptionList, Kpi, LoadingState, StatusBadge, TextInput } from '@collabiz/ui';
 import { Bars, ORDER_TONE, STATEMENT_TONE, monthShort, rupees } from '@/components/Franchise';
 import { ApiErrorView } from '@/components/Screen';
 import { WorkspaceNav, inr, webUrl } from '@/components/Workspace';
@@ -31,7 +32,7 @@ export default function FranchiseUnit() {
   return (
     <div className="cz-ws">
       <WorkspaceNav />
-      <PageHeader title={`${u.brand} — ${u.city}`} breadcrumb="Franchise network" description={`${u.franchisee} · ${FRANCHISE_FORMAT_LABELS[u.format]} · ${u.code}`} actions={<StatusBadge status={u.status} label={FRANCHISE_STATUS_LABELS[u.status]} />} />
+      <BannerHeader title={`${u.brand} — ${u.city}`} breadcrumb="Franchise network" description={`${u.franchisee} · ${FRANCHISE_FORMAT_LABELS[u.format]} · ${u.code}`} actions={<StatusBadge status={u.status} label={FRANCHISE_STATUS_LABELS[u.status]} />} />
       {act.error && <Alert tone="danger">{act.error}</Alert>}
       <div className="cz-ws-cols">
         <div className="cz-ws">

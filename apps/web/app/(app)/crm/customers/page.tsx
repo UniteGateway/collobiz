@@ -15,7 +15,7 @@ export default function Customers() {
   const create = useMutation(async () => { await api.post('/crm/customers', { legalName: f.legalName, contactName: f.contactName || undefined, contactEmail: f.contactEmail || undefined, city: f.city || undefined }); setOpen(false); list.reload(); return true; });
   return (
     <div>
-      <PageHeader title="Customers" breadcrumb="Lead Registration & Client CRM" actions={<Button onClick={() => setOpen(true)}>Add customer</Button>} />
+      <div className="cz-hero cz-hero-photo cz-hero-compact" data-palette="navy"><img className="cz-hero-img" src="/photos/person-laptop.webp" alt="" aria-hidden /><PageHeader title="Customers" breadcrumb="Lead Registration & Client CRM" actions={<Button onClick={() => setOpen(true)}>Add customer</Button>} /></div>
       <Card>
         <TextInput label="Search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Name or city" />
         {list.loading ? <LoadingState /> : list.error ? <ApiErrorView error={list.error} onRetry={list.reload} /> : (

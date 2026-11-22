@@ -2090,7 +2090,7 @@ a.cz-app-tile:hover { border-color: transparent; box-shadow: var(--cz-shadow-hov
 .cz-notice-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; }
 .cz-notice-src { color: var(--cz-muted, #64748B); flex: 1; min-width: 0; }
 .cz-band { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; background: #F1F5F9; color: #475467; white-space: nowrap; }
-.cz-band.cz-band-p0 { background: #FEE4E2; color: #B42318; } .cz-band.cz-band-p1 { background: #FEF0C7; color: #B54708; } .cz-band.cz-band-p2 { background: #D1E9FF; color: #175CD3; }
+.cz-band.cz-band-p0 { background: #FEE4E2; color: #B42318; } .cz-band.cz-band-p1 { background: #FEF0C7; color: #93370D; } .cz-band.cz-band-p2 { background: #D1E9FF; color: #1849A9; }
 .cz-verif { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid #D0D5DD; color: #344054; white-space: nowrap; }
 .cz-verif-confirmed { border-color: #A6F4C5; color: #027A48; background: #ECFDF3; } .cz-verif-reported { border-color: #FEDF89; color: #B54708; }
 .cz-verif-missing { border-color: #FECDCA; color: #B42318; } .cz-verif-ai { border-style: dashed; border-color: #B692F6; color: #6941C6; background: #F9F5FF; }

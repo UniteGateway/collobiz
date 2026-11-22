@@ -1,5 +1,6 @@
 'use client';
-import { Card, LoadingState, PageHeader, StatusBadge } from '@collabiz/ui';
+import { Card, LoadingState, StatusBadge } from '@collabiz/ui';
+import { BannerHeader } from '@/components/Banner';
 import { ApiErrorView } from '@/components/Screen';
 import { useQuery } from '@/lib/hooks';
 
@@ -10,7 +11,7 @@ export default function Integrations() {
   const q = useQuery<P[]>('/integrations');
   return (
     <div className="cz-stack" style={{ gap: 18 }}>
-      <PageHeader title="Integrations" breadcrumb="Workspace" description="Each of these needs an account, contract or approval before it can be switched on. Until then the feature tells users it is not connected and offers the manual route below." />
+      <BannerHeader title="Integrations" breadcrumb="Workspace" description="Each of these needs an account, contract or approval before it can be switched on. Until then the feature tells users it is not connected and offers the manual route below." />
       <Card>{q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !q.data ? <LoadingState /> : (
         <ul className="cz-ws-list">{q.data.map((p) => (
           <li key={p.key} data-integration={p.key} style={{ alignItems: 'flex-start' }}>

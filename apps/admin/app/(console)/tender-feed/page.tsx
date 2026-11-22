@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { sectorName } from '@collabiz/types';
-import { Alert, Button, Card, EmptyState, LoadingState, PageHeader, Select, StatusBadge, TextInput } from '@collabiz/ui';
+import { Alert, Button, Card, EmptyState, LoadingState, Select, StatusBadge, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -21,7 +22,7 @@ export default function TenderFeed() {
   const rows = q.data?.leads.filter((l) => show === 'all' || l.status === show) ?? [];
   return (
     <div className="cz-stack" style={{ gap: 18 }}>
-      <PageHeader title="Tender feed" breadcrumb="Opportunities & routing" description="Public tenders read from a feed file (RSS or Atom from CPPP, GeM or a state portal). Review them and shortlist the ones worth sending to partners. Nothing reaches partners automatically." />
+      <BannerHeader title="Tender feed" breadcrumb="Opportunities & routing" description="Public tenders read from a feed file (RSS or Atom from CPPP, GeM or a state portal). Review them and shortlist the ones worth sending to partners. Nothing reaches partners automatically." />
       <Card title="Import a feed file">
         <div className="cz-row" style={{ gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
           <div style={{ minWidth: 200 }}><TextInput label="Source name" value={source} onChange={(e) => setSource(e.target.value)} /></div>

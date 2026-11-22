@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { VENTURE_ROLE_LABELS, VENTURE_STAGES, VENTURE_STAGE_LABELS, levelLabel, regionLabel, sectorName } from '@collabiz/types';
-import { Alert, Button, Card, DescriptionList, EmptyState, Icon, Kpi, LoadingState, PageHeader, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
+import { Alert, Button, Card, DescriptionList, EmptyState, Icon, Kpi, LoadingState, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -27,7 +28,7 @@ export default function VentureAdmin() {
   const locked = v.regulated && !v.cleared;
   return (
     <div>
-      <PageHeader title={v.name} breadcrumb="Unite Group Administration / Unite businesses" description={`${v.tagline} · ${v.category}`}
+      <BannerHeader title={v.name} breadcrumb="Unite Group Administration / Unite businesses" description={`${v.tagline} · ${v.category}`}
         actions={<div className="cz-row">{!locked && <Button size="sm" variant={v.open ? 'secondary' : 'accent'} loading={save.pending} onClick={() => save.run({ open: !v.open })}>{v.open ? 'Close to partners' : 'Open to partners'}</Button>}<StatusBadge status={locked ? 'on_hold' : v.open ? 'open' : 'pending'} label={v.availability} /></div>} />
       <p style={{ marginTop: -6 }}><Link href="/ventures" className="cz-back"><Icon name="prev" size={14} />All businesses</Link></p>
       {save.error && <Alert tone="danger">{save.error}</Alert>}

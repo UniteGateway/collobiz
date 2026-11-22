@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { PILOT_CONTINUE_LABELS, PILOT_FEATURE_LABELS } from '@collabiz/types';
-import { Alert, Button, Card, EmptyState, LoadingState, PageHeader, Segmented } from '@collabiz/ui';
+import { Alert, Button, Card, EmptyState, LoadingState, Segmented } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -34,7 +35,7 @@ export default function PilotResults() {
   const total = r ? r.continueUse.yes + r.continueUse.maybe + r.continueUse.no : 0;
   return (
     <div>
-      <PageHeader title="Pilot feedback" breadcrumb="Unite Group Administration"
+      <BannerHeader title="Pilot feedback" breadcrumb="Unite Group Administration"
         description="Weekly check-ins from pilot partners. Use it in the pilot review: are partners finding it useful, what blocks them, and would they keep using it?"
         actions={<div className="cz-row" style={{ gap: 8 }}>
           <Button variant="secondary" loading={remind.pending} onClick={() => remind.run()}>Send reminder</Button>

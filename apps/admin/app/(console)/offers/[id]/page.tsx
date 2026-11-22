@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { COMMISSION_STATE_LABELS, OFFER_KIND_LABELS, OFFER_PRICING_LABELS, REWARD_LABELS, levelLabel, regionLabel, sectorName } from '@collabiz/types';
-import { Alert, Button, Card, DescriptionList, EmptyState, Icon, Kpi, LoadingState, PageHeader, StatusBadge, TextInput } from '@collabiz/ui';
+import { Alert, Button, Card, DescriptionList, EmptyState, Icon, Kpi, LoadingState, StatusBadge, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -33,7 +34,7 @@ export default function OfferAdmin() {
   const live = o.responses.filter((r) => r.status === 'submitted');
   return (
     <div>
-      <PageHeader title={o.title} breadcrumb="Unite Group Administration / Direct offers"
+      <BannerHeader title={o.title} breadcrumb="Unite Group Administration / Direct offers"
         description={<><span className="cz-mono">{o.code}</span> · {o.issuer} · {OFFER_KIND_LABELS[o.kind]} · {sectorName(o.sector)} · {o.regions.length ? o.regions.map(regionLabel).join(', ') : 'Anywhere'}</>}
         actions={<div className="cz-row"><StatusBadge status={o.status} label={o.open ? 'Open' : o.status === 'open' ? 'Past deadline' : undefined} />{o.status === 'open' && <><Button size="sm" variant="secondary" onClick={() => setClosing('close')}>Close</Button><Button size="sm" variant="ghost" onClick={() => setClosing('withdraw')}>Withdraw</Button></>}</div>} />
       <p style={{ marginTop: -6 }}><Link href="/offers" className="cz-back"><Icon name="prev" size={14} />All offers</Link></p>

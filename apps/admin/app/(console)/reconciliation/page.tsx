@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
+import { BannerHeader } from '@/components/Banner';
 import { PAYMENT_STATE_LABELS } from '@collabiz/types';
-import { Alert, Button, Card, EmptyState, LoadingState, PageHeader, StatusBadge } from '@collabiz/ui';
+import { Alert, Button, Card, EmptyState, LoadingState, StatusBadge } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -17,7 +18,7 @@ export default function Reconciliation() {
   const confirm = useMutation(async (rid: string) => { await api.post(`/payment-receipts/${rid}/confirm`, {}); q.reload(); return true; });
   return (
     <div className="cz-stack" style={{ gap: 18 }}>
-      <PageHeader title="Payment reconciliation" breadcrumb="Finance" description="Project invoices against the payments recorded for them. Money moves between the parties’ own bank accounts — COLLABIZ does not hold funds." />
+      <BannerHeader title="Payment reconciliation" breadcrumb="Finance" description="Project invoices against the payments recorded for them. Money moves between the parties’ own bank accounts — COLLABIZ does not hold funds." />
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !d ? <LoadingState /> : (
         <>
           <div className="cz-figures">

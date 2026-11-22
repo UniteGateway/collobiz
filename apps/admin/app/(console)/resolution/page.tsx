@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { RESOLUTION_DECISION_LABELS, RESOLUTION_KIND_LABELS } from '@collabiz/types';
-import { Alert, Button, Card, Dialog, EmptyState, LoadingState, PageHeader, Select, StatusBadge, TextArea } from '@collabiz/ui';
+import { Alert, Button, Card, Dialog, EmptyState, LoadingState, Select, StatusBadge, TextArea } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -19,7 +20,7 @@ export default function ResolutionCentre() {
   const rows = q.data?.cases.filter((c) => !kind || c.kind === kind) ?? [];
   return (
     <div className="cz-stack" style={{ gap: 18 }}>
-      <PageHeader title="Resolution centre" breadcrumb="Partners & compliance" description="All disputes in one queue. Assign a reviewer who belongs to neither party; they read the record and decide with reasons. Appeals go to a super admin." />
+      <BannerHeader title="Resolution centre" breadcrumb="Partners & compliance" description="All disputes in one queue. Assign a reviewer who belongs to neither party; they read the record and decide with reasons. Appeals go to a super admin." />
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !q.data ? <LoadingState /> : (
         <>
           <div className="cz-figures">

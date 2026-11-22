@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { CONTACT_SOURCES, CONTACT_SOURCE_LABELS, COUNTRIES, INDIA_STATES, LAWFUL_BASES, LAWFUL_BASIS_LABELS, SECTORS, sectorName } from '@collabiz/types';
-import { Alert, Button, Card, Dialog, EmptyState, LoadingState, PageHeader, SearchInput, Segmented, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
+import { Alert, Button, Card, Dialog, EmptyState, LoadingState, SearchInput, Segmented, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -34,7 +35,7 @@ export default function GrowthContacts() {
   const optOut = useMutation(async (id: string) => { await api.post(`/admin/growth/contacts/${id}/opt-out`, {}); q.reload(); return true; });
   return (
     <div>
-      <PageHeader title="Lead database" breadcrumb="Growth Desk"
+      <BannerHeader title="Lead database" breadcrumb="Growth Desk"
         description="Companies, associations, institutions and investors that agents may consider. Every contact records where it came from and the lawful basis for contacting it. Contacts without a basis are kept but never contacted."
         actions={<div className="cz-row" style={{ gap: 8 }}><Button variant="secondary" onClick={() => setImporting(true)}>Import CSV</Button><Button onClick={() => setAdding(true)}>Add contact</Button></div>} />
       <Alert tone="info">Only use sources you are allowed to use: enquiries, referrals with consent, events, opt-in lists, public company registries and licensed directories. Do not copy contacts from social networks or scraped websites.</Alert>

@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { useParams } from 'next/navigation';
 import { SOLAR_MODEL_LABELS, SOLAR_QUOTE_STATUS_LABELS, SOLAR_SYSTEM_LABELS, regionLabel, type SolarQuoteCalc } from '@collabiz/types';
-import { Alert, Button, Card, DescriptionList, LoadingState, PageHeader, StatusBadge, TextInput } from '@collabiz/ui';
+import { Alert, Button, Card, DescriptionList, LoadingState, StatusBadge, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { WorkspaceNav, inr } from '@/components/Workspace';
 import { api } from '@/lib/api';
@@ -28,7 +29,7 @@ export default function SolarQuoteAdmin() {
   return (
     <div className="cz-ws">
       <WorkspaceNav />
-      <PageHeader title={`${d.customer.name} — ${d.capacityKw} kW`} breadcrumb="Unite Solar desk" description={`${SOLAR_MODEL_LABELS[d.model]}${d.model !== 'ppa' ? ` · ${SOLAR_SYSTEM_LABELS[d.system]}` : ''} · ${d.code} · ${d.partner ?? 'Unite Solar'}`} actions={<StatusBadge status={d.status} label={SOLAR_QUOTE_STATUS_LABELS[d.status]} />} />
+      <BannerHeader title={`${d.customer.name} — ${d.capacityKw} kW`} breadcrumb="Unite Solar desk" description={`${SOLAR_MODEL_LABELS[d.model]}${d.model !== 'ppa' ? ` · ${SOLAR_SYSTEM_LABELS[d.system]}` : ''} · ${d.code} · ${d.partner ?? 'Unite Solar'}`} actions={<StatusBadge status={d.status} label={SOLAR_QUOTE_STATUS_LABELS[d.status]} />} />
       <div className="cz-ws-cols">
         <div className="cz-ws">
           <Card title="Figures">

@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
+import { BannerHeader } from '@/components/Banner';
 import { CRITERION_LABELS } from '@collabiz/types';
-import { Alert, Button, Card, Dialog, EmptyState, LoadingState, PageHeader, StatusBadge, TextArea } from '@collabiz/ui';
+import { Alert, Button, Card, Dialog, EmptyState, LoadingState, StatusBadge, TextArea } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -15,7 +16,7 @@ export default function TenderReviews() {
   const [open, setOpen] = useState<Item | null>(null);
   return (
     <div className="cz-stack" style={{ gap: 18 }}>
-      <PageHeader title="Tender eligibility reviews" breadcrumb="Tenders" description="Partners ask Unite to confirm the conditions COLLABIZ extracted from a tender. Check each one against the original document before confirming." />
+      <BannerHeader title="Tender eligibility reviews" breadcrumb="Tenders" description="Partners ask Unite to confirm the conditions COLLABIZ extracted from a tender. Check each one against the original document before confirming." />
       <Card>{q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !q.data ? <LoadingState /> : !q.data.length ? <EmptyState icon="tenders" title="No reviews requested" /> : (
         <ul className="cz-ws-list">{q.data.map((a) => (
           <li key={a.id} data-review={a.title}><span><strong>{a.title}</strong><br /><span className="cz-muted" style={{ fontSize: 13 }}>{a.organization} · {a.criteria} conditions · {a.pages} pages · {new Date(a.createdAt).toLocaleDateString('en-IN')}</span></span>

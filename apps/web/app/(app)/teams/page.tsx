@@ -10,7 +10,7 @@ export default function MyTeams() {
   const q = useQuery<any[]>('/teams');
   return (
     <div>
-      <PageHeader title="My collaboration teams" breadcrumb="Collaboration & Partner Matching" actions={<><ButtonLink href="/collaboration/requests" variant="secondary">Incoming requests</ButtonLink><ButtonLink href="/teams/new">Create team</ButtonLink></>} />
+      <div className="cz-hero cz-hero-photo cz-hero-compact" data-palette="navy"><img className="cz-hero-img" src="/photos/team-meeting.webp" alt="" aria-hidden /><PageHeader title="My collaboration teams" breadcrumb="Collaboration & Partner Matching" actions={<><ButtonLink href="/collaboration/requests" variant="secondary">Incoming requests</ButtonLink><ButtonLink href="/teams/new">Create team</ButtonLink></>} /></div>
       <Card>{q.loading ? <LoadingState /> : q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : (
         <DataTable caption="Teams" rows={q.data ?? []} empty={<EmptyState title="No teams yet" />} columns={[
           { key: 'name', header: 'Team', render: (t) => <><Link href={`/teams/${t.id}/workspace`}>{t.name}</Link><div className="cz-mono cz-muted">{t.code} · {t.kind}</div></> },
