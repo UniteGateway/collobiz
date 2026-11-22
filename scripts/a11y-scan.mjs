@@ -34,6 +34,14 @@ await p.getByLabel('Email').fill('meera@consult.example'); await p.getByLabel('P
 for (const u of ['/earnings', '/earnings/summary', '/earnings/live', '/commissions/calculator', '/payouts/request', '/payments/history', '/tax-records', '/finance/opportunities', '/finance/enquiry', '/finance/disputes', '/commissions/disputes']) await scan(WEB + u);
 const agid = await p.evaluate(async () => (await (await fetch('/api/v1/commissions/agreements')).json())[0]?.id);
 if (agid) { await scan(`${WEB}/commissions/agreements/${agid}`); await scan(`${WEB}/commissions/agreements/${agid}/milestones`); }
+// GO EB5 — partner, client and staff views
+for (const u of ['/eb5/partner', '/eb5/leads', '/eb5/leads/new']) await scan(WEB + u);
+{ const { webLogin, webLoginMfa } = await import('./e2e-suites.mjs');
+  await webLogin(p, WEB, 'client@goeb5.example'); for (const u of ['/eb5/portal', '/eb5/apply']) await scan(WEB + u);
+  await webLoginMfa(p, WEB, 'manager@goeb5.example');
+  for (const u of ['/eb5', '/eb5/leads', '/eb5/applications', '/eb5/consultations', '/eb5/agreements', '/eb5/documents', '/eb5/cases', '/eb5/projects', '/eb5/tasks', '/eb5/reports']) await scan(WEB + u);
+  const lid = await p.evaluate(async () => (await (await fetch('/api/v1/eb5/leads')).json())[0]?.id); if (lid) await scan(`${WEB}/eb5/leads/${lid}`);
+  await webLoginMfa(p, WEB, 'compliance@collabiz.local'); for (const u of ['/eb5/settings', '/eb5/compliance', '/eb5/partners', '/eb5/disputes', '/eb5/audit']) await scan(WEB + u); }
 await scan(ADMIN + '/login');
 await b.close();
 process.exit(total ? 1 : 0);

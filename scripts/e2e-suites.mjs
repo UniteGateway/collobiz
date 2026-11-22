@@ -2932,3 +2932,125 @@ suites.push({
     await page.getByRole('button', { name: /^Received \(/ }).waitFor();
   },
 });
+
+suites.push({
+  name: 'GO EB5 · partner introduces, public partner link, client application, legal gates, agreement signed and counter-signed, commencement invoice verified',
+  only: 'desktop',
+  run: async ({ page, WEB, expect, shot }) => {
+    const tag = Date.now().toString(36);
+    // Partner (approved demo partner) introduces a prospect and copies the public link
+    await webLogin(page, WEB, 'meera@consult.example');
+    await page.getByRole('link', { name: 'Partner desk' }).first().waitFor();
+    await page.goto(WEB + '/eb5/partner');
+    const link = await page.locator('.cz-qr-url a').getAttribute('href');
+    await page.goto(WEB + '/eb5/leads/new');
+    await page.getByLabel('Prospect full name').fill(`Neha Sharma ${tag}`);
+    await page.getByLabel('Email').fill(`neha.${tag}@example.com`);
+    await page.getByLabel('Phone').fill('+91 98765 43210');
+    await page.getByLabel(/The prospect has agreed/).check();
+    await page.getByRole('button', { name: 'Register introduction' }).click();
+    await page.getByText(/Lead EB5L-\d{4}-\d{6} registered/).first().waitFor();
+    await shot('eb5-partner-introduced');
+    // A prospect uses the partner's public link (signed out)
+    await page.context().clearCookies();
+    await page.goto(link);
+    await page.getByRole('heading', { name: 'Ask about EB-5 consultancy' }).waitFor();
+    await page.getByLabel('Your full name').fill(`Vikas Rao ${tag}`);
+    await page.getByLabel('Email').fill(`vikas.${tag}@example.com`);
+    await page.getByLabel(/I agree that GO EB5/).check();
+    await page.getByRole('button', { name: 'Send my enquiry' }).click();
+    await page.getByText('Enquiry received').waitFor();
+    // Client completes the preliminary application
+    await webLogin(page, WEB, 'client@goeb5.example');
+    await page.goto(WEB + '/eb5/portal');
+    await page.getByRole('heading', { name: /Welcome, Arjun/ }).waitFor();
+    await page.goto(WEB + '/eb5/apply');
+    await page.getByLabel('Date of birth').fill('1982-03-14');
+    await page.getByLabel('Gender').selectOption('Male');
+    await page.getByLabel('Nationality').fill('Indian');
+    await page.getByLabel('Country of residence').fill('India');
+    await page.getByLabel('Email', { exact: true }).fill('client@goeb5.example');
+    await page.getByLabel('Phone', { exact: true }).fill('+91 90000 00001');
+    await page.getByLabel('Address line 1').fill('5 FC Road');
+    await page.getByLabel('City', { exact: true }).fill('Pune');
+    await page.getByLabel('Country', { exact: true }).fill('India');
+    await page.getByLabel('Occupation').fill('Manufacturer');
+    await page.getByLabel('Marital status').selectOption('Married');
+    await page.getByLabel('Children under 21').fill('1');
+    await page.getByLabel('Proposed investment budget (USD)').fill('900000');
+    await page.getByRole('button', { name: 'Business income' }).click();
+    await page.getByLabel('Consultation').selectOption('Online');
+    await page.getByLabel('Your time zone').fill('Asia/Kolkata');
+    await page.getByLabel(/I agree that GO EB5/).check();
+    await page.getByLabel(/I declare that the information/).check();
+    await page.getByLabel('Type your full name as your electronic signature').fill('Arjun Mehra');
+    await page.getByRole('button', { name: 'Save draft' }).click();
+    await page.getByText('Draft saved').waitFor();
+    await page.getByRole('button', { name: 'Submit application' }).click();
+    await page.getByText(/Application EB5A-\d{4}-\d{6} submitted/).waitFor();
+    await shot('eb5-application-submitted');
+    // Compliance records counsel's approvals
+    await webLoginMfa(page, WEB, 'compliance@collabiz.local');
+    await page.goto(WEB + '/eb5/settings');
+    for (const g of ['agreementTemplateApproved', 'feesApproved', 'invoicingApproved']) {
+      const row = page.locator(`[data-gate="${g}"]`);
+      await row.getByLabel("Counsel's reference").fill('Counsel opinion ref E2E-2026-01');
+      await row.getByRole('button', { name: 'Record approval' }).click();
+      await row.getByText('Approved', { exact: true }).waitFor();
+    }
+    await shot('eb5-legal-approvals');
+    // Manager drafts the agreement and sends it for review
+    await webLoginMfa(page, WEB, 'manager@goeb5.example');
+    await page.goto(WEB + '/eb5/leads');
+    await page.locator('[data-lead="EB5L-2026-100001"]').click();
+    await page.getByRole('button', { name: 'Draft consultancy agreement' }).click();
+    await page.getByText(/CONSULTANCY AGREEMENT between CITRUS360 LLC/).waitFor();
+    const agUrl = page.url();
+    await page.getByRole('button', { name: 'Send for internal review' }).click();
+    await page.getByText('Internal Review', { exact: true }).last().waitFor();
+    await webLoginMfa(page, WEB, 'compliance@collabiz.local');
+    await page.goto(agUrl);
+    await page.getByRole('button', { name: 'Record legal approval' }).click();
+    await page.getByText('Legal Approved', { exact: true }).last().waitFor();
+    await webLoginMfa(page, WEB, 'manager@goeb5.example');
+    await page.goto(agUrl);
+    await page.getByRole('button', { name: 'Send to client' }).click();
+    await page.getByText('Sent to Client', { exact: true }).last().waitFor();
+    // Client signs
+    await webLogin(page, WEB, 'client@goeb5.example');
+    await page.goto(agUrl);
+    await page.getByLabel(/Type your full name/).fill('Arjun Mehra');
+    await page.getByLabel(/I have read and agree/).check();
+    await page.getByRole('button', { name: 'Sign agreement' }).click();
+    await page.getByText(/Client: Arjun Mehra — signed electronically/).waitFor();
+    // CITRUS360 counter-signs and issues the commencement invoice
+    await webLoginMfa(page, WEB, 'citrus.admin@goeb5.example');
+    await page.goto(agUrl);
+    await page.getByRole('button', { name: 'Counter-sign for CITRUS360 LLC' }).click();
+    await page.getByText(/For CITRUS360 LLC: counter-signed/).waitFor();
+    await page.goto(WEB + '/eb5/invoices');
+    await page.getByLabel('Client').first().selectOption({ label: 'Arjun Mehra · EB5L-2026-100001' });
+    await page.getByRole('button', { name: 'Issue invoice' }).click();
+    await page.getByRole('table', { name: 'Invoices and records' }).getByText('$20,000').waitFor();
+    await page.getByRole('table', { name: 'Invoices and records' }).getByRole('link', { name: /^C360-INV-/ }).first().click();
+    await page.waitForURL(/\/eb5\/invoices\/[0-9a-f-]{36}$/);
+    const invUrl = page.url();
+    // Client reports the transfer; finance verifies cleared funds
+    await webLogin(page, WEB, 'client@goeb5.example');
+    await page.goto(invUrl);
+    await page.getByLabel('Bank transfer reference (SWIFT / UTR)').fill('SWIFT-E2E-001');
+    await page.getByRole('button', { name: 'Report payment' }).click();
+    await page.getByText('Payment reported — waiting for finance to confirm cleared funds.').waitFor();
+    await webLoginMfa(page, WEB, 'finance@collabiz.local');
+    await page.goto(invUrl);
+    await page.getByLabel('Bank statement reference').fill('STMT-778');
+    await page.getByRole('button', { name: 'Verify and issue receipt' }).click();
+    await page.getByRole('heading', { name: 'Payment receipt' }).waitFor();
+    await shot('eb5-receipt');
+    await webLogin(page, WEB, 'client@goeb5.example');
+    await page.goto(WEB + '/eb5/portal');
+    await page.getByText('Consultancy Active').first().waitFor();
+    expect(await page.getByText(/guarantee/i).count() === 0 || await page.getByText(/does not guarantee|No outcome, timeline or return is promised/).count() > 0, 'no promises shown to the client');
+    await shot('eb5-client-portal');
+  },
+});

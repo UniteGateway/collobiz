@@ -18,7 +18,13 @@ export default function Eb5Apply() {
   const [d, setD] = useState<Data>({});
   const [savedAt, setSavedAt] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { if (q.data?.application) setD(q.data.application.data ?? {}); else if (q.data) setD({ applicant: { fullName: q.data.lead.fullName } }); }, [q.data]);
+  // Unticked boxes and empty choice lists are real answers ("no", "none"), so they start with those values.
+  useEffect(() => {
+    if (!q.data) return;
+    const base: Data = q.data.application?.data ?? { applicant: { fullName: q.data.lead.fullName } };
+    const inv = (base.investment as Record<string, unknown>) ?? {}; const his = (base.history as Record<string, unknown>) ?? {};
+    setD({ ...base, investment: { sourceOfFunds: [], objectives: [], ...inv }, history: { priorUsVisas: false, priorDenials: false, ...his } });
+  }, [q.data]);
   const sec = (k: string) => (d[k] as Record<string, unknown>) ?? {};
   const set = (k: string, f: string, v: unknown) => setD({ ...d, [k]: { ...sec(k), [f]: v } });
   const val = (k: string, f: string) => (sec(k)[f] as string | undefined) ?? '';

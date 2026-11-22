@@ -22,6 +22,7 @@ One line per module: where it lives and where it is documented. Earlier modules 
 | Proof passport + Business QR | `/proof`, `/business-qr`, `/b/:token` | `modules/trust-finance/proof.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
 | Invoices & P&L, credit notes, expenses | `/finance/pnl`, `/finance/credit-notes` | `modules/trust-finance/books.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
 | Unite programmes + setup checklist | `/collab/programs`, Home | `modules/trust-finance/programmes.controller.ts` | [live-site-comparison.md](live-site-comparison.md) |
+| **GO EB5** (EB-5 consultancy, CITRUS360 LLC; flag `go_eb5`) | `/eb5`, public `/go-eb5/[token]` | `modules/eb5` | [go-eb5/](go-eb5/README.md) |
 | Unite Power Lab (separate app, port 3002) | `apps/power` | Next API routes | [power/PROGRESS.md](power/PROGRESS.md) |
 
 BIZO (www.bizo.one) is listed as Unite business #48 with its brochure features, indicative plans and a link-out. Single
