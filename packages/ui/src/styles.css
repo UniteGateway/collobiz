@@ -2708,3 +2708,6 @@ a.cz-card:hover, .cz-card[href]:hover, .cz-venture:hover, .cz-kpi:hover { box-sh
 .cz-kpi::before { display: none; }
 .cz-kpi[data-accent], .cz-kpi.cz-kpi-accent, .cz-kpi:has(.cz-accent) { background: var(--md-surface); }
 .cz-kpi .cz-label, .cz-kpi span:first-child { color: var(--md-on-variant); }
+/* Outlined buttons on dark surfaces (navy CTA cards, photo heroes) */
+.cz-feature-cta .cz-btn-secondary, .cz-home-cta .cz-btn-secondary, .cz-hero .cz-btn-secondary, .cz-app-hero .cz-btn-secondary { color: #fff; border-color: rgba(255, 255, 255, .7); background: transparent; }
+.cz-feature-cta .cz-btn-secondary:hover, .cz-home-cta .cz-btn-secondary:hover, .cz-hero .cz-btn-secondary:hover, .cz-app-hero .cz-btn-secondary:hover { background: rgba(255, 255, 255, .12); color: #fff; }

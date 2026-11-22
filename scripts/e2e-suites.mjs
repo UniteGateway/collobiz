@@ -1699,8 +1699,8 @@ suites.push({
   run: async ({ page, WEB, ADMIN, shot, expect }) => {
     await page.context().clearCookies();
     await page.goto(WEB + '/businesses');
-    await page.getByRole('region', { name: 'Nano Bazar' }).waitFor();
-    await page.getByRole('region', { name: 'WAKIN' }).waitFor();
+    await page.locator('[data-product="nano-bazar"]').waitFor();
+    await page.locator('[data-product="wakin"]').waitFor();
     expect((await page.content()).includes('Universal Trade Coin') === false, 'regulated business shown publicly');
     await webLogin(page, WEB, 'deepak@deccan.example');
     await page.goto(WEB + '/ventures');
