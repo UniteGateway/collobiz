@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { OFFER_CATEGORIES, SECTORS, sectorName } from '@collabiz/types';
+import { OFFER_CATEGORIES, SECTORS, appBrand, sectorName } from '@collabiz/types';
 import { Icon, Skeleton, type IconName } from '@collabiz/ui';
 import { useQuery } from '@/lib/hooks';
 
@@ -11,244 +11,227 @@ const inrShort = (minor: number) => {
   return `₹${Math.round(r).toLocaleString('en-IN')}`;
 };
 
-const CAPABILITIES: { icon: IconName; title: string; body: string }[] = [
-  { icon: 'leads', title: 'Protected leads', body: 'Register a customer with consent and evidence. A sealed, time-stamped certificate protects your introduction while Unite Group reviews it.' },
-  { icon: 'teams', title: 'Collaboration teams', body: 'Form multi-company teams under a signed NDA, agree roles and revenue shares, and bid together with one voice.' },
-  { icon: 'earnings', title: 'Transparent commissions', body: 'Every rupee is tracked from projected to paid on an append-only ledger. Commission is earned only when the customer pays.' },
-  { icon: 'search', title: 'Explainable matching', body: 'Recommendations show exactly why — sector, region, capacity, certifications — and only include partners who consent.' },
-  { icon: 'verify', title: 'Verified reputation', body: 'Reputation comes from verified delivery, quality and settlement conduct. It cannot be bought or boosted.' },
+/** Everything COLLABIZ does, as one grid. Big tiles carry a photo. */
+const PLATFORM: { icon: IconName; title: string; text: string; href: string; photo?: string; wide?: boolean }[] = [
+  { icon: 'leads', title: 'Protected leads & CRM', text: 'Register a customer with consent and evidence. A time-stamped certificate protects your introduction, and the deal runs in your own pipeline.', href: '/how-it-works', photo: 'team-handshake', wide: true },
+  { icon: 'tenders', title: 'Teams & tenders', text: 'Form multi-company teams under NDA and bid together.', href: '/how-it-works' },
+  { icon: 'projects', title: 'Projects & milestones', text: 'Evidence-backed milestones the client certifies.', href: '/how-it-works' },
+  { icon: 'earnings', title: 'Commissions you can trace', text: 'Projected → eligible → earned → paid, on an append-only ledger.', href: '/how-it-works' },
+  { icon: 'value', title: 'Unite Solar & Green Park', text: 'Rooftop, EPC and PPA quotes from a bill; renewable capacity meets industrial demand with landed-cost estimates.', href: '/businesses/sunite', photo: 'energy-solar-field', wide: true },
+  { icon: 'building', title: 'Property & industrial parks', text: 'Unite residential projects and industrial parks with RERA details, live availability and site-visit booking.', href: '/businesses/prodeal', photo: 'property-tower', wide: true },
+  { icon: 'briefcase', title: 'Micro-contracts & capacity', text: 'Small fixed-price jobs and bookable idle capacity.', href: '/businesses/xpert' },
+  { icon: 'trading', title: 'Business offers & XCHANGE', text: 'Franchises, dealerships, capacity — and barter or part-cash deals.', href: '/login?next=/business-offers' },
+  { icon: 'verify', title: 'Proof passport', text: 'Verified delivery and payment history that buyers can check.', href: '/login?next=/proof' },
+  { icon: 'bell', title: 'ACTION OS', text: 'One board for every follow-up, deadline and approval.', href: '/login?next=/action-os' },
+  { icon: 'learning', title: 'Learning & certificates', text: 'Short courses with certificates partners can share.', href: '/businesses/unite-learning' },
 ];
 
 const STEPS: { icon: IconName; title: string; body: string }[] = [
-  { icon: 'verify', title: 'Join and verify', body: 'Create your company profile and complete KYC/KYB once. Verified partners unlock the full network.' },
-  { icon: 'opportunities', title: 'Bring or find business', body: 'Register a protected lead, or apply to Unite Group and partner opportunities that match your capability.' },
-  { icon: 'teams', title: 'Collaborate and deliver', body: 'Build a team, bid on tenders, sign contracts and track milestones with evidence the client certifies.' },
-  { icon: 'earnings', title: 'Get paid transparently', body: 'Watch commission move to earned when the customer pays, request payout, and keep tax records in one place.' },
+  { icon: 'verify', title: 'Join and verify', body: 'Create your company profile and complete KYC/KYB once.' },
+  { icon: 'opportunities', title: 'Bring or find business', body: 'Register a protected lead or apply to opportunities that fit.' },
+  { icon: 'teams', title: 'Collaborate and deliver', body: 'Team up, bid, sign and track milestones with evidence.' },
+  { icon: 'earnings', title: 'Get paid transparently', body: 'Commission becomes earned when the customer pays.' },
+];
+
+const TRUST: { icon: IconName; title: string; body: string }[] = [
+  { icon: 'lock', title: 'Introductions are protected', body: 'Sealed certificates and timed first reviews.' },
+  { icon: 'verify', title: 'Partners are verified', body: 'KYC/KYB before the full network opens.' },
+  { icon: 'earnings', title: 'Money is never held', body: 'COLLABIZ records payments; it never holds funds.' },
+  { icon: 'award', title: 'Reputation is earned', body: 'From verified delivery — it cannot be bought.' },
+  { icon: 'eye', title: 'Matching is explainable', body: 'Every recommendation shows its reasons.' },
 ];
 
 const ROUTES = [
-  { key: 'A', title: 'Unite-owned business', body: 'Projects and supply opportunities published directly by Unite Group companies.' },
-  { key: 'B', title: 'Partner-originated', body: 'You introduce the customer. Unite Group gets a timed first review; your introduction stays protected.' },
-  { key: 'C', title: 'Partner exchange', body: 'Opportunities Unite releases to verified partners, with the buyer’s consent and the introducer credited.' },
-  { key: 'D', title: 'Joint execution', body: 'Unite Group and partners deliver together under one contract, with shares agreed up front.' },
+  { key: 'A', title: 'Unite-owned business', body: 'Projects and supply published directly by Unite Group companies.' },
+  { key: 'B', title: 'Partner-originated', body: 'You introduce the customer; your introduction stays protected.' },
+  { key: 'C', title: 'Partner exchange', body: 'Opportunities Unite releases to verified partners, introducer credited.' },
+  { key: 'D', title: 'Joint execution', body: 'Unite Group and partners deliver together under one contract.' },
 ];
 
-/** Screen 001 — Public homepage. Figures and the featured listing are live from the platform. */
+/** Screen 001 — Public homepage. Figures, the featured listing, companies and products are live from the platform. */
 export default function HomePage() {
   const stats = useQuery<{ verifiedPartners: number; groupCompanies: number; openOpportunities: number; openValue: number; activeSectors: number; protectedLeads: number; asOf: string }>('/public/stats');
   const featured = useQuery<any[]>('/public/opportunities');
   const companies = useQuery<any[]>('/public/group-companies');
+  const products = useQuery<{ slug: string; name: string; tagline: string }[]>('/public/products');
   const opp = (featured.data ?? [])[0];
   const s = stats.data;
+  const logos = (products.data ?? []).filter((p) => appBrand(p.slug)?.logo).slice(0, 18);
   return (
-    <div data-screen="001" className="cz-home">
-      {/* ---------- Hero ---------- */}
-      <section className="cz-home-hero">
-        <div className="cz-container cz-home-hero-grid">
-          <div>
-            <span className="cz-pill"><span className="cz-pill-dot" />The Unite-first B2B collaboration network</span>
-            <h1>Win more business,<br /><span>together.</span></h1>
-            <p className="cz-home-lede">
-              COLLABIZ connects consultants, EPC contractors, traders, manufacturers and developers with Unite Group and with each other —
-              with protected leads, verified partners and commissions you can trace from introduction to payment.
-            </p>
-            <div className="cz-row" style={{ gap: 12, marginTop: 28 }}>
-              <Link href="/signup" className="cz-btn cz-btn-accent cz-btn-lg">Join as a partner<Icon name="arrow" size={17} /></Link>
-              <Link href="/opportunities/public" className="cz-btn cz-btn-secondary cz-btn-lg">Browse opportunities</Link>
-            </div>
-            <ul className="cz-home-assurances" aria-label="Assurances">
-              <li><Icon name="success" size={16} />Verified partners only</li>
-              <li><Icon name="success" size={16} />Introductions protected by certificate</li>
-              <li><Icon name="success" size={16} />Paid only when the customer pays</li>
-            </ul>
+    <div data-screen="001" className="cz-hx">
+      {/* ---------- Full hero ---------- */}
+      <section className="cz-hx-hero" aria-labelledby="hx-h">
+        <img className="cz-hx-hero-img" src="/photos/energy-solar-field.webp" alt="" aria-hidden fetchPriority="high" />
+        <div className="cz-hx-hero-in">
+          <span className="cz-hx-kicker">The Unite-first B2B collaboration network</span>
+          <h1 id="hx-h">Win more business,<br />together.</h1>
+          <p>COLLABIZ connects consultants, EPC contractors, traders, manufacturers and developers with Unite Group and with each other — with protected leads, verified partners and commissions you can trace from introduction to payment.</p>
+          <div className="cz-hx-ctas">
+            <Link href="/signup" className="cz-hx-btn cz-hx-btn-light">Join as a partner<Icon name="arrow" size={17} /></Link>
+            <Link href="/opportunities/public" className="cz-hx-btn cz-hx-btn-glass">Browse opportunities</Link>
           </div>
+        </div>
+        <dl className="cz-hx-stats" aria-label="Live platform figures">
+          {[
+            ['Verified partners', s?.verifiedPartners],
+            ['Unite Group companies', s?.groupCompanies],
+            ['Open opportunities', s?.openOpportunities],
+            ['Open pipeline value', s ? inrShort(s.openValue) : undefined],
+          ].map(([k, v]) => <div key={k as string}><dt>{k}</dt><dd>{v ?? <Skeleton height={26} width={60} />}</dd></div>)}
+        </dl>
+      </section>
 
-          {/* Product preview built from live data */}
-          <div className="cz-home-preview" aria-label="Product preview">
-            <img className="cz-home-hero-photo" src="/photos/team-handshake.webp" alt="" aria-hidden fetchPriority="high" />
-            <div className="cz-preview-card cz-preview-main">
-              <div className="cz-preview-head"><span className="cz-tag">Featured opportunity</span><span className="cz-badge" style={{ color: '#2F6F25', background: '#E7F4E3' }}>Open</span></div>
-              {opp ? (
-                <>
-                  <div className="cz-mono cz-muted" style={{ marginTop: 14 }}>{opp.code}</div>
-                  <h3 className="cz-preview-title">{opp.title}</h3>
-                  <p className="cz-muted" style={{ fontSize: 13.5, margin: '0 0 16px' }}>{sectorName(opp.sector)} · {[opp.city, opp.region?.replace('IN-', '')].filter(Boolean).join(', ')}</p>
-                  <div className="cz-preview-facts">
-                    <div><span>Indicative value</span><strong>{opp.estimatedValue ? inrShort(opp.estimatedValue) : 'On request'}</strong></div>
-                    <div><span>Closes</span><strong>{opp.deadline ? new Date(opp.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Rolling'}</strong></div>
-                    <div><span>Published by</span><strong>{opp.publisher ?? 'Unite Group'}</strong></div>
-                  </div>
-                </>
-              ) : <div style={{ marginTop: 16 }}><Skeleton height={14} width="40%" /><Skeleton height={22} style={{ marginTop: 10 }} /><Skeleton height={60} style={{ marginTop: 14 }} /></div>}
-            </div>
-            <div className="cz-preview-card cz-preview-float cz-preview-cert">
-              <span className="cz-preview-icon"><Icon name="leads" size={18} /></span>
-              <div><strong>Lead protected</strong><span>Certificate CZL-2026-00000006 · 90 days</span></div>
-            </div>
-            <div className="cz-preview-card cz-preview-float cz-preview-ledger">
-              <div className="cz-preview-ledger-title">Commission · Milestone 2</div>
-              <ol>
-                {['Projected', 'Eligible', 'Earned', 'Paid'].map((st, i) => <li key={st} data-done={i < 3}>{st}</li>)}
-              </ol>
-            </div>
-            <span className="cz-preview-caption">Live listing · status cards are illustrative</span>
-          </div>
+      {/* ---------- What COLLABIZ is ---------- */}
+      <section className="cz-hx-section cz-hx-intro" aria-labelledby="intro-h">
+        <p className="cz-hx-eyebrow">What is COLLABIZ</p>
+        <h2 id="intro-h">One place to find business, work together and get paid.</h2>
+        <p className="cz-hx-lede">Unite Group publishes its demand here first — solar, infrastructure, property, trade and services. Verified businesses bring their own customers, form teams for bigger work, and every introduction, milestone and commission is recorded from start to finish.</p>
+        <div className="cz-hx-pillars">
+          {[
+            { icon: 'opportunities' as IconName, t: 'Find business', d: 'Unite Group opportunities, business offers, tenders and Unite products to sell.' },
+            { icon: 'teams' as IconName, t: 'Work together', d: 'Teams, consortiums, micro-contracts, capacity sharing and barter between businesses.' },
+            { icon: 'earnings' as IconName, t: 'Get paid', d: 'Protected introductions and a commission ledger that pays when the customer pays.' },
+          ].map((p) => <article key={p.t}><span><Icon name={p.icon} size={22} /></span><h3>{p.t}</h3><p>{p.d}</p></article>)}
         </div>
       </section>
 
       {/* ---------- Three ways in ---------- */}
-      <section className="cz-section" aria-labelledby="ways-h">
-        <div className="cz-container">
-          <div className="cz-home-head"><span className="cz-eyebrow">Get started</span><h2 id="ways-h">Three ways in. One network behind them.</h2></div>
-          <div className="cz-ways">
-            {[
-              { tag: 'COLLAB', title: 'Resource-first matching', text: 'Describe what you have and need once. COLLABIZ matches you with business offers, Unite Group programmes and other businesses — and tells you why.', points: ['What I have / What I need profiles', 'Reverse matching between businesses', 'Private rooms, proposals and counters'], href: '/login?next=/collab', cta: 'Start a Collab', photo: 'team-desk' },
-              { tag: 'BUSINESS OFFERS', title: 'A marketplace both sides publish to', text: 'Partnerships, franchises, dealerships, BPO and EPC contracts, idle capacity and businesses for sale — checked by COLLABIZ before they go live.', points: [`${OFFER_CATEGORIES.length} categories, zero-upfront filter`, 'Confidential listings', 'Optional Unite-first review'], href: '/login?next=/business-offers', cta: 'Explore offers', photo: 'deal-handshake' },
-              { tag: 'UNITE GREEN PARK', title: 'Renewable energy marketplace', text: 'Solar, wind, hybrid and storage capacity meets industrial demand — with delivered-cost estimates, protected introductions and a 19-stage deal room.', points: ['Plant and buyer registration', 'Landed-cost calculator by state', 'Licensed trader directory'], href: '/login?next=/energy', cta: 'Enter the marketplace', photo: 'energy-wind-solar' },
-            ].map((w) => (
-              <article key={w.tag} className="cz-way">
-                <img src={`/photos/${w.photo}.webp`} alt="" aria-hidden loading="lazy" />
-                <div className="cz-way-body"><span className="cz-way-tag">{w.tag}</span><h3>{w.title}</h3><p>{w.text}</p>
-                  <ul>{w.points.map((x) => <li key={x}><Icon name="check" size={15} />{x}</li>)}</ul>
-                  <Link className="cz-btn cz-btn-primary" href={w.href}>{w.cta}<Icon name="arrow" size={15} /></Link></div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- Industries (real photography) ---------- */}
-      <section className="cz-section">
-        <div className="cz-container">
-          <div className="cz-home-head"><span className="cz-eyebrow">Industries</span><h2>Built for the businesses that build India</h2><p className="cz-muted">Partners in every sector find work, team up and get paid on one platform.</p></div>
-          <div className="cz-ind-grid">
-            {[['Solar & renewable energy', 'Rooftop, EPC, PPA, BESS and open access', 'energy-solar-field'], ['EPC & infrastructure', 'Tenders, consortiums and milestone billing', 'build-engineers'],
-              ['Trade & logistics', 'RFQs, exports, barter and part-cash deals', 'trade-port'], ['Manufacturing', 'Capacity sharing, supply and procurement', 'industry-worker'],
-              ['Real estate', 'Property sales, franchise outlets and group investment', 'property-modern-house'], ['Consulting & services', 'Advisory teams, BPO and professional services', 'team-meeting']].map(([t, d, ph]) => (
-              <article key={t} className="cz-ind-tile"><img src={`/photos/${ph}.webp`} alt="" aria-hidden loading="lazy" /><div><h3>{t}</h3><p>{d}</p></div></article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- Live figures ---------- */}
-      <section className="cz-home-stats" aria-label="Live platform figures">
-        <div className="cz-container">
-          <dl>
-            {[
-              ['Verified partners', s?.verifiedPartners],
-              ['Unite Group companies', s?.groupCompanies],
-              ['Open opportunities', s?.openOpportunities],
-              ['Open pipeline value', s ? inrShort(s.openValue) : undefined],
-            ].map(([k, v]) => (
-              <div key={k as string}><dt>{k}</dt><dd className="cz-num">{v ?? <Skeleton height={30} width={80} />}</dd></div>
-            ))}
-          </dl>
-          <p className="cz-muted">Live from the platform{s ? ` · updated ${new Date(s.asOf ?? Date.now()).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}` : ''}</p>
-        </div>
-      </section>
-
-      {/* ---------- How it works ---------- */}
-      <section className="cz-section">
-        <div className="cz-container">
-          <div className="cz-home-head"><span className="cz-eyebrow">How it works</span><h2>From introduction to payment, in one place</h2></div>
-          <ol className="cz-home-steps">
-            {STEPS.map((st, i) => (
-              <li key={st.title}>
-                <span className="cz-step-num">{String(i + 1).padStart(2, '0')}</span>
-                <span className="cz-feature-icon"><Icon name={st.icon} size={20} /></span>
-                <h3>{st.title}</h3>
-                <p className="cz-muted">{st.body}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* ---------- Trust capabilities ---------- */}
-      <section className="cz-section cz-home-tint">
-        <div className="cz-container">
-          <div className="cz-home-head"><span className="cz-eyebrow">Built for trust</span><h2>Five capabilities in every workflow</h2><p className="cz-muted">Not add-ons. Each one is enforced by the platform, from the database up.</p></div>
-          <div className="cz-home-features">
-            {CAPABILITIES.map((c) => (
-              <article key={c.title} className="cz-feature">
-                <span className="cz-feature-icon"><Icon name={c.icon} size={20} /></span>
-                <h3>{c.title}</h3>
-                <p className="cz-muted">{c.body}</p>
-              </article>
-            ))}
-            <article className="cz-feature cz-feature-cta">
-              <h3>See the full model</h3>
-              <p>How Unite-first routing, teams and the commission ledger work together.</p>
-              <Link href="/how-it-works" className="cz-btn cz-btn-secondary">How it works<Icon name="arrow" size={16} /></Link>
+      <section className="cz-hx-section" aria-labelledby="ways-h">
+        <div className="cz-hx-head"><p className="cz-hx-eyebrow">Get started</p><h2 id="ways-h">Three ways in. One network behind them.</h2></div>
+        <div className="cz-hx-ways">
+          {[
+            { tag: 'Collab', title: 'Resource-first matching', text: 'Describe what you have and need once. COLLABIZ matches you with business offers, Unite programmes and other businesses — and tells you why.', href: '/login?next=/collab', cta: 'Start a Collab', photo: 'team-desk' },
+            { tag: 'Business offers', title: 'A marketplace both sides publish to', text: `Partnerships, franchises, dealerships, EPC contracts, idle capacity and businesses for sale across ${OFFER_CATEGORIES.length} categories — checked before they go live.`, href: '/login?next=/business-offers', cta: 'Explore offers', photo: 'deal-handshake' },
+            { tag: 'Unite Green Park', title: 'Renewable energy marketplace', text: 'Solar, wind, hybrid and storage capacity meets industrial demand — with delivered-cost estimates and a staged deal room.', href: '/login?next=/energy', cta: 'Enter the marketplace', photo: 'energy-wind-solar' },
+          ].map((w) => (
+            <article key={w.tag} className="cz-hx-way">
+              <img src={`/photos/${w.photo}.webp`} alt="" aria-hidden loading="lazy" />
+              <div><span>{w.tag}</span><h3>{w.title}</h3><p>{w.text}</p><Link href={w.href}>{w.cta}<Icon name="arrow" size={15} /></Link></div>
             </article>
-          </div>
+          ))}
         </div>
+      </section>
+
+      {/* ---------- Everything in one place ---------- */}
+      <section className="cz-hx-section" aria-labelledby="platform-h">
+        <div className="cz-hx-head"><p className="cz-hx-eyebrow">The platform</p><h2 id="platform-h">Everything your business needs, in one place.</h2>
+          <p className="cz-hx-sub">Every capability below is built into COLLABIZ and works with the others — the same customer, team and ledger from first call to final payment.</p></div>
+        <ul className="cz-hx-bento">
+          {PLATFORM.map((x) => (
+            <li key={x.title} className={x.wide ? 'is-wide' : undefined}>
+              <Link href={x.href}>
+                {x.photo && <img src={`/photos/${x.photo}.webp`} alt="" aria-hidden loading="lazy" />}
+                <span className="cz-hx-bento-ic"><Icon name={x.icon} size={20} /></span>
+                <h3>{x.title}</h3>
+                <p>{x.text}</p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* ---------- Unite products ---------- */}
+      <section className="cz-hx-section cz-hx-products" aria-labelledby="prod-h">
+        <div className="cz-hx-head"><p className="cz-hx-eyebrow">Unite Group products</p><h2 id="prod-h">{products.data ? `${products.data.length} Unite businesses to use, sell and grow.` : 'Unite businesses to use, sell and grow.'}</h2>
+          <p className="cz-hx-sub">Energy, property, commerce, jobs, learning, media and mobility — each with its own page, connected to COLLABIZ.</p></div>
+        <ul className="cz-hx-logos" aria-label="Unite products">
+          <li><Link href="/go-eb5/apply" aria-label="GO EB5"><img src="/brands/goeb5.png" alt="" /></Link></li>
+          {logos.map((p) => <li key={p.slug}><Link href={`/businesses/${p.slug}`} aria-label={p.name}><img src={appBrand(p.slug)!.logo} alt="" loading="lazy" /></Link></li>)}
+        </ul>
+        <div className="cz-hx-center"><Link href="/businesses" className="cz-hx-btn cz-hx-btn-dark">See all Unite products<Icon name="arrow" size={16} /></Link></div>
+      </section>
+
+      {/* ---------- Featured + how it works ---------- */}
+      <section className="cz-hx-section" aria-labelledby="how-h">
+        <div className="cz-hx-split">
+          <div>
+            <p className="cz-hx-eyebrow">How it works</p>
+            <h2 id="how-h">From introduction to payment.</h2>
+            <ol className="cz-hx-steps">{STEPS.map((st, i) => (
+              <li key={st.title}><span className="cz-hx-step-n">{i + 1}</span><div><h3>{st.title}</h3><p>{st.body}</p></div></li>
+            ))}</ol>
+          </div>
+          <aside className="cz-hx-feature" aria-label="Featured opportunity">
+            <img src="/photos/build-engineers.webp" alt="" aria-hidden loading="lazy" />
+            <div className="cz-hx-feature-card">
+              <span className="cz-hx-chip">Featured opportunity · live</span>
+              {opp ? <>
+                <h3>{opp.title}</h3>
+                <p>{sectorName(opp.sector)} · {[opp.city, opp.region?.replace('IN-', '')].filter(Boolean).join(', ')}</p>
+                <dl>
+                  <div><dt>Indicative value</dt><dd>{opp.estimatedValue ? inrShort(opp.estimatedValue) : 'On request'}</dd></div>
+                  <div><dt>Closes</dt><dd>{opp.deadline ? new Date(opp.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Rolling'}</dd></div>
+                  <div><dt>Published by</dt><dd>{opp.publisher ?? 'Unite Group'}</dd></div>
+                </dl>
+                <Link href="/opportunities/public">All open opportunities<Icon name="arrow" size={15} /></Link>
+              </> : <><Skeleton height={22} /><Skeleton height={60} style={{ marginTop: 12 }} /></>}
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      {/* ---------- Trust ---------- */}
+      <section className="cz-hx-section cz-hx-dark" aria-labelledby="trust-h">
+        <div className="cz-hx-head"><p className="cz-hx-eyebrow">Built for trust</p><h2 id="trust-h">Enforced by the platform, not promised.</h2></div>
+        <ul className="cz-hx-trust">{TRUST.map((x) => <li key={x.title}><Icon name={x.icon} size={22} /><h3>{x.title}</h3><p>{x.body}</p></li>)}</ul>
+        <div className="cz-hx-center"><Link href="/how-it-works" className="cz-hx-btn cz-hx-btn-light">See the full model<Icon name="arrow" size={16} /></Link></div>
       </section>
 
       {/* ---------- Routes ---------- */}
-      <section className="cz-section">
-        <div className="cz-container">
-          <div className="cz-home-head"><span className="cz-eyebrow">The Unite-first hybrid model</span><h2>Four ways business flows</h2></div>
-          <div className="cz-home-routes">
-            {ROUTES.map((r) => (
-              <article key={r.key}>
-                <span className="cz-route-key">{r.key}</span>
-                <h3>{r.title}</h3>
-                <p className="cz-muted">{r.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
+      <section className="cz-hx-section" aria-labelledby="routes-h">
+        <div className="cz-hx-head"><p className="cz-hx-eyebrow">The Unite-first hybrid model</p><h2 id="routes-h">Four ways business flows.</h2></div>
+        <ul className="cz-hx-routes">{ROUTES.map((r) => <li key={r.key}><span>{r.key}</span><h3>{r.title}</h3><p>{r.body}</p></li>)}</ul>
+      </section>
+
+      {/* ---------- Industries ---------- */}
+      <section className="cz-hx-section" aria-labelledby="ind-h">
+        <div className="cz-hx-head"><p className="cz-hx-eyebrow">Industries</p><h2 id="ind-h">Built for the businesses that build India.</h2></div>
+        <ul className="cz-hx-ind">
+          {[['Solar & renewable energy', 'Rooftop, EPC, PPA, BESS and open access', 'energy-panel-roof'], ['EPC & infrastructure', 'Tenders, consortiums and milestone billing', 'build-excavator'],
+            ['Trade & logistics', 'RFQs, exports, barter and part-cash deals', 'trade-port'], ['Manufacturing', 'Capacity sharing, supply and procurement', 'industry-engineer'],
+            ['Real estate', 'Property sales, franchise outlets and industrial parks', 'property-tower'], ['Consulting & services', 'Advisory teams, BPO and professional services', 'team-meeting']].map(([t, d, ph]) => (
+            <li key={t}><img src={`/photos/${ph}.webp`} alt="" aria-hidden loading="lazy" /><div><h3>{t}</h3><p>{d}</p></div></li>
+          ))}
+        </ul>
       </section>
 
       {/* ---------- Sectors & companies ---------- */}
-      <section className="cz-section cz-home-tint">
-        <div className="cz-container cz-home-split">
-          <div>
-            <span className="cz-eyebrow">Sectors</span>
-            <h2>Where partners are winning work</h2>
-            <p className="cz-muted">Priority sectors carry the most Unite Group demand.</p>
-            <ul className="cz-sector-list">
-              {SECTORS.map((sec) => (
-                <li key={sec.code} data-priority={sec.priority}>
-                  <Link href={`/opportunities/public?sector=${sec.code}`}>{sec.name}{sec.priority && <span className="cz-tag">Priority</span>}</Link>
-                </li>
-              ))}
-            </ul>
+      <section className="cz-hx-section" aria-label="Sectors and Unite Group companies">
+        <div className="cz-hx-split cz-hx-split-even">
+          <div className="cz-hx-panel">
+            <p className="cz-hx-eyebrow">Sectors</p>
+            <h2>Where partners are winning work.</h2>
+            <ul className="cz-hx-sectors">{SECTORS.map((sec) => (
+              <li key={sec.code}><Link href={`/opportunities/public?sector=${sec.code}`} data-priority={sec.priority || undefined}>{sec.name}</Link></li>
+            ))}</ul>
           </div>
-          <div>
-            <span className="cz-eyebrow">Unite Group</span>
-            <h2>Companies you can work with</h2>
-            <ul className="cz-company-list">
+          <div className="cz-hx-panel">
+            <p className="cz-hx-eyebrow">Unite Group</p>
+            <h2>Companies you can work with.</h2>
+            <ul className="cz-hx-companies">
               {(companies.data ?? []).slice(0, 6).map((c) => (
-                <li key={c.id}>
-                  <span className="cz-company-mark" aria-hidden>{(c.brandName ?? '?').slice(0, 1)}</span>
-                  <div><strong>{c.brandName}</strong><span className="cz-muted">{(c.sectors ?? []).slice(0, 3).map(sectorName).join(' · ')}{c.city ? ` · ${c.city}` : ''}</span></div>
-                </li>
+                <li key={c.id}><span aria-hidden>{(c.brandName ?? '?').slice(0, 1)}</span><div><strong>{c.brandName}</strong><small>{(c.sectors ?? []).slice(0, 3).map(sectorName).join(' · ')}{c.city ? ` · ${c.city}` : ''}</small></div></li>
               ))}
               {companies.loading && [0, 1, 2].map((i) => <li key={i}><Skeleton height={40} /></li>)}
             </ul>
-            <Link href="/group-companies" className="cz-link-arrow">All Unite Group companies<Icon name="arrow" size={15} /></Link>
+            <Link href="/group-companies" className="cz-hx-more">All Unite Group companies<Icon name="arrow" size={15} /></Link>
           </div>
         </div>
       </section>
 
-      {/* ---------- CTA ---------- */}
-      <section className="cz-section">
-        <div className="cz-container">
-          <div className="cz-home-cta">
-            <div>
-              <h2>Bring your capability to the network</h2>
-              <p>Verification takes one sitting. Your first protected lead can follow the same day.</p>
-            </div>
-            <div className="cz-row" style={{ gap: 12 }}>
-              <Link href="/signup" className="cz-btn cz-btn-accent cz-btn-lg">Join as a partner</Link>
-              <Link href="/rfq/new" className="cz-btn cz-btn-lg cz-btn-onnavy">Submit a requirement</Link>
-            </div>
+      {/* ---------- Closing CTA ---------- */}
+      <section className="cz-hx-cta" aria-labelledby="cta-h">
+        <img src="/photos/global-skyline.webp" alt="" aria-hidden loading="lazy" />
+        <div>
+          <h2 id="cta-h">Bring your capability to the network.</h2>
+          <p>Verification takes one sitting. Your first protected lead can follow the same day.</p>
+          <div className="cz-hx-ctas">
+            <Link href="/signup" className="cz-hx-btn cz-hx-btn-light">Join as a partner</Link>
+            <Link href="/rfq/new" className="cz-hx-btn cz-hx-btn-glass">Submit a requirement</Link>
           </div>
         </div>
       </section>
+      <p className="cz-hx-note">Figures are live from the platform{s ? ` · updated ${new Date(s.asOf ?? Date.now()).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}` : ''}. Earnings are never guaranteed; commission becomes payable only on defined contractual triggers.</p>
     </div>
   );
 }
