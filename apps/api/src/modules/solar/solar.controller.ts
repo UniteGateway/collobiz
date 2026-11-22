@@ -12,15 +12,15 @@
  *  - Commission and referral settings are changed only by super admins or finance.
  */
 import {
-  BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, HttpCode, Injectable, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Post, UploadedFile, UseInterceptors,
+  BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, HttpCode, Injectable, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Post, UploadedFile, UploadedFiles, UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { and, desc, eq, inArray, isNull, lt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
-  DEFAULT_SOLAR_CONFIG, SOLAR_MODELS, SOLAR_QUOTE_NEXT, SOLAR_QUOTE_STATUSES, SOLAR_SYSTEMS, SolarKitSchema, SolarQuoteSchema, SolarReferralSchema, SolarSiteSchema,
+  DEFAULT_SOLAR_CONFIG, SOLAR_MODELS, SOLAR_QUOTE_NEXT, SOLAR_QUOTE_STATUSES, SOLAR_SYSTEMS, SolarKitSchema, SolarProductLeadSchema, SolarQuoteSchema, SolarReferralSchema, SolarSiteSchema,
   phone10, pickKit, quoteSolar, readBill, recommendKw, type SolarConfig, type SolarKitLike,
 } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
@@ -40,6 +40,9 @@ const staff = (ctx: RequestContext) => ctx.platformRoles.some((r) => r === 'supe
 const money = (ctx: RequestContext) => ctx.platformRoles.some((r) => r === 'super_admin' || r === 'finance');
 const STAFF_ONLY = ['won', 'installed', 'paid'];
 const BILL_KEEP_DAYS = 90;
+type UpFile = { buffer: Buffer; mimetype: string; originalname: string };
+/** House referral codes for Unite product pages (no partner owner, so no referral reward). */
+const HOUSE_CODES: Record<string, [string, string]> = { sunx: ['SUNX', 'SunX'], sungate: ['SUNGATE', 'SUNGATE'], 'solar-village-mission': ['SOLARVM', 'Solar Village Mission'], solcart: ['SOLCART', 'SOLCART'] };
 const kitView = (k: typeof solarKits.$inferSelect) => ({
   id: k.id, code: k.code, name: k.name, system: k.system, capacityKw: k.capacityW / 1000, panelW: k.panelW, panelCount: Math.ceil(k.capacityW / k.panelW), inverterKw: k.inverterW / 1000,
   batteryKwh: k.batteryWh != null ? k.batteryWh / 1000 : null, phase: k.phase, price: k.price, warrantyYears: k.warrantyYears, includes: k.includes as string[], description: k.description, status: k.status,
@@ -113,6 +116,13 @@ export class SolarService {
     }
     throw new ConflictException('Could not create a referral code — try again');
   }
+  async houseCode(source: string) {
+    const [code, name] = HOUSE_CODES[source];
+    await this.db.insert(solarReferralCodes).values({ code, ownerName: name }).onConflictDoNothing();
+    const [c] = await this.db.select().from(solarReferralCodes).where(eq(solarReferralCodes.code, code)).limit(1);
+    return c;
+  }
+
   async notifyStaff(title: string, text: string, link: string) {
     const admins = await this.db.selectDistinct({ u: memberships.userId }).from(memberships).where(and(inArray(memberships.role, ['unite_admin', 'super_admin']), eq(memberships.status, 'active')));
     if (admins.length) await this.db.insert(notifications).values(admins.map((a) => ({ userId: a.u, kind: 'announcement', title, body: text, link })));
@@ -187,6 +197,56 @@ export class SolarController {
     await this.svc.notifyStaff(`New solar referral: ${b.name}, ${b.city}`, `Referred by ${c.ownerName}.`, '/workspace/solar?tab=referrals');
     if (c.ownerOrgId) await this.svc.notifyOrg(c.ownerOrgId, `Your referral ${firstName(b.name)} asked about solar`, `${b.city}. Unite Solar or your team will call them.`, '/solar?tab=referrals');
     return { ok: true, message: 'Thank you — Unite Solar will call you within two working days.' };
+  }
+
+  /**
+   * Solar enquiry from a Unite product page (SunX, SUNGATE, Solar Village Mission, SOLCART). It becomes a Unite Solar
+   * referral: under the partner's code when the page was opened from a partner link (?ref=CODE), otherwise under the
+   * product's own house code. Duplicate phone numbers are refused. The bill and roof photo are kept for the same
+   * retention period as quote bills and then deleted; numbers are read from PDF bills only.
+   */
+  @Public()
+  @Post('public/solar/leads')
+  @HttpCode(201)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'bill', maxCount: 1 }, { name: 'roof', maxCount: 1 }], { limits: { fileSize: MAX_UPLOAD_BYTES, files: 2 } }))
+  async productLead(@Body() raw: Record<string, unknown>, @UploadedFiles() files: { bill?: UpFile[]; roof?: UpFile[] } | undefined) {
+    const parsed = SolarProductLeadSchema.safeParse(raw);
+    if (!parsed.success) throw new BadRequestException({ statusCode: 400, error: 'ValidationError', message: 'Please correct the highlighted fields', issues: parsed.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })) });
+    const b = parsed.data;
+    const p = phone10(b.phone);
+    const [dup] = await this.db.select({ id: solarReferrals.id }).from(solarReferrals).where(eq(solarReferrals.phone10, p)).limit(1);
+    if (dup) throw new ConflictException('This number is already with Unite Solar — we will be in touch');
+    let code: typeof solarReferralCodes.$inferSelect | undefined;
+    if (b.ref) {
+      [code] = await this.db.select().from(solarReferralCodes).where(eq(solarReferralCodes.code, b.ref)).limit(1);
+      if (code?.ownerPhone && phone10(code.ownerPhone) === p) code = undefined; // no self-referral
+    }
+    code ??= await this.svc.houseCode(b.source);
+    const keep = async (f: UpFile | undefined, kind: 'bill' | 'roof_photo') => {
+      if (!f) return null;
+      const stored = await this.storage.put(f.buffer, f.mimetype, kind === 'bill' ? 'solar-bills' : 'solar-roofs');
+      const text = kind === 'bill' && f.mimetype === 'application/pdf' ? await pdfText(f.buffer).catch(() => '') : '';
+      const extract = kind === 'bill' ? readBill(text) : { kind: 'roof_photo', found: [] };
+      const [row] = await this.db.insert(solarBills).values({ orgId: null, uploadedBy: null, objectKey: stored.key, fileName: `${kind}-${f.originalname}`.slice(0, 200), mime: stored.mime, size: stored.size, sha256: stored.sha256, extract, deleteAfter: new Date(Date.now() + BILL_KEEP_DAYS * 86400_000) }).returning();
+      return { id: row.id, extract };
+    };
+    const bill = await keep(files?.bill?.[0], 'bill');
+    const roof = await keep(files?.roof?.[0], 'roof_photo');
+    const readUnits = (bill?.extract as { units?: number } | undefined)?.units;
+    const [r] = await this.db.insert(solarReferrals).values({
+      codeId: code.id, name: b.name, phone10: p, city: b.city, region: b.region, segment: b.segment, monthlyBill: b.monthlyBill !== undefined ? b.monthlyBill * 100 : null,
+      source: b.source, details: { siteType: b.siteType, note: b.note ?? null }, billId: bill?.id ?? null, roofPhotoId: roof?.id ?? null, consentAt: new Date(),
+    }).onConflictDoNothing().returning();
+    if (!r) throw new ConflictException('This number is already with Unite Solar — we will be in touch');
+    await this.svc.notifyStaff(`New solar lead from ${code.ownerName === 'A COLLABIZ partner' ? 'a partner link' : b.source}: ${b.name}, ${b.city}`, `${b.siteType}${bill ? ' · bill attached' : ''}${roof ? ' · roof photo attached' : ''}.`, '/workspace/solar?tab=referrals');
+    if (code.ownerOrgId) await this.svc.notifyOrg(code.ownerOrgId, `Your link brought a solar lead: ${firstName(b.name)}`, `${b.city} via ${b.source}. Unite Solar or your team will call them.`, '/solar?tab=referrals');
+    return {
+      ok: true, reference: `SOL-${r.id.slice(0, 8).toUpperCase()}`,
+      billRead: bill ? (bill.extract as { found: string[] }).found : null, units: readUnits ?? null,
+      message: 'Thank you — Unite Solar will call you within two working days to check your roof and bill.',
+    };
   }
 
   // ---------- partners and staff ----------
@@ -305,10 +365,13 @@ export class SolarController {
     }
     if (b.status === 'installed') {
       if (q.referralId) {
-        const reward = (q.calc as { referralReward: number }).referralReward;
-        const [r] = await this.db.update(solarReferrals).set({ status: 'installed', reward, updatedAt: now }).where(and(eq(solarReferrals.id, q.referralId), inArray(solarReferrals.status, ['new', 'quoted']))).returning();
+        const [refRow] = await this.db.select({ c: solarReferralCodes }).from(solarReferrals).innerJoin(solarReferralCodes, eq(solarReferralCodes.id, solarReferrals.codeId)).where(eq(solarReferrals.id, q.referralId)).limit(1);
+        // House codes (Unite product pages) have no referrer, so no reward is due.
+        const house = !!refRow && !refRow.c.ownerUserId && !refRow.c.ownerOrgId && !refRow.c.ownerPhone;
+        const reward = house ? 0 : (q.calc as { referralReward: number }).referralReward;
+        const [r] = await this.db.update(solarReferrals).set({ status: 'installed', reward: house ? null : reward, updatedAt: now }).where(and(eq(solarReferrals.id, q.referralId), inArray(solarReferrals.status, ['new', 'quoted']))).returning();
         const [code] = r ? await this.db.select().from(solarReferralCodes).where(eq(solarReferralCodes.id, r.codeId)) : [];
-        if (code?.ownerOrgId) await this.svc.notifyOrg(code.ownerOrgId, 'Referral reward due', `${firstName(r.name)}'s solar system is installed — ₹${(reward / 100).toLocaleString('en-IN')} reward is due.`, '/solar?tab=referrals');
+        if (!house && code?.ownerOrgId) await this.svc.notifyOrg(code.ownerOrgId, 'Referral reward due', `${firstName(r.name)}'s solar system is installed — ₹${(reward / 100).toLocaleString('en-IN')} reward is due.`, '/solar?tab=referrals');
       }
       // The customer gets their own referral code to share.
       await this.db.insert(solarReferralCodes).values({ code: `${firstName(c.name).replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 5) || 'SUN'}${randomDigits(4)}`, ownerName: c.name, ownerPhone: phone10(c.phone), sourceQuoteId: q.id }).onConflictDoNothing();
@@ -358,7 +421,7 @@ export class SolarController {
         referrals: refs.length, rewardsDue: refs.filter((x) => x.r.status === 'installed').reduce((a, x) => a + (x.r.reward ?? 0), 0),
       },
       quotes: quotes.map(({ q, partner }) => ({ id: q.id, code: q.code, customer: (q.customer as { name: string }).name, city: (q.customer as { city: string }).city, partner, model: q.model, system: q.system, capacityKw: q.capacityW / 1000, total: q.total, commission: q.commission, status: q.status, createdAt: q.createdAt })),
-      referrals: refs.map(({ r, by, code }) => ({ id: r.id, name: r.name, phone: maskPhone(r.phone10), city: r.city, segment: r.segment, status: r.status, reward: r.reward, by, code, createdAt: r.createdAt, quoteId: r.quoteId })),
+      referrals: refs.map(({ r, by, code }) => ({ id: r.id, name: r.name, phone: maskPhone(r.phone10), city: r.city, segment: r.segment, status: r.status, reward: r.reward, by, code, createdAt: r.createdAt, quoteId: r.quoteId, source: r.source, siteType: (r.details as { siteType?: string } | null)?.siteType ?? null, hasBill: !!r.billId, hasRoofPhoto: !!r.roofPhotoId })),
       kits: await this.svc.kits(true), config: cfg, canEditMoney: money(ctx),
     };
   }

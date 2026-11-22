@@ -119,4 +119,57 @@ describe('Unite Group businesses (ventures)', () => {
     const note = await one("select count(*)::int n from notifications where title like 'New enquiry for SUNITE%'");
     expect(note.n).toBeGreaterThan(0);
   });
+  it('Wave 1: product-page solar leads, partner link attribution, CRM hand-off and micro-contracts posted through XPERT', async () => {
+    // Partner link (Digital Seed): every partner has a personal code; a product link carries it.
+    const mine = await api(app).get('/v1/ventures/sunite').set(auth(t.asha)).expect(200);
+    expect(mine.body.myLink.path).toMatch(/^\/businesses\/sunite\?ref=[A-Z0-9]+$/);
+    const code = mine.body.myLink.code;
+    // Solar lead from SunX, under the partner's code, with a PDF bill and a roof photo
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
+    const pdf = Buffer.from('%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF');
+    const lead = (extra: Record<string, string> = {}) => {
+      const f: Record<string, string> = { source: 'sunx', ref: code, name: 'Kiran Rao', phone: '9876501234', city: 'Vijayawada', region: 'IN-AP', segment: 'residential', siteType: 'Independent house', monthlyBill: '4200', consent: 'true', ...extra };
+      let r = api(app).post('/v1/public/solar/leads');
+      for (const [k, v] of Object.entries(f)) r = r.field(k, v);
+      return r;
+    };
+    await lead({ website: 'bot' }).expect(400);
+    await lead({ consent: 'false' }).expect(400);
+    await lead({ source: 'bestpe' }).expect(400);
+    const ok = await lead().attach('bill', pdf, { filename: 'bill.pdf', contentType: 'application/pdf' }).attach('roof', png, { filename: 'roof.png', contentType: 'image/png' }).expect(201);
+    expect(ok.body.reference).toMatch(/^SOL-/);
+    const row = await one("select r.source, r.monthly_bill, r.bill_id, r.roof_photo_id, r.consent_at, c.code from solar_referrals r join solar_referral_codes c on c.id = r.code_id where r.phone10 = '9876501234'");
+    expect(row).toMatchObject({ source: 'sunx', code, monthly_bill: '420000' });
+    expect(row.bill_id && row.roof_photo_id && row.consent_at).toBeTruthy();
+    await lead({ name: 'Kiran R' }).expect(409); // same phone: duplicate
+    // Without a partner link the lead goes to the product's house code (no referral reward)
+    await lead({ ref: '', phone: '9876501299', source: 'sungate', siteType: 'Apartment / housing society' }).expect(201);
+    expect((await one("select c.code, c.owner_user_id from solar_referrals r join solar_referral_codes c on c.id = r.code_id where r.phone10 = '9876501299'"))).toMatchObject({ code: 'SUNGATE', owner_user_id: null });
+    // Business enquiry through the partner link is attributed and shown to the partner
+    const good = { kind: 'customer', name: 'Ritu Jain', email: 'ritu@example.com', message: 'We need a solar operating system for 40 installs a month.', consent: true, ref: code };
+    const enq = await api(app).post('/v1/public/products/sunite/enquiries').send(good).expect(201);
+    const after = await api(app).get('/v1/ventures/sunite').set(auth(t.asha)).expect(200);
+    expect(after.body.myLink.enquiries).toBeGreaterThanOrEqual(1);
+    // LeadDNA hand-off: the operating company's CRM gets a customer and a deal, with the introducer on record
+    const v = await one("select id, group_company_org_id from unite_ventures where slug = 'sunite'");
+    const detail = await api(app).get(`/v1/admin/ventures/${v.id}`).set(auth(t.uniteAdmin)).expect(200);
+    const e = detail.body.enquiries.find((x: any) => x.reference === enq.body.reference);
+    expect(e.introducedBy).toBeTruthy();
+    await api(app).post(`/v1/admin/ventures/${v.id}/enquiries/${e.id}/convert`).set(auth(t.asha)).expect(403);
+    const conv = await api(app).post(`/v1/admin/ventures/${v.id}/enquiries/${e.id}/convert`).set(auth(t.uniteAdmin)).expect(201);
+    await api(app).post(`/v1/admin/ventures/${v.id}/enquiries/${e.id}/convert`).set(auth(t.uniteAdmin)).expect(409);
+    const deal = await one('select organization_id, stage, title from crm_deals where id = $1', [conv.body.dealId]);
+    expect(deal).toMatchObject({ organization_id: v.group_company_org_id, stage: 'new' });
+    const notes = await pool.query("select body from crm_activities where subject_id = $1", [conv.body.dealId]);
+    expect(notes.rows.some((n: any) => /Introduced by .* Any reward follows their signed agreement/.test(n.body))).toBe(true);
+    expect(notes.rows.some((n: any) => n.body.includes(enq.body.reference))).toBe(true);
+    // XPERT: work posted through the XPERT page is a normal micro-contract tagged with its source
+    const day = new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10);
+    const job = { source: 'xpert', kind: 'site_survey', state: 'AP', title: 'Rooftop survey for 3 homes in Vijayawada', scope: 'Measure the roof, shading and meter location for three homes and upload photos.', acceptance: 'Survey sheet and photos for all three homes', quantity: 3, unit: 'surveys', priceRs: 1500, due: day };
+    const m = await api(app).post('/v1/micro').set(auth(t.asha)).set(idem()).send(job).expect(201);
+    expect(m.body.source).toBe('xpert');
+    const xp = await api(app).get('/v1/public/products/xpert').expect(200);
+    expect(xp.body.work.open).toBeGreaterThanOrEqual(1);
+    expect(JSON.stringify(xp.body.work)).not.toContain('Vijayawada'); // counts only
+  });
 });

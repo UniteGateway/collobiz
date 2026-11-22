@@ -59,6 +59,8 @@ export const microContracts = pgTable('micro_contracts', {
   code: text('code').notNull().unique(),
   orgId: uuid('org_id').notNull().references(() => organizations.id),
   kind: text('kind').notNull(),
+  /** Unite product the job was posted through (xpert | partimer | zuppo); null when posted directly. */
+  source: text('source'),
   state: text('state'),
   title: text('title').notNull(),
   scope: text('scope').notNull(),

@@ -12,7 +12,7 @@ import { useSession } from '@/lib/session';
 
 interface Interest { id: string; partner: string; city: string | null; level: string; roles: string[]; regions: string[]; message: string; status: string; decisionNote: string | null; updatedAt: string }
 interface Detail { id: string; slug: string; name: string; category: string; sector: string; tagline: string; summary: string; stage: string; open: boolean; availability: string; company: string | null; groupCompanyOrgId: string | null; regulated: boolean; regulatedReason: string | null; cleared: boolean; clearanceNote: string | null; roles: string[]; interests: Interest[]; offers: { id: string; code: string; title: string; status: string }[]; sales: { leads: number; won: number; wonValue: number }; enquiries: Enquiry[] }
-interface Enquiry { id: string; reference: string; kind: string | null; name: string; email: string; phone: string | null; city: string | null; organization: string | null; message: string; status: string; createdAt: string }
+interface Enquiry { id: string; reference: string; kind: string | null; name: string; email: string; phone: string | null; city: string | null; organization: string | null; message: string; status: string; createdAt: string; introducedBy: string | null; crmDealId: string | null }
 const INTEREST: Record<string, string> = { pending: 'Awaiting decision', approved: 'Promoter', declined: 'Declined', withdrawn: 'Withdrawn' };
 
 /** One Unite business: settings, promotion requests and results. */
@@ -63,7 +63,7 @@ export default function VentureAdmin() {
         </Card>
       </div>
       <Card title="Website enquiries" className="cz-mt" actions={<a href={`${process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000'}/businesses/${v.slug}`} target="_blank" rel="noopener noreferrer" className="cz-btn cz-btn-ghost cz-btn-sm">Public page</a>}>
-        {!v.enquiries?.length ? <EmptyState icon="inbox" title="No enquiries from the public page yet" /> : <ul className="cz-review-list">{v.enquiries.map((e) => <EnquiryItem key={e.id} e={e} ventureId={v.id} onDone={q.reload} />)}</ul>}
+        {!v.enquiries?.length ? <EmptyState icon="inbox" title="No enquiries from the public page yet" /> : <ul className="cz-review-list">{v.enquiries.map((e) => <EnquiryItem key={e.id} e={e} ventureId={v.id} onDone={q.reload} canConvert={!!v.groupCompanyOrgId} />)}</ul>}
       </Card>
       <Card title="Partners who want to promote it">
         {!v.interests.length ? <EmptyState icon="users" title="No requests yet" /> : <ul className="cz-review-list">{v.interests.map((i) => <InterestItem key={i.id} i={i} ventureId={v.id} onDone={q.reload} />)}</ul>}
@@ -93,7 +93,8 @@ function InterestItem({ i, ventureId, onDone }: { i: Interest; ventureId: string
 }
 
 const KIND: Record<string, string> = { customer: 'Wants to use it', partner: 'Wants to partner', interest: 'Notify at launch' };
-function EnquiryItem({ e, ventureId, onDone }: { e: Enquiry; ventureId: string; onDone: () => void }) {
+function EnquiryItem({ e, ventureId, onDone, canConvert }: { e: Enquiry; ventureId: string; onDone: () => void; canConvert: boolean }) {
+  const conv = useMutation(async () => { await api.post(`/admin/ventures/${ventureId}/enquiries/${e.id}/convert`, {}); onDone(); return true; });
   const m = useMutation(async (status: 'open' | 'handled') => { await api.post(`/admin/ventures/${ventureId}/enquiries/${e.id}/status`, { status }); onDone(); return status; });
   return (
     <li data-enquiry={e.reference}>
@@ -102,10 +103,13 @@ function EnquiryItem({ e, ventureId, onDone }: { e: Enquiry; ventureId: string; 
         <StatusBadge status={e.status} tone={e.status === 'handled' ? 'success' : 'info'} label={e.status === 'handled' ? 'Handled' : 'Open'} />
       </div>
       <p className="cz-muted" style={{ margin: '2px 0 6px', fontSize: 13 }}>{e.reference} · {KIND[e.kind ?? ''] ?? 'Enquiry'} · {new Date(e.createdAt).toLocaleDateString('en-IN')}{e.city ? ` · ${e.city}` : ''}</p>
+      {e.introducedBy && <p style={{ margin: '0 0 6px', fontSize: 13.5 }}><StatusBadge status="introduced" tone="info" label="Partner link" /> Introduced by {e.introducedBy}</p>}
       <p style={{ margin: '0 0 6px' }}>{e.message}</p>
       <p style={{ margin: 0, fontSize: 13.5 }}><a href={`mailto:${e.email}`}>{e.email}</a>{e.phone ? <> · <a href={`tel:${e.phone.replace(/\s/g, '')}`}>{e.phone}</a></> : null}</p>
       {m.error && <Alert tone="danger">{m.error}</Alert>}
-      <div style={{ marginTop: 8 }}><Button size="sm" variant={e.status === 'handled' ? 'ghost' : 'secondary'} loading={m.pending} onClick={() => m.run(e.status === 'handled' ? 'open' : 'handled')}>{e.status === 'handled' ? 'Reopen' : 'Mark handled'}</Button></div>
+      {conv.error && <Alert tone="danger">{conv.error}</Alert>}
+      <div className="cz-row" style={{ marginTop: 8, gap: 8, flexWrap: 'wrap' }}>
+        {e.crmDealId ? <StatusBadge status="in_crm" tone="success" label="In CRM pipeline" /> : canConvert && <Button size="sm" loading={conv.pending} onClick={() => conv.run()}>Add to CRM pipeline</Button>}<Button size="sm" variant={e.status === 'handled' ? 'ghost' : 'secondary'} loading={m.pending} onClick={() => m.run(e.status === 'handled' ? 'open' : 'handled')}>{e.status === 'handled' ? 'Reopen' : 'Mark handled'}</Button></div>
     </li>
   );
 }

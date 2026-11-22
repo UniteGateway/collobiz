@@ -2590,3 +2590,11 @@ a.cz-kpi:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(16,24
 .cz-gp-features .cz-gp-pill { margin-top: 8px; }
 .cz-gp-tile-logo { height: 64px; width: 100%; display: grid; place-items: center; }
 .cz-gp-tile-logo img { max-height: 64px; max-width: min(170px, 90%); object-fit: contain; }
+.cz-gp-file { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: var(--cz-navy-900); }
+.cz-gp-file input { font: inherit; font-weight: 400; font-size: 14px; padding: 10px; border: 1px dashed #c4c7c5; border-radius: 14px; background: #fafbfc; }
+.cz-gp-work { display: grid; grid-template-columns: auto auto 1fr; gap: 16px 28px; align-items: center; padding: 24px; border-radius: 24px; border: 1px solid var(--gp-line, #e3e3e3); }
+.cz-gp-work > div:not(.cz-row) { display: flex; flex-direction: column; }
+.cz-gp-work strong { font-size: 32px; font-weight: 500; color: var(--gp-ink, #1f1f1f); line-height: 1; }
+.cz-gp-work span { font-size: 13.5px; color: var(--gp-sub, #444746); margin-top: 4px; }
+.cz-gp-work > p { grid-column: 1 / -1; }
+@media (max-width: 860px) { .cz-gp-work { grid-template-columns: 1fr 1fr; } .cz-gp-work > .cz-row { grid-column: 1 / -1; } }

@@ -60,9 +60,9 @@ Each product page shows its next integration as **Next** in "Works with" (`NEXT_
 
 | Wave | Businesses | COLLABIZ module they plug into | Why first |
 |---|---|---|---|
-| 1 | SunX, SUNGATE, SOLCART, Solar Village Mission | Unite Solar desk, Powertek products, Projects, Proof | These modules already exist; leads and orders flow straight into solar sales |
-| 1 | LeadDNA, Digital Seed | Leads & CRM, Commissions | They reuse the existing pipeline and commission ledger |
-| 1 | XPERT, Partimer, ZUPPO | Micro-contracts, Capacity | Scopes, milestones and settlement are already built |
+| 1 ✅ | SunX, SUNGATE, SOLCART, Solar Village Mission | Unite Solar desk, Powertek products, Projects, Proof | These modules already exist; leads and orders flow straight into solar sales |
+| 1 ✅ | LeadDNA, Digital Seed | Leads & CRM, Commissions | They reuse the existing pipeline and commission ledger |
+| 1 ✅ | XPERT, Partimer, ZUPPO | Micro-contracts, Capacity | Scopes, milestones and settlement are already built |
 | 2 | ProDeal, Real Bricks, ROOFZ | Property sales, Green Park | The property and energy marketplaces exist |
 | 2 | Unite Learning, StartSmart, AI Teacher | Learning, Launch | Course and launch flows exist |
 | 2 | SOCPOST, VIDPLAY | AI Growth Desk, Commissions | Campaign approvals and payouts |
@@ -72,3 +72,16 @@ Each product page shows its next integration as **Next** in "Works with" (`NEXT_
 | 3 | 99OFFERS, FreeTicket, Nano Bazar | Business offers, Store, Business QR | Promotions engine exists; allocation rules need review |
 | 3 | Goodtime.live, Help Today, WEEKEND, UGROW, Unite Aqua | Community, Announcements, Launch, Powertek products | Community features exist |
 | Blocked | Unite Digital Bank, Bestpe, Universal Trade Coin, Payslip.app, PowerBank and the other regulated concepts | — | Hidden until a super admin records regulatory clearance; no integration before legal review |
+
+## Wave 1 integrations (built)
+| Business | Connection | How it works |
+|---|---|---|
+| **SunX, SUNGATE, Solar Village Mission, SOLCART** | Unite Solar referrals | The page shows a "Get a solar quote" form (optional bill and roof photo, consent required). `POST /api/v1/public/solar/leads` (multipart, 5 per minute, honeypot) creates a `solar_referrals` row with `source`, `details.siteType`, the bill and photo ids, and `consent_at`.<br>• Duplicate phone numbers are refused.<br>• Numbers are read from PDF bills only. Files follow the 90-day bill retention.<br>• Without a partner link the lead is filed under the product's house code (SUNX, SUNGATE, SOLARVM, SOLCART). House codes never earn a referral reward. |
+| **Digital Seed** | Partner links | Every partner has one personal code. The partner business page shows "Your partner link" (`/businesses/<slug>?ref=CODE`) with counts.<br>• Enquiries and solar requests through the link are recorded as introduced by that partner (`enquiries.referral_code_id`), and the partner is notified.<br>• Rewards follow the partner's signed agreement; nothing is paid automatically. |
+| **LeadDNA** | CRM hand-off | In the admin console, Ventures → business → Website enquiries, the **Add to CRM pipeline** button creates a customer and a `new` deal in the operating company's CRM.<br>• The deal's activity history records the enquiry reference, the message and the introducer.<br>• It is refused if the business has no operating company or the enquiry was already converted. The conversion is audited. |
+| **XPERT, Partimer, ZUPPO** | Micro-contracts | "Post a job" opens `/micro/new?source=<slug>`. The job is a normal micro-contract tagged with `source`. The public page shows only counts (open and completed). Posting needs a verified business account. |
+
+Migrations 0053–0055 only add columns. Tests:
+- `apps/api/test/ventures.e2e.ts`: Wave 1 case.
+- `solar.e2e.ts` and `collab-ops.e2e.ts`: still pass.
+- Browser suite "Wave 1 · …": partner link → SunX quote → enquiry → CRM → solar desk → XPERT job.

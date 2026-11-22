@@ -3096,3 +3096,56 @@ suites.push({
     await shot('product-enquiry-admin');
   },
 });
+
+suites.push({
+  name: 'Wave 1 · partner link, SunX solar quote, enquiry into CRM pipeline, XPERT job posting',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, expect, shot }) => {
+    // Partner copies their personal link from the business page
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/ventures/sunite');
+    const linkText = await page.locator('#partner-link code').textContent();
+    const code = linkText.match(/ref=([A-Z0-9]+)/)[1];
+    await shot('wave1-partner-link');
+    // A customer opens SunX through the link and asks for a solar quote
+    await page.goto(`${WEB}/businesses/sunx?ref=${code}`);
+    await page.getByRole('heading', { level: 1, name: 'SunX' }).waitFor();
+    const form = page.locator('[data-form="solar-lead"]');
+    await form.getByLabel('Your name').fill('Kiran Rao');
+    await form.getByLabel('Mobile number').fill('9876512345');
+    await form.getByLabel('City or village').fill('Vijayawada');
+    await form.getByLabel('Monthly electricity bill (₹, optional)').fill('4200');
+    await form.getByLabel(/I agree that Unite Solar may call me/).check();
+    await form.getByRole('button', { name: 'Request a solar quote' }).click();
+    await page.getByText(/Request received — SOL-/).waitFor();
+    await shot('wave1-solar-lead');
+    // The same customer sends a SUNITE enquiry through the link
+    await page.goto(`${WEB}/businesses/sunite?ref=${code}`);
+    await page.getByLabel('Your name').fill('Ritu Jain');
+    await page.getByLabel('Email').fill('ritu.wave1@example.com');
+    await page.getByLabel('How can we help?').fill('We need a solar operating system for 40 installs a month.');
+    await page.getByLabel(/I agree that Unite Group may contact me/).check();
+    await page.getByRole('button', { name: 'Send' }).click();
+    const ok = page.getByText(/Thank you — reference BIZ-\d{4}-\d{6}/);
+    await ok.waitFor();
+    const ref = (await ok.textContent()).match(/BIZ-\d{4}-\d{6}/)[0];
+    // Unite admin sees the introducer and moves the enquiry into the CRM pipeline; the solar desk shows the lead
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/ventures');
+    await page.getByRole('link', { name: /SUNITE/ }).first().click();
+    const item = page.locator(`[data-enquiry="${ref}"]`);
+    await item.getByText(/Introduced by/).waitFor();
+    await item.getByRole('button', { name: 'Add to CRM pipeline' }).click();
+    await item.getByText('In CRM pipeline').waitFor();
+    await shot('wave1-crm');
+    await page.goto(ADMIN + '/workspace/solar?tab=referrals');
+    await page.getByText(/from the sunx page via .*'s link/).first().waitFor();
+    // XPERT: post a job through the product page
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/businesses/xpert');
+    await page.getByRole('heading', { name: 'Post or find work' }).waitFor();
+    await page.getByRole('link', { name: 'Post a job' }).click();
+    await page.getByText('Posting through XPERT').waitFor();
+    await shot('wave1-xpert');
+  },
+});

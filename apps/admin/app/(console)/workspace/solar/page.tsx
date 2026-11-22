@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { REFERRAL_STATUS_LABELS, SOLAR_MODEL_LABELS, SOLAR_QUOTE_STATUS_LABELS, SOLAR_SEGMENT_LABELS, SOLAR_SYSTEMS, SOLAR_SYSTEM_LABELS, type SolarConfig } from '@collabiz/types';
 import { Alert, Button, Card, Dialog, EmptyState, LoadingState, Segmented, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { ApiErrorView } from '@/components/Screen';
@@ -9,7 +9,7 @@ import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
 interface Q { id: string; code: string; customer: string; city: string; partner: string | null; model: string; system: string; capacityKw: number; total: number; commission: number; status: string; createdAt: string }
-interface R { id: string; name: string; phone: string; city: string; segment: string; status: string; reward: number | null; by: string; code: string; createdAt: string; quoteId: string | null }
+interface R { id: string; name: string; phone: string; city: string; segment: string; status: string; reward: number | null; by: string; code: string; createdAt: string; quoteId: string | null; source: string | null; siteType: string | null; hasBill: boolean; hasRoofPhoto: boolean }
 interface K { id: string; code: string; name: string; system: string; capacityKw: number; price: number; batteryKwh: number | null; status: string }
 interface Res { totals: { quotes: number; open: number; openValue: number; won: number; wonKw: number; wonValue: number; commission: number; referrals: number; rewardsDue: number }; quotes: Q[]; referrals: R[]; kits: K[]; config: SolarConfig; canEditMoney: boolean }
 const TONE: Record<string, 'success' | 'info' | 'warning' | 'neutral' | 'danger'> = { draft: 'neutral', sent: 'info', accepted: 'info', won: 'success', installed: 'success', paid: 'success', declined: 'danger', expired: 'warning', new: 'info', quoted: 'info', rewarded: 'success', lost: 'neutral' };
@@ -19,6 +19,8 @@ const rs = (p: string) => Math.round(Number(p || 0) * 100);
 export default function SolarAdmin() {
   const q = useQuery<Res>('/admin/solar');
   const [tab, setTab] = useState('quotes');
+  // Notification links open a section directly (e.g. ?tab=referrals).
+  useEffect(() => { const t = new URLSearchParams(window.location.search).get('tab'); if (t && ['quotes', 'referrals', 'kits', 'settings'].includes(t)) setTab(t); }, []);
   const [f, setF] = useState('open');
   const d = q.data;
   const ref = useMutation(async (id: string, action: string) => { await api.post(`/admin/solar/referrals/${id}/${action}`, {}); q.reload(); return true; });
@@ -49,7 +51,7 @@ export default function SolarAdmin() {
                 {ref.error && <Alert tone="danger">{ref.error}</Alert>}
                 {!d.referrals.length ? <EmptyState icon="users" title="No referrals yet" /> : (
                   <ul className="cz-ws-list">{d.referrals.map((r) => (
-                    <li key={r.id} data-referral={r.name}><span><strong>{r.name}</strong> · {r.city}<br /><span className="cz-muted" style={{ fontSize: 13 }}>{SOLAR_SEGMENT_LABELS[r.segment]} · {r.phone} · referred by {r.by} ({r.code}){r.reward ? ` · reward ${inr(r.reward)}` : ''}</span></span>
+                    <li key={r.id} data-referral={r.name}><span><strong>{r.name}</strong> · {r.city}<br /><span className="cz-muted" style={{ fontSize: 13 }}>{SOLAR_SEGMENT_LABELS[r.segment]} · {r.phone} · {refLine(r)}{r.siteType ? ` · ${r.siteType}` : ''}{r.hasBill ? ' · bill attached' : ''}{r.hasRoofPhoto ? ' · roof photo' : ''}{r.reward ? ` · reward ${inr(r.reward)}` : ''}</span></span>
                       <StatusBadge status={r.status} tone={TONE[r.status]} label={REFERRAL_STATUS_LABELS[r.status]} />
                       {r.status === 'installed' && d.canEditMoney && <Button size="sm" onClick={() => ref.run(r.id, 'rewarded')}>Reward paid</Button>}
                       {['new', 'quoted'].includes(r.status) && <Button size="sm" variant="ghost" onClick={() => ref.run(r.id, 'lost')}>Not going ahead</Button>}
@@ -148,4 +150,11 @@ function Settings({ cfg, canEdit, onChange }: { cfg: SolarConfig; canEdit: boole
       {canEdit && <div><Button type="submit" loading={save.pending}>Save settings</Button></div>}
     </form>
   );
+}
+
+const HOUSE = ['SUNX', 'SUNGATE', 'SOLARVM', 'SOLCART'];
+/** Where a referral came from: a partner link, a Unite product page, or both. */
+function refLine(r: R) {
+  if (!r.source) return `referred by ${r.by} (${r.code})`;
+  return HOUSE.includes(r.code) ? `from the ${r.by} page` : `from the ${r.source} page via ${r.by}'s link (${r.code})`;
 }

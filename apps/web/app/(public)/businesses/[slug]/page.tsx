@@ -4,18 +4,24 @@ import { useParams } from 'next/navigation';
 import { appBrand } from '@collabiz/types';
 import { ButtonLink, EmptyState, ErrorState, Icon, LoadingState } from '@collabiz/ui';
 import { VentureMark, stageLabel } from '@/components/Ventures';
-import { ProductEnquiry, ProductTile, STATUS_LABEL, groupName, stagePill, worksWith, type Product } from '@/components/Products';
+import { ProductEnquiry, ProductTile, STATUS_LABEL, SolarLeadForm, WorkPanel, groupName, stagePill, worksWith, type Product } from '@/components/Products';
+import { SOLAR_LEAD_SOURCES } from '@collabiz/types';
+import { useEffect, useState } from 'react';
 import { venturePhoto } from '@/lib/photos';
 import { isNotFound, useQuery } from '@/lib/hooks';
 
 const IC: Record<string, string> = { doc: 'documents', globe: 'map', search: 'search', sparkle: 'award', chart: 'earnings', grid: 'package', shield: 'verify', flag: 'bookmark', people: 'users', clock: 'clock', bell: 'bell', check: 'check', map: 'location' };
 
-type P = Product & { related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
+type P = Product & { work?: { open: number; done: number } | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
 
 /** A Unite product's own page: overview, features, what it works with, and an enquiry form wired into COLLABIZ. */
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
   const q = useQuery<P>(`/public/products/${slug}`);
+  // Partner link: /businesses/<slug>?ref=CODE — kept for this visit so the enquiry is credited to the partner.
+  const [ref, setRef] = useState<string | undefined>();
+  const [mode, setMode] = useState<'solar' | 'general'>('solar');
+  useEffect(() => { const r = new URLSearchParams(window.location.search).get('ref'); if (r && /^[A-Za-z0-9]{4,12}$/.test(r)) setRef(r.toUpperCase()); }, []);
   if (q.loading) return <div className="cz-gp-body"><LoadingState /></div>;
   if (q.error) return <div className="cz-gp-body">{isNotFound(q.error)
     ? <EmptyState title="Product not found"><Link href="/businesses">See all Unite products</Link></EmptyState> : <ErrorState error={q.error} onRetry={q.reload} />}</div>;
@@ -84,13 +90,33 @@ export default function ProductPage() {
           </>}
         </section>
 
+        {p.work && (
+          <section className="cz-gp-section" aria-labelledby="work-h">
+            <h2 id="work-h">Post or find work</h2>
+            <WorkPanel p={p} work={p.work} />
+          </section>
+        )}
+
         <section id="contact" className="cz-gp-section cz-gp-contact" aria-labelledby="c-h">
           <div>
-            <h2 id="c-h">{p.stage === 'live' || p.stage === 'pilot' ? `Get in touch with ${p.name}` : `Be first to hear about ${p.name}`}</h2>
-            <p className="cz-muted">{stageLabel(p.stage)}. Your message goes to the {p.name} team in COLLABIZ and you get a reference number by email.</p>
+            {(SOLAR_LEAD_SOURCES as readonly string[]).includes(p.slug) ? <>
+              <h2 id="c-h">Get a solar quote</h2>
+              <p className="cz-muted">{p.name} sends your request to the Unite Solar desk. A solar adviser calls you within two working days to check your roof and bill. There is no charge for the quote.</p>
+            </> : <>
+              <h2 id="c-h">{p.stage === 'live' || p.stage === 'pilot' ? `Get in touch with ${p.name}` : `Be first to hear about ${p.name}`}</h2>
+              <p className="cz-muted">{stageLabel(p.stage)}. Your message goes to the {p.name} team in COLLABIZ and you get a reference number by email.</p>
+            </>}
             {p.open && <p className="cz-muted">Run a business? <ButtonLink href="/onboarding/account-type" variant="ghost" size="sm">Partner with {p.name}</ButtonLink></p>}
           </div>
-          <ProductEnquiry p={p} />
+          {(SOLAR_LEAD_SOURCES as readonly string[]).includes(p.slug) ? (
+            <div className="cz-stack" style={{ gap: 12 }}>
+              <div className="cz-gp-seg" role="group" aria-label="Type of request">
+                <label className={mode === 'solar' ? 'is-on' : ''}><input type="radio" name="mode" checked={mode === 'solar'} onChange={() => setMode('solar')} />Solar quote</label>
+                <label className={mode === 'general' ? 'is-on' : ''}><input type="radio" name="mode" checked={mode === 'general'} onChange={() => setMode('general')} />Other enquiry</label>
+              </div>
+              {mode === 'solar' ? <SolarLeadForm p={p} refCode={ref} /> : <ProductEnquiry p={p} refCode={ref} />}
+            </div>
+          ) : <ProductEnquiry p={p} refCode={ref} />}
         </section>
         <p className="cz-muted cz-gp-note">{p.stage === 'live' ? '' : `${p.name} is at an early stage and may be available only in some areas. `}Nothing on this page is an offer of investment, credit or financial products, and no earnings are guaranteed.</p>
       </div>

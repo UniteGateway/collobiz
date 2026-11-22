@@ -27,7 +27,7 @@ export class MicroController {
   private view(m: Micro, ctx: RequestContext, poster: string | null) {
     const party = m.orgId === ctx.orgId || (!!m.workerOrgId && m.workerOrgId === ctx.orgId);
     const hist = m.history as Step[];
-    return { id: m.id, code: m.code, kind: m.kind, kindLabel: microKindLabel(m.kind), state: m.state, stateName: m.state ? opsStateName(m.state) : 'Remote / anywhere', title: m.title, scope: m.scope, acceptance: m.acceptance,
+    return { id: m.id, code: m.code, kind: m.kind, source: m.source, kindLabel: microKindLabel(m.kind), state: m.state, stateName: m.state ? opsStateName(m.state) : 'Remote / anywhere', title: m.title, scope: m.scope, acceptance: m.acceptance,
       quantity: m.quantity, unit: m.unit, priceRs: m.priceRs, due: m.due, status: m.status, poster, isPoster: m.orgId === ctx.orgId, isWorker: !!m.workerOrgId && m.workerOrgId === ctx.orgId, demo: m.demo,
       delivery: party ? m.delivery : null, paymentRef: party ? m.paymentRef : null, paymentConfirmed: hist.some((h) => h.status === 'payment_confirmed'), history: party ? hist : [], createdAt: m.createdAt };
   }
@@ -60,9 +60,9 @@ export class MicroController {
     mustBeVerified(ctx, 'post work');
     if (b.due < today()) throw new BadRequestException('The due date is in the past');
     const code = await nextCode(this.db, microContracts, 'MIC', 300000);
-    const [m] = await this.db.insert(microContracts).values({ code, orgId: ctx.orgId!, kind: b.kind, state: b.state ?? null, title: b.title, scope: b.scope, acceptance: b.acceptance, quantity: b.quantity, unit: b.unit, priceRs: b.priceRs, due: b.due,
+    const [m] = await this.db.insert(microContracts).values({ code, orgId: ctx.orgId!, kind: b.kind, source: b.source ?? null, state: b.state ?? null, title: b.title, scope: b.scope, acceptance: b.acceptance, quantity: b.quantity, unit: b.unit, priceRs: b.priceRs, due: b.due,
       history: [{ status: 'open', at: new Date().toISOString(), by: ctx.userId }], createdBy: ctx.userId }).returning();
-    await this.audit.record(ctx, { action: 'micro.posted', objectType: 'micro_contract', objectId: m.id, after: { code, priceRs: b.priceRs } });
+    await this.audit.record(ctx, { action: 'micro.posted', objectType: 'micro_contract', objectId: m.id, after: { code, priceRs: b.priceRs, source: b.source ?? null } });
     return this.view(m, ctx, null);
   }
 

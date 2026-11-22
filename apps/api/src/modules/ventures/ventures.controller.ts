@@ -17,14 +17,15 @@ import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { and, asc, desc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { VENTURE_ROLES, VENTURE_STAGES, ventureAvailability } from '@collabiz/types';
+import { MICRO_SOURCES, VENTURE_ROLES, VENTURE_STAGES, ventureAvailability } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
-import { directOfferRecipients, directOffers, enquiries, memberships, notifications, offerSales, organizations, uniteVentures, ventureInterests } from '../../db/schema';
+import { crmActivities, crmDeals, customers, microContracts, directOfferRecipients, directOffers, enquiries, memberships, solarReferralCodes, notifications, offerSales, organizations, uniteVentures, ventureInterests } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, Public, RequireCaps, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
 import { MailService } from '../../common/adapters';
 import { randomDigits } from '../../common/crypto';
+import { SolarModule, SolarService } from '../solar/solar.controller';
 
 type Venture = typeof uniteVentures.$inferSelect;
 const PARTNER_ORG = ['partner_company', 'partner_individual'];
@@ -40,6 +41,7 @@ export const BusinessEnquirySchema = z.object({
   message: z.string().trim().min(10, 'Please tell us a little more (at least 10 characters)').max(2000),
   consent: z.literal(true, { message: 'Consent is required so we can reply' }),
   website: z.string().max(0).optional(),
+  ref: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{4,12}$/).optional().or(z.literal('').transform(() => undefined)),
 });
 const EnquiryStatusSchema = z.object({ status: z.enum(['open', 'handled']) });
 const UpdateSchema = z.object({
@@ -84,7 +86,7 @@ export class VenturesService {
 @ApiTags('ventures')
 @Controller()
 export class VenturesController {
-  constructor(@InjectDb() private db: Db, private svc: VenturesService, private audit: AuditService, private mail: MailService) {}
+  constructor(@InjectDb() private db: Db, private svc: VenturesService, private audit: AuditService, private mail: MailService, private solar: SolarService) {}
 
   // ---------- Public ----------
   @Public()
@@ -112,7 +114,11 @@ export class VenturesController {
     const { roles: _r, rewardNote: _n, ...v } = this.svc.view(r.v, r.company);
     const related = await this.db.select().from(uniteVentures)
       .where(and(eq(uniteVentures.sector, r.v.sector), sql`${uniteVentures.id} <> ${r.v.id}`, or(isNull(uniteVentures.regulatedReason), isNotNull(uniteVentures.clearedAt)))).orderBy(asc(uniteVentures.num)).limit(4);
-    return { ...v, related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
+    // XPERT, Partimer and ZUPPO post work as COLLABIZ micro-contracts: show how many are open (counts only, no details).
+    const work = (MICRO_SOURCES as readonly string[]).includes(slug)
+      ? (await this.db.select({ open: sql<number>`count(*) filter (where ${microContracts.status} = 'open')::int`, done: sql<number>`count(*) filter (where ${microContracts.status} in ('paid', 'accepted'))::int` }).from(microContracts).where(eq(microContracts.source, slug)))[0]
+      : null;
+    return { ...v, work, related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
   }
 
   /** Enquiry from a business page. Stored with the business; its operating company (or Unite admins) is notified. */
@@ -124,7 +130,14 @@ export class VenturesController {
     const r = await this.svc.bySlug(slug);
     if (!r || regulatedLocked(r.v)) throw new NotFoundException();
     const reference = `BIZ-${new Date().getFullYear()}-${randomDigits(6)}`;
-    await this.db.insert(enquiries).values({ reference, name: b.name, email: b.email, organization: b.organization, topic: 'business', message: b.message, ventureId: r.v.id, kind: b.kind, phone: b.phone, city: b.city });
+    // Partner attribution: only a partner's personal code counts (house and customer codes do not).
+    const [code] = b.ref ? await this.db.select().from(solarReferralCodes).where(eq(solarReferralCodes.code, b.ref)).limit(1) : [];
+    const introducer = code?.ownerUserId ? code : null;
+    await this.db.insert(enquiries).values({ reference, name: b.name, email: b.email, organization: b.organization, topic: 'business', message: b.message, ventureId: r.v.id, kind: b.kind, phone: b.phone, city: b.city, referralCodeId: introducer?.id ?? null });
+    if (introducer?.ownerOrgId) {
+      const team = await this.db.select({ userId: memberships.userId }).from(memberships).where(and(eq(memberships.organizationId, introducer.ownerOrgId), eq(memberships.status, 'active')));
+      if (team.length) await this.db.insert(notifications).values(team.map((m) => ({ userId: m.userId, kind: 'venture', title: `Your ${r.v.name} link brought an enquiry`, body: `${b.name.split(' ')[0]}${b.city ? ` · ${b.city}` : ''} (${reference}). It is recorded as introduced by you.`, link: `/ventures/${r.v.slug}` })));
+    }
     const label = b.kind === 'partner' ? 'partnership enquiry' : b.kind === 'interest' ? 'registration of interest' : 'enquiry';
     await this.mail.send('email', b.email, `${r.v.name} ${label} ${reference}`, `Thank you ${b.name}. ${r.v.name} received your ${label} (${reference}). The team will reply by email.`);
     const users = await this.svc.deciders(r.v);
@@ -154,7 +167,10 @@ export class VenturesController {
       .from(directOfferRecipients).innerJoin(directOffers, eq(directOffers.id, directOfferRecipients.offerId))
       .where(and(eq(directOfferRecipients.organizationId, ctx.orgId!), eq(directOffers.ventureId, r.v.id), sql`${directOffers.status} <> 'withdrawn'`)).orderBy(desc(directOffers.createdAt));
     const [promoters] = await this.db.select({ n: sql<number>`count(*)::int` }).from(ventureInterests).where(and(eq(ventureInterests.ventureId, r.v.id), eq(ventureInterests.status, 'approved')));
-    return { ...this.svc.view(r.v, r.company), myInterest: interest ? { status: interest.status, roles: interest.roles, regions: interest.regions, message: interest.message, decisionNote: interest.decisionNote } : null, offers, promoters: promoters.n };
+    const code = await this.solar.codeFor(ctx.userId, ctx.orgId ?? null);
+    const [intro] = await this.db.select({ n: sql<number>`count(*)::int`, converted: sql<number>`count(*) filter (where ${enquiries.crmDealId} is not null)::int` }).from(enquiries)
+      .where(and(eq(enquiries.ventureId, r.v.id), eq(enquiries.referralCodeId, code.id)));
+    return { ...this.svc.view(r.v, r.company), myLink: { code: code.code, path: `/businesses/${r.v.slug}?ref=${code.code}`, enquiries: intro.n, converted: intro.converted }, myInterest: interest ? { status: interest.status, roles: interest.roles, regions: interest.regions, message: interest.message, decisionNote: interest.decisionNote } : null, offers, promoters: promoters.n };
   }
 
   @Post('ventures/:slug/interest')
@@ -220,8 +236,10 @@ export class VenturesController {
       ...this.svc.view(r.v, r.company), num: r.v.num, regulated: !!r.v.regulatedReason, regulatedReason: r.v.regulatedReason, cleared: !!r.v.clearedAt, clearanceNote: r.v.clearanceNote, groupCompanyOrgId: r.v.groupCompanyOrgId,
       interests: interests.map((x) => ({ id: x.i.id, partner: x.org.displayName, city: x.org.city, level: x.org.membershipLevel, roles: x.i.roles, regions: x.i.regions, message: x.i.message, status: x.i.status, decisionNote: x.i.decisionNote, updatedAt: x.i.updatedAt })),
       offers, sales: { leads: sales.leads, won: sales.won, wonValue: Number(sales.wonValue) },
-      enquiries: (await this.db.select().from(enquiries).where(eq(enquiries.ventureId, id)).orderBy(desc(enquiries.createdAt)).limit(100))
-        .map((e) => ({ id: e.id, reference: e.reference, kind: e.kind, name: e.name, email: e.email, phone: e.phone, city: e.city, organization: e.organization, message: e.message, status: e.status, createdAt: e.createdAt })),
+      enquiries: (await this.db.select({ e: enquiries, by: solarReferralCodes.ownerName, byOrg: organizations.displayName }).from(enquiries)
+        .leftJoin(solarReferralCodes, eq(solarReferralCodes.id, enquiries.referralCodeId)).leftJoin(organizations, eq(organizations.id, solarReferralCodes.ownerOrgId))
+        .where(eq(enquiries.ventureId, id)).orderBy(desc(enquiries.createdAt)).limit(100))
+        .map(({ e, by, byOrg }) => ({ id: e.id, reference: e.reference, kind: e.kind, name: e.name, email: e.email, phone: e.phone, city: e.city, organization: e.organization, message: e.message, status: e.status, createdAt: e.createdAt, introducedBy: by ? (byOrg ? `${by} · ${byOrg}` : by) : null, crmDealId: e.crmDealId })),
     };
   }
 
@@ -235,6 +253,36 @@ export class VenturesController {
     if (!e) throw new NotFoundException();
     await this.audit.record(ctx, { action: 'venture.enquiry_status', objectType: 'enquiry', objectId: eid, after: { status: b.status } });
     return { status: e.status };
+  }
+
+  /**
+   * LeadDNA hand-off: a website enquiry becomes a customer and a "new" deal in the operating company's CRM pipeline.
+   * The introducing partner (if any) is recorded on the deal's activity history; any reward follows that partner's
+   * signed agreement — nothing is paid automatically.
+   */
+  @Post('admin/ventures/:id/enquiries/:eid/convert')
+  @RequireCaps('opportunity.publish')
+  @HttpCode(201)
+  async convertEnquiry(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Param('eid', ParseUUIDPipe) eid: string) {
+    const [v] = await this.db.select().from(uniteVentures).where(eq(uniteVentures.id, id)).limit(1);
+    if (!v) throw new NotFoundException();
+    if (!this.svc.canManage(ctx, v)) throw new ForbiddenException('Only the operating company or a super admin can convert these enquiries');
+    if (!v.groupCompanyOrgId) throw new ConflictException(`Assign an operating company to ${v.name} first — its CRM receives the lead`);
+    const [e] = await this.db.select().from(enquiries).where(and(eq(enquiries.id, eid), eq(enquiries.ventureId, id))).limit(1);
+    if (!e) throw new NotFoundException();
+    if (e.crmDealId) throw new ConflictException('This enquiry is already in the CRM pipeline');
+    const [code] = e.referralCodeId ? await this.db.select({ c: solarReferralCodes, org: organizations.displayName }).from(solarReferralCodes).leftJoin(organizations, eq(organizations.id, solarReferralCodes.ownerOrgId)).where(eq(solarReferralCodes.id, e.referralCodeId)).limit(1) : [];
+    const org = v.groupCompanyOrgId;
+    const [c] = await this.db.insert(customers).values({ organizationId: org, legalName: e.organization ?? e.name, contactName: e.name, contactEmail: e.email, contactPhone: e.phone, city: e.city,
+      consentProvenance: { method: 'website_enquiry', reference: e.reference, obtainedAt: e.createdAt.toISOString(), disclosureScope: 'restricted' }, restrictedContacts: true }).returning();
+    const kind = e.kind === 'partner' ? 'partnership' : e.kind === 'interest' ? 'launch interest' : 'customer enquiry';
+    const [d] = await this.db.insert(crmDeals).values({ organizationId: org, customerId: c.id, title: `${v.name}: ${kind} — ${e.name}`, ownerUserId: ctx.userId }).returning();
+    const notes = [`Created from website enquiry ${e.reference} on the ${v.name} page.`, `Message: ${e.message}`];
+    if (code) notes.push(`Introduced by ${code.c.ownerName}${code.org ? ` (${code.org})` : ''} through their partner link. Any reward follows their signed agreement.`);
+    await this.db.insert(crmActivities).values(notes.map((body) => ({ organizationId: org, subjectType: 'deal', subjectId: d.id, kind: 'system', body, actorUserId: ctx.userId })));
+    await this.db.update(enquiries).set({ crmDealId: d.id, status: 'handled' }).where(eq(enquiries.id, eid));
+    await this.audit.record(ctx, { action: 'venture.enquiry_converted', objectType: 'enquiry', objectId: eid, after: { dealId: d.id, organizationId: org } });
+    return { dealId: d.id, customerId: c.id };
   }
 
   @Patch('admin/ventures/:id')
@@ -285,5 +333,5 @@ export class VenturesController {
   }
 }
 
-@Module({ controllers: [VenturesController], providers: [VenturesService] })
+@Module({ imports: [SolarModule], controllers: [VenturesController], providers: [VenturesService] })
 export class VenturesModule {}

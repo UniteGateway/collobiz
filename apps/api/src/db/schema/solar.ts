@@ -73,6 +73,12 @@ export const solarReferrals = pgTable('solar_referrals', {
   reward: bigint('reward', { mode: 'number' }),
   rewardedAt: timestamp('rewarded_at', { withTimezone: true }),
   rewardedBy: uuid('rewarded_by').references(() => users.id),
+  /** Unite product page the lead came from (sunx, sungate, solar-village-mission, solcart); null for a partner link. */
+  source: text('source'),
+  details: jsonb('details'), // { siteType, roofType?, note? }
+  billId: uuid('bill_id'), // solar_bills row (deleted after the retention period)
+  roofPhotoId: uuid('roof_photo_id'), // solar_bills row holding the roof photo (same retention)
+  consentAt: timestamp('consent_at', { withTimezone: true }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (t) => [uniqueIndex('solar_referrals_phone_uq').on(t.phone10), index('solar_referrals_code_idx').on(t.codeId)]);

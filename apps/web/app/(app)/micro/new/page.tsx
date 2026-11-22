@@ -1,7 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MICRO_KINDS, MICRO_MAX_RS, MICRO_MIN_RS } from '@collabiz/types';
+import { MICRO_KINDS, MICRO_MAX_RS, MICRO_MIN_RS, MICRO_SOURCES, appBrand } from '@collabiz/types';
 import { Alert, Button, Card, Select, TextArea, TextInput } from '@collabiz/ui';
 import { Screen } from '@/components/Screen';
 import { STATE_OPTIONS, addDays, toNum } from '@/components/Ops';
@@ -11,7 +11,10 @@ import { useMutation } from '@/lib/hooks';
 export default function PostMicro() {
   const router = useRouter();
   const [f, setF] = useState({ kind: 'calling', state: '', title: '', scope: '', acceptance: '', quantity: '', unit: '', priceRs: '', due: addDays(7) });
-  const save = useMutation(async () => { const r = await api.post<{ id: string }>('/micro', { ...f, state: f.state || null, quantity: toNum(f.quantity), priceRs: toNum(f.priceRs) }); router.push(`/micro/${r.id}`); return r; });
+  // Opened from a Unite product page (XPERT, Partimer, ZUPPO): the job is tagged with that product.
+  const [source, setSource] = useState<string | null>(null);
+  useEffect(() => { const s = new URLSearchParams(window.location.search).get('source'); if (s && (MICRO_SOURCES as readonly string[]).includes(s)) setSource(s); }, []);
+  const save = useMutation(async () => { const r = await api.post<{ id: string }>('/micro', { ...f, source, state: f.state || null, quantity: toNum(f.quantity), priceRs: toNum(f.priceRs) }); router.push(`/micro/${r.id}`); return r; });
   const e = save.fieldErrors;
   return (
     <Screen page={{ key: 'micro-new', title: 'Post a micro-contract', access: 'partner' }} eyebrow="Micro-contracts"
@@ -19,6 +22,7 @@ export default function PostMicro() {
       <Card>
         <form noValidate className="cz-stack" style={{ gap: 12 }} onSubmit={(ev) => { ev.preventDefault(); save.run(); }}>
           {save.error && <Alert tone="danger">{save.error}</Alert>}
+          {source && <Alert tone="info" title={`Posting through ${source === 'xpert' ? 'XPERT' : source === 'zuppo' ? 'ZUPPO' : 'Partimer'}`}>{appBrand(source)?.logo ? <img src={appBrand(source)!.logo} alt="" height={22} style={{ verticalAlign: 'middle', marginRight: 8 }} /> : null}It is counted on the {source === 'xpert' ? 'XPERT' : source === 'zuppo' ? 'ZUPPO' : 'Partimer'} page and works like any other micro-contract.</Alert>}
           <div className="cz-grid cz-grid-2">
             <Select label="Type of work" value={f.kind} onChange={(ev) => setF({ ...f, kind: ev.target.value })} options={MICRO_KINDS.map((k) => ({ value: k.code, label: k.label }))} />
             <Select label="State (optional)" value={f.state} onChange={(ev) => setF({ ...f, state: ev.target.value })} options={[{ value: '', label: 'Remote / anywhere' }, ...STATE_OPTIONS]} />

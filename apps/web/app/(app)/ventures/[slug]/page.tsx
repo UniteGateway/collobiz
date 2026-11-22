@@ -10,7 +10,7 @@ import { INTEREST, VentureMark, roleLabel, stageLabel, type Venture } from '@/co
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
-type Detail = Venture & { roles: string[]; myInterest: { status: string; roles: string[]; regions: string[]; message: string; decisionNote: string | null } | null; offers: { id: string; code: string; title: string; deadline: string; status: string; myStatus: string }[]; promoters: number };
+type Detail = Venture & { myLink?: { code: string; path: string; enquiries: number; converted: number }; roles: string[]; myInterest: { status: string; roles: string[]; regions: string[]; message: string; decisionNote: string | null } | null; offers: { id: string; code: string; title: string; deadline: string; status: string; myStatus: string }[]; promoters: number };
 const PAGE = { key: 'venture', title: 'Unite business', access: 'partner' as const };
 /** Feature icons in the brand data map onto the design-system icon set. */
 const IC: Record<string, string> = { doc: 'documents', globe: 'map', search: 'search', sparkle: 'award', chart: 'earnings', grid: 'package', shield: 'verify', flag: 'bookmark', people: 'users', clock: 'clock', bell: 'bell', check: 'check', map: 'location' };
@@ -101,6 +101,7 @@ export default function VenturePage() {
               </form>
             </Card>
           ) : <Card title="Coming soon"><p style={{ margin: 0 }}>{v.name} is not open to partners yet. It will appear under “Open to partners” when Unite Group starts working with partners on it.</p></Card>)}
+          {v.myLink && <PartnerLink name={v.name} link={v.myLink} />}
           <Card title={`Offers from ${v.name}`}>
             {!v.offers.length ? <p className="cz-muted" style={{ margin: 0 }}>No offers for you yet.{mine?.status === 'approved' ? ' They will appear here and on your Home page.' : ''}</p> : (
               <ul className="cz-pick-list">{v.offers.map((o) => <li key={o.id} className="cz-row" style={{ justifyContent: 'space-between' }}><Link href={`/offers/${o.id}`}>{o.title}</Link><span className="cz-muted cz-mono" style={{ fontSize: 12.5 }}>{o.code}</span></li>)}</ul>
@@ -109,5 +110,21 @@ export default function VenturePage() {
         </div>
       </div>
     </Screen>
+  );
+}
+
+/** Personal tracked link to the public product page; enquiries through it are recorded as introduced by this partner. */
+function PartnerLink({ name, link }: { name: string; link: { code: string; path: string; enquiries: number; converted: number } }) {
+  const [copied, setCopied] = useState(false);
+  const url = typeof window !== 'undefined' ? `${window.location.origin}${link.path}` : link.path;
+  return (
+    <Card title="Your partner link" id="partner-link">
+      <p style={{ marginTop: 0 }}>Share this link to the {name} page. Enquiries and solar requests sent through it are recorded as introduced by you.</p>
+      <div className="cz-row" style={{ gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <code className="cz-mono" style={{ padding: '8px 12px', background: 'var(--cz-grey-100, #f2f4f7)', borderRadius: 10, wordBreak: 'break-all' }}>{url}</code>
+        <Button size="sm" variant="secondary" onClick={() => { navigator.clipboard?.writeText(url).then(() => setCopied(true)).catch(() => setCopied(false)); }}>{copied ? 'Copied' : 'Copy link'}</Button>
+      </div>
+      <p className="cz-muted" style={{ marginBottom: 0, fontSize: 13 }}>{link.enquiries} enquir{link.enquiries === 1 ? 'y' : 'ies'} through your link · {link.converted} moved into the sales pipeline. Rewards follow your signed agreement with Unite Group; nothing is paid automatically.</p>
+    </Card>
   );
 }

@@ -148,5 +148,9 @@ export const enquiries = pgTable('enquiries', {
   kind: text('kind'), // customer | partner | interest (business pages only)
   phone: text('phone'),
   city: text('city'),
+  /** Partner referral code (solar_referral_codes.id) when the page was opened from a partner's link. */
+  referralCodeId: uuid('referral_code_id'),
+  /** CRM deal created from this enquiry in the operating company's pipeline. */
+  crmDealId: uuid('crm_deal_id'),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex('enquiries_ref_uq').on(t.reference), index('enquiries_venture_idx').on(t.ventureId)]);

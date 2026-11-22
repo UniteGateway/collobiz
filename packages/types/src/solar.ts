@@ -299,6 +299,25 @@ export function readBill(text: string): BillExtract {
 }
 
 // ---------------- Referrals ----------------
+/** Unite product pages that send solar enquiries into the Unite Solar referral desk. */
+export const SOLAR_LEAD_SOURCES = ['sunx', 'sungate', 'solar-village-mission', 'solcart'] as const;
+export const SOLAR_SITE_TYPES = ['Independent house', 'Apartment / housing society', 'Village household', 'Shop or office', 'Factory or warehouse', 'Farm / pump'] as const;
+/** A solar enquiry from a Unite product page (multipart form fields, coerced). */
+export const SolarProductLeadSchema = z.object({
+  source: z.enum(SOLAR_LEAD_SOURCES),
+  ref: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{4,12}$/).optional().or(z.literal('').transform(() => undefined)),
+  name: z.string().trim().min(2, 'Please enter your name').max(120),
+  phone: z.string().trim().regex(INDIA_MOBILE, { message: 'Enter a 10-digit Indian mobile number' }),
+  city: z.string().trim().min(2, 'Enter your city or village').max(80),
+  region: z.string().trim().min(2, 'Choose your state').max(6),
+  segment: z.enum(SOLAR_SEGMENTS),
+  siteType: z.enum(SOLAR_SITE_TYPES),
+  monthlyBill: z.coerce.number().int().min(0).max(1_00_00_000).optional().or(z.literal('').transform(() => undefined)),
+  note: z.string().trim().max(600).optional().or(z.literal('').transform(() => undefined)),
+  consent: z.union([z.literal(true), z.literal('true')], { message: 'Please agree to be contacted about solar' }),
+  website: z.string().max(0).optional(),
+});
+
 export const SolarReferralSchema = z.object({
   name: z.string().trim().min(2).max(120),
   phone: z.string().trim().regex(INDIA_MOBILE, { message: 'Enter a 10-digit Indian mobile number' }),
