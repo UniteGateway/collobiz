@@ -428,6 +428,13 @@
       "when": 1795456060780,
       "tag": "0060_club_agreements",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1795468445120,
+      "tag": "0061_biofix_bio_cng_hydrogen",
+      "breakpoints": true
     }
   ]
 }

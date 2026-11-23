@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { appBrand } from '@collabiz/types';
 import { ButtonLink, EmptyState, ErrorState, Icon, LoadingState } from '@collabiz/ui';
 import { VentureMark, stageLabel } from '@/components/Ventures';
-import { ConnectorPanel, CourseShowcase, ProductEnquiry, type ConnectorView, ProductTile, ProjectShowcase, STATUS_LABEL, SolarLeadForm, WorkPanel, type ShowCourse, type ShowProject, groupName, stagePill, worksWith, type Product } from '@/components/Products';
+import { BiofixSchemes, ConnectorPanel, CourseShowcase, ProductEnquiry, type ConnectorView, ProductTile, ProjectShowcase, STATUS_LABEL, SolarLeadForm, WorkPanel, type ShowCourse, type ShowProject, groupName, stagePill, worksWith, type Product } from '@/components/Products';
 import { SOLAR_LEAD_SOURCES, productSubdomain } from '@collabiz/types';
 import { useEffect, useState } from 'react';
 import { venturePhoto } from '@/lib/photos';
@@ -114,6 +114,13 @@ export default function ProductPage() {
           </section>
         )}
 
+        {p.slug === 'unite-biofix' && (
+          <section className="cz-gp-section" aria-labelledby="schemes-h" id="schemes">
+            <h2 id="schemes-h">Public programmes to check</h2>
+            <BiofixSchemes />
+          </section>
+        )}
+
         {p.work && (
           <section className="cz-gp-section" aria-labelledby="work-h">
             <h2 id="work-h">Post or find work</h2>
@@ -127,7 +134,7 @@ export default function ProductPage() {
               <h2 id="c-h">{p.slug === 'roofz' ? 'Offer your roof, or go solar' : 'Get a solar quote'}</h2>
               <p className="cz-muted">{p.slug === 'roofz' ? 'Tell us about your roof. The Unite Solar team checks whether it suits a solar project you host (PPA or roof rent) or a system you own, and calls you within two working days. Any lease or PPA terms are agreed in writing before work starts.' : `${p.name} sends your request to the Unite Solar desk. A solar adviser calls you within two working days to check your roof and bill. There is no charge for the quote.`}</p>
             </> : <>
-              <h2 id="c-h">{p.stage === 'live' || p.stage === 'pilot' ? `Get in touch with ${p.name}` : `Be first to hear about ${p.name}`}</h2>
+              <h2 id="c-h">{p.slug === 'unite-biofix' ? 'Register feedstock, land or demand' : p.stage === 'live' || p.stage === 'pilot' ? `Get in touch with ${p.name}` : `Be first to hear about ${p.name}`}</h2>
               <p className="cz-muted">{stageLabel(p.stage)}. Your message goes to the {p.name} team in COLLABIZ and you get a reference number by email.</p>
             </>}
             {p.open && <p className="cz-muted">Run a business? <ButtonLink href="/onboarding/account-type" variant="ghost" size="sm">Partner with {p.name}</ButtonLink></p>}

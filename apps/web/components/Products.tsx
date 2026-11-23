@@ -2,7 +2,7 @@
 /** Public Unite product pages (/businesses): directory tiles, "works with" integrations and the enquiry form. */
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { INDIA_STATES, SOLAR_LEAD_SOURCES, SOLAR_SITE_TYPES, MICRO_SOURCES, appBrand, sectorName } from '@collabiz/types';
+import { BIOFIX_FEEDSTOCKS, BIOFIX_SCHEMES, PAGE_INTENTS, INDIA_STATES, SOLAR_LEAD_SOURCES, SOLAR_SITE_TYPES, MICRO_SOURCES, appBrand, sectorName } from '@collabiz/types';
 import { Alert, Button, Select, TextArea, TextInput } from '@collabiz/ui';
 import { VentureMark, type Venture } from '@/components/Ventures';
 import { api } from '@/lib/api';
@@ -67,7 +67,6 @@ export const NEXT_INTEGRATION: Record<string, { title: string; text: string }> =
   weekend: { title: 'Announcements', text: 'Edition archive and advertiser reporting.' },
   'help-today': { title: 'Community', text: 'Request triage and outcome updates in COLLABIZ community.' },
   'goodtime-live': { title: 'Community', text: 'Community events and volunteer sign-ups.' },
-  'unite-biofix': { title: 'Data room & Projects', text: 'Site data room and offtake tracking.' },
   'unite-aqua': { title: 'Powertek products', text: 'Specification sheets and demonstration booking.' },
   '99films': { title: 'Data room & Contracts', text: 'Rights ledger and milestone approvals.' },
   'moveon-video': { title: 'Contracts', text: 'Rights catalogue and revenue statements.' },
@@ -117,7 +116,6 @@ export const MEMBER_LINKS: Record<string, { title: string; href: string; text: s
   weekend: { title: 'Announcements', href: '/announcements', text: 'Editions and notices published to members.' },
   '99films': { title: 'Data room & Contracts', href: '/data-room', text: 'Project documents and rights records for members.' },
   'moveon-video': { title: 'Contracts', href: '/contracts', text: 'Distribution agreements managed in COLLABIZ contracts.' },
-  'unite-biofix': { title: 'Data room & Projects', href: '/data-room', text: 'Site documents and project milestones for members.' },
   'unite-aqua': { title: 'Powertek products', href: '/powertek', text: 'Equipment and consumables sold through the Powertek desk.' },
   startsmart: { title: 'Launch', href: '/launch', text: 'Members turn an idea into a launch plan with partners.' },
   sunite: { title: 'Unite Solar desk', href: '/unite-solar', text: 'Partners quote, track and install solar projects.' },
@@ -133,22 +131,34 @@ export interface ShowProject { id: string; name: string; kind: string; city: str
 export interface ShowCourse { id: string; title: string; summary: string; level: string; minutes: number; modules: number }
 
 export function ProductEnquiry({ p, refCode, projects, projectId, items, itemId }: { p: Product; refCode?: string; projects?: ShowProject[]; projectId?: string; items?: ConnectorItem[]; itemId?: string }) {
+  const intents = PAGE_INTENTS[p.slug];
   const kinds: { k: 'customer' | 'partner' | 'interest'; label: string }[] = p.stage === 'live' || p.stage === 'pilot'
     ? [{ k: 'customer', label: 'I want to use it' }, { k: 'partner', label: 'I want to partner' }]
     : [{ k: 'interest', label: 'Notify me at launch' }, { k: 'partner', label: 'I want to partner' }];
-  const [f, setF] = useState({ kind: kinds[0].k as string, name: '', email: '', phone: '', city: '', organization: '', message: '', consent: false, projectId: projectId ?? '', visitDate: '', itemId: itemId ?? '' });
+  const [f, setF] = useState({ kind: kinds[0].k as string, name: '', email: '', phone: '', city: '', organization: '', message: '', consent: false, projectId: projectId ?? '', visitDate: '', itemId: itemId ?? '', intent: intents?.[0]?.code ?? '', quantity: '', feedstock: '', state: '' });
   useEffect(() => { if (projectId) setF((x) => ({ ...x, projectId })); }, [projectId]);
   useEffect(() => { if (itemId) setF((x) => ({ ...x, itemId })); }, [itemId]);
   const [hp, setHp] = useState('');
   const [ref, setRef] = useState<string | null>(null);
-  const send = useMutation(async () => { const r = await api.post<{ reference: string }>(`/public/products/${p.slug}/enquiries`, { ...f, projectId: f.projectId || undefined, visitDate: f.visitDate || undefined, itemId: f.itemId || undefined, website: hp || undefined, ref: refCode }); setRef(r.reference); return r; });
+  const send = useMutation(async () => { const r = await api.post<{ reference: string }>(`/public/products/${p.slug}/enquiries`, { ...f, kind: intents ? (f.intent === 'partner' ? 'partner' : 'customer') : f.kind, projectId: f.projectId || undefined, visitDate: f.visitDate || undefined, itemId: f.itemId || undefined, intent: f.intent || undefined, quantity: f.quantity ? Number(f.quantity) : undefined, feedstock: f.feedstock || undefined, state: f.state || undefined, website: hp || undefined, ref: refCode }); setRef(r.reference); return r; });
   if (ref) return <Alert tone="success" title={`Thank you — reference ${ref}`}>The {p.name} team has your message and will reply by email. A confirmation is on its way to {f.email}.</Alert>;
   return (
     <form noValidate className="cz-gp-form" onSubmit={(e) => { e.preventDefault(); send.run(); }}>
       {send.error && <Alert tone="danger" title={send.error}>{Object.keys(send.fieldErrors).length ? 'Please check the highlighted fields.' : null}</Alert>}
-      <fieldset className="cz-gp-seg"><legend className="cz-sr-only">What would you like?</legend>
+      {intents ? (() => { const it = intents.find((x) => x.code === f.intent); return (
+        <div className="cz-stack" style={{ gap: 12 }} data-intents>
+          <fieldset className="cz-fieldset"><legend>What would you like to do?</legend>
+            <div className="cz-intent-grid">{intents.map((x) => <label key={x.code} className={f.intent === x.code ? 'is-on' : ''}><input type="radio" name="intent" value={x.code} checked={f.intent === x.code} onChange={() => setF({ ...f, intent: x.code })} />{x.label}</label>)}</div>
+          </fieldset>
+          <div className="cz-grid cz-grid-2">
+            {it?.needsFeedstock && <Select label="Type of feedstock" value={f.feedstock} onChange={(e) => setF({ ...f, feedstock: e.target.value })} options={[{ value: '', label: 'Choose' }, ...BIOFIX_FEEDSTOCKS.map((x) => ({ value: x, label: x }))]} error={send.fieldErrors.feedstock} />}
+            {it?.unit && <TextInput label={`${it.quantityLabel ?? 'Quantity'} (${it.unit})`} inputMode="decimal" value={f.quantity} onChange={(e) => setF({ ...f, quantity: e.target.value })} error={send.fieldErrors.quantity} />}
+            <Select label="State" value={f.state} onChange={(e) => setF({ ...f, state: e.target.value })} options={[{ value: '', label: 'Choose (optional)' }, ...INDIA_STATES.map(([, n]) => ({ value: n, label: n })), { value: 'Outside India', label: 'Outside India' }]} />
+          </div>
+        </div>
+      ); })() : <fieldset className="cz-gp-seg"><legend className="cz-sr-only">What would you like?</legend>
         {kinds.map((x) => <label key={x.k} className={f.kind === x.k ? 'is-on' : ''}><input type="radio" name="kind" value={x.k} checked={f.kind === x.k} onChange={() => setF({ ...f, kind: x.k })} />{x.label}</label>)}
-      </fieldset>
+      </fieldset>}
       <div className="cz-grid cz-grid-2">
         <TextInput label="Your name" autoComplete="name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} error={send.fieldErrors.name} />
         <TextInput label="Email" type="email" autoComplete="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} error={send.fieldErrors.email} />
@@ -284,6 +294,16 @@ export function ConnectorPanel({ c, onAsk }: { c: ConnectorView; onAsk: (id: str
         ))}</ul>
       ) : ['capacity', 'offers', 'energy', 'powertek'].includes(c.kind) ? <p className="cz-muted">Nothing is listed right now. New listings appear here as members publish them.</p> : null}
       <p style={{ margin: 0 }}><a href={c.member.href}>{c.member.label} (members) →</a></p>
+    </div>
+  );
+}
+
+/** Unite Biofix: public programmes to check (facts only, no promise of eligibility). */
+export function BiofixSchemes() {
+  return (
+    <div className="cz-stack" style={{ gap: 12 }}>
+      <ul className="cz-gp-list">{BIOFIX_SCHEMES.map((x) => <li key={x.name}><div><strong>{x.name}</strong><p>{x.by}. {x.text}</p></div></li>)}</ul>
+      <p className="cz-muted" style={{ margin: 0, fontSize: 13.5 }}>Eligibility, prices and incentives are set by each programme’s official guidelines and can change. Unite Biofix helps you check them; it does not promise any subsidy, price or return.</p>
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { Injectable } from '@nestjs/common';
 import { and, desc, eq, gte, ilike, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm';
 import { CONNECTORS, OFFER_OPEN, capacityTypeLabel, offerCategoryLabel, sectorName, type ConnectorFeed, type SectorCode } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
-import { actionItems, announcements, businessOffers, capacityOffers, catalogItems, communityPosts, energyListings, groupCompanies, meetings, microContracts, opportunities, organizations, proofShares } from '../../db/schema';
+import { actionItems, announcements, businessOffers, capacityOffers, catalogItems, clubPowerRequests, communityPosts, energyListings, enquiries, groupCompanies, meetings, microContracts, opportunities, organizations, proofShares, uniteVentures } from '../../db/schema';
 
 export interface FeedItem { id: string; type: 'capacity' | 'offer' | 'energy' | 'product'; title: string; subtitle: string; ownerOrgId: string | null }
 const DAYS30 = () => new Date(Date.now() - 30 * 86400_000);
@@ -68,6 +68,23 @@ export class ConnectorService {
       case 'actions': return [{ label: 'Follow-ups completed in the last 30 days', value: await n(this.db.select({ n: count }).from(actionItems).where(and(eq(actionItems.status, 'done'), gte(actionItems.doneAt, DAYS30())))) }];
       case 'meetings': return [{ label: 'Meetings held or scheduled in the last 30 days', value: await n(this.db.select({ n: count }).from(meetings).where(and(inArray(meetings.status, ['scheduled', 'completed']), gte(meetings.startsAt, DAYS30())))) }];
       case 'storefronts': return [{ label: 'Live Business QR pages', value: await n(this.db.select({ n: count }).from(proofShares).where(eq(proofShares.enabled, true))) }];
+      case 'register': {
+        const [v] = await this.db.select({ id: uniteVentures.id }).from(uniteVentures).where(eq(uniteVentures.slug, slug)).limit(1);
+        if (!v) return [];
+        const intent = sql`${enquiries.details}->'request'->>'intent'`;
+        const [r] = await this.db.select({
+          suppliers: sql<number>`count(*) filter (where ${intent} = 'feedstock')::int`,
+          tpd: sql<number>`coalesce(sum((${enquiries.details}->'request'->>'quantity')::numeric) filter (where ${intent} = 'feedstock'), 0)::float`,
+          sites: sql<number>`count(*) filter (where ${intent} = 'host_land')::int`,
+          buyers: sql<number>`count(*) filter (where ${intent} in ('offtake_cbg', 'offtake_fom', 'offtake_h2'))::int`,
+          partners: sql<number>`count(*) filter (where ${intent} = 'partner')::int`,
+        }).from(enquiries).where(eq(enquiries.ventureId, v.id));
+        const club = await n(this.db.select({ n: count }).from(clubPowerRequests).where(inArray(clubPowerRequests.need, ['bio_cng', 'green_hydrogen'])));
+        return [
+          { label: 'Feedstock offered (tonnes a day)', value: Math.round(r?.tpd ?? 0) }, { label: 'Feedstock suppliers', value: r?.suppliers ?? 0 },
+          { label: 'Sites offered', value: r?.sites ?? 0 }, { label: 'Buyers of Bio-CNG, manure or hydrogen', value: (r?.buyers ?? 0) + club }, { label: 'EPC and O&M partners', value: r?.partners ?? 0 },
+        ];
+      }
       case 'powertek': return [{ label: 'Matching Powertek products', value: (await this.items(feed)).length }];
     }
   }

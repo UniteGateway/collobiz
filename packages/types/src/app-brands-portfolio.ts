@@ -43,6 +43,18 @@ export const PORTFOLIO_BRANDS: Record<string, AppBrand> = {
   'partimer': { logo: '/brands/partimer.png', accent: ['#0C2354', '#3C5484'], features: [p("Shift availability", 'check'), p("Attendance confirmation", 'check'), p("Wage breakdown", 'check'), p("Employer verification", 'shield'), p("Cancellation rules", 'check'), p("Settlement tracking", 'check')] },
   'startsmart': { accent: ['#0F2A4A', '#1F9D55'], features: [p("Idea submissions", 'check'), p("Mentor matching", 'people'), p("Validation log", 'check'), p("Demo-day scheduling", 'clock'), p("Funding-introduction records", 'doc'), p("Cohort reporting", 'chart')] },
   'help-today': { logo: '/brands/help-today.png', accent: ['#09539E', '#0C3C6C'], features: [p("Story consent", 'shield'), p("Partner directory", 'grid'), p("Request triage", 'check'), p("Outcome updates", 'check'), p("Correction process", 'check'), p("Community feedback", 'check')] },
-  'unite-biofix': { accent: ['#0F2A4A', '#1F9D55'], features: [p("Feedstock contracts", 'check'), p("Site data room", 'doc'), p("Mass-balance records", 'doc'), p("Offtake tracking", 'check'), p("Operating dashboard", 'chart'), p("By-product sales records", 'doc')] },
+  'unite-biofix': { accent: ['#0F2A4A', '#1F9D55'], features: [
+    { title: 'Feedstock register', text: 'Farmers, sugar mills, dairies, municipalities and food businesses register crop residue, press mud, dung and organic waste with quantity and location.', icon: 'check' },
+    { title: 'Host a plant', text: 'Landowners and industries offer sites for Bio-CNG or green hydrogen plants.', icon: 'flag' },
+    { title: 'Offtake register', text: 'Fleets, industries and gas distributors register demand for Bio-CNG, fermented organic manure and green hydrogen.', icon: 'chart' },
+    { title: 'Industry Club supply', text: 'Club members ask the energy desk for Bio-CNG or green hydrogen alongside solar and open-access power.', icon: 'people' },
+    { title: 'Online agreements', text: 'Feedstock, offtake and partner agreements are signed online through Unite Industry Club agreements.', icon: 'doc' },
+    p('Mass-balance and quality records', 'doc'), p('Plant operating dashboard', 'chart'), p('Carbon and by-product records', 'doc'),
+  ], workflow: [
+    { title: 'Register', text: 'Feedstock, land, offtake or partnership — with quantity and location.' },
+    { title: 'Assessment', text: 'The Unite Biofix team checks feedstock availability, site and demand for a viable cluster.' },
+    { title: 'Project and partners', text: 'EPC, O&M and equipment partners are brought in through COLLABIZ teams, tenders and micro-contracts.' },
+    { title: 'Agreements', text: 'Supply and offtake agreements are signed online by both parties.' },
+  ] },
   'unite-aqua': { logo: '/brands/unite-aqua.png', accent: ['#0C3C84', '#0C9CE4'], features: [p("Verified specification sheet", 'shield'), p("Operating-cost records", 'doc'), p("Feed-quality tests", 'check'), p("Demonstration booking", 'check'), p("Service and consumables catalogue", 'grid')] },
 };

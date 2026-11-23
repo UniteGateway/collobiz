@@ -71,4 +71,27 @@ describe('Wave 3 connectors', () => {
     await api(app).post('/v1/community/posts').set(auth(t.asha)).send({ body: 'Who can help with a rooftop structure check in Pune?', topic: 'question' }).expect(201);
     expect((await page('help-today')).connector.stats[0].value).toBe(before + 1);
   });
+
+  it('Unite Biofix: Bio-CNG and green hydrogen register — validated requests, live totals, Industry Club demand counted', async () => {
+    const pg = await page('unite-biofix');
+    expect(pg.tagline).toBe('Bio-CNG and green hydrogen projects');
+    expect(pg.connector.kind).toBe('register');
+    const total = (label: string, c = pg.connector) => c.stats.find((s: { label: string }) => s.label.startsWith(label)).value;
+    const before = { tpd: total('Feedstock offered'), buyers: total('Buyers') };
+    const send = (b: object) => api(app).post('/v1/public/products/unite-biofix/enquiries').send({ ...base, ...b });
+    await send({ intent: 'feedstock', feedstock: 'Sugarcane press mud' }).expect(400); // quantity needed
+    await send({ intent: 'feedstock', quantity: 40 }).expect(400); // feedstock type needed
+    await send({ intent: 'teleport', quantity: 1 }).expect(400);
+    await api(app).post('/v1/public/products/ev-saathi/enquiries').send({ ...base, intent: 'feedstock', quantity: 5 }).expect(400); // not a Biofix page
+    const r = (await send({ intent: 'feedstock', quantity: 40, feedstock: 'Sugarcane press mud', state: 'Telangana' }).expect(201)).body;
+    const e = (await pool.query('select details from enquiries where reference = $1', [r.reference])).rows[0];
+    expect(e.details.request).toEqual({ intent: 'feedstock', intentLabel: 'Supply feedstock', quantity: 40, unit: 'tonnes a day', feedstock: 'Sugarcane press mud', state: 'Telangana' });
+    await send({ intent: 'offtake_h2', quantity: 500 }).expect(201);
+    // An Industry Club member asking for Bio-CNG counts as demand too
+    await api(app).post('/v1/club/power-requests').set(auth(t.ravi)).send({ need: 'bio_cng', state: 'Gujarat', city: 'Ahmedabad', monthlyUnits: 1000, note: 'Bio-CNG for 12 delivery vans' }).expect(201);
+    const after = (await page('unite-biofix')).connector;
+    expect(total('Feedstock offered', after)).toBe(before.tpd + 40);
+    expect(total('Buyers', after)).toBe(before.buyers + 2);
+  });
 });
+

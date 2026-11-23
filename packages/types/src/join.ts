@@ -15,6 +15,8 @@ export const JOIN_INTENTS = [
     icon: 'value', links: [['/solar', 'Get a solar quote'], ['/energy', 'Energy desk']], ventures: ['sunite', 'roofz', 'solar-village-mission'], sectors: ['solar'] },
   { code: 'buy_power', label: 'Buy green power for my factory or business', blurb: 'Open access, group captive or PPA power from solar, wind and hybrid plants — usually cheaper than the grid tariff.',
     icon: 'value', links: [['/club/power', 'Request power'], ['/energy', 'Green Park energy market']], ventures: [], sectors: ['solar', 'manufacturing', 'infrastructure'] },
+  { code: 'bio_energy', label: 'Turn waste into Bio-CNG, or buy Bio-CNG and green hydrogen', blurb: 'Supply crop residue, press mud, dung or food waste, host a plant on your land, or buy Bio-CNG, organic manure and green hydrogen through Unite Biofix.',
+    icon: 'value', links: [['/businesses/unite-biofix', 'Unite Biofix'], ['/club/power', 'Buy Bio-CNG or hydrogen']], ventures: ['unite-biofix'], sectors: ['agri_food', 'manufacturing', 'infrastructure', 'solar'] },
   { code: 'solar_products', label: 'Sell my products under the Unite Powertek brand, with free power', blurb: 'OEM: we brand, list and sell your product through the Unite network; customers can get free solar power with it.',
     icon: 'package', links: [['/club/products', 'Submit a product'], ['/powertek', 'Powertek catalogue']], ventures: ['solcart', 'sungate', 'unite-powertek'], sectors: ['solar', 'power_equipment', 'manufacturing'] },
   { code: 'epc_partner', label: 'Become an EPC or installation partner', blurb: 'Solar EPC work, sealed-bid projects through SOLBID, tenders and installation teams.',
@@ -144,11 +146,13 @@ export const CLUB_POWER_NEEDS = [
   { code: 'group_captive', label: 'Group captive (own a share of a plant)' },
   { code: 'rooftop_ppa', label: 'Rooftop solar on PPA (pay only for units)' },
   { code: 'green_tariff', label: 'Green tariff from my DISCOM' },
+  { code: 'bio_cng', label: 'Bio-CNG (compressed biogas) for my fleet, boiler or kitchen — Unite Biofix' },
+  { code: 'green_hydrogen', label: 'Green hydrogen for my process or fleet — Unite Biofix' },
   { code: 'not_sure', label: 'Not sure — advise me' },
 ] as const;
 export const CLUB_POWER_STATUS = { new: 'Received', in_progress: 'Energy desk working on it', proposal_sent: 'Proposal sent', closed: 'Closed' } as const;
 export const ClubPowerRequestSchema = z.object({
-  need: z.enum(['open_access', 'group_captive', 'rooftop_ppa', 'green_tariff', 'not_sure']),
+  need: z.enum(['open_access', 'group_captive', 'rooftop_ppa', 'green_tariff', 'bio_cng', 'green_hydrogen', 'not_sure']),
   sanctionedLoadKw: z.number().positive().max(1_000_000).optional(),
   monthlyUnits: z.number().int().positive().max(1_000_000_000).optional(),
   monthlyBill: money.optional(),

@@ -144,3 +144,31 @@ Each page now shows **live data from its COLLABIZ module**, and visitors' reques
 - **10 regulated businesses** stay locked until their clearances are recorded.
 
 Tests: `apps/api/test/connectors.e2e.ts` and the browser suite "Wave 3".
+
+## Unite Biofix — Bio-CNG and green hydrogen (23 Nov 2026)
+
+**Microsite:** `biofix.<products domain>` and `/businesses/unite-biofix`. It has these sections:
+- What Unite Biofix does
+- Features
+- How it works (register → assessment → project and partners → agreements)
+- Live register totals
+- Public programmes to check (SATAT, GOBARdhan, National Green Hydrogen Mission), stated as facts with no promise of a subsidy, price or return
+- The register form
+
+**The register form records:**
+- Supplying feedstock: the type (crop residue, press mud, dung, poultry litter, organic municipal waste, food waste, effluent) and tonnes a day
+- Hosting a plant: acres
+- Buying Bio-CNG (kg a day), organic manure (tonnes a month) or green hydrogen (kg a day)
+- Becoming an EPC or O&M partner
+
+Every request is validated, stored as structured data with its enquiry, and shown to Unite admins on the business's enquiries.
+
+**How it connects to COLLABIZ:**
+- **Live totals on the page:** feedstock offered (tonnes a day), suppliers, sites, buyers and partners.
+- **Unite Industry Club:**
+  - A club choice, "Turn waste into Bio-CNG, or buy Bio-CNG and green hydrogen", puts Biofix on the member's board.
+  - Members can request Bio-CNG or green hydrogen on the Buy power page. Those requests go to the energy desk and count as buyers on the Biofix page.
+- **Agreements:** feedstock, offtake and partner agreements are signed online through Industry Club agreements.
+- **Partners:** EPC, O&M and equipment partners come in through teams, tenders and micro-contracts.
+- **Still planned:** mass-balance and quality records, a plant operating dashboard, and carbon and by-product records.
+- **Existing databases:** migration 0061 updates Biofix's text only if it is still the original seed text.

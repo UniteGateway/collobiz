@@ -3336,3 +3336,31 @@ suites.push({
     }
   },
 });
+
+suites.push({
+  name: 'Unite Biofix microsite · Bio-CNG and green hydrogen register on biofix. subdomain, totals update',
+  run: async ({ page, WEB, expect, shot, label }) => {
+    const host = new URL(WEB).host;
+    await page.goto(label === 'desktop' ? `http://biofix.${host}/` : `${WEB}/businesses/unite-biofix`);
+    await page.getByRole('heading', { level: 1, name: 'Unite Biofix' }).waitFor();
+    await page.getByText('Bio-CNG and green hydrogen projects').first().waitFor();
+    await page.getByRole('heading', { name: 'Public programmes to check' }).waitFor();
+    const tpd = async () => Number((await page.locator('.cz-gp-stats div', { hasText: 'Feedstock offered' }).locator('strong').textContent()).replace(/,/g, ''));
+    const before = await tpd();
+    await shot('biofix-microsite');
+    const form = page.locator('#contact');
+    await form.getByLabel('Supply feedstock').check();
+    await form.getByLabel('Type of feedstock').selectOption('Cattle dung');
+    await form.getByLabel('Quantity available (tonnes a day)').fill('25');
+    await form.getByLabel('State').selectOption('Andhra Pradesh');
+    await form.getByLabel('Your name').fill('Ramesh Naidu');
+    await form.getByLabel('Email').fill(`ramesh.${label}@example.com`);
+    await form.getByLabel('How can we help?').fill('Our dairy cluster has dung available every day near Guntur.');
+    await form.getByLabel(/I agree that Unite Group may contact me/).check();
+    await form.getByRole('button', { name: 'Send' }).click();
+    await page.getByText(/Thank you — reference BIZ-\d{4}-\d{6}/).waitFor();
+    await page.reload();
+    await page.locator('.cz-gp-stats').first().waitFor();
+    expect(await tpd() === before + 25, 'the register total includes the new feedstock');
+  },
+});

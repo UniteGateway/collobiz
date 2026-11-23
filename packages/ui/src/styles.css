@@ -2946,3 +2946,7 @@ a.cz-card:hover, .cz-card[href]:hover, .cz-venture:hover, .cz-kpi:hover { box-sh
 .cz-gp-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .cz-gp-list li { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: #fff; border: 1px solid #E1E3E1; border-radius: 12px; padding: 12px 14px; }
 .cz-gp-list p { margin: 2px 0 0; color: #444746; font-size: 14px; }
+.cz-intent-grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.cz-intent-grid label { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border: 1px solid #C4C7C5; border-radius: 12px; background: #fff; cursor: pointer; font-weight: 500; }
+.cz-intent-grid label.is-on { background: #EAF4EA; border-color: #2E7D32; }
+.cz-intent-grid input { accent-color: #2E7D32; width: 18px; height: 18px; }

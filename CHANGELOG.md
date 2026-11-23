@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Unite Biofix — Bio-CNG and green hydrogen microsite (2026-11-23)
+- Biofix becomes the Bio-CNG and green hydrogen business: microsite with features, workflow, public programmes (facts only) and a validated register (feedstock type and tonnes/day, land, Bio-CNG/manure/hydrogen offtake, EPC/O&M partners) with live totals. Industry Club: new Bio-energy choice and Bio-CNG / green hydrogen power requests, counted as Biofix demand. Migration 0061.
+
 ### Wave 3 — 17 Unite businesses connected (2026-11-23)
 - Live module feeds on the pages of EV Saathi, ELWIN, SOCPOST, PRIZO, Unite Biofix, Unite Aqua (items a visitor can ask about, routed to the business and the listing owner without contact details); WAKIN, VIDPLAY, 99Films and MoveOn post real micro-contracts; Help Today, Goodtime, WITHME, WEEKEND, iBrain, U meet and Nano Bazar show live counts from Community, Announcements, ACTION OS, Meetings and Business QR. Admins see the listing on each enquiry. No business is "link only" any more.
 

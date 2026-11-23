@@ -17,7 +17,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { and, asc, desc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { MICRO_SOURCES, VENTURE_ROLES, VENTURE_STAGES, ventureAvailability } from '@collabiz/types';
+import { BIOFIX_FEEDSTOCKS, MICRO_SOURCES, VENTURE_ROLES, VENTURE_STAGES, pageIntent, ventureAvailability } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import { courses, crmActivities, crmDeals, customers, microContracts, propertyProjects, propertyUnits, directOfferRecipients, directOffers, enquiries, memberships, solarReferralCodes, notifications, offerSales, organizations, uniteVentures, ventureInterests } from '../../db/schema';
 import { body } from '../../common/http';
@@ -49,6 +49,11 @@ export const BusinessEnquirySchema = z.object({
   ref: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{4,12}$/).optional().or(z.literal('').transform(() => undefined)),
   /** Wave 3: the listed item (capacity, offer, energy project, product) the visitor is asking about. */
   itemId: z.string().uuid().optional().or(z.literal('').transform(() => undefined)),
+  /** Structured request a business page accepts (PAGE_INTENTS), e.g. Unite Biofix feedstock or offtake. */
+  intent: z.string().trim().max(40).optional().or(z.literal('').transform(() => undefined)),
+  quantity: z.number().positive().max(10_000_000).optional(),
+  feedstock: z.string().trim().max(80).optional().or(z.literal('').transform(() => undefined)),
+  state: z.string().trim().max(60).optional().or(z.literal('').transform(() => undefined)),
 });
 const EnquiryStatusSchema = z.object({ status: z.enum(['open', 'handled']) });
 const UpdateSchema = z.object({
@@ -152,6 +157,14 @@ export class VenturesController {
       }
       details = { projectId: project.id, projectName: project.name, visitDate: b.visitDate ?? null };
     }
+    let request: { intent: string; intentLabel: string; quantity: number | null; unit: string | null; feedstock: string | null; state: string | null } | null = null;
+    if (b.intent) {
+      const it = pageIntent(slug, b.intent);
+      if (!it) throw new BadRequestException(`${r.v.name} does not take this kind of request`);
+      if (it.unit && !b.quantity) throw new BadRequestException({ statusCode: 400, message: 'Please correct the highlighted fields', issues: [{ path: 'quantity', message: `Enter the ${it.quantityLabel?.toLowerCase() ?? 'quantity'} in ${it.unit}` }] });
+      if (it.needsFeedstock && !(BIOFIX_FEEDSTOCKS as readonly string[]).includes(b.feedstock ?? '')) throw new BadRequestException({ statusCode: 400, message: 'Please correct the highlighted fields', issues: [{ path: 'feedstock', message: 'Choose the type of feedstock' }] });
+      request = { intent: it.code, intentLabel: it.label, quantity: it.unit ? b.quantity! : null, unit: it.unit ?? null, feedstock: it.needsFeedstock ? b.feedstock! : null, state: b.state ?? null };
+    }
     let item: Awaited<ReturnType<ConnectorService['find']>> = null;
     if (b.itemId) {
       item = await this.connectors.find(slug, b.itemId);
@@ -161,7 +174,7 @@ export class VenturesController {
     // Partner attribution: only a partner's personal code counts (house and customer codes do not).
     const [code] = b.ref ? await this.db.select().from(solarReferralCodes).where(eq(solarReferralCodes.code, b.ref)).limit(1) : [];
     const introducer = code?.ownerUserId ? code : null;
-    await this.db.insert(enquiries).values({ reference, name: b.name, email: b.email, organization: b.organization, topic: 'business', message: b.message, ventureId: r.v.id, kind: b.kind, phone: b.phone, city: b.city, referralCodeId: introducer?.id ?? null, details: item ? { ...(details ?? {}), item: { type: item.type, id: item.id, title: item.title } } : details });
+    await this.db.insert(enquiries).values({ reference, name: b.name, email: b.email, organization: b.organization, topic: 'business', message: b.message, ventureId: r.v.id, kind: b.kind, phone: b.phone, city: b.city, referralCodeId: introducer?.id ?? null, details: item || request ? { ...(details ?? {}), ...(item ? { item: { type: item.type, id: item.id, title: item.title } } : {}), ...(request ? { request } : {}) } : details });
     if (introducer?.ownerOrgId) {
       const team = await this.db.select({ userId: memberships.userId }).from(memberships).where(and(eq(memberships.organizationId, introducer.ownerOrgId), eq(memberships.status, 'active')));
       if (team.length) await this.db.insert(notifications).values(team.map((m) => ({ userId: m.userId, kind: 'venture', title: `Your ${r.v.name} link brought an enquiry`, body: `${b.name.split(' ')[0]}${b.city ? ` · ${b.city}` : ''} (${reference}). It is recorded as introduced by you.`, link: `/ventures/${r.v.slug}` })));
@@ -171,10 +184,10 @@ export class VenturesController {
       const team = await this.db.select({ userId: memberships.userId }).from(memberships).where(and(eq(memberships.organizationId, item.ownerOrgId), eq(memberships.status, 'active')));
       if (team.length) await this.db.insert(notifications).values(team.map((m) => ({ userId: m.userId, kind: 'venture', title: `${r.v.name}: interest in “${item!.title}”`, body: `A visitor${b.city ? ` from ${b.city}` : ''} asked about your listing through ${r.v.name} (${reference}). The ${r.v.name} team will introduce you.`, link: '/notifications' })));
     }
-    const label = details?.visitDate ? 'site-visit request' : b.kind === 'partner' ? 'partnership enquiry' : b.kind === 'interest' ? 'registration of interest' : 'enquiry';
+    const label = request ? request.intentLabel.toLowerCase() + ' request' : details?.visitDate ? 'site-visit request' : b.kind === 'partner' ? 'partnership enquiry' : b.kind === 'interest' ? 'registration of interest' : 'enquiry';
     await this.mail.send('email', b.email, `${r.v.name} ${label} ${reference}`, `Thank you ${b.name}. ${r.v.name} received your ${label} (${reference}). The team will reply by email.`);
     const users = await this.svc.deciders(r.v);
-    if (users.length) await this.db.insert(notifications).values(users.map((u) => ({ userId: u, kind: 'venture', title: `New ${label} for ${r.v.name}`, body: `${b.name}${b.city ? ` · ${b.city}` : ''}${item ? ` · about “${item.title}”` : ''}${details ? ` · ${details.projectName}${details.visitDate ? ` on ${details.visitDate}` : ''}` : ''}: ${b.message.slice(0, 160)}`, link: `/ventures/${r.v.id}` })));
+    if (users.length) await this.db.insert(notifications).values(users.map((u) => ({ userId: u, kind: 'venture', title: `New ${label} for ${r.v.name}`, body: `${b.name}${b.city ? ` · ${b.city}` : ''}${item ? ` · about “${item.title}”` : ''}${request ? ` · ${request.intentLabel}${request.quantity ? `: ${request.quantity} ${request.unit}` : ''}${request.feedstock ? ` of ${request.feedstock.toLowerCase()}` : ''}` : ''}${details ? ` · ${details.projectName}${details.visitDate ? ` on ${details.visitDate}` : ''}` : ''}: ${b.message.slice(0, 160)}`, link: `/ventures/${r.v.id}` })));
     return { reference };
   }
 
