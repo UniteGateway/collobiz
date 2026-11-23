@@ -28,6 +28,7 @@ import { Ctx, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
 import { decryptField, randomDigits, sha256 } from '../../common/crypto';
 import { Idempotent } from '../../common/idempotency';
+import { contractExecuted } from '../../common/contract-hooks';
 import { MAX_UPLOAD_BYTES, StorageService } from '../../common/adapters';
 import { requireProvider } from '../../common/providers';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -282,6 +283,7 @@ export class ContractsController {
       return u;
     });
     await this.audit.record(ctx, { action: 'contract.signed', objectType: 'contract', objectId: id, after: { versionId: v.id, bodyHash: v.bodyHash, organizationId: ctx.orgId, typedName: b.typedName, method: evidence?.method ?? 'typed', evidenceSha256: evidence?.sha256 } });
+    if (out.status === 'executed') await contractExecuted(id);
     const other = ctx.orgId === c.issuerOrgId ? c.counterpartyOrgId : c.issuerOrgId;
     await this.svc.notifyOrg(other, out.status === 'executed' ? `Executed: ${c.code}` : `Signed by the other party: ${c.code}`, out.status === 'executed' ? `${c.title} is fully signed.` : `${c.title} is waiting for your signature.`, `/vault?contract=${id}`);
     return this.svc.view(ctx, out);

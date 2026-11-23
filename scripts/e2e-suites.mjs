@@ -3222,7 +3222,7 @@ suites.push({
 });
 
 suites.push({
-  name: 'Unite Industry Club · join, submit a product with free power, Unite approves, it sells in the Powertek catalogue, buy power',
+  name: 'Unite Industry Club · join, accept terms, submit a product, Unite approves, both sign the licence online, it sells in Powertek, buy power',
   run: async ({ page, WEB, ADMIN, expect, shot, label }) => {
     await page.goto(WEB + '/');
     await page.getByRole('link', { name: 'Unite Industry Club' }).first().click();
@@ -3244,6 +3244,14 @@ suites.push({
     await page.locator('[data-board-card="solar_products"]').waitFor();
     await page.locator('[data-club-strip]').waitFor();
     await shot('club-board');
+    // Accept the Club terms (typed name), see the club code
+    await page.goto(WEB + '/club/agreements');
+    await page.locator('[data-club-terms]').getByLabel(/I have read the terms/).check();
+    await page.getByLabel('Type your full name to accept').fill('Ravi Patel');
+    await page.getByRole('button', { name: 'Accept the Club terms' }).click();
+    await page.getByText(/Accepted by Ravi Patel/).waitFor();
+    expect(/^UIC-\d{6}$/.test(await page.locator('[data-member-code]').getAttribute('data-member-code')), 'the member has a club code to share');
+    await shot('club-agreements');
     // Submit a product for the Unite Powertek brand with a free-power offer
     const name = `Solar cold room ${label}`;
     await page.goto(WEB + '/club/products');
@@ -3261,10 +3269,26 @@ suites.push({
     await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
     await page.goto(ADMIN + '/club');
     const rev = page.locator('[data-club-product]').filter({ hasText: name });
-    for (const l of [/quality checked/, /Certifications verified/, /KYB\) complete/, /Brand licence/]) await rev.getByLabel(l).check();
+    for (const l of [/quality checked/, /Certifications verified/, /KYB\) complete/]) await rev.getByLabel(l).check();
+    await rev.getByLabel('Law and disputes').selectOption('singapore');
     await shot('club-admin-review');
-    await rev.getByRole('button', { name: 'Approve and list in Powertek catalogue' }).click();
+    await rev.getByRole('button', { name: 'Approve and issue brand licence' }).click();
     await page.getByText(/No club products in this state/).waitFor();
+    // Both parties sign the brand licence online in the Vault
+    const signLicence = async (email, fullName) => {
+      await webLogin(page, WEB, email);
+      await page.goto(WEB + '/club/agreements');
+      const row = page.locator('[data-club-agreement]').filter({ hasText: name });
+      await row.getByRole('link', { name: 'Review and sign' }).click();
+      await page.getByText(/BRAND LICENCE AND OEM SUPPLY AGREEMENT/).first().waitFor();
+      await page.getByLabel('Type your full name').fill(fullName);
+      await page.getByLabel(/I am authorised to sign/).check();
+      await page.getByRole('button', { name: 'Sign document' }).click();
+      await page.getByRole('button', { name: 'Sign document' }).waitFor({ state: 'detached' });
+    };
+    await signLicence('ravi@sunrise.example', 'Ravi Patel');
+    await shot('club-licence-signed-once');
+    await signLicence('powertek@collabiz.local', 'Rahul Desai');
     // Any partner now sees it in the Unite Powertek catalogue
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.goto(WEB + '/powertek');

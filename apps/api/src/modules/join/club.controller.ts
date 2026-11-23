@@ -15,7 +15,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { and, desc, eq, ilike, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
-  CLUB_BRAND_OPTIONS, CLUB_POWER_NEEDS, CLUB_POWER_STATUS, CLUB_PRODUCT_STATUS, ClubPowerRequestSchema, ClubPowerStatusSchema, ClubProductSchema, ClubReviewSchema, sectorName, type SectorCode,
+  disputeText, marketsLabel, CLUB_BRAND_OPTIONS, CLUB_POWER_NEEDS, CLUB_POWER_STATUS, CLUB_PRODUCT_STATUS, ClubPowerRequestSchema, ClubPowerStatusSchema, ClubProductSchema, ClubReviewSchema, sectorName, type SectorCode,
 } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import { catalogItems, clubPowerRequests, clubProducts, collabJoinProfiles, groupCompanies, memberships, notifications, organizations } from '../../db/schema';
@@ -23,17 +23,19 @@ import { body } from '../../common/http';
 import { Ctx, Public, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
 import { randomDigits } from '../../common/crypto';
+import { ClubLegalService } from './club-agreements.controller';
 
 type Product = typeof clubProducts.$inferSelect;
 const staff = (ctx: RequestContext) => ctx.platformRoles.some((r) => r === 'super_admin' || r === 'unite_admin');
 const hist = (by: string, status: string, note?: string | null) => sql`history || ${JSON.stringify([{ at: new Date().toISOString(), by, status, note: note ?? null }])}::jsonb`;
 const brandLabel = (b: string) => CLUB_BRAND_OPTIONS.find((o) => o.code === b)?.label ?? b;
+const money = (minor: number | null, cur: string) => (minor == null ? 'Not stated' : `${cur} ${(minor / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`);
 const code = (p: string) => `${p}-${new Date().getFullYear()}-${randomDigits(6)}`;
 
 @ApiTags('club')
 @Controller()
 export class ClubController {
-  constructor(@InjectDb() private db: Db, private audit: AuditService) {}
+  constructor(@InjectDb() private db: Db, private audit: AuditService, private legal: ClubLegalService) {}
 
   private org(ctx: RequestContext) {
     if (!ctx.orgId) throw new ForbiddenException('Create or choose your business account first');
@@ -50,12 +52,6 @@ export class ClubController {
     const [p] = await this.db.select().from(clubProducts).where(and(eq(clubProducts.id, id), eq(clubProducts.orgId, orgId))).limit(1);
     if (!p) throw new NotFoundException('Product not found');
     return p;
-  }
-  private async powertek() {
-    const [g] = await this.db.select({ id: groupCompanies.organizationId }).from(groupCompanies).where(ilike(groupCompanies.brandName, '%powertek%')).limit(1);
-    const [o] = g ? [g] : await this.db.select({ id: organizations.id }).from(organizations).where(ilike(organizations.displayName, '%powertek%')).limit(1);
-    if (!o) throw new ConflictException('Unite Powertek is not set up in COLLABIZ yet, so products cannot be listed');
-    return o.id;
   }
   private async notifyOrg(orgId: string, title: string, text: string, link: string) {
     const ms = await this.db.select({ u: memberships.userId }).from(memberships).where(and(eq(memberships.organizationId, orgId), eq(memberships.status, 'active')));
@@ -76,7 +72,7 @@ export class ClubController {
   async create(@Ctx() ctx: RequestContext, @Body(body(ClubProductSchema)) b: z.infer<typeof ClubProductSchema>) {
     const orgId = this.org(ctx);
     if (!this.manager(ctx, orgId)) throw new ForbiddenException('Only the owner or an admin of your business can submit products');
-    const n = await this.db.$count(clubProducts, and(eq(clubProducts.orgId, orgId), inArray(clubProducts.status, ['draft', 'submitted', 'approved'])));
+    const n = await this.db.$count(clubProducts, and(eq(clubProducts.orgId, orgId), inArray(clubProducts.status, ['draft', 'submitted', 'licence_pending', 'approved'])));
     if (n >= 50) throw new ConflictException('You can have up to 50 products in the club. Withdraw one first.');
     const [p] = await this.db.insert(clubProducts).values({ ...b, powerOffer: b.powerFree ? b.powerOffer : null, code: code('ICP'), orgId, createdBy: ctx.userId!, history: [{ at: new Date().toISOString(), by: ctx.userId, status: 'draft' }] }).returning();
     await this.audit.record(ctx, { action: 'club.product_created', objectType: 'club_product', objectId: p.id, after: { name: p.name, brandOption: p.brandOption } });
@@ -99,6 +95,7 @@ export class ClubController {
     const p = await this.mine(ctx, id);
     if (!this.manager(ctx, p.orgId)) throw new ForbiddenException();
     if (ctx.orgVerificationStatus !== 'verified') throw new ForbiddenException('Complete your business verification (KYB) before submitting products for the Unite brand');
+    await this.legal.assertTerms(p.orgId);
     if (!['draft', 'rejected'].includes(p.status)) throw new ConflictException(`This product is already ${CLUB_PRODUCT_STATUS[p.status as keyof typeof CLUB_PRODUCT_STATUS].toLowerCase()}`);
     const [u] = await this.db.update(clubProducts).set({ status: 'submitted', history: hist(ctx.userId!, 'submitted'), updatedAt: new Date() }).where(eq(clubProducts.id, id)).returning();
     await this.audit.record(ctx, { action: 'club.product_submitted', objectType: 'club_product', objectId: id });
@@ -133,25 +130,27 @@ export class ClubController {
     const [p] = await this.db.select().from(clubProducts).where(eq(clubProducts.id, id)).limit(1);
     if (!p) throw new NotFoundException('Product not found');
     if (p.status !== 'submitted') throw new ConflictException('Only submitted products can be reviewed');
-    let catalogItemId: string | null = null;
+    let contract: { id: string; code: string; pilotDraft: boolean } | null = null;
     if (b.decision === 'approve') {
-      const owner = await this.powertek();
-      const specs: Record<string, string> = { 'Product line': 'Unite Industry Club', Category: p.category, Brand: p.brandOption === 'unite_powertek' ? 'Unite Powertek' : 'Powered by Unite', 'Club product': p.code };
-      if (p.powerFree && p.powerOffer) specs['Free power option'] = p.powerOffer;
-      if (p.certifications.length) specs.Certifications = p.certifications.join(', ');
-      if (p.monthlyCapacity) specs['Monthly capacity'] = `${p.monthlyCapacity.toLocaleString('en-IN')}${p.unit ? ` ${p.unit}` : ''}`;
-      const [ci] = await this.db.insert(catalogItems).values({
-        ownerOrgId: owner, kind: 'product', name: p.brandOption === 'unite_powertek' ? `Unite Powertek ${p.name}` : p.name, sector: p.sector, description: p.description,
-        sku: p.code, unit: p.unit ?? null, listPrice: p.mrp ?? null, status: 'published', visibility: 'public', specs, createdBy: ctx.userId,
-      }).returning({ id: catalogItems.id });
-      catalogItemId = ci.id;
+      const licensor = await this.legal.licensorOrgId();
+      const [L, M] = await Promise.all([this.legal.party(licensor), this.legal.party(p.orgId)]);
+      contract = await this.legal.issue(ctx, {
+        type: 'brand_licence', code: 'club_brand_licence', fromOrgId: licensor, toOrgId: p.orgId, productId: p.id, title: `Brand Licence and OEM Supply Agreement — ${p.name}`,
+        terms: { termMonths: b.licence.termMonths, warrantyMonths: b.licence.warrantyMonths, dispute: b.licence.dispute },
+        vars: {
+          licensor: L, licensee: { ...M, country: M.country }, brand: { name: p.brandOption === 'unite_powertek' ? '“Unite Powertek” (name and logo)' : '“Powered by Unite” (badge)' },
+          territory: marketsLabel(p.markets), termMonths: b.licence.termMonths, warrantyMonths: b.licence.warrantyMonths, dispute: disputeText(b.licence.dispute), commercial: b.licence.commercial,
+          powerBundle: p.powerFree ? 'The Product is offered with the free-power bundle in Schedule B. The Licensee is responsible for that offer to customers; the solar system is supplied under separate terms by Unite Solar or an installer approved by the Licensor. No party will promise customers a specific saving unless it is calculated for that customer and labelled as an estimate.' : 'No free-power bundle applies to the Product.',
+          product: { code: p.code, name: p.name, category: p.category, description: p.description, certifications: p.certifications.length ? p.certifications.join(', ') : 'None declared', capacity: p.monthlyCapacity ? `${p.monthlyCapacity.toLocaleString('en-IN')} ${p.unit ?? 'units'} a month` : 'Not declared', mrp: money(p.mrp, p.currency), powerOffer: p.powerFree && p.powerOffer ? p.powerOffer : 'Not applicable.' },
+        },
+      });
     }
-    const to = b.decision === 'approve' ? 'approved' : 'rejected';
-    const [u] = await this.db.update(clubProducts).set({ status: to, checks: b.checks, reviewNote: b.note ?? null, reviewedBy: ctx.userId, reviewedAt: new Date(), catalogItemId, history: hist(ctx.userId!, to, b.note), updatedAt: new Date() })
+    const to = b.decision === 'approve' ? 'licence_pending' : 'rejected';
+    const [u] = await this.db.update(clubProducts).set({ status: to, checks: b.checks, reviewNote: b.note ?? null, reviewedBy: ctx.userId, reviewedAt: new Date(), contractId: contract?.id ?? null, history: hist(ctx.userId!, to, b.note), updatedAt: new Date() })
       .where(and(eq(clubProducts.id, id), eq(clubProducts.status, 'submitted'))).returning();
-    await this.audit.record(ctx, { action: `club.product_${to}`, objectType: 'club_product', objectId: id, after: { checks: b.checks, catalogItemId } });
-    await this.notifyOrg(p.orgId, `${p.name}: ${CLUB_PRODUCT_STATUS[to]}`, b.decision === 'approve' ? 'Your product is now in the Unite Powertek catalogue, and every COLLABIZ partner can sell it.' : `Reason: ${b.note}`, '/club/products');
-    return this.view(u);
+    await this.audit.record(ctx, { action: `club.product_${to}`, objectType: 'club_product', objectId: id, after: { checks: b.checks, contractId: contract?.id ?? null } });
+    await this.notifyOrg(p.orgId, `${p.name}: ${CLUB_PRODUCT_STATUS[to]}`, b.decision === 'approve' ? `Unite approved your product. Review and sign the brand licence ${contract!.code}; the product is listed as soon as both sides have signed.` : `Reason: ${b.note}`, b.decision === 'approve' ? `/vault?contract=${contract!.id}` : '/club/products');
+    return this.view(u, { contract });
   }
 
   // ------------------------------------------------------------------ Buy power

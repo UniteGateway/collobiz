@@ -14,7 +14,7 @@
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, ne, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { createPool, type Db } from './client';
 import * as s from './schema';
@@ -54,7 +54,7 @@ export async function publishAgreements(db: Db, dir: string | undefined, legalRe
         if (!first.startsWith('# ')) throw new Error(`${f}: the first line must be "# <title>"`);
         return { code: f.replace(/\.md$/, ''), title: first.slice(2).trim(), body: rest.join('\n').trim() };
       })
-    : (await db.select({ n: sql<number>`count(*)::int` }).from(s.agreementTemplates))[0].n ? [] : AGREEMENTS;
+    : (await db.select({ n: sql<number>`count(*)::int` }).from(s.agreementTemplates).where(ne(s.agreementTemplates.requiredFor, 'club')))[0].n ? [] : AGREEMENTS;
   for (const a of texts) {
     if (!/^[a-z_]+$/.test(a.code)) throw new Error(`Agreement code "${a.code}" must be lower-case letters and underscores`);
     if (a.body.length < 50) throw new Error(`${a.code}: text is too short to be an agreement`);

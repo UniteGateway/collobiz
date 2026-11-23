@@ -21,6 +21,8 @@ import { Ctx, Public, RequireOrg, type RequestContext } from '../../common/conte
 import { AuditService } from '../../common/audit.service';
 import { SolbidModule, SolbidClient } from '../solbid/solbid.controller';
 import { ClubController, memberSlug } from './club.controller';
+import { ClubAgreementsController, ClubLegalService } from './club-agreements.controller';
+import { randomDigits } from '../../common/crypto';
 
 const EPC_SECTORS = ['solar', 'construction_epc', 'infrastructure', 'power_equipment'];
 
@@ -59,7 +61,7 @@ export class JoinController {
     if (!this.manager(ctx, orgId)) throw new ForbiddenException('Only the owner or an admin of your business can change how it collaborates');
     const before = await this.load(orgId);
     const [org] = await this.db.select({ name: organizations.displayName }).from(organizations).where(eq(organizations.id, orgId)).limit(1);
-    const values = { sector: b.sector, intents: b.intents, about: b.about ?? null, city: b.city ?? null, micrositePublic: b.micrositePublic, slug: before?.slug ?? memberSlug(org?.name ?? 'member', orgId), updatedBy: ctx.userId, updatedAt: new Date() };
+    const values = { sector: b.sector, intents: b.intents, about: b.about ?? null, city: b.city ?? null, micrositePublic: b.micrositePublic, country: b.country, slug: before?.slug ?? memberSlug(org?.name ?? 'member', orgId), memberCode: before?.memberCode ?? `UIC-${randomDigits(6)}`, updatedBy: ctx.userId, updatedAt: new Date() };
     const [p] = await this.db.insert(collabJoinProfiles).values({ orgId, ...values }).onConflictDoUpdate({ target: collabJoinProfiles.orgId, set: values }).returning();
     await this.audit.record(ctx, { action: before ? 'join.profile_updated' : 'join.profile_created', objectType: 'organization', objectId: orgId,
       before: before ? { sector: before.sector, intents: before.intents } : undefined, after: { sector: p.sector, intents: p.intents } });
@@ -71,8 +73,9 @@ export class JoinController {
   @RequireOrg()
   async board(@Ctx() ctx: RequestContext) {
     const orgId = this.org(ctx);
-    const p = await this.load(orgId);
+    let p = await this.load(orgId);
     if (!p) throw new NotFoundException('Tell us your industry and how you want to collaborate first');
+    if (!p.memberCode) [p] = await this.db.update(collabJoinProfiles).set({ memberCode: `UIC-${randomDigits(6)}` }).where(eq(collabJoinProfiles.orgId, orgId)).returning(); // profiles saved before club codes existed
     const cards = await Promise.all(p.intents.map((c) => this.card(c, orgId, p.sector)));
     // Unite businesses for this member (regulated ones only once cleared).
     const vs = await this.db.select().from(uniteVentures).where(or(isNull(uniteVentures.regulatedReason), isNotNull(uniteVentures.clearedAt))).limit(200);
@@ -92,7 +95,7 @@ export class JoinController {
     }));
     const [{ peers }] = await this.db.select({ peers: sql<number>`count(*)::int` }).from(collabJoinProfiles).where(and(eq(collabJoinProfiles.sector, p.sector), ne(collabJoinProfiles.orgId, orgId)));
     return {
-      profile: { sector: p.sector, sectorName: sectorName(p.sector as SectorCode), intents: p.intents, about: p.about, city: p.city, micrositePublic: p.micrositePublic, slug: p.slug, updatedAt: p.updatedAt },
+      profile: { sector: p.sector, sectorName: sectorName(p.sector as SectorCode), intents: p.intents, about: p.about, city: p.city, micrositePublic: p.micrositePublic, slug: p.slug, country: p.country, memberCode: p.memberCode, updatedAt: p.updatedAt },
       club: await this.clubSummary(orgId),
       cards, ventures, offers, peers,
       note: 'Matched by rules: your industry and the collaborations you chose. Each match shows why. Matches are suggestions, not offers of work or guarantees of income.',
@@ -103,7 +106,7 @@ export class JoinController {
     const rows = await this.db.select({ status: clubProducts.status, n: sql<number>`count(*)::int` }).from(clubProducts).where(eq(clubProducts.orgId, orgId)).groupBy(clubProducts.status);
     const by = Object.fromEntries(rows.map((r) => [r.status, r.n]));
     const [{ power }] = await this.db.select({ power: sql<number>`count(*)::int` }).from(clubPowerRequests).where(eq(clubPowerRequests.orgId, orgId));
-    return { approved: by.approved ?? 0, submitted: by.submitted ?? 0, drafts: (by.draft ?? 0) + (by.rejected ?? 0), powerRequests: power };
+    return { approved: by.approved ?? 0, licencePending: by.licence_pending ?? 0, submitted: by.submitted ?? 0, drafts: (by.draft ?? 0) + (by.rejected ?? 0), powerRequests: power };
   }
 
   private async card(code: string, orgId: string, sector: string) {
@@ -163,5 +166,5 @@ export class JoinPublicController {
   options() { return { intents: JOIN_INTENTS.map(({ code, label, blurb }) => ({ code, label, blurb })) }; }
 }
 
-@Module({ imports: [SolbidModule], controllers: [JoinController, JoinPublicController, ClubController] })
+@Module({ imports: [SolbidModule], controllers: [JoinController, JoinPublicController, ClubController, ClubAgreementsController], providers: [ClubLegalService] })
 export class JoinModule {}

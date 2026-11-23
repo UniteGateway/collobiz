@@ -9,7 +9,19 @@ describe('Unite Industry Club', () => {
   afterAll(async () => { await pool?.end(); await app?.close(); });
   const get = (path: string, tok?: string) => (tok ? api(app).get(`/v1${path}`).set(auth(tok)) : api(app).get(`/v1${path}`));
   const post = (path: string, tok: string, b: object = {}) => api(app).post(`/v1${path}`).set(auth(tok)).send(b);
-  const ALL_CHECKS = ['quality_checked', 'certifications_verified', 'factory_verified', 'brand_licence_signed'];
+  const ALL_CHECKS = ['quality_checked', 'certifications_verified', 'factory_verified'];
+  const acceptTerms = async (tok: string, name: string) => {
+    const v = (await get('/club/terms', tok).expect(200)).body.version;
+    await post('/club/terms/accept', tok, { typedName: name, version: v }).expect(201);
+  };
+  /** Both parties sign the licence; returns the contract after signing. */
+  const signBoth = async (contractId: string) => {
+    for (const [tok, name] of [[t.ravi, 'Ravi Patel'], [t.powertek, 'Rahul Desai']] as const) {
+      const c = (await get(`/contracts/${contractId}`, tok).expect(200)).body;
+      const hash = c.versions?.find((v: { approvedAt: string | null }) => v.approvedAt)?.bodyHash ?? c.approvedVersion?.bodyHash ?? c.bodyHash;
+      await api(app).post(`/v1/contracts/${contractId}/sign`).set(auth(tok)).set('Idempotency-Key', `sign-${contractId}-${name}`).send({ typedName: name, consent: true, bodyHash: hash }).expect(200);
+    }
+  };
   const coldRoom = { name: 'Solar Cold Room 5 MT', category: 'Cold storage', sector: 'manufacturing', description: 'Insulated 5 tonne cold room with inverter compressor for farm produce.', brandOption: 'unite_powertek',
     powerFree: true, powerOffer: '5 kW rooftop solar with every cold room, so the farmer pays nothing for running power.', certifications: ['BIS'], monthlyCapacity: 40, unit: 'units', mrp: 450000_00 };
 
@@ -29,14 +41,24 @@ describe('Unite Industry Club', () => {
     await post(`/club/products/${productId}/submit`, t.asha).expect(404);
   });
 
-  it('only Unite staff review; approval needs every check including the signed licence, and lists it in the Powertek catalogue', async () => {
+  it('only Unite staff review; approval issues a brand licence, and the product is listed once both parties sign it', async () => {
+    await post(`/club/products/${productId}/submit`, t.ravi).expect(403); // Club terms not accepted yet
+    await acceptTerms(t.ravi, 'Ravi Patel');
     await post(`/club/products/${productId}/submit`, t.ravi).expect(201);
     await post(`/club/products/${productId}/submit`, t.ravi).expect(409);
     await post(`/admin/club/products/${productId}/review`, t.ravi, { decision: 'approve', checks: ALL_CHECKS }).expect(403);
-    await post(`/admin/club/products/${productId}/review`, t.uniteAdmin, { decision: 'approve', checks: ALL_CHECKS.slice(0, 3) }).expect(400);
+    await post(`/admin/club/products/${productId}/review`, t.uniteAdmin, { decision: 'approve', checks: ALL_CHECKS.slice(0, 2) }).expect(400);
     const queue = (await get('/admin/club/products?status=submitted', t.uniteAdmin).expect(200)).body.items;
     expect(queue.map((x: { id: string }) => x.id)).toContain(productId);
-    const ok = (await post(`/admin/club/products/${productId}/review`, t.uniteAdmin, { decision: 'approve', checks: ALL_CHECKS }).expect(201)).body;
+    const lic = (await post(`/admin/club/products/${productId}/review`, t.uniteAdmin, { decision: 'approve', checks: ALL_CHECKS, licence: { termMonths: 24, dispute: 'singapore' } }).expect(201)).body;
+    expect(lic.status).toBe('licence_pending'); expect(lic.catalogItemId).toBeNull();
+    // The licence is a normal contract: Powertek (licensor) and Sunrise (licensee), with the product and the chosen forum in the text
+    const text = (await pool.query("select v.body from contract_versions v where v.contract_id = $1", [lic.contractId])).rows[0].body as string;
+    expect(text).toMatch(/^PILOT DRAFT/); // template not yet approved by counsel
+    expect(text).toMatch(/Solar Cold Room 5 MT/); expect(text).toMatch(/Singapore International Arbitration Centre/); expect(text).toMatch(/24 months/);
+    expect(text).toMatch(/5 kW rooftop solar/); expect(text).not.toMatch(/\{\{/);
+    await signBoth(lic.contractId);
+    const ok = (await get('/club/products', t.ravi).expect(200)).body.items.find((x: { id: string }) => x.id === productId);
     expect(ok.status).toBe('approved'); expect(ok.catalogItemId).toBeTruthy();
     // Now sellable by every partner through the Powertek catalogue — another business finds it there.
     const cat = (await get('/product-sales/powertek/catalogue?q=Cold%20Room', t.asha).expect(200)).body;
@@ -48,7 +70,7 @@ describe('Unite Industry Club', () => {
     expect(JSON.stringify(row.specs)).not.toMatch(/Sunrise/); // the brand is shown, not the maker
     await post(`/admin/club/products/${productId}/review`, t.uniteAdmin, { decision: 'reject', note: 'again' }).expect(409);
     const a = await pool.query("select action from audit_events where action like 'club.product_%' order by seq");
-    expect(a.rows.map((r) => r.action)).toEqual(expect.arrayContaining(['club.product_created', 'club.product_submitted', 'club.product_approved']));
+    expect(a.rows.map((r) => r.action)).toEqual(expect.arrayContaining(['club.product_created', 'club.product_submitted', 'club.product_licence_pending']));
   });
 
   it('rejection needs a reason; withdrawing an approved product takes it out of the catalogue', async () => {
@@ -79,7 +101,8 @@ describe('Unite Industry Club', () => {
     // Re-approve a product so the page has something to show
     const p = (await post('/club/products', t.ravi, { ...coldRoom, name: 'Solar dryer' }).expect(201)).body;
     await post(`/club/products/${p.id}/submit`, t.ravi).expect(201);
-    await post(`/admin/club/products/${p.id}/review`, t.uniteAdmin, { decision: 'approve', checks: ALL_CHECKS }).expect(201);
+    const l = (await post(`/admin/club/products/${p.id}/review`, t.uniteAdmin, { decision: 'approve', checks: ALL_CHECKS }).expect(201)).body;
+    await signBoth(l.contractId);
     await api(app).put('/v1/join/profile').set(auth(t.ravi)).send({ sector: 'manufacturing', intents: ['solar_products', 'buy_power'], city: 'Hyderabad', micrositePublic: true }).expect(200);
     const page = (await get(`/public/club/members/${slug}`).expect(200)).body;
     expect(page.name).toBe('Sunrise Traders');

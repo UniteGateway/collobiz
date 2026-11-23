@@ -24,14 +24,14 @@ describe('Production bootstrap (fresh database, no demo data)', () => {
     await bootstrap(db, { platformName: 'Unite Group Operations Pvt Ltd' }, log);
     expect(await one("select legal_name, type from organizations where type = 'platform'")).toEqual({ legal_name: 'Unite Group Operations Pvt Ltd', type: 'platform' });
     expect((await one('select count(*)::int n from users')).n).toBe(0); // no demo people
-    const ag = (await pool.query("select code, version, status, legal_reviewed from agreement_templates order by code")).rows;
+    const ag = (await pool.query("select code, version, status, legal_reviewed from agreement_templates where required_for <> 'club' order by code")).rows;
     expect(ag.map((a) => a.code)).toEqual(['lead_registration', 'partner_terms', 'privacy_notice']);
     expect(ag.every((a) => a.status === 'active' && a.legal_reviewed === false)).toBe(true);
-    expect(await one('select count(*)::int n, count(*) filter (where open)::int open from unite_ventures')).toEqual({ n: 47, open: 0 });
+    expect(await one('select count(*)::int n, count(*) filter (where open)::int open from unite_ventures')).toEqual({ n: 48, open: 0 }); // 47 portfolio businesses + BIZO
     // Running again changes nothing.
     await bootstrap(db, {}, log);
     expect((await one('select count(*)::int n from organizations')).n).toBe(1);
-    expect((await one('select count(*)::int n from agreement_templates')).n).toBe(3);
+    expect((await one("select count(*)::int n from agreement_templates where required_for <> 'club'")).n).toBe(3); // the Industry Club module adds its own templates at start-up
   });
 
   it('a partner can register and sees the agreements; the first super admin is granted only after registering', async () => {

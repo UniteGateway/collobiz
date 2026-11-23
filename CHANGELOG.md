@@ -4,6 +4,12 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Industry Club: virtual agreements, legal drafts, Terms and Conditions, global reach (2026-11-23)
+- Five versioned legal drafts (Club terms, Brand Licence & OEM Supply, mutual NDA, international distribution, collaboration MoU), with a counsel-approval record per version and a pilot-draft notice until approved.
+- The brand licence is issued on Unite approval and signed online by both parties; the product is listed only after both sign. Members send each other agreements by club code, in any country, with a choice of law and forum.
+- Members, products and markets can be anywhere in the world (ISO countries, currency, made-in). Public pages: `/club/terms`, `/club/legal`. Migration 0060.
+- Fixed: the production setup check now ignores Club templates, and the setup test reflects the 48 Unite businesses (BIZO).
+
 ### Unite Industry Club (2026-11-23)
 - The join module becomes the Unite Industry Club: sell under the Unite Powertek brand (OEM), with Unite review (four checks, including a signed brand licence) that lists approved products in the Powertek catalogue for every partner to sell; free-power offers with products; buy-power requests handled by the energy desk; opt-in public member pages; admin console page. Migration 0059. See `docs/unite-industry-club.md`.
 

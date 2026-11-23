@@ -99,6 +99,11 @@ export const agreementTemplates = pgTable('agreement_templates', {
   requiredFor: text('required_for').notNull().default('onboarding'),
   status: text('status').notNull().default('active'), // draft | active | retired
   legalReviewed: boolean('legal_reviewed').notNull().default(false),
+  /** Counsel approval record (who reviewed, when, recorded by whom). */
+  legalReviewedBy: text('legal_reviewed_by'),
+  legalReviewedAt: timestamp('legal_reviewed_at', { withTimezone: true }),
+  legalReviewRecordedBy: uuid('legal_review_recorded_by').references(() => users.id),
+  legalReviewNote: text('legal_review_note'),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex('agreement_templates_code_ver_uq').on(t.code, t.version)]);
 

@@ -10,8 +10,8 @@ import { useQuery } from '@/lib/hooks';
 interface Stat { label: string; value: number | null; note?: string }
 interface Card { code: string; label: string; blurb: string; icon: string; links: { href: string; label: string }[]; stats: Stat[] }
 interface Board {
-  profile: { sector: string; sectorName: string; intents: string[]; about: string | null; city: string | null; micrositePublic: boolean; slug: string | null; updatedAt: string };
-  club: { approved: number; submitted: number; drafts: number; powerRequests: number };
+  profile: { sector: string; sectorName: string; intents: string[]; about: string | null; city: string | null; micrositePublic: boolean; slug: string | null; country: string; memberCode: string | null; updatedAt: string };
+  club: { approved: number; licencePending: number; submitted: number; drafts: number; powerRequests: number };
   cards: Card[];
   ventures: { slug: string; name: string; tagline: string; open: boolean; reasons: { label: string }[] }[];
   offers: { id: string; title: string; category: string; owner: string; city: string | null; reasons: string[] }[];
@@ -39,6 +39,7 @@ export default function BoardPage() {
             <div>
               <p className="cz-muted" style={{ margin: 0 }}>Your industry</p>
               <h2 style={{ margin: '2px 0 0' }}>{d.profile.sectorName}{d.profile.city ? ` · ${d.profile.city}` : ''}</h2>
+              {d.profile.memberCode && <p style={{ margin: '4px 0 0' }}>Club code <strong data-board-member-code>{d.profile.memberCode}</strong> · <Link href="/club/agreements">Agreements</Link></p>}
               <p className="cz-muted" style={{ margin: '6px 0 0' }}>
                 {d.peers > 0 ? `${d.peers} other business${d.peers === 1 ? '' : 'es'} in your industry ${d.peers === 1 ? 'has' : 'have'} joined.` : 'You are the first business from your industry on the board.'}
               </p>
@@ -52,6 +53,7 @@ export default function BoardPage() {
           <section aria-labelledby="board-club" className="cz-club-strip" data-club-strip>
             <h2 id="board-club" className="cz-sr-only">Club summary</h2>
             <Link href="/club/products"><strong>{d.club.approved}</strong>Products sold under the Unite brand</Link>
+            <Link href="/club/products"><strong>{d.club.licencePending}</strong>Brand licences to sign</Link>
             <Link href="/club/products"><strong>{d.club.submitted}</strong>Waiting for Unite review</Link>
             <Link href="/club/products"><strong>{d.club.drafts}</strong>Drafts to finish</Link>
             <Link href="/club/power"><strong>{d.club.powerRequests}</strong>Power requests</Link>

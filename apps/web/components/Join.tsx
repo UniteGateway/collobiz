@@ -3,13 +3,15 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { JOIN_INTENTS, SECTORS, suggestIntents, type JoinIntent, type SectorCode } from '@collabiz/types';
-import { Alert, Button, Checkbox, Icon, TextInput, type IconName } from '@collabiz/ui';
+import { ISO_COUNTRIES, JOIN_INTENTS, SECTORS, countryName, suggestIntents, type JoinIntent, type SectorCode } from '@collabiz/types';
+import { Alert, Button, Checkbox, Icon, Select, TextInput, type IconName } from '@collabiz/ui';
+
+const COUNTRY_OPTIONS = ISO_COUNTRIES.map((c) => ({ value: c, label: countryName(c) })).sort((a, b) => a.label.localeCompare(b.label));
 import { api } from '@/lib/api';
 import { useSession } from '@/lib/session';
 
 const DRAFT = 'cz.join.draft';
-export interface JoinDraft { sector: SectorCode; intents: JoinIntent[]; city?: string; micrositePublic?: boolean }
+export interface JoinDraft { sector: SectorCode; intents: JoinIntent[]; city?: string; micrositePublic?: boolean; country?: string }
 export function readDraft(): JoinDraft | null {
   try { const s = window.localStorage.getItem(DRAFT); return s ? (JSON.parse(s) as JoinDraft) : null; } catch { return null; }
 }
@@ -25,6 +27,7 @@ export function JoinWizard({ initial, onSaved }: { initial?: Partial<JoinDraft>;
   const [intents, setIntents] = useState<JoinIntent[]>((initial?.intents as JoinIntent[]) ?? []);
   const [city, setCity] = useState(initial?.city ?? '');
   const [site, setSite] = useState(!!initial?.micrositePublic);
+  const [country, setCountry] = useState(initial?.country ?? 'IN');
   const [touched, setTouched] = useState(!!initial?.intents?.length);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -33,12 +36,12 @@ export function JoinWizard({ initial, onSaved }: { initial?: Partial<JoinDraft>;
   useEffect(() => {
     if (initial?.sector) return;
     const d = readDraft();
-    if (d) { setSector(d.sector); setIntents(d.intents); setCity(d.city ?? ''); setSite(!!d.micrositePublic); setTouched(true); setStep(2); }
+    if (d) { setSector(d.sector); setIntents(d.intents); setCity(d.city ?? ''); setSite(!!d.micrositePublic); setCountry(d.country ?? 'IN'); setTouched(true); setStep(2); }
   }, [initial?.sector]);
 
   const pickSector = (s: SectorCode) => { setSector(s); if (!touched) setIntents(suggestIntents(s)); setStep(1); };
   const toggle = (c: JoinIntent) => { setTouched(true); setIntents((v) => (v.includes(c) ? v.filter((x) => x !== c) : [...v, c])); };
-  const draft = (): JoinDraft | null => (sector ? { sector, intents, city: city.trim() || undefined, micrositePublic: site } : null);
+  const draft = (): JoinDraft | null => (sector ? { sector, intents, city: city.trim() || undefined, micrositePublic: site, country } : null);
   const hasOrg = !!me?.activeOrg;
 
   async function save() {
@@ -101,11 +104,14 @@ export function JoinWizard({ initial, onSaved }: { initial?: Partial<JoinDraft>;
         <section aria-labelledby="join-s3">
           <h2 id="join-s3">Join the Unite Industry Club</h2>
           <p className="cz-muted">
-            {SECTORS.find((s) => s.code === sector)?.name} · {intents.length} way{intents.length === 1 ? '' : 's'} to collaborate. Membership is free.
+            {SECTORS.find((s) => s.code === sector)?.name} · {intents.length} way{intents.length === 1 ? '' : 's'} to collaborate. Membership is free, for businesses in any country.
             Your board shows live opportunities for each choice, the Unite businesses that fit you, and why each one was matched.
           </p>
           <ul className="cz-join-summary">{intents.map((c) => <li key={c}>{JOIN_INTENTS.find((i) => i.code === c)?.label}</li>)}</ul>
-          <div style={{ maxWidth: 360 }}><TextInput label="City (optional)" value={city} onChange={(e) => setCity(e.target.value)} maxLength={80} /></div>
+          <div style={{ display: 'grid', gap: 12, maxWidth: 640, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+            <Select label="Country" value={country} onChange={(e) => setCountry(e.target.value)} options={COUNTRY_OPTIONS} />
+            <TextInput label="City (optional)" value={city} onChange={(e) => setCity(e.target.value)} maxLength={80} />
+          </div>
           <Checkbox label="Show my business page publicly on COLLABIZ (with my approved products)" checked={site} onChange={(e) => setSite(e.target.checked)} />
           {error && <Alert tone="danger">{error}</Alert>}
           <div className="cz-join-actions">

@@ -421,6 +421,13 @@
       "when": 1795454489761,
       "tag": "0059_industry_club",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1795456060780,
+      "tag": "0060_club_agreements",
+      "breakpoints": true
     }
   ]
 }

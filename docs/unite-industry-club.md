@@ -13,8 +13,8 @@
 | Rule | Detail |
 |---|---|
 | Who prepares and submits | The business owner or an admin drafts products. Only a KYB-verified business can submit one for the brand. |
-| Who approves | Only Unite admins. Approval needs all four checks: quality, certifications, the maker's KYB, and a signed brand licence. Declining needs a reason. |
-| What approval does | It creates one item in the Unite Powertek catalogue (product line "Unite Industry Club"). The catalogue shows the brand, not the maker. |
+| Who approves | Only Unite admins. Approval needs the quality, certifications and KYB checks, and issues the brand licence. Declining needs a reason. |
+| What approval does | It issues the brand licence. Once both parties sign it, one item is created in the Unite Powertek catalogue (product line "Unite Industry Club"). The catalogue shows the brand, not the maker. |
 | Withdrawing | Withdrawing an approved product archives the catalogue item, so past enquiries keep their history. |
 | Fees and royalties | None are charged through COLLABIZ. The licence terms are agreed with Unite outside the app. |
 | Power | COLLABIZ does not sell power or quote tariffs. Plant owners and DISCOMs supply it under their own agreements. |
@@ -39,6 +39,57 @@
 | `GET /v1/public/club/products`, `GET /v1/public/club/members/:slug` | public | Approved products; member pages. |
 
 Tests: `apps/api/test/club.e2e.ts` and the browser suite "Unite Industry Club".
+
+
+## Virtual agreements, legal drafts and Terms and Conditions
+
+**Any industry, any product, anywhere in the world.**
+- Members can be in any country (ISO 3166 codes).
+- A product lists where it is made, the markets it can be sold in (or worldwide), and its currency.
+- Every agreement lets the parties choose the governing law and dispute forum:
+  - India (arbitration in Hyderabad)
+  - Singapore (SIAC)
+  - UAE (Dubai)
+  - England & Wales (LCIA)
+  - New York (ICDR)
+
+### Legal drafts (`packages/types/src/club-legal.ts`)
+
+| Template | Type | Used for |
+|---|---|---|
+| Membership Terms and Conditions | Click-to-accept (typed name, per version) | Required before submitting a product or sending an agreement |
+| Brand Licence and OEM Supply Agreement | Contract (Unite Powertek ↔ member) | Issued automatically when Unite approves a product |
+| Mutual Non-Disclosure Agreement | Contract (member ↔ member) | Sharing drawings, prices or plans |
+| International Distribution Agreement | Contract (member ↔ member) | Appointing a distributor for chosen countries, with currency, Incoterm, payment terms and exclusivity |
+| Collaboration Memorandum of Understanding | Contract (member ↔ member) | Recording intentions before the final contract |
+
+All five are **drafts for Unite's legal counsel**.
+- **Before counsel approves a version:** every document generated from it starts with a "PILOT DRAFT" notice, and the agreement is flagged.
+- **Recording approval:** a super admin records the approval in the admin console (Unite Industry Club → Legal templates). The record names counsel, the date and the exact version (by fingerprint).
+- **Changing a text:** this creates a new version that needs approval again. Accepted and signed versions never change.
+- **Who runs the club:** the operator named in the terms comes from `CLUB_OPERATOR_NAME`, `CLUB_OPERATOR_ADDRESS` and `CLUB_OPERATOR_PHONE`. The defaults are Unite Group's published company details. **The contracting entity is to be confirmed by Unite.**
+
+### How virtual agreements work
+- **Built on Contracts:** agreements are ordinary Contracts. The approved text is locked, and each signature is bound to the text's SHA-256 fingerprint. A party can also upload a signed printed copy. Contracts come with a signing certificate and appear in the Vault.
+- **Brand licence:** Unite approves a product (quality, certifications and KYB checks, plus the licence terms: length, warranty, dispute forum, Schedule C commercial terms). The member and the Unite Powertek signatory then both sign online. **Only then** is the product listed in the Unite Powertek catalogue.
+- **Agreements between members:**
+  - Each member has a **club code** (UIC-123456) to share, so no member directory is exposed.
+  - Only an owner or admin who has accepted the terms can send an agreement.
+  - Unite is not a party to these agreements.
+- **Demo signatory:** Unite Powertek's demo signatory is `powertek@collabiz.local`. In production, Unite adds its real authorised signatory as an owner or admin of the Powertek organisation.
+
+### Pages
+- **Public:** `/club/terms` (Terms and Conditions) and `/club/legal` (all templates, with their version and counsel status).
+- **Member:** `/club/agreements`. Accept the terms, see your club code and your agreements, and create an NDA, a distribution agreement or an MoU. Signing happens in the Vault.
+- **Admin:** a Legal templates tab in the admin console's Unite Industry Club page.
+
+### API
+- `GET /v1/public/club/terms`, `GET /v1/public/club/legal`
+- `GET /v1/club/terms`, `POST /v1/club/terms/accept`
+- `GET/POST /v1/club/agreements`
+- `GET /v1/admin/club/templates`, `POST /v1/admin/club/templates/:code/counsel-approval` (super admin only)
+
+Tests: `apps/api/test/club-agreements.e2e.ts`.
 
 ---
 

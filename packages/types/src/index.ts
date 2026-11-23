@@ -44,3 +44,4 @@ export * from './trust-finance';
 export * from './programmes';
 export * from './eb5';
 export * from './join';
+export * from './club-legal';

@@ -10,7 +10,8 @@ export const metadata: Metadata = {
 const STEPS = [
   ['Join free', 'Pick your industry and what you want from the club.'],
   ['Submit your product', 'Specifications, certifications, monthly capacity and an optional free-power offer.'],
-  ['Unite approves', 'Quality, certifications and factory checks, then a signed brand licence.'],
+  ['Unite approves', 'Quality, certification and business checks.'],
+  ['Sign online', 'You and Unite Powertek sign the brand licence on COLLABIZ — no paper, any country.'],
   ['Sold across the network', 'Listed in the Unite Powertek catalogue; every COLLABIZ partner, franchise and store can sell it.'],
 ] as const;
 
@@ -21,7 +22,7 @@ export default function ClubPage() {
       <header className="cz-join-hero">
         <p className="cz-hx-eyebrow">Unite Industry Club</p>
         <h1>Make it. We brand it, power it and sell it.</h1>
-        <p className="cz-hx-sub">Any industry can join. Sell your products under the Unite Powertek brand with free solar power for your customers, buy green power for your own factory, and grow through the whole Unite network.</p>
+        <p className="cz-hx-sub">Any industry, any product, anywhere in the world. Sell your products under the Unite Powertek brand with free solar power for your customers, buy green power for your own factory, and grow through the whole Unite network.</p>
         <div className="cz-join-actions">
           <Link href="/join" className="cz-btn cz-btn-primary cz-btn-lg">Join the Industry Club</Link>
           <Link href="/club/products" className="cz-btn cz-btn-secondary cz-btn-lg">Submit a product</Link>
@@ -44,7 +45,7 @@ export default function ClubPage() {
       </section>
 
       <p className="cz-muted" style={{ marginTop: 32, fontSize: 14 }}>
-        Membership is free. Brand use needs Unite’s approval and a signed brand licence; licence terms are agreed with Unite and are not charged through COLLABIZ. Free-power offers are made by the member with its product. Power is supplied by plant owners and DISCOMs under their own agreements; COLLABIZ does not sell power or quote tariffs.
+        Membership is free. Read the <Link href="/club/terms">Club Terms and Conditions</Link> and all <Link href="/club/legal">legal documents</Link>. Brand use needs Unite’s approval and a signed brand licence; commercial terms are agreed in the licence and are not charged through COLLABIZ. Free-power offers are made by the member with its product. Power is supplied by plant owners and DISCOMs under their own agreements; COLLABIZ does not sell power or quote tariffs.
       </p>
     </div>
   );

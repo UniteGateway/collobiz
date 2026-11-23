@@ -1,14 +1,15 @@
 'use client';
 import Link from 'next/link';
 import { useState } from 'react';
-import { CLUB_BRAND_OPTIONS, SECTORS } from '@collabiz/types';
+import { CLUB_BRAND_OPTIONS, ISO_COUNTRIES, SECTORS, countryName, marketsLabel } from '@collabiz/types';
 import { Alert, Button, Card, Checkbox, Dialog, EmptyState, LoadingState, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { ApiErrorView, Screen } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
-interface P { id: string; code: string; name: string; category: string; sectorName: string; brandLabel: string; powerFree: boolean; powerOffer: string | null; status: string; statusLabel: string; reviewNote: string | null; mrp: number | null }
-const TONE: Record<string, 'success' | 'info' | 'warning' | 'neutral' | 'danger'> = { approved: 'success', submitted: 'info', draft: 'neutral', rejected: 'warning', withdrawn: 'neutral' };
+interface P { id: string; code: string; name: string; category: string; sectorName: string; brandLabel: string; powerFree: boolean; powerOffer: string | null; status: string; statusLabel: string; reviewNote: string | null; mrp: number | null; markets: string[]; originCountry: string; contractId: string | null }
+const COUNTRY_OPTIONS = ISO_COUNTRIES.map((c) => ({ value: c, label: countryName(c) })).sort((a, b) => a.label.localeCompare(b.label));
+const TONE: Record<string, 'success' | 'info' | 'warning' | 'neutral' | 'danger'> = { approved: 'success', licence_pending: 'warning', submitted: 'info', draft: 'neutral', rejected: 'warning', withdrawn: 'neutral' };
 
 /** Unite Industry Club — my products for the Unite Powertek brand. */
 export default function ClubProducts() {
@@ -22,6 +23,7 @@ export default function ClubProducts() {
       actions={d?.canEdit ? <Button onClick={() => setOpen(true)}>Add a product</Button> : undefined}>
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !d ? <LoadingState /> : (
         <div className="cz-stack" style={{ gap: 16 }}>
+          <Alert tone="info">Before submitting, your business accepts the <Link href="/club/agreements">Club terms</Link>. When Unite approves a product, you sign the brand licence online and the product is listed.</Alert>
           {!d.verified && <Alert tone="info">You can prepare products now. Complete your business verification (KYB) to submit them for the Unite brand. <Link href="/onboarding/status">Check verification</Link></Alert>}
           {act.error && <Alert tone="danger">{act.error}</Alert>}
           {!d.items.length ? <Card><EmptyState icon="package" title="No products yet">Add your first product to sell it under the Unite Powertek brand.</EmptyState></Card> : d.items.map((p) => (
@@ -29,14 +31,15 @@ export default function ClubProducts() {
               <div data-my-club-product={p.code} style={{ display: 'flex', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap' }}>
                 <div>
                   <h2 style={{ margin: 0 }}>{p.name}</h2>
-                  <p className="cz-muted" style={{ margin: '4px 0 0' }}>{p.code} · {p.category} · {p.brandLabel}</p>
+                  <p className="cz-muted" style={{ margin: '4px 0 0' }}>{p.code} · {p.category} · {p.brandLabel} · Made in {countryName(p.originCountry)} · Markets: {marketsLabel(p.markets)}</p>
                   {p.powerFree && <p className="cz-club-power" style={{ margin: '6px 0 0' }}>Free power: {p.powerOffer}</p>}
                   {p.reviewNote && p.status === 'rejected' && <p style={{ margin: '6px 0 0' }}>Unite’s note: {p.reviewNote}</p>}
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', flexWrap: 'wrap' }}>
                   <StatusBadge status={p.status} label={p.statusLabel} tone={TONE[p.status]} />
                   {d.canEdit && ['draft', 'rejected'].includes(p.status) && <Button size="sm" disabled={!d.verified || act.pending} onClick={() => act.run(p.id, 'submit')}>Submit for Unite review</Button>}
-                  {d.canEdit && ['submitted', 'approved'].includes(p.status) && <Button size="sm" variant="ghost" disabled={act.pending} onClick={() => act.run(p.id, 'withdraw')}>Withdraw</Button>}
+                  {p.status === 'licence_pending' && p.contractId && <Link className="cz-btn cz-btn-primary cz-btn-sm" href={`/vault?contract=${p.contractId}`}>Sign the brand licence</Link>}
+                  {d.canEdit && ['submitted', 'licence_pending', 'approved'].includes(p.status) && <Button size="sm" variant="ghost" disabled={act.pending} onClick={() => act.run(p.id, 'withdraw')}>Withdraw</Button>}
                   {p.status === 'approved' && <Link className="cz-btn cz-btn-secondary cz-btn-sm" href="/powertek">See in catalogue</Link>}
                 </div>
               </div>
@@ -50,17 +53,18 @@ export default function ClubProducts() {
 }
 
 function NewProduct({ onDone }: { onDone: () => void }) {
-  const [f, setF] = useState({ name: '', category: '', sector: 'manufacturing', description: '', brandOption: 'unite_powertek', powerFree: false, powerOffer: '', certifications: '', monthlyCapacity: '', unit: '', mrp: '' });
+  const [f, setF] = useState({ markets: [] as string[], currency: 'INR', originCountry: 'IN', name: '', category: '', sector: 'manufacturing', description: '', brandOption: 'unite_powertek', powerFree: false, powerOffer: '', certifications: '', monthlyCapacity: '', unit: '', mrp: '' });
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((x) => ({ ...x, [k]: e.target.value }));
   const m = useMutation(async () => {
     await api.post('/club/products', {
       name: f.name, category: f.category, sector: f.sector, description: f.description, brandOption: f.brandOption, powerFree: f.powerFree, powerOffer: f.powerFree ? f.powerOffer : undefined,
       certifications: f.certifications.split(',').map((s) => s.trim()).filter(Boolean), monthlyCapacity: f.monthlyCapacity ? Number(f.monthlyCapacity) : undefined, unit: f.unit || undefined,
-      mrp: f.mrp ? Math.round(Number(f.mrp) * 100) : undefined,
+      mrp: f.mrp ? Math.round(Number(f.mrp) * 100) : undefined, currency: f.currency, markets: f.markets, originCountry: f.originCountry,
     });
     onDone(); return true;
   });
   const fe = m.fieldErrors;
+  const [pick, setPick] = useState('IN');
   return (
     <form className="cz-stack" style={{ gap: 12 }} onSubmit={(e) => { e.preventDefault(); m.run(); }}>
       <TextInput label="Product name" value={f.name} onChange={set('name')} error={fe.name} required />
@@ -78,8 +82,17 @@ function NewProduct({ onDone }: { onDone: () => void }) {
       <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
         <TextInput label="Monthly capacity (optional)" inputMode="numeric" value={f.monthlyCapacity} onChange={set('monthlyCapacity')} error={fe.monthlyCapacity} />
         <TextInput label="Unit (optional)" value={f.unit} onChange={set('unit')} />
-        <TextInput label="MRP in ₹ (optional)" inputMode="decimal" value={f.mrp} onChange={set('mrp')} error={fe.mrp} />
+        <TextInput label="MRP (optional)" inputMode="decimal" value={f.mrp} onChange={set('mrp')} error={fe.mrp} />
+        <TextInput label="Currency" value={f.currency} maxLength={3} onChange={set('currency')} error={fe.currency} />
       </div>
+      <Select label="Made in" value={f.originCountry} onChange={set('originCountry')} options={COUNTRY_OPTIONS} />
+      <fieldset className="cz-fieldset"><legend>Where you want to sell</legend>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <div style={{ minWidth: 220 }}><Select label="Add a market" value={pick} onChange={(e) => setPick(e.target.value)} options={[{ value: 'WW', label: 'Worldwide' }, ...COUNTRY_OPTIONS]} /></div>
+          <Button type="button" variant="secondary" onClick={() => setF((x) => ({ ...x, markets: x.markets.includes(pick) ? x.markets : [...x.markets, pick] }))}>Add</Button>
+        </div>
+        <div className="cz-board-why">{f.markets.length ? f.markets.map((c) => <button type="button" key={c} className="cz-chip" aria-pressed="true" onClick={() => setF((x) => ({ ...x, markets: x.markets.filter((y) => y !== c) }))}>{countryName(c)} ✕</button>) : <span className="cz-muted">Worldwide (no limit)</span>}</div>
+      </fieldset>
       {m.error && <Alert tone="danger">{m.error}</Alert>}
       <Button type="submit" disabled={m.pending}>{m.pending ? 'Saving…' : 'Save as draft'}</Button>
     </form>

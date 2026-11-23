@@ -2934,3 +2934,7 @@ a.cz-card:hover, .cz-card[href]:hover, .cz-venture:hover, .cz-kpi:hover { box-sh
 .cz-club-strip a { display: block; background: #fff; border: 1px solid #E1E3E1; border-radius: 16px; padding: 16px; color: inherit; text-decoration: none; }
 .cz-club-strip a:hover { background: #F1F4F9; }
 .cz-club-strip strong { display: block; font-size: 26px; color: #011E48; }
+.cz-legal { white-space: pre-wrap; font-family: inherit; font-size: 15px; line-height: 1.6; color: #1F1F1F; margin: 12px 0 0; max-height: 70vh; overflow: auto; padding: 16px; background: #fff; border: 1px solid #E1E3E1; border-radius: 12px; }
+.cz-club-code { display: grid; gap: 8px; grid-template-columns: minmax(180px, auto) 1fr; align-items: center; }
+.cz-club-code strong { font-size: 26px; letter-spacing: .04em; color: #011E48; }
+@media (max-width: 640px) { .cz-club-code { grid-template-columns: 1fr; } }

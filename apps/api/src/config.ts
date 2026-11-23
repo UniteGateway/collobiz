@@ -26,6 +26,10 @@ const Env = z.object({
   AI_PROVIDER: z.enum(['rules', 'anthropic']).default('rules'),
   /** Growth Desk outreach sending. Off until a separate marketing e-mail domain/service is configured; approved drafts wait. */
   GROWTH_SENDING_ENABLED: bool.default(false),
+  /** Unite Industry Club operator shown in the Club terms. Defaults are Unite Group's published company details; confirm the contracting entity with counsel. */
+  CLUB_OPERATOR_NAME: z.string().min(3).default('Unite Developers Global Inc.'),
+  CLUB_OPERATOR_ADDRESS: z.string().min(5).default('202, Ashoka Capitol, Park View Enclave, Banjara Hills, Hyderabad, Telangana 500034, India'),
+  CLUB_OPERATOR_PHONE: z.string().min(5).default('+91 96676 60773'),
   /** SOLBID (Unite's sealed-bid solar marketplace): origin only, e.g. https://solbid.example — no path. Off when unset. */
   SOLBID_API_URL: z.string().url().optional(),
   /** Shared secret for signed calls both ways; must equal COLLABIZ_SHARED_SECRET on SOLBID. */

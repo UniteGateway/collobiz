@@ -123,6 +123,9 @@ export const collabJoinProfiles = pgTable('collab_join_profiles', {
   /** Public business page (microsite) at /club/m/:slug — only when the member switches it on. */
   micrositePublic: boolean('microsite_public').notNull().default(false),
   slug: text('slug').unique(),
+  country: text('country').notNull().default('IN'),
+  /** Shareable code other members use to send this business an agreement (UIC-123456). */
+  memberCode: text('member_code').unique(),
   updatedBy: uuid('updated_by').references(() => users.id),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
@@ -143,8 +146,13 @@ export const clubProducts = pgTable('club_products', {
   certifications: text('certifications').array().notNull().default(sql`'{}'::text[]`),
   monthlyCapacity: integer('monthly_capacity'),
   unit: text('unit'),
-  mrp: bigint('mrp', { mode: 'number' }), // paise
-  status: text('status').notNull().default('draft'), // draft | submitted | approved | rejected | withdrawn
+  mrp: bigint('mrp', { mode: 'number' }), // minor units of `currency`
+  currency: text('currency').notNull().default('INR'),
+  markets: text('markets').array().notNull().default(sql`'{}'::text[]`),
+  originCountry: text('origin_country').notNull().default('IN'),
+  status: text('status').notNull().default('draft'), // draft | submitted | licence_pending | approved | rejected | withdrawn
+  /** Brand licence issued on Unite approval; the product is listed once both parties sign it. */
+  contractId: uuid('contract_id'),
   checks: text('checks').array().notNull().default(sql`'{}'::text[]`),
   reviewNote: text('review_note'),
   reviewedBy: uuid('reviewed_by').references(() => users.id),
@@ -175,3 +183,20 @@ export const clubPowerRequests = pgTable('club_power_requests', {
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (t) => [index('club_power_org_idx').on(t.orgId)]);
+
+/** Club agreements created from the Club templates (brand licences and member-to-member agreements); the contract itself lives in Contracts. */
+export const clubAgreements = pgTable('club_agreements', {
+  id: id(),
+  contractId: uuid('contract_id').notNull().unique(),
+  type: text('type').notNull(), // brand_licence | nda | distribution | mou
+  templateCode: text('template_code').notNull(),
+  templateVersion: integer('template_version').notNull(),
+  /** True when the template version had no recorded counsel approval when this agreement was generated. */
+  pilotDraft: boolean('pilot_draft').notNull(),
+  fromOrgId: uuid('from_org_id').notNull().references(() => organizations.id),
+  toOrgId: uuid('to_org_id').notNull().references(() => organizations.id),
+  productId: uuid('product_id'),
+  variables: jsonb('variables').notNull().default(sql`'{}'::jsonb`),
+  createdBy: uuid('created_by').notNull().references(() => users.id),
+  createdAt: createdAt(),
+}, (t) => [index('club_agreements_from_idx').on(t.fromOrgId), index('club_agreements_to_idx').on(t.toOrgId)]);
