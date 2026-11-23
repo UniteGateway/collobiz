@@ -3246,9 +3246,12 @@ suites.push({
     await shot('club-board');
     // Accept the Club terms (typed name), see the club code
     await page.goto(WEB + '/club/agreements');
-    await page.locator('[data-club-terms]').getByLabel(/I have read the terms/).check();
-    await page.getByLabel('Type your full name to accept').fill('Ravi Patel');
-    await page.getByRole('button', { name: 'Accept the Club terms' }).click();
+    await page.locator('[data-club-terms]').waitFor();
+    if (!(await page.getByText(/Accepted by Ravi Patel/).isVisible())) { // the phone pass reuses the desktop pass's database
+      await page.locator('[data-club-terms]').getByLabel(/I have read the terms/).check();
+      await page.getByLabel('Type your full name to accept').fill('Ravi Patel');
+      await page.getByRole('button', { name: 'Accept the Club terms' }).click();
+    }
     await page.getByText(/Accepted by Ravi Patel/).waitFor();
     expect(/^UIC-\d{6}$/.test(await page.locator('[data-member-code]').getAttribute('data-member-code')), 'the member has a club code to share');
     await shot('club-agreements');
