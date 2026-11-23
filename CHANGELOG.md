@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Unite Industry Club (2026-11-23)
+- The join module becomes the Unite Industry Club: sell under the Unite Powertek brand (OEM), with Unite review (four checks, including a signed brand licence) that lists approved products in the Powertek catalogue for every partner to sell; free-power offers with products; buy-power requests handled by the energy desk; opt-in public member pages; admin console page. Migration 0059. See `docs/unite-industry-club.md`.
+
 ### Join as any industry + My collaboration board (2026-11-23)
 - Public `/join` wizard: industry, then ways to collaborate with Unite Group (free power, solar-integrated products, EPC, barter, trading, exports/imports, promoting Unite businesses, property, work, learning, launch); choices are kept through sign-up.
 - `/board`: one live card per choice, matched Unite businesses and member offers with reasons, peers in the same industry. Table `collab_join_profiles` (migration 0058). See `docs/join-any-industry.md`.

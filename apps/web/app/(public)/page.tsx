@@ -68,7 +68,7 @@ export default function HomePage() {
           <p>COLLABIZ connects consultants, EPC contractors, traders, manufacturers and developers with Unite Group and with each other — with protected leads, verified partners and commissions you can trace from introduction to payment.</p>
           <div className="cz-hx-ctas">
             <Link href="/signup" className="cz-hx-btn cz-hx-btn-light">Join as a partner<Icon name="arrow" size={17} /></Link>
-            <Link href="/join" className="cz-hx-btn cz-hx-btn-glass">Join as any industry</Link>
+            <Link href="/club" className="cz-hx-btn cz-hx-btn-glass">Unite Industry Club</Link>
             <Link href="/opportunities/public" className="cz-hx-btn cz-hx-btn-glass">Browse opportunities</Link>
           </div>
         </div>
@@ -228,7 +228,7 @@ export default function HomePage() {
           <p>Verification takes one sitting. Your first protected lead can follow the same day.</p>
           <div className="cz-hx-ctas">
             <Link href="/signup" className="cz-hx-btn cz-hx-btn-light">Join as a partner</Link>
-            <Link href="/join" className="cz-hx-btn cz-hx-btn-glass">Collaborate with Unite Group</Link>
+            <Link href="/club" className="cz-hx-btn cz-hx-btn-glass">Join the Industry Club</Link>
             <Link href="/rfq/new" className="cz-hx-btn cz-hx-btn-glass">Submit a requirement</Link>
           </div>
         </div>

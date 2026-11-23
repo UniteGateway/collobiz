@@ -9,7 +9,7 @@ export interface Module { key: string; label: string; icon: IconName; home: stri
 
 export const MODULES: Module[] = [
   { key: 'home', label: 'Home', icon: 'home', home: '/dashboard', match: ['/dashboard'] },
-  { key: 'board', label: 'My board', icon: 'sector', home: '/board', match: ['/board'] },
+  { key: 'board', label: 'Industry Club', icon: 'sector', home: '/board', match: ['/board', '/club/products', '/club/power'], tabs: [['/board', 'My club board'], ['/club/products', 'My products'], ['/club/power', 'Buy power']] },
   { key: 'collab', label: 'Collab', icon: 'teams', home: '/collab', match: ['/collab'], tabs: [['/collab', 'Start'], ['/collab/matches', 'Matches'], ['/collab/requests', 'Requests & deals'], ['/collab/programs', 'Unite programmes'], ['/collab/workspace', 'My collaborations']] },
   { key: 'business-offers', label: 'Business Offers', icon: 'briefcase', home: '/business-offers', match: ['/business-offers'], tabs: [['/business-offers', 'Browse'], ['/business-offers/new', 'Publish'], ['/business-offers/mine', 'My offers']] },
   { key: 'opportunities', label: 'Opportunities', icon: 'opportunities', home: '/marketplace', match: ['/marketplace', '/opportunities', '/my/opportunities', '/feed', '/rfq', '/ai/matching', '/offers', '/one', '/radar'],

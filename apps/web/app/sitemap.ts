@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const web = process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000';
-  const fixed = ['/', '/about', '/how-it-works', '/businesses', '/join', '/membership', '/opportunities', '/catalogue', '/go-eb5/apply'].map((p) => ({ url: `${web}${p}`, changeFrequency: 'weekly' as const }));
+  const fixed = ['/', '/about', '/how-it-works', '/businesses', '/club', '/join', '/membership', '/opportunities', '/catalogue', '/go-eb5/apply'].map((p) => ({ url: `${web}${p}`, changeFrequency: 'weekly' as const }));
   let products: { slug: string }[] = [];
   try {
     const r = await fetch(`${process.env.API_INTERNAL_URL ?? 'http://localhost:4000'}/v1/public/products`, { cache: 'no-store' });

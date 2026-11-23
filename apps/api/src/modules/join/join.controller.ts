@@ -14,12 +14,13 @@ import { and, desc, eq, gt, inArray, isNotNull, isNull, lt, ne, or, sql } from '
 import { JOIN_INTENTS, JoinProfileSchema, OFFER_OPEN, joinIntent, offerCategoryLabel, sectorName, suggestIntents, ventureReasons, type JoinProfile, type SectorCode } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import {
-  businessOffers, collabJoinProfiles, courses, crossBorderEnquiries, microContracts, opportunities, organizations, partnerProfiles, propertyProjects, tenders, tradeRequirements, uniteVentures, xchangeListings,
+  businessOffers, clubPowerRequests, clubProducts, collabJoinProfiles, courses, energyListings, crossBorderEnquiries, microContracts, opportunities, organizations, partnerProfiles, propertyProjects, tenders, tradeRequirements, uniteVentures, xchangeListings,
 } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, Public, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
 import { SolbidModule, SolbidClient } from '../solbid/solbid.controller';
+import { ClubController, memberSlug } from './club.controller';
 
 const EPC_SECTORS = ['solar', 'construction_epc', 'infrastructure', 'power_equipment'];
 
@@ -57,7 +58,8 @@ export class JoinController {
     const orgId = this.org(ctx);
     if (!this.manager(ctx, orgId)) throw new ForbiddenException('Only the owner or an admin of your business can change how it collaborates');
     const before = await this.load(orgId);
-    const values = { sector: b.sector, intents: b.intents, about: b.about ?? null, city: b.city ?? null, updatedBy: ctx.userId, updatedAt: new Date() };
+    const [org] = await this.db.select({ name: organizations.displayName }).from(organizations).where(eq(organizations.id, orgId)).limit(1);
+    const values = { sector: b.sector, intents: b.intents, about: b.about ?? null, city: b.city ?? null, micrositePublic: b.micrositePublic, slug: before?.slug ?? memberSlug(org?.name ?? 'member', orgId), updatedBy: ctx.userId, updatedAt: new Date() };
     const [p] = await this.db.insert(collabJoinProfiles).values({ orgId, ...values }).onConflictDoUpdate({ target: collabJoinProfiles.orgId, set: values }).returning();
     await this.audit.record(ctx, { action: before ? 'join.profile_updated' : 'join.profile_created', objectType: 'organization', objectId: orgId,
       before: before ? { sector: before.sector, intents: before.intents } : undefined, after: { sector: p.sector, intents: p.intents } });
@@ -90,10 +92,18 @@ export class JoinController {
     }));
     const [{ peers }] = await this.db.select({ peers: sql<number>`count(*)::int` }).from(collabJoinProfiles).where(and(eq(collabJoinProfiles.sector, p.sector), ne(collabJoinProfiles.orgId, orgId)));
     return {
-      profile: { sector: p.sector, sectorName: sectorName(p.sector as SectorCode), intents: p.intents, about: p.about, city: p.city, updatedAt: p.updatedAt },
+      profile: { sector: p.sector, sectorName: sectorName(p.sector as SectorCode), intents: p.intents, about: p.about, city: p.city, micrositePublic: p.micrositePublic, slug: p.slug, updatedAt: p.updatedAt },
+      club: await this.clubSummary(orgId),
       cards, ventures, offers, peers,
       note: 'Matched by rules: your industry and the collaborations you chose. Each match shows why. Matches are suggestions, not offers of work or guarantees of income.',
     };
+  }
+
+  private async clubSummary(orgId: string) {
+    const rows = await this.db.select({ status: clubProducts.status, n: sql<number>`count(*)::int` }).from(clubProducts).where(eq(clubProducts.orgId, orgId)).groupBy(clubProducts.status);
+    const by = Object.fromEntries(rows.map((r) => [r.status, r.n]));
+    const [{ power }] = await this.db.select({ power: sql<number>`count(*)::int` }).from(clubPowerRequests).where(eq(clubPowerRequests.orgId, orgId));
+    return { approved: by.approved ?? 0, submitted: by.submitted ?? 0, drafts: (by.draft ?? 0) + (by.rejected ?? 0), powerRequests: power };
   }
 
   private async card(code: string, orgId: string, sector: string) {
@@ -117,6 +127,14 @@ export class JoinController {
         break;
       case 'export_import':
         stats.push({ label: 'Cross-border enquiries routed to you', value: await n(this.db.select({ n: count }).from(crossBorderEnquiries).where(and(eq(crossBorderEnquiries.routedToOrgId, orgId), eq(crossBorderEnquiries.status, 'open')))) });
+        break;
+      case 'buy_power':
+        stats.push({ label: 'Power plants offering capacity on the Green Park market', value: await n(this.db.select({ n: count }).from(energyListings).where(and(eq(energyListings.side, 'plant'), eq(energyListings.status, 'live')))) });
+        stats.push({ label: 'Your open power requests', value: await n(this.db.select({ n: count }).from(clubPowerRequests).where(and(eq(clubPowerRequests.orgId, orgId), inArray(clubPowerRequests.status, ['new', 'in_progress', 'proposal_sent'])))) });
+        break;
+      case 'solar_products':
+        stats.push({ label: 'Your products approved for the Unite brand', value: await n(this.db.select({ n: count }).from(clubProducts).where(and(eq(clubProducts.orgId, orgId), eq(clubProducts.status, 'approved')))) });
+        stats.push({ label: 'Waiting for Unite review', value: await n(this.db.select({ n: count }).from(clubProducts).where(and(eq(clubProducts.orgId, orgId), eq(clubProducts.status, 'submitted')))) });
         break;
       case 'promote':
         stats.push({ label: 'Unite businesses open to partners', value: await n(this.db.select({ n: count }).from(uniteVentures).where(and(eq(uniteVentures.open, true), or(isNull(uniteVentures.regulatedReason), isNotNull(uniteVentures.clearedAt))))) });
@@ -145,5 +163,5 @@ export class JoinPublicController {
   options() { return { intents: JOIN_INTENTS.map(({ code, label, blurb }) => ({ code, label, blurb })) }; }
 }
 
-@Module({ imports: [SolbidModule], controllers: [JoinController, JoinPublicController] })
+@Module({ imports: [SolbidModule], controllers: [JoinController, JoinPublicController, ClubController] })
 export class JoinModule {}

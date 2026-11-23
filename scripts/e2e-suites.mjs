@@ -3222,31 +3222,62 @@ suites.push({
 });
 
 suites.push({
-  name: 'Join as any industry · wizard keeps choices through sign-in, then the board shows live cards',
-  run: async ({ page, WEB, expect, shot }) => {
+  name: 'Unite Industry Club · join, submit a product with free power, Unite approves, it sells in the Powertek catalogue, buy power',
+  run: async ({ page, WEB, ADMIN, expect, shot, label }) => {
     await page.goto(WEB + '/');
-    await page.getByRole('link', { name: 'Join as any industry' }).first().click();
-    await page.getByRole('heading', { level: 1, name: /Join as any industry/ }).waitFor();
+    await page.getByRole('link', { name: 'Unite Industry Club' }).first().click();
+    await page.getByRole('heading', { level: 1, name: /We brand it, power it and sell it/ }).waitFor();
+    await page.locator('[data-benefit="power_free"]').waitFor();
+    await shot('club-landing');
+    await page.getByRole('link', { name: 'Join the Industry Club' }).first().click();
     await page.locator('[data-sector="manufacturing"]').click();
-    await page.getByRole('heading', { name: 'How do you want to collaborate with Unite Group?' }).waitFor();
-    expect(await page.locator('[data-intent="free_power"]').getAttribute('aria-pressed') === 'true', 'free power is suggested for every industry');
-    await page.locator('[data-intent="barter"]').click();
-    await page.locator('[data-intent="export_import"]').click();
-    await shot('join-intents');
+    await page.getByRole('heading', { name: 'What do you want from the Unite Industry Club?' }).waitFor();
+    expect(await page.locator('[data-intent="solar_products"]').getAttribute('aria-pressed') === 'true', 'selling under the Unite brand is suggested');
+    await page.locator('[data-intent="buy_power"]').click();
     await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByLabel(/Show my business page publicly/).check();
     await page.getByRole('link', { name: 'I already have an account' }).click();
-    await page.waitForURL(/\/login/);
-    await webLogin(page, WEB, 'asha@voltepc.example');
+    await webLogin(page, WEB, 'ravi@sunrise.example');
     await page.goto(WEB + '/join');
-    await page.getByRole('button', { name: 'Save and open my board' }).click();
+    await page.getByRole('button', { name: 'Join and open my club board' }).click();
     await page.waitForURL(/\/board/);
-    await page.locator('[data-board-card="barter"]').waitFor();
-    expect(await page.locator('[data-board-card]').count() >= 3, 'one card per chosen collaboration');
-    await page.locator('[data-board-card="export_import"]').getByText('Cross-border enquiries routed to you').waitFor();
-    await page.getByRole('heading', { name: 'Unite businesses for you' }).waitFor();
-    await shot('join-board');
-    // Change what I want: the wizard opens with the saved choices
-    await page.getByRole('button', { name: 'Change what I want' }).click();
-    await page.getByRole('heading', { name: 'Which industry are you in?' }).waitFor();
+    await page.locator('[data-board-card="solar_products"]').waitFor();
+    await page.locator('[data-club-strip]').waitFor();
+    await shot('club-board');
+    // Submit a product for the Unite Powertek brand with a free-power offer
+    const name = `Solar cold room ${label}`;
+    await page.goto(WEB + '/club/products');
+    await page.getByRole('button', { name: 'Add a product' }).click();
+    await page.getByLabel('Product name').fill(name);
+    await page.getByLabel('Category', { exact: true }).fill('Cold storage');
+    await page.getByLabel('Description').fill('Insulated 5 tonne cold room with an inverter compressor for farm produce.');
+    await page.getByLabel(/Offer free power with this product/).check();
+    await page.getByLabel('Free-power offer').fill('5 kW rooftop solar with every cold room.');
+    await page.getByRole('button', { name: 'Save as draft' }).click();
+    const card = page.locator('[data-my-club-product]').filter({ hasText: name });
+    await card.getByRole('button', { name: 'Submit for Unite review' }).click();
+    await card.getByText('Waiting for Unite review').waitFor();
+    // Unite admin approves with every check
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/club');
+    const rev = page.locator('[data-club-product]').filter({ hasText: name });
+    for (const l of [/quality checked/, /Certifications verified/, /KYB\) complete/, /Brand licence/]) await rev.getByLabel(l).check();
+    await shot('club-admin-review');
+    await rev.getByRole('button', { name: 'Approve and list in Powertek catalogue' }).click();
+    await page.getByText(/No club products in this state/).waitFor();
+    // Any partner now sees it in the Unite Powertek catalogue
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/powertek');
+    await page.getByLabel('Search products').fill(name);
+    await page.locator('article', { hasText: `Unite Powertek ${name}` }).first().waitFor({ timeout: 15000 });
+    await shot('club-in-powertek');
+    // Buy power
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/club/power');
+    await page.getByLabel('City').fill('Hyderabad');
+    await page.getByLabel('Units a month (kWh)').fill('180000');
+    await page.getByRole('button', { name: 'Send power request' }).click();
+    await page.getByText(/Request PWR-\d{4}-\d{6} sent/).waitFor();
+    await shot('club-power');
   },
 });

@@ -120,7 +120,58 @@ export const collabJoinProfiles = pgTable('collab_join_profiles', {
   intents: text('intents').array().notNull().default(sql`'{}'::text[]`),
   about: text('about'),
   city: text('city'),
+  /** Public business page (microsite) at /club/m/:slug — only when the member switches it on. */
+  micrositePublic: boolean('microsite_public').notNull().default(false),
+  slug: text('slug').unique(),
   updatedBy: uuid('updated_by').references(() => users.id),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
+
+/** Unite Industry Club — a member's product submitted to be sold under the Unite Powertek brand (OEM), optionally with free power. */
+export const clubProducts = pgTable('club_products', {
+  id: id(),
+  code: text('code').notNull().unique(),
+  orgId: uuid('org_id').notNull().references(() => organizations.id),
+  name: text('name').notNull(),
+  category: text('category').notNull(),
+  sector: text('sector').notNull(),
+  description: text('description').notNull(),
+  brandOption: text('brand_option').notNull(), // unite_powertek | powered_by_unite
+  powerFree: boolean('power_free').notNull().default(false),
+  powerOffer: text('power_offer'),
+  certifications: text('certifications').array().notNull().default(sql`'{}'::text[]`),
+  monthlyCapacity: integer('monthly_capacity'),
+  unit: text('unit'),
+  mrp: bigint('mrp', { mode: 'number' }), // paise
+  status: text('status').notNull().default('draft'), // draft | submitted | approved | rejected | withdrawn
+  checks: text('checks').array().notNull().default(sql`'{}'::text[]`),
+  reviewNote: text('review_note'),
+  reviewedBy: uuid('reviewed_by').references(() => users.id),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+  /** The Unite Powertek catalogue item created on approval (sold through the product-sales module). */
+  catalogItemId: uuid('catalog_item_id'),
+  history: jsonb('history').notNull().default(sql`'[]'::jsonb`),
+  createdBy: uuid('created_by').notNull().references(() => users.id),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (t) => [index('club_products_org_idx').on(t.orgId), index('club_products_status_idx').on(t.status)]);
+
+/** Unite Industry Club — a member asks to buy green power; the energy desk handles it. */
+export const clubPowerRequests = pgTable('club_power_requests', {
+  id: id(),
+  code: text('code').notNull().unique(),
+  orgId: uuid('org_id').notNull().references(() => organizations.id),
+  need: text('need').notNull(),
+  sanctionedLoadKw: doublePrecision('sanctioned_load_kw'),
+  monthlyUnits: integer('monthly_units'),
+  monthlyBill: bigint('monthly_bill', { mode: 'number' }), // paise
+  state: text('state').notNull(),
+  city: text('city').notNull(),
+  note: text('note'),
+  status: text('status').notNull().default('new'), // new | in_progress | proposal_sent | closed
+  history: jsonb('history').notNull().default(sql`'[]'::jsonb`),
+  createdBy: uuid('created_by').notNull().references(() => users.id),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (t) => [index('club_power_org_idx').on(t.orgId)]);

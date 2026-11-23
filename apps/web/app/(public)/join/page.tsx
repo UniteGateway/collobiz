@@ -2,13 +2,13 @@ import type { Metadata } from 'next';
 import { JoinWizard } from '@/components/Join';
 
 export const metadata: Metadata = {
-  title: 'Join as any industry',
+  title: 'Join the Unite Industry Club',
   description: 'Any business, in any industry, can collaborate with Unite Group on COLLABIZ — free or lower-cost power, selling with solar, barter, trading, exports and imports, and more.',
 };
 
 const HOW = [
   ['Pick your industry', 'Manufacturing, retail, education, logistics, agriculture, real estate, technology — every industry is welcome.'],
-  ['Choose how you collaborate', 'Free or lower-cost power, selling your products with solar, the barter club, trading, exports and imports, EPC work, property, jobs and more.'],
+  ['Choose what you want', 'Sell under the Unite brand with free power, buy green power, the barter club, trading, exports and imports, EPC work, property, jobs and more.'],
   ['Open your own board', 'Your board shows live opportunities for each choice and the Unite businesses that fit you, with the reason for every match.'],
 ] as const;
 
@@ -17,9 +17,9 @@ export default function JoinPage() {
   return (
     <div className="cz-container cz-section" data-screen="join">
       <header className="cz-join-hero">
-        <p className="cz-hx-eyebrow">Join COLLABIZ</p>
-        <h1>Join as any industry. Collaborate with Unite Group.</h1>
-        <p className="cz-hx-sub">COLLABIZ is one business network. Energy is one part of it; your industry is another. Tell us what you do and what you want — you get your own board with the opportunities that fit you.</p>
+        <p className="cz-hx-eyebrow">Unite Industry Club</p>
+        <h1>Join the Unite Industry Club — any industry.</h1>
+        <p className="cz-hx-sub">Sell your products under the Unite Powertek brand with free power, buy green power for your factory, and grow through the Unite network. Tell us what you do and what you want — you get your own club board.</p>
       </header>
       <ol className="cz-join-how">
         {HOW.map(([t, d], i) => <li key={t}><span>{i + 1}</span><strong>{t}</strong><p>{d}</p></li>)}

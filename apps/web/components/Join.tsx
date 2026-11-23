@@ -1,21 +1,21 @@
 'use client';
-/** JOIN — "Join as any industry or collaborate with Unite Group": the wizard (public and in-app) and its draft. */
+/** UNITE INDUSTRY CLUB — the join wizard (public and in-app) and its draft. */
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { JOIN_INTENTS, SECTORS, suggestIntents, type JoinIntent, type SectorCode } from '@collabiz/types';
-import { Alert, Button, Icon, TextInput, type IconName } from '@collabiz/ui';
+import { Alert, Button, Checkbox, Icon, TextInput, type IconName } from '@collabiz/ui';
 import { api } from '@/lib/api';
 import { useSession } from '@/lib/session';
 
 const DRAFT = 'cz.join.draft';
-export interface JoinDraft { sector: SectorCode; intents: JoinIntent[]; city?: string }
+export interface JoinDraft { sector: SectorCode; intents: JoinIntent[]; city?: string; micrositePublic?: boolean }
 export function readDraft(): JoinDraft | null {
   try { const s = window.localStorage.getItem(DRAFT); return s ? (JSON.parse(s) as JoinDraft) : null; } catch { return null; }
 }
 const writeDraft = (d: JoinDraft | null) => { try { if (d) window.localStorage.setItem(DRAFT, JSON.stringify(d)); else window.localStorage.removeItem(DRAFT); } catch { /* private window */ } };
 
-const STEPS = ['Your industry', 'How you want to collaborate', 'Join'];
+const STEPS = ['Your industry', 'What you want from the club', 'Join'];
 
 export function JoinWizard({ initial, onSaved }: { initial?: Partial<JoinDraft>; onSaved?: () => void }) {
   const { me, loading } = useSession();
@@ -24,6 +24,7 @@ export function JoinWizard({ initial, onSaved }: { initial?: Partial<JoinDraft>;
   const [sector, setSector] = useState<SectorCode | null>((initial?.sector as SectorCode) ?? null);
   const [intents, setIntents] = useState<JoinIntent[]>((initial?.intents as JoinIntent[]) ?? []);
   const [city, setCity] = useState(initial?.city ?? '');
+  const [site, setSite] = useState(!!initial?.micrositePublic);
   const [touched, setTouched] = useState(!!initial?.intents?.length);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -32,12 +33,12 @@ export function JoinWizard({ initial, onSaved }: { initial?: Partial<JoinDraft>;
   useEffect(() => {
     if (initial?.sector) return;
     const d = readDraft();
-    if (d) { setSector(d.sector); setIntents(d.intents); setCity(d.city ?? ''); setTouched(true); setStep(2); }
+    if (d) { setSector(d.sector); setIntents(d.intents); setCity(d.city ?? ''); setSite(!!d.micrositePublic); setTouched(true); setStep(2); }
   }, [initial?.sector]);
 
   const pickSector = (s: SectorCode) => { setSector(s); if (!touched) setIntents(suggestIntents(s)); setStep(1); };
   const toggle = (c: JoinIntent) => { setTouched(true); setIntents((v) => (v.includes(c) ? v.filter((x) => x !== c) : [...v, c])); };
-  const draft = (): JoinDraft | null => (sector ? { sector, intents, city: city.trim() || undefined } : null);
+  const draft = (): JoinDraft | null => (sector ? { sector, intents, city: city.trim() || undefined, micrositePublic: site } : null);
   const hasOrg = !!me?.activeOrg;
 
   async function save() {
@@ -75,7 +76,7 @@ export function JoinWizard({ initial, onSaved }: { initial?: Partial<JoinDraft>;
 
       {step === 1 && sector && (
         <section aria-labelledby="join-s2">
-          <h2 id="join-s2">How do you want to collaborate with Unite Group?</h2>
+          <h2 id="join-s2">What do you want from the Unite Industry Club?</h2>
           <p className="cz-muted">Choose as many as you like. We suggested a few for {SECTORS.find((s) => s.code === sector)?.name}. Your board will show one card for each.</p>
           <div className="cz-join-intents">
             {JOIN_INTENTS.map((i) => {
@@ -98,23 +99,24 @@ export function JoinWizard({ initial, onSaved }: { initial?: Partial<JoinDraft>;
 
       {step === 2 && sector && (
         <section aria-labelledby="join-s3">
-          <h2 id="join-s3">Your collaboration board is ready to build</h2>
+          <h2 id="join-s3">Join the Unite Industry Club</h2>
           <p className="cz-muted">
             {SECTORS.find((s) => s.code === sector)?.name} · {intents.length} way{intents.length === 1 ? '' : 's'} to collaborate. Membership is free.
             Your board shows live opportunities for each choice, the Unite businesses that fit you, and why each one was matched.
           </p>
           <ul className="cz-join-summary">{intents.map((c) => <li key={c}>{JOIN_INTENTS.find((i) => i.code === c)?.label}</li>)}</ul>
           <div style={{ maxWidth: 360 }}><TextInput label="City (optional)" value={city} onChange={(e) => setCity(e.target.value)} maxLength={80} /></div>
+          <Checkbox label="Show my business page publicly on COLLABIZ (with my approved products)" checked={site} onChange={(e) => setSite(e.target.checked)} />
           {error && <Alert tone="danger">{error}</Alert>}
           <div className="cz-join-actions">
             <Button variant="ghost" onClick={() => setStep(1)}>Back</Button>
             {loading ? null : hasOrg ? (
-              <Button onClick={save} disabled={busy || !intents.length}>{busy ? 'Saving…' : 'Save and open my board'}</Button>
+              <Button onClick={save} disabled={busy || !intents.length}>{busy ? 'Saving…' : 'Join and open my club board'}</Button>
             ) : me ? (
               <Link className="cz-btn cz-btn-primary" href="/onboarding/account-type" onClick={keep}>Create my business account</Link>
             ) : (
               <>
-                <Link className="cz-btn cz-btn-primary" href="/signup?next=/join" onClick={keep}>Join free</Link>
+                <Link className="cz-btn cz-btn-primary" href="/signup?next=/join" onClick={keep}>Join the club free</Link>
                 <Link className="cz-btn cz-btn-secondary" href="/login?next=/join" onClick={keep}>I already have an account</Link>
               </>
             )}

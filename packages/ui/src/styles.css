@@ -2920,3 +2920,17 @@ a.cz-card:hover, .cz-card[href]:hover, .cz-venture:hover, .cz-kpi:hover { box-sh
 .cz-board-list li { padding: 12px 0; border-top: 1px solid #E1E3E1; }
 .cz-board-list li:first-child { border-top: 0; }
 .cz-board-why { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+/* ---------- Unite Industry Club ---------- */
+.cz-radio { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; cursor: pointer; }
+.cz-radio input { margin-top: 4px; width: 18px; height: 18px; accent-color: #011E48; }
+.cz-club-benefits { display: grid; gap: 16px; margin-top: 16px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.cz-club-benefit { background: #fff; border: 1px solid #E1E3E1; border-radius: 16px; padding: 20px; }
+.cz-club-benefit h3 { margin: 10px 0 6px; font-size: 18px; }
+.cz-club-benefit p { margin: 0; color: #444746; line-height: 1.5; }
+.cz-club-num { display: inline-grid; place-items: center; min-width: 36px; height: 28px; border-radius: 999px; background: #EAF4EA; color: #1B5E20; font-weight: 600; font-size: 13px; }
+.cz-club-brand { align-self: flex-start; display: inline-block; padding: 3px 10px; border-radius: 999px; background: #011E48; color: #fff; font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+.cz-club-power { color: #1B5E20; font-weight: 500; }
+.cz-club-strip { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.cz-club-strip a { display: block; background: #fff; border: 1px solid #E1E3E1; border-radius: 16px; padding: 16px; color: inherit; text-decoration: none; }
+.cz-club-strip a:hover { background: #F1F4F9; }
+.cz-club-strip strong { display: block; font-size: 26px; color: #011E48; }

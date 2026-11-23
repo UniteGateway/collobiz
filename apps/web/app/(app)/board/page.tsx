@@ -10,7 +10,8 @@ import { useQuery } from '@/lib/hooks';
 interface Stat { label: string; value: number | null; note?: string }
 interface Card { code: string; label: string; blurb: string; icon: string; links: { href: string; label: string }[]; stats: Stat[] }
 interface Board {
-  profile: { sector: string; sectorName: string; intents: string[]; about: string | null; city: string | null; updatedAt: string };
+  profile: { sector: string; sectorName: string; intents: string[]; about: string | null; city: string | null; micrositePublic: boolean; slug: string | null; updatedAt: string };
+  club: { approved: number; submitted: number; drafts: number; powerRequests: number };
   cards: Card[];
   ventures: { slug: string; name: string; tagline: string; open: boolean; reasons: { label: string }[] }[];
   offers: { id: string; title: string; category: string; owner: string; city: string | null; reasons: string[] }[];
@@ -24,11 +25,11 @@ export default function BoardPage() {
   const none = b.error instanceof ApiError && b.error.status === 404;
   const d = b.data;
   return (
-    <Screen page={{ key: 'board', title: 'My collaboration board', access: 'partner' }} eyebrow="YOUR BOARD"
-      description="Everything your business can do with Unite Group, in one place. Each card is live from the module behind it.">
+    <Screen page={{ key: 'board', title: 'My Industry Club board', access: 'partner' }} eyebrow="UNITE INDUSTRY CLUB"
+      description="Everything your business can do with Unite Group — sell under the Unite brand with free power, buy green power, and grow through the network. Each card is live.">
       {none || editing ? (
         <div className="cz-card">
-          {none && <Alert tone="info">Tell us your industry and how you want to collaborate. Your board appears as soon as you save.</Alert>}
+          {none && <Alert tone="info">Join the Unite Industry Club: tell us your industry and what you want. Your board appears as soon as you join.</Alert>}
           <JoinWizard initial={d && editing ? { sector: d.profile.sector as never, intents: d.profile.intents as never, city: d.profile.city ?? undefined } : undefined}
             onSaved={() => { setEditing(false); b.reload(); }} />
         </div>
@@ -42,7 +43,18 @@ export default function BoardPage() {
                 {d.peers > 0 ? `${d.peers} other business${d.peers === 1 ? '' : 'es'} in your industry ${d.peers === 1 ? 'has' : 'have'} joined.` : 'You are the first business from your industry on the board.'}
               </p>
             </div>
-            <Button variant="secondary" onClick={() => setEditing(true)}>Change what I want</Button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {d.profile.micrositePublic && d.profile.slug && <Link className="cz-btn cz-btn-ghost" href={`/club/m/${d.profile.slug}`}>View my public page</Link>}
+              <Button variant="secondary" onClick={() => setEditing(true)}>Change what I want</Button>
+            </div>
+          </section>
+
+          <section aria-labelledby="board-club" className="cz-club-strip" data-club-strip>
+            <h2 id="board-club" className="cz-sr-only">Club summary</h2>
+            <Link href="/club/products"><strong>{d.club.approved}</strong>Products sold under the Unite brand</Link>
+            <Link href="/club/products"><strong>{d.club.submitted}</strong>Waiting for Unite review</Link>
+            <Link href="/club/products"><strong>{d.club.drafts}</strong>Drafts to finish</Link>
+            <Link href="/club/power"><strong>{d.club.powerRequests}</strong>Power requests</Link>
           </section>
 
           <section aria-labelledby="board-cards">
