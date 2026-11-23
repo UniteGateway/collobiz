@@ -3220,3 +3220,33 @@ suites.push({
     await shot('wave2-admin');
   },
 });
+
+suites.push({
+  name: 'Join as any industry · wizard keeps choices through sign-in, then the board shows live cards',
+  run: async ({ page, WEB, expect, shot }) => {
+    await page.goto(WEB + '/');
+    await page.getByRole('link', { name: 'Join as any industry' }).first().click();
+    await page.getByRole('heading', { level: 1, name: /Join as any industry/ }).waitFor();
+    await page.locator('[data-sector="manufacturing"]').click();
+    await page.getByRole('heading', { name: 'How do you want to collaborate with Unite Group?' }).waitFor();
+    expect(await page.locator('[data-intent="free_power"]').getAttribute('aria-pressed') === 'true', 'free power is suggested for every industry');
+    await page.locator('[data-intent="barter"]').click();
+    await page.locator('[data-intent="export_import"]').click();
+    await shot('join-intents');
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByRole('link', { name: 'I already have an account' }).click();
+    await page.waitForURL(/\/login/);
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/join');
+    await page.getByRole('button', { name: 'Save and open my board' }).click();
+    await page.waitForURL(/\/board/);
+    await page.locator('[data-board-card="barter"]').waitFor();
+    expect(await page.locator('[data-board-card]').count() >= 3, 'one card per chosen collaboration');
+    await page.locator('[data-board-card="export_import"]').getByText('Cross-border enquiries routed to you').waitFor();
+    await page.getByRole('heading', { name: 'Unite businesses for you' }).waitFor();
+    await shot('join-board');
+    // Change what I want: the wizard opens with the saved choices
+    await page.getByRole('button', { name: 'Change what I want' }).click();
+    await page.getByRole('heading', { name: 'Which industry are you in?' }).waitFor();
+  },
+});

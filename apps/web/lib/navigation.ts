@@ -9,6 +9,7 @@ export interface Module { key: string; label: string; icon: IconName; home: stri
 
 export const MODULES: Module[] = [
   { key: 'home', label: 'Home', icon: 'home', home: '/dashboard', match: ['/dashboard'] },
+  { key: 'board', label: 'My board', icon: 'sector', home: '/board', match: ['/board'] },
   { key: 'collab', label: 'Collab', icon: 'teams', home: '/collab', match: ['/collab'], tabs: [['/collab', 'Start'], ['/collab/matches', 'Matches'], ['/collab/requests', 'Requests & deals'], ['/collab/programs', 'Unite programmes'], ['/collab/workspace', 'My collaborations']] },
   { key: 'business-offers', label: 'Business Offers', icon: 'briefcase', home: '/business-offers', match: ['/business-offers'], tabs: [['/business-offers', 'Browse'], ['/business-offers/new', 'Publish'], ['/business-offers/mine', 'My offers']] },
   { key: 'opportunities', label: 'Opportunities', icon: 'opportunities', home: '/marketplace', match: ['/marketplace', '/opportunities', '/my/opportunities', '/feed', '/rfq', '/ai/matching', '/offers', '/one', '/radar'],
@@ -98,7 +99,7 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}, eb5?
     ['Money', ['earnings', 'books', 'proof']],
     ['Network & growth', ['community', 'messages', 'global', 'growth']],
   ];
-  sections.push({ items: [item('home'), item('action-os')] });
+  sections.push({ items: [item('home'), item('board'), item('action-os')] });
   const eb = eb5Section(eb5); if (eb) sections.push(eb);
   for (const [title, keys] of GROUPS) sections.push({ title, collapsible: true, items: keys.filter((k) => byKey[k]).map(item) });
   if (me?.capabilities.includes('commission.approve')) sections.push({ title: 'Finance', items: [{ href: '/commissions/approvals', label: 'Commission approvals', icon: 'verify' }] });

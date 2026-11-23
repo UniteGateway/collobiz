@@ -4,6 +4,10 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Join as any industry + My collaboration board (2026-11-23)
+- Public `/join` wizard: industry, then ways to collaborate with Unite Group (free power, solar-integrated products, EPC, barter, trading, exports/imports, promoting Unite businesses, property, work, learning, launch); choices are kept through sign-up.
+- `/board`: one live card per choice, matched Unite businesses and member offers with reasons, peers in the same industry. Table `collab_join_profiles` (migration 0058). See `docs/join-any-industry.md`.
+
 ### Stage 12 — Commission ledger & finance (2026-11-06)
 - Commission policies (two-person activation), agreements with frozen hashed terms, a ledger earned only on customer payment, dual approval, payout requests, idempotent single-use settlements, tax records, holds/reversals, commission and payment disputes, and feature-flagged finance introductions; screens 027, 095–104, 135, 138, 157–159 (web/admin) and 095/100/158 (native).
 - Fixed: lead-evidence seal hash omitted nested fields; all JSON hashes now use canonical JSON (jsonb-safe). Opportunity map now queries located listings server-side.

@@ -112,3 +112,15 @@ export const collabInvitations = pgTable('collab_invitations', {
   respondedAt: timestamp('responded_at', { withTimezone: true }),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex('collab_invitations_uq').on(t.opportunityId, t.toOrgId), index('collab_invitations_to_idx').on(t.toOrgId)]);
+
+/** JOIN — an organisation's industry and the ways it wants to collaborate with Unite Group (drives its board). */
+export const collabJoinProfiles = pgTable('collab_join_profiles', {
+  orgId: uuid('org_id').primaryKey().references(() => organizations.id),
+  sector: text('sector').notNull(),
+  intents: text('intents').array().notNull().default(sql`'{}'::text[]`),
+  about: text('about'),
+  city: text('city'),
+  updatedBy: uuid('updated_by').references(() => users.id),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});

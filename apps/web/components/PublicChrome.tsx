@@ -9,6 +9,7 @@ const NAV = [
   { href: '/how-it-works', label: 'How it works' },
   { href: '/group-companies', label: 'Unite Group' },
   { href: '/businesses', label: 'Businesses' },
+  { href: '/join', label: 'Join any industry' },
   { href: '/catalogue', label: 'Catalogue' },
   { href: '/store', label: 'Store' },
   { href: '/opportunities/public', label: 'Opportunities' },

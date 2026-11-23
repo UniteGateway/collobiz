@@ -2880,3 +2880,43 @@ a.cz-card:hover, .cz-card[href]:hover, .cz-venture:hover, .cz-kpi:hover { box-sh
 @media (prefers-reduced-motion: reduce) { .cz-hx-hero-img { animation: none; } .cz-hx-bento a, .cz-hx-logos a, .cz-hx-btn { transition: none; } .cz-hx-bento a:hover, .cz-hx-btn:hover { transform: none; } }
 .cz-hx-hero::after { background: linear-gradient(90deg, rgba(1,18,44,.82) 0%, rgba(1,18,44,.55) 45%, rgba(1,18,44,.12) 80%), linear-gradient(180deg, rgba(1,18,44,0) 55%, rgba(1,18,44,.7) 100%); }
 .cz-hx-bento { grid-auto-flow: dense; }
+
+/* ---------- JOIN: any industry wizard + collaboration board ---------- */
+.cz-join-hero { max-width: 860px; }
+.cz-join-hero h1 { margin: 0; font-size: clamp(30px, 4.6vw, 52px); line-height: 1.08; font-weight: 600; letter-spacing: -0.02em; }
+.cz-join-how { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.cz-join-how li { background: #fff; border: 1px solid #E1E3E1; border-radius: 16px; padding: 18px; }
+.cz-join-how li span { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #D6E2F5; color: #011E48; font-weight: 600; margin-right: 8px; }
+.cz-join-how li p { margin: 8px 0 0; color: #444746; }
+.cz-join-steps { list-style: none; padding: 0; margin: 0 0 20px; display: flex; flex-wrap: wrap; gap: 8px; }
+.cz-join-steps button { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #C4C7C5; background: #fff; color: #1F1F1F; border-radius: 999px; padding: 6px 14px 6px 6px; font: inherit; cursor: pointer; }
+.cz-join-steps button:disabled { cursor: default; color: #5E5E5E; }
+.cz-join-steps button span { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #E9EEF6; font-size: 13px; font-weight: 600; }
+.cz-join-steps li[aria-current="step"] button { background: #D6E2F5; border-color: #D6E2F5; color: #011E48; font-weight: 600; }
+.cz-join-steps li.done button span { background: #2E7D32; color: #fff; }
+.cz-join h2 { margin: 0 0 6px; }
+.cz-join-grid { display: grid; gap: 10px; margin-top: 16px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.cz-join-tile { text-align: left; min-height: 56px; border: 1px solid #C4C7C5; border-radius: 12px; background: #fff; color: #1F1F1F; padding: 12px 14px; font: inherit; font-weight: 500; cursor: pointer; transition: background .15s, border-color .15s; }
+.cz-join-tile:hover { background: #F1F4F9; }
+.cz-join-tile[aria-pressed="true"] { background: #D6E2F5; border-color: #011E48; color: #011E48; }
+.cz-join-intents { display: grid; gap: 10px; margin-top: 16px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.cz-join-intent { display: flex; gap: 12px; text-align: left; border: 1px solid #C4C7C5; border-radius: 16px; background: #fff; color: #1F1F1F; padding: 14px; font: inherit; cursor: pointer; }
+.cz-join-intent strong { display: block; font-weight: 600; }
+.cz-join-intent small { display: block; margin-top: 4px; color: #444746; font-size: 14px; line-height: 1.4; }
+.cz-join-intent[aria-pressed="true"] { background: #EAF4EA; border-color: #2E7D32; }
+.cz-join-ic { flex: none; display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #E9EEF6; color: #011E48; }
+.cz-join-intent[aria-pressed="true"] .cz-join-ic { background: #2E7D32; color: #fff; }
+.cz-join-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.cz-join-summary { margin: 12px 0 16px; padding-left: 20px; }
+.cz-join-summary li { margin: 4px 0; }
+.cz-board-head { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; background: #fff; border: 1px solid #E1E3E1; border-radius: 16px; padding: 20px; }
+.cz-board-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.cz-board-card { display: flex; flex-direction: column; gap: 6px; }
+.cz-board-card h3 { margin: 8px 0 0; font-size: 18px; }
+.cz-board-card p { margin: 0; }
+.cz-board-stat strong { font-size: 22px; color: #011E48; }
+.cz-board-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 10px; }
+.cz-board-list { list-style: none; padding: 0; margin: 0; }
+.cz-board-list li { padding: 12px 0; border-top: 1px solid #E1E3E1; }
+.cz-board-list li:first-child { border-top: 0; }
+.cz-board-why { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
