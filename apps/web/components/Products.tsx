@@ -9,6 +9,8 @@ import { api } from '@/lib/api';
 import { useMutation } from '@/lib/hooks';
 
 export type Product = Omit<Venture, 'roles' | 'rewardNote'>;
+export interface ConnectorItem { id: string; type: string; title: string; subtitle: string }
+export interface ConnectorView { kind: string; module: string; text: string; itemPrompt: string | null; member: { label: string; href: string }; stats: { label: string; value: number }[]; items: ConnectorItem[] }
 
 /** Directory order: the groups people look for first. */
 export const PRODUCT_GROUP_ORDER = ['solar', 'ev', 'power_equipment', 'infrastructure', 'real_estate', 'local_commerce', 'technology', 'financial_services', 'employment', 'education', 'media', 'social_impact', 'agri_food', 'consulting'];
@@ -74,7 +76,7 @@ export const NEXT_INTEGRATION: Record<string, { title: string; text: string }> =
   ugrow: { title: 'Launch', text: 'Entrepreneur launches backed by the partner network.' },
 };
 
-export function worksWith(p: Product & { showcase?: { kind: string } | null }): { title: string; text: string; icon: string; status: 'connected' | 'link_only' | 'not_connected' | 'next'; href?: string }[] {
+export function worksWith(p: Product & { showcase?: { kind: string } | null; connector?: ConnectorView | null }): { title: string; text: string; icon: string; status: 'connected' | 'link_only' | 'not_connected' | 'next'; href?: string }[] {
   const list: ReturnType<typeof worksWith> = [
     { title: 'COLLABIZ enquiries', text: `Messages from this page go straight to the ${p.name} team in COLLABIZ, with a reference number for you.`, icon: '✉', status: 'connected' },
     { title: 'COLLABIZ partner network', text: p.open ? `Verified businesses can ask to promote ${p.name} and receive its offers.` : `Partners can promote ${p.name} once it opens to partners.`, icon: '⇄', status: p.open ? 'connected' : 'not_connected' },
@@ -87,11 +89,12 @@ export function worksWith(p: Product & { showcase?: { kind: string } | null }): 
   if (p.showcase?.kind === 'courses') list.push({ title: 'COLLABIZ learning', text: 'Courses on this page are the published COLLABIZ courses, with certificates on completion.', icon: '🎓', status: 'connected' });
   const m = MODULE_FOR[p.slug];
   if (m && !(SOLAR_LEAD_SOURCES as readonly string[]).includes(p.slug) && !(m === 'property' && p.showcase)) list.push({ ...MODULE_LINKS[m], status: 'connected' });
-  const ml = MEMBER_LINKS[p.slug];
+  if (p.connector && p.connector.kind !== 'micro') list.push({ title: `COLLABIZ ${p.connector.module}`, text: p.connector.text, icon: '⇆', status: 'connected', href: p.connector.member.href });
+  const ml = p.connector ? undefined : MEMBER_LINKS[p.slug];
   if (ml && !list.some((x) => x.title === ml.title)) list.push({ title: ml.title, text: ml.text, icon: '↗', status: 'link_only', href: ml.href });
   const b = appBrand(p.slug);
   if (b?.integration) list.push({ title: `${p.name} platform`, text: b.integration.text, icon: '↗', status: b.integration.status });
-  const n = NEXT_INTEGRATION[p.slug];
+  const n = p.connector ? undefined : NEXT_INTEGRATION[p.slug];
   if (n && !list.some((x) => x.title === n.title)) list.push({ ...n, icon: '→', status: 'next' });
   return list;
 }
@@ -129,15 +132,16 @@ export const STATUS_LABEL = { connected: 'Connected', link_only: 'Link only', no
 export interface ShowProject { id: string; name: string; kind: string; city: string; region: string; reraNumber: string | null; available: number; priceFrom: number | null; priceTo: number | null }
 export interface ShowCourse { id: string; title: string; summary: string; level: string; minutes: number; modules: number }
 
-export function ProductEnquiry({ p, refCode, projects, projectId }: { p: Product; refCode?: string; projects?: ShowProject[]; projectId?: string }) {
+export function ProductEnquiry({ p, refCode, projects, projectId, items, itemId }: { p: Product; refCode?: string; projects?: ShowProject[]; projectId?: string; items?: ConnectorItem[]; itemId?: string }) {
   const kinds: { k: 'customer' | 'partner' | 'interest'; label: string }[] = p.stage === 'live' || p.stage === 'pilot'
     ? [{ k: 'customer', label: 'I want to use it' }, { k: 'partner', label: 'I want to partner' }]
     : [{ k: 'interest', label: 'Notify me at launch' }, { k: 'partner', label: 'I want to partner' }];
-  const [f, setF] = useState({ kind: kinds[0].k as string, name: '', email: '', phone: '', city: '', organization: '', message: '', consent: false, projectId: projectId ?? '', visitDate: '' });
+  const [f, setF] = useState({ kind: kinds[0].k as string, name: '', email: '', phone: '', city: '', organization: '', message: '', consent: false, projectId: projectId ?? '', visitDate: '', itemId: itemId ?? '' });
   useEffect(() => { if (projectId) setF((x) => ({ ...x, projectId })); }, [projectId]);
+  useEffect(() => { if (itemId) setF((x) => ({ ...x, itemId })); }, [itemId]);
   const [hp, setHp] = useState('');
   const [ref, setRef] = useState<string | null>(null);
-  const send = useMutation(async () => { const r = await api.post<{ reference: string }>(`/public/products/${p.slug}/enquiries`, { ...f, projectId: f.projectId || undefined, visitDate: f.visitDate || undefined, website: hp || undefined, ref: refCode }); setRef(r.reference); return r; });
+  const send = useMutation(async () => { const r = await api.post<{ reference: string }>(`/public/products/${p.slug}/enquiries`, { ...f, projectId: f.projectId || undefined, visitDate: f.visitDate || undefined, itemId: f.itemId || undefined, website: hp || undefined, ref: refCode }); setRef(r.reference); return r; });
   if (ref) return <Alert tone="success" title={`Thank you — reference ${ref}`}>The {p.name} team has your message and will reply by email. A confirmation is on its way to {f.email}.</Alert>;
   return (
     <form noValidate className="cz-gp-form" onSubmit={(e) => { e.preventDefault(); send.run(); }}>
@@ -155,6 +159,7 @@ export function ProductEnquiry({ p, refCode, projects, projectId }: { p: Product
         <Select label="Project (optional)" value={f.projectId} onChange={(e) => setF({ ...f, projectId: e.target.value })} options={[{ value: '', label: 'Not sure yet' }, ...projects.map((x) => ({ value: x.id, label: `${x.name} — ${x.city}` }))]} error={send.fieldErrors.projectId} />
         <TextInput label="Preferred site-visit date (optional)" type="date" value={f.visitDate} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setF({ ...f, visitDate: e.target.value })} disabled={!f.projectId} error={send.fieldErrors.visitDate} />
       </div> : null}
+      {items?.length ? <Select label="About (optional)" value={f.itemId} onChange={(e) => setF({ ...f, itemId: e.target.value })} options={[{ value: '', label: 'General enquiry' }, ...items.map((x) => ({ value: x.id, label: x.title }))]} error={send.fieldErrors.itemId} /> : null}
       {f.kind === 'partner' && <TextInput label="Company (optional)" autoComplete="organization" value={f.organization} onChange={(e) => setF({ ...f, organization: e.target.value })} />}
       <TextArea label="How can we help?" rows={4} value={f.message} onChange={(e) => setF({ ...f, message: e.target.value })} error={send.fieldErrors.message} />
       <label className="cz-hp" aria-hidden="true">Website<input tabIndex={-1} autoComplete="off" value={hp} onChange={(e) => setHp(e.target.value)} /></label>
@@ -261,5 +266,24 @@ export function CourseShowcase({ items }: { items: ShowCourse[] }) {
         <Link className="cz-btn cz-btn-secondary cz-btn-sm" href={`/learning/assessments/${c.id}`}>Start learning</Link>
       </li>
     ))}</ul>
+  );
+}
+
+/** Wave 3: live data from the COLLABIZ module a business runs on, with "ask about this" on listed items. */
+export function ConnectorPanel({ c, onAsk }: { c: ConnectorView; onAsk: (id: string) => void }) {
+  return (
+    <div className="cz-stack" style={{ gap: 12 }} data-connector={c.kind}>
+      <p className="cz-muted" style={{ margin: 0 }}>{c.text}</p>
+      <div className="cz-gp-stats">{c.stats.map((s) => <div key={s.label}><strong>{s.value.toLocaleString('en-IN')}</strong><span>{s.label}</span></div>)}</div>
+      {c.items.length > 0 ? (
+        <ul className="cz-gp-list">{c.items.map((i) => (
+          <li key={i.id} data-connector-item={i.id}>
+            <div><strong>{i.title}</strong><p>{i.subtitle}</p></div>
+            <Button size="sm" variant="secondary" onClick={() => onAsk(i.id)}>{c.itemPrompt ?? 'Ask about this'}</Button>
+          </li>
+        ))}</ul>
+      ) : ['capacity', 'offers', 'energy', 'powertek'].includes(c.kind) ? <p className="cz-muted">Nothing is listed right now. New listings appear here as members publish them.</p> : null}
+      <p style={{ margin: 0 }}><a href={c.member.href}>{c.member.label} (members) →</a></p>
+    </div>
   );
 }

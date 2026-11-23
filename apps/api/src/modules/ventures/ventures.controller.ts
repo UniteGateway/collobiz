@@ -26,6 +26,7 @@ import { AuditService } from '../../common/audit.service';
 import { MailService } from '../../common/adapters';
 import { randomDigits } from '../../common/crypto';
 import { SolarModule, SolarService } from '../solar/solar.controller';
+import { ConnectorService } from './connectors';
 
 type Venture = typeof uniteVentures.$inferSelect;
 /** Unite products whose pages show live data from a COLLABIZ module. */
@@ -46,6 +47,8 @@ export const BusinessEnquirySchema = z.object({
   projectId: z.string().uuid().optional().or(z.literal('').transform(() => undefined)),
   visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date').optional().or(z.literal('').transform(() => undefined)),
   ref: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{4,12}$/).optional().or(z.literal('').transform(() => undefined)),
+  /** Wave 3: the listed item (capacity, offer, energy project, product) the visitor is asking about. */
+  itemId: z.string().uuid().optional().or(z.literal('').transform(() => undefined)),
 });
 const EnquiryStatusSchema = z.object({ status: z.enum(['open', 'handled']) });
 const UpdateSchema = z.object({
@@ -90,7 +93,7 @@ export class VenturesService {
 @ApiTags('ventures')
 @Controller()
 export class VenturesController {
-  constructor(@InjectDb() private db: Db, private svc: VenturesService, private audit: AuditService, private mail: MailService, private solar: SolarService) {}
+  constructor(@InjectDb() private db: Db, private svc: VenturesService, private audit: AuditService, private mail: MailService, private solar: SolarService, private connectors: ConnectorService) {}
 
   // ---------- Public ----------
   @Public()
@@ -126,7 +129,8 @@ export class VenturesController {
       : SHOWCASE[slug] === 'courses' ? { kind: 'courses' as const, items: (await this.db.select().from(courses).where(eq(courses.status, 'published')).orderBy(courses.level, courses.title).limit(9))
         .map((c) => ({ id: c.id, title: c.title, summary: c.summary, level: c.level, minutes: c.minutes, modules: (c.modules as unknown[]).length })) }
       : null;
-    return { ...v, work, showcase, related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
+    const connector = await this.connectors.forPage(slug);
+    return { ...v, work, showcase, connector, related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
   }
 
   /** Enquiry from a business page. Stored with the business; its operating company (or Unite admins) is notified. */
@@ -148,19 +152,29 @@ export class VenturesController {
       }
       details = { projectId: project.id, projectName: project.name, visitDate: b.visitDate ?? null };
     }
+    let item: Awaited<ReturnType<ConnectorService['find']>> = null;
+    if (b.itemId) {
+      item = await this.connectors.find(slug, b.itemId);
+      if (!item) throw new BadRequestException('Choose one of the items listed on this page');
+    }
     const reference = `BIZ-${new Date().getFullYear()}-${randomDigits(6)}`;
     // Partner attribution: only a partner's personal code counts (house and customer codes do not).
     const [code] = b.ref ? await this.db.select().from(solarReferralCodes).where(eq(solarReferralCodes.code, b.ref)).limit(1) : [];
     const introducer = code?.ownerUserId ? code : null;
-    await this.db.insert(enquiries).values({ reference, name: b.name, email: b.email, organization: b.organization, topic: 'business', message: b.message, ventureId: r.v.id, kind: b.kind, phone: b.phone, city: b.city, referralCodeId: introducer?.id ?? null, details });
+    await this.db.insert(enquiries).values({ reference, name: b.name, email: b.email, organization: b.organization, topic: 'business', message: b.message, ventureId: r.v.id, kind: b.kind, phone: b.phone, city: b.city, referralCodeId: introducer?.id ?? null, details: item ? { ...(details ?? {}), item: { type: item.type, id: item.id, title: item.title } } : details });
     if (introducer?.ownerOrgId) {
       const team = await this.db.select({ userId: memberships.userId }).from(memberships).where(and(eq(memberships.organizationId, introducer.ownerOrgId), eq(memberships.status, 'active')));
       if (team.length) await this.db.insert(notifications).values(team.map((m) => ({ userId: m.userId, kind: 'venture', title: `Your ${r.v.name} link brought an enquiry`, body: `${b.name.split(' ')[0]}${b.city ? ` · ${b.city}` : ''} (${reference}). It is recorded as introduced by you.`, link: `/ventures/${r.v.slug}` })));
     }
+    // Introduction to the item's owner: what was asked about and from where — never the visitor's contact details.
+    if (item?.ownerOrgId) {
+      const team = await this.db.select({ userId: memberships.userId }).from(memberships).where(and(eq(memberships.organizationId, item.ownerOrgId), eq(memberships.status, 'active')));
+      if (team.length) await this.db.insert(notifications).values(team.map((m) => ({ userId: m.userId, kind: 'venture', title: `${r.v.name}: interest in “${item!.title}”`, body: `A visitor${b.city ? ` from ${b.city}` : ''} asked about your listing through ${r.v.name} (${reference}). The ${r.v.name} team will introduce you.`, link: '/notifications' })));
+    }
     const label = details?.visitDate ? 'site-visit request' : b.kind === 'partner' ? 'partnership enquiry' : b.kind === 'interest' ? 'registration of interest' : 'enquiry';
     await this.mail.send('email', b.email, `${r.v.name} ${label} ${reference}`, `Thank you ${b.name}. ${r.v.name} received your ${label} (${reference}). The team will reply by email.`);
     const users = await this.svc.deciders(r.v);
-    if (users.length) await this.db.insert(notifications).values(users.map((u) => ({ userId: u, kind: 'venture', title: `New ${label} for ${r.v.name}`, body: `${b.name}${b.city ? ` · ${b.city}` : ''}${details ? ` · ${details.projectName}${details.visitDate ? ` on ${details.visitDate}` : ''}` : ''}: ${b.message.slice(0, 160)}`, link: `/ventures/${r.v.id}` })));
+    if (users.length) await this.db.insert(notifications).values(users.map((u) => ({ userId: u, kind: 'venture', title: `New ${label} for ${r.v.name}`, body: `${b.name}${b.city ? ` · ${b.city}` : ''}${item ? ` · about “${item.title}”` : ''}${details ? ` · ${details.projectName}${details.visitDate ? ` on ${details.visitDate}` : ''}` : ''}: ${b.message.slice(0, 160)}`, link: `/ventures/${r.v.id}` })));
     return { reference };
   }
 
@@ -365,5 +379,5 @@ export class VenturesController {
   }
 }
 
-@Module({ imports: [SolarModule], controllers: [VenturesController], providers: [VenturesService] })
+@Module({ imports: [SolarModule], controllers: [VenturesController], providers: [VenturesService, ConnectorService] })
 export class VenturesModule {}

@@ -130,7 +130,7 @@ export const MICRO_KINDS = [
 export const microKindLabel = (c: string) => MICRO_KINDS.find((x) => x.code === c)?.label ?? c;
 export const MICRO_MIN_RS = 100; export const MICRO_MAX_RS = 50_000;
 /** Unite products whose pages post work as micro-contracts. */
-export const MICRO_SOURCES = ['xpert', 'partimer', 'zuppo'] as const;
+export const MICRO_SOURCES = ['xpert', 'partimer', 'zuppo', 'wakin', 'vidplay', '99films', 'moveon-video'] as const;
 export const MicroContractSchema = z.object({
   source: z.enum(MICRO_SOURCES).nullable().optional(),
   kind: z.enum(MICRO_KINDS.map((k) => k.code) as unknown as [string, ...string[]]),

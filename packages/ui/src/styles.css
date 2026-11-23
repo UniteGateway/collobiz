@@ -2938,3 +2938,11 @@ a.cz-card:hover, .cz-card[href]:hover, .cz-venture:hover, .cz-kpi:hover { box-sh
 .cz-club-code { display: grid; gap: 8px; grid-template-columns: minmax(180px, auto) 1fr; align-items: center; }
 .cz-club-code strong { font-size: 26px; letter-spacing: .04em; color: #011E48; }
 @media (max-width: 640px) { .cz-club-code { grid-template-columns: 1fr; } }
+/* ---------- Wave 3 connector panel on product pages ---------- */
+.cz-gp-stats { display: flex; flex-wrap: wrap; gap: 12px; }
+.cz-gp-stats div { background: #fff; border: 1px solid #E1E3E1; border-radius: 16px; padding: 14px 18px; min-width: 160px; }
+.cz-gp-stats strong { display: block; font-size: 28px; font-weight: 600; color: #011E48; }
+.cz-gp-stats span { color: #444746; font-size: 14px; }
+.cz-gp-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.cz-gp-list li { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: #fff; border: 1px solid #E1E3E1; border-radius: 12px; padding: 12px 14px; }
+.cz-gp-list p { margin: 2px 0 0; color: #444746; font-size: 14px; }

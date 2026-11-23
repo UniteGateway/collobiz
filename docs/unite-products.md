@@ -99,3 +99,48 @@ Migration 0056 adds `enquiries.details` only. Tests:
 - `solar.e2e.ts`: 7/7.
 - Browser suite "Wave 2 · …".
 - Accessibility check on the changed pages.
+
+## Wave 3 — the 17 link-only businesses are connected (23 Nov 2026)
+
+Each page now shows **live data from its COLLABIZ module**, and visitors' requests reach the right people. The definitions are in `packages/types/src/connectors.ts`, and the server side is in `apps/api/src/modules/ventures/connectors.ts`.
+
+**Businesses whose pages list items a visitor can ask about.** The visitor picks a listing and the request is stored with it. The listing's owner is told that a visitor asked, with the city and reference, but never the visitor's contact details. The business team makes the introduction.
+
+| Business | Module | What the page shows |
+|---|---|---|
+| EV Saathi | Capacity calendar | Open vehicle and driver listings |
+| ELWIN | Capacity calendar | Vehicles and charging or service equipment |
+| SOCPOST | Business offers | Live member offers to promote |
+| PRIZO | Business offers | Live deals |
+| Unite Biofix | Energy · Green Park | Live projects and buyers that are not marked confidential |
+| Unite Aqua | Powertek products | Matching public catalogue items |
+
+**Businesses that post work as micro-contracts.** Work posted through these pages becomes a real micro-contract tagged with the business as its source. The page shows how many jobs are open and how many are completed.
+
+| Business | Work posted |
+|---|---|
+| WAKIN | Jobs |
+| VIDPLAY | Creator campaigns |
+| 99Films | Film crew and post-production work |
+| MoveOn.video | Video work |
+
+**Businesses whose pages show live counts only.** Members act directly in the module.
+
+| Business | Module | Count shown |
+|---|---|---|
+| Help Today | Community | Questions and general posts |
+| Goodtime.live | Community | Events |
+| WITHME | Community | Events and general posts |
+| WEEKEND | Announcements | Announcements published |
+| iBrain | ACTION OS | Follow-ups completed |
+| U meet | Meetings | Meetings |
+| Nano Bazar | Business QR | Live Business QR pages |
+
+**Unite admins** see which listing a visitor asked about on the business's enquiries.
+
+**Status now:**
+- 37 businesses connected (20 earlier plus these 17).
+- **BIZO** is waiting for its API documentation and credentials.
+- **10 regulated businesses** stay locked until their clearances are recorded.
+
+Tests: `apps/api/test/connectors.e2e.ts` and the browser suite "Wave 3".

@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Wave 3 — 17 Unite businesses connected (2026-11-23)
+- Live module feeds on the pages of EV Saathi, ELWIN, SOCPOST, PRIZO, Unite Biofix, Unite Aqua (items a visitor can ask about, routed to the business and the listing owner without contact details); WAKIN, VIDPLAY, 99Films and MoveOn post real micro-contracts; Help Today, Goodtime, WITHME, WEEKEND, iBrain, U meet and Nano Bazar show live counts from Community, Announcements, ACTION OS, Meetings and Business QR. Admins see the listing on each enquiry. No business is "link only" any more.
+
 ### Industry Club: virtual agreements, legal drafts, Terms and Conditions, global reach (2026-11-23)
 - Five versioned legal drafts (Club terms, Brand Licence & OEM Supply, mutual NDA, international distribution, collaboration MoU), with a counsel-approval record per version and a pilot-draft notice until approved.
 - The brand licence is issued on Unite approval and signed online by both parties; the product is listed only after both sign. Members send each other agreements by club code, in any country, with a choice of law and forum.

@@ -5,7 +5,7 @@ _Prepared 23 Nov 2026. Timelines are estimates and assume the decisions and acco
 **Where we are**
 - **Built:** about 100k lines of code, about 465 screens, 939 API endpoints and 245 tables.
 - **Tested:** about 750 server and unit tests, 76 browser journeys, accessibility clean.
-- **Unite businesses:** 20 of the 48 are fully connected, 17 are link-only, 1 needs an external API (BIZO) and 10 are waiting for regulatory clearance.
+- **Unite businesses:** 37 of the 48 are connected (Wave 3 finished on 23 Nov 2026), 1 needs an external API (BIZO) and 10 are waiting for regulatory clearance.
 - **Not yet in place:** deployment, real data, live third-party services, a security audit and real users.
 
 **Owners:** **Dev** = engineering (can be done in this project). **Unite** = decisions, accounts, legal or people that only Unite Group can provide.
@@ -33,7 +33,7 @@ These block later phases, so they come first.
 
 | # | Work | Done when |
 |---|---|---|
-| 1.1 | **Wave 3: connect the 17 link-only businesses** — 99Films/MoveOn/Unite Biofix → data rooms and contracts; EV Saathi/ELWIN/WITHME → capacity bookings; WEEKEND → announcements; Help Today/Goodtime → community; Nano Bazar → Business QR storefronts; SOCPOST/VIDPLAY/PRIZO → business offers; iBrain → ACTION OS; U meet → meetings; WAKIN → teams; Unite Aqua → Powertek products | Each shows "Connected" with tests |
+| 1.1 | ✅ **Done 23 Nov 2026 — Wave 3: connect the 17 link-only businesses** — 99Films/MoveOn/Unite Biofix → data rooms and contracts; EV Saathi/ELWIN/WITHME → capacity bookings; WEEKEND → announcements; Help Today/Goodtime → community; Nano Bazar → Business QR storefronts; SOCPOST/VIDPLAY/PRIZO → business offers; iBrain → ACTION OS; U meet → meetings; WAKIN → teams; Unite Aqua → Powertek products | Each shows "Connected" with tests |
 | 1.2 | **BIZO** single sign-on and data sync | After 0.8; tests pass |
 | 1.3 | **Mobile app parity** for recent features: business pages, solar quote, partner links, GO EB5 portal, the Google-style restyle | Mobile E2E pass; Android and iOS builds |
 | 1.4 | **Real data import** — replace demo data with Unite's master data (0.9), using the existing Excel/CSV/Tally importers; remove the demo banner in production | Data reviewed by Unite |

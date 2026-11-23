@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { appBrand } from '@collabiz/types';
 import { ButtonLink, EmptyState, ErrorState, Icon, LoadingState } from '@collabiz/ui';
 import { VentureMark, stageLabel } from '@/components/Ventures';
-import { CourseShowcase, ProductEnquiry, ProductTile, ProjectShowcase, STATUS_LABEL, SolarLeadForm, WorkPanel, type ShowCourse, type ShowProject, groupName, stagePill, worksWith, type Product } from '@/components/Products';
+import { ConnectorPanel, CourseShowcase, ProductEnquiry, type ConnectorView, ProductTile, ProjectShowcase, STATUS_LABEL, SolarLeadForm, WorkPanel, type ShowCourse, type ShowProject, groupName, stagePill, worksWith, type Product } from '@/components/Products';
 import { SOLAR_LEAD_SOURCES, productSubdomain } from '@collabiz/types';
 import { useEffect, useState } from 'react';
 import { venturePhoto } from '@/lib/photos';
@@ -12,7 +12,7 @@ import { isNotFound, useQuery } from '@/lib/hooks';
 
 const IC: Record<string, string> = { doc: 'documents', globe: 'map', search: 'search', sparkle: 'award', chart: 'earnings', grid: 'package', shield: 'verify', flag: 'bookmark', people: 'users', clock: 'clock', bell: 'bell', check: 'check', map: 'location' };
 
-type P = Product & { showcase?: { kind: 'property'; items: ShowProject[] } | { kind: 'courses'; items: ShowCourse[] } | null; work?: { open: number; done: number } | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
+type P = Product & { showcase?: { kind: 'property'; items: ShowProject[] } | { kind: 'courses'; items: ShowCourse[] } | null; work?: { open: number; done: number } | null; connector?: ConnectorView | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
 
 /** A Unite product's own page: overview, features, what it works with, and an enquiry form wired into COLLABIZ. */
 export default function ProductPage() {
@@ -22,6 +22,7 @@ export default function ProductPage() {
   const [ref, setRef] = useState<string | undefined>();
   const [mode, setMode] = useState<'solar' | 'general'>('solar');
   const [visit, setVisit] = useState<string | undefined>();
+  const [ask, setAsk] = useState<string | undefined>();
   useEffect(() => { const r = new URLSearchParams(window.location.search).get('ref'); if (r && /^[A-Za-z0-9]{4,12}$/.test(r)) setRef(r.toUpperCase()); }, []);
   if (q.loading) return <div className="cz-gp-body"><LoadingState /></div>;
   if (q.error) return <div className="cz-gp-body">{isNotFound(q.error)
@@ -106,6 +107,13 @@ export default function ProductPage() {
           </section>
         )}
 
+        {p.connector && p.connector.kind !== 'micro' && (
+          <section className="cz-gp-section" aria-labelledby="live-h" id="live">
+            <h2 id="live-h">Live from COLLABIZ {p.connector.module}</h2>
+            <ConnectorPanel c={p.connector} onAsk={(id) => { setAsk(id); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }} />
+          </section>
+        )}
+
         {p.work && (
           <section className="cz-gp-section" aria-labelledby="work-h">
             <h2 id="work-h">Post or find work</h2>
@@ -132,7 +140,7 @@ export default function ProductPage() {
               </div>
               {mode === 'solar' ? <SolarLeadForm p={p} refCode={ref} /> : <ProductEnquiry p={p} refCode={ref} />}
             </div>
-          ) : <ProductEnquiry p={p} refCode={ref} projects={p.showcase?.kind === 'property' ? p.showcase.items : undefined} projectId={visit} />}
+          ) : <ProductEnquiry p={p} refCode={ref} projects={p.showcase?.kind === 'property' ? p.showcase.items : undefined} projectId={visit} items={p.connector?.items} itemId={ask} />}
         </section>
         <p className="cz-muted cz-gp-note">{p.stage === 'live' ? '' : `${p.name} is at an early stage and may be available only in some areas. `}Nothing on this page is an offer of investment, credit or financial products, and no earnings are guaranteed.</p>
       </div>

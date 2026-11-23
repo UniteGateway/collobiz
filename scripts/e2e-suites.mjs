@@ -3308,3 +3308,31 @@ suites.push({
     await shot('club-power');
   },
 });
+
+suites.push({
+  name: 'Wave 3 · the 17 link-only businesses show live COLLABIZ data; a visitor asks about a listed vehicle',
+  run: async ({ page, WEB, expect, shot, label }) => {
+    await page.goto(WEB + '/businesses/ev-saathi');
+    await page.getByRole('heading', { name: 'Live from COLLABIZ Capacity calendar' }).waitFor();
+    const first = page.locator('[data-connector-item]').first();
+    await first.waitFor();
+    const title = (await first.locator('strong').textContent()).trim();
+    await shot('wave3-ev-saathi');
+    await first.getByRole('button', { name: 'Ask about this vehicle or driver' }).click();
+    const form = page.locator('#contact');
+    expect((await form.getByLabel('About (optional)').locator('option:checked').textContent()).trim() === title, 'the request points at the listing the visitor chose');
+    await form.getByLabel('Your name').fill('Lakshmi Devi');
+    await form.getByLabel('Email').fill(`lakshmi.${label}@example.com`);
+    await form.getByLabel('How can we help?').fill('I need this vehicle with a driver for two weeks next month.');
+    await form.getByLabel(/I agree that Unite Group may contact me/).check();
+    await form.getByRole('button', { name: 'Send' }).click();
+    await page.getByText(/Thank you — reference BIZ-\d{4}-\d{6}/).waitFor();
+    if (label !== 'desktop') return;
+    for (const slug of ['ev-saathi', 'elwin', 'socpost', 'prizo', 'unite-biofix', 'unite-aqua', 'help-today', 'goodtime-live', 'withme', 'weekend', 'ibrain', 'u-meet', 'nano-bazar', 'wakin', 'vidplay', '99films', 'moveon-video']) {
+      await page.goto(`${WEB}/businesses/${slug}`);
+      await page.getByRole('heading', { level: 1 }).waitFor();
+      expect(await page.locator('.cz-gp-int li', { hasText: 'Link only' }).count() === 0, `${slug} has no "Link only" integrations left`);
+      expect(await page.locator('[data-connector], #work-h').count() > 0, `${slug} shows live COLLABIZ data`);
+    }
+  },
+});
