@@ -14,7 +14,7 @@ export default function UMeetPage() {
   const now = Date.now();
   const upcoming = (q.data ?? []).filter((m) => m.status === 'scheduled' && new Date(m.endsAt).getTime() >= now).sort((a, b) => +new Date(a.startsAt) - +new Date(b.startsAt)).slice(0, 6);
   return (
-    <Screen title="U meet" header={false}>
+    <Screen page={{ key: 'umeet', title: 'U meet', access: 'partner' }} header={false}>
       <div className="cz-umeet-hero" data-screen="umeet">
         <div>
           <p className="cz-ph-eyebrow" style={{ color: '#E0B8FF' }}>U meet</p>
