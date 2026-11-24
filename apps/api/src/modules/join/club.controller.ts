@@ -17,6 +17,8 @@ import { z } from 'zod';
 import {
   disputeText, marketsLabel, CLUB_BRAND_OPTIONS, CLUB_POWER_NEEDS, CLUB_POWER_STATUS, CLUB_PRODUCT_STATUS, ClubPowerRequestSchema, ClubPowerStatusSchema, ClubProductSchema, ClubReviewSchema, sectorName, type SectorCode,
 } from '@collabiz/types';
+import { PT_CONTRIBUTION_KINDS, PT_INTERESTS, PT_SOURCES, type PtContributionKind, type PtInterest, type PtSource } from '@collabiz/types';
+import { ptContributions, ptEnergyNeeds, ptProfiles } from '../../db/schema';
 import { InjectDb, type Db } from '../../db/client';
 import { catalogItems, clubPowerRequests, clubProducts, collabJoinProfiles, groupCompanies, memberships, notifications, organizations } from '../../db/schema';
 import { body } from '../../common/http';
@@ -207,7 +209,18 @@ export class ClubController {
       .innerJoin(organizations, eq(organizations.id, collabJoinProfiles.orgId)).where(and(eq(collabJoinProfiles.slug, slug), eq(collabJoinProfiles.micrositePublic, true))).limit(1);
     if (!m) throw new NotFoundException('This business page is not public');
     const products = await this.db.select().from(clubProducts).where(and(eq(clubProducts.orgId, m.j.orgId), eq(clubProducts.status, 'approved')));
+    // POWERTRADE section: only what the business chose to share; never bills, tariffs, bank details or PPA terms.
+    const [pt] = await this.db.select().from(ptProfiles).where(and(eq(ptProfiles.orgId, m.j.orgId), eq(ptProfiles.shareProducts, true))).limit(1);
+    const ptContrib = pt ? await this.db.select().from(ptContributions).where(and(eq(ptContributions.orgId, m.j.orgId), eq(ptContributions.active, true))) : [];
+    const [ptNeed] = pt?.shareEnergySummary ? await this.db.select().from(ptEnergyNeeds).where(eq(ptEnergyNeeds.orgId, m.j.orgId)).orderBy(desc(ptEnergyNeeds.createdAt)).limit(1) : [];
+    const band = (u: number) => (u >= 1_000_000 ? 'over 10 lakh units a month' : u >= 100_000 ? '1–10 lakh units a month' : 'under 1 lakh units a month');
+    const powertrade = pt ? {
+      industry: pt.industry, interests: pt.interests.map((i) => PT_INTERESTS[i as PtInterest] ?? i),
+      contributions: ptContrib.map((c) => ({ kind: PT_CONTRIBUTION_KINDS[c.kind as PtContributionKind] ?? c.kind, title: c.title, capacity: c.capacity, locations: c.locations, exportCapable: c.exportCapable })),
+      energy: ptNeed ? { sources: ptNeed.preferredSources.map((x) => PT_SOURCES[x as PtSource] ?? x), size: band(ptNeed.monthlyUnits), rtc: ptNeed.rtcNeeded } : null,
+    } : null;
     return {
+      powertrade,
       name: m.name, verified: m.verified === 'verified', sector: m.j.sector, sectorName: sectorName(m.j.sector as SectorCode), city: m.j.city, about: m.j.about,
       products: products.map((p) => ({ name: p.name, category: p.category, brand: brandLabel(p.brandOption), powerFree: p.powerFree, powerOffer: p.powerOffer, description: p.description })),
     };

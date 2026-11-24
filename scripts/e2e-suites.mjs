@@ -3682,3 +3682,68 @@ suites.push({
   },
 });
 
+
+suites.push({
+  name: 'POWERTRADE · steel manufacturer joins, compares power options, finds matches, proposes Product-for-Power; calculator keeps money apart',
+  run: async ({ page, WEB, expect, shot, label }) => {
+    await webLogin(page, WEB, 'vikram@greenbuild.example');
+    await page.goto(WEB + '/powertrade');
+    await page.getByRole('heading', { level: 1, name: /Do Business\. Save on Power\. Grow Together\./ }).waitFor();
+    if (label !== 'desktop') { await shot('home'); return; }
+    await page.getByRole('link', { name: 'Join POWERTRADE' }).click();
+    const id = page.locator('[data-form="pt-identity"]');
+    await id.getByLabel('Industry').fill('Steel manufacturer');
+    await id.getByLabel('State').selectOption('Maharashtra');
+    for (const t of ['Buy discounted power', 'Supply Unite projects', 'Find customers']) await id.getByText(t, { exact: true }).click();
+    await id.getByRole('button', { name: 'Save and continue' }).click();
+    const en = page.locator('[data-form="pt-energy"]');
+    await en.getByLabel('Monthly units (kWh)').fill('1500000');
+    await en.getByLabel('Average tariff (₹/kWh, all-in)').fill('8.5');
+    await en.getByLabel('Contract demand (kVA)').fill('3000');
+    await en.getByLabel('Supply voltage (kV)').fill('33');
+    await en.getByText('Present bill ≈').waitFor();
+    await en.getByRole('button', { name: 'Save and continue' }).click();
+    const co = page.locator('[data-form="pt-contribution"]');
+    await co.getByLabel('What it is').fill('Solar module mounting structures');
+    await co.getByLabel('Keywords buyers search for').fill('steel, mounting, structure');
+    await co.getByRole('button', { name: 'Add' }).click();
+    await page.locator('[data-contribution="Solar module mounting structures"]').waitFor();
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.locator('[data-pt-activated="true"]').waitFor();
+    await shot('join');
+    // Compare power options
+    await page.goto(WEB + '/powertrade/power');
+    await page.locator('[data-form="pt-compare"]').getByLabel('Plant location (state)').selectOption('MH');
+    await page.locator('[data-form="pt-compare"]').getByLabel('Plant capacity (MW AC)').fill('8');
+    await page.getByRole('button', { name: 'Compare' }).click();
+    await page.locator('[data-arrangement="third_party"][data-eligible="true"]').waitFor();
+    expect(await page.locator('[data-arrangement="group_captive"][data-eligible="false"]').count() === 1, 'group captive needs an equity share before it is eligible');
+    await page.getByText('Indicative comparison').waitFor();
+    await shot('power');
+    // Reverse matching with an example
+    await page.goto(WEB + '/powertrade/matches');
+    await page.getByRole('button', { name: 'Steel manufacturer' }).click();
+    await page.getByRole('button', { name: 'Find my fits' }).click();
+    await page.locator('[data-pt-parsed]').getByText(/15,00,000 units\/month/).waitFor();
+    await page.locator('[data-type="energy"]').first().waitFor();
+    await shot('matches');
+    // Product-for-Power proposal
+    await page.goto(WEB + '/powertrade/collaborations?model=product_for_power');
+    const f = page.locator('[data-form="pt-collab"]');
+    await f.getByLabel('Title').fill('Mounting structures with a separate solar PPA');
+    await f.getByLabel('What each side does').fill('We supply ₹1 Cr of mounting structures under a supply agreement; a ₹5 L rebate is agreed separately; power under its own PPA.');
+    await f.getByLabel('Supply value (₹)').fill('10000000');
+    await f.getByLabel('Separately agreed benefit (₹)').fill('500000');
+    await f.getByLabel('Power tariff in the separate PPA (₹/kWh)').fill('4.2');
+    await f.getByRole('button', { name: 'Save as draft' }).click();
+    await page.waitForURL(/\/powertrade\/collaborations\/[0-9a-f-]+$/);
+    await page.locator('[data-doc="tax_review"]').waitFor();
+    await page.getByRole('button', { name: 'Submitted' }).click();
+    await page.getByText(/Submitted · /).first().waitFor();
+    await shot('collaboration');
+    // Calculator: ₹10 L bill, ₹7.5 L new expense, ₹5 L collected and approved → ₹2.5 L residual
+    await page.goto(WEB + '/powertrade/finance');
+    await page.locator('[data-pt-residual]').getByText('₹2.50 L').waitFor();
+    await shot('finance');
+  },
+});

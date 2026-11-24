@@ -17,7 +17,7 @@ const inr = (minor = 0) => {
   return `₹${Math.round(r).toLocaleString('en-IN')}`;
 };
 
-const GOALS: [string, string][] = [['Sell your products', '/partner-with-unite'], ['Get discounted power', '/club/power'], ['Exchange & barter', '/xchange'], ['Find partners & investors', '/collab'], ['Launch a new business', '/launch']];
+const GOALS: [string, string][] = [['Sell your products', '/partner-with-unite'], ['Get discounted power', '/powertrade/power'], ['Exchange & barter', '/xchange'], ['Find partners & investors', '/collab'], ['Launch a new business', '/launch']];
 const TILES: { label: string; sub: string; href: string; icon: IconName; tone: string }[] = [
   { label: 'Energy & Solar', sub: 'PPA · EPC · Captive', href: '/energy', icon: 'sun', tone: 'blue' },
   { label: 'ROOFZ', sub: 'Rooftop business & leasing', href: '/businesses/roofz', icon: 'roof', tone: 'red' },
@@ -29,7 +29,7 @@ const TILES: { label: string; sub: string; href: string; icon: IconName; tone: s
   { label: 'Investments', sub: 'Equity · JV · Funding', href: '/invest', icon: 'coins', tone: 'rose' },
   { label: 'AI Match', sub: 'Smart partnering', href: '/ai/matching', icon: 'sparkles', tone: 'purple' },
 ];
-const QUICK: [string, string][] = [['I want to buy power', '/club/power'], ['I want to sell my product', '/club/products'], ['I have a rooftop or land', '/businesses/roofz'], ['I am looking for investment', '/invest'], ['I want a business partner', '/collab']];
+const QUICK: [string, string][] = [['I want to buy power', '/powertrade/power'], ['I want to sell my product', '/club/products'], ['I have a rooftop or land', '/businesses/roofz'], ['I am looking for investment', '/invest'], ['I want a business partner', '/collab']];
 const SECTOR_PIC: Record<string, string> = { solar: 'energy-panel-roof', power_equipment: 'industry-engineer', infrastructure: 'build-site-team', real_estate: 'property-tower', local_commerce: 'trade-warehouse', technology: 'tech-data', consulting: 'team-boardroom', ev: 'energy-ev-carport', agri_food: 'growth-seedling', financial_services: 'finance-analysis' };
 const BRANDS: [string, string, string][] = [['Unite Solar', '/brands/sunx.png', '/businesses/sunx'], ['Unite Powertek', '/brands/unite-powertek.png', '/powertek'], ['ROOFZ', '/brands/roofz.png', '/businesses/roofz'], ['PRIZO', '/brands/prizo.png', '/businesses/prizo'], ['LeadDNA', '/brands/leaddna.png', '/businesses/leaddna'], ['UNIECO', '/brands/unieco.png', '/businesses/unieco']];
 

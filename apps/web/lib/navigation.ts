@@ -11,7 +11,7 @@ export const MODULES: Module[] = [
   { key: 'home', label: 'Home', icon: 'home', home: '/dashboard', match: ['/dashboard'] },
   { key: 'dealer', label: 'Sell Unite products', icon: 'briefcase', home: '/dealer', match: ['/dealer'] },
   { key: 'board', label: 'Industry Club', icon: 'sector', home: '/board', match: ['/board', '/club/products', '/club/power', '/club/agreements'], tabs: [['/board', 'My club board'], ['/club/products', 'My products'], ['/club/agreements', 'Agreements'], ['/club/power', 'Buy power']] },
-  { key: 'collab', label: 'Collab', icon: 'teams', home: '/collab', match: ['/collab'], tabs: [['/collab', 'Start'], ['/collab/matches', 'Matches'], ['/collab/requests', 'Requests & deals'], ['/collab/programs', 'Unite programmes'], ['/collab/workspace', 'My collaborations']] },
+  { key: 'collab', label: 'Collab', icon: 'teams', home: '/collab', match: ['/collab'], tabs: [['/collab', 'Start'], ['/powertrade', 'Energy & Business Tie-Ups'], ['/collab/matches', 'Matches'], ['/collab/requests', 'Requests & deals'], ['/collab/programs', 'Unite programmes'], ['/collab/workspace', 'My collaborations']] },
   { key: 'business-offers', label: 'Business Offers', icon: 'briefcase', home: '/business-offers', match: ['/business-offers'], tabs: [['/business-offers', 'Browse'], ['/business-offers/new', 'Publish'], ['/business-offers/mine', 'My offers']] },
   { key: 'opportunities', label: 'Opportunities', icon: 'opportunities', home: '/marketplace', match: ['/marketplace', '/opportunities', '/my/opportunities', '/feed', '/rfq', '/ai/matching', '/offers', '/one', '/radar'],
     tabs: [['/marketplace', 'Browse'], ['/one', 'COLLABIZ ONE'], ['/radar', 'Radar'], ['/offers', 'Offers for you'], ['/ai/matching', 'AI matches'], ['/feed', 'Recommended'], ['/my/opportunities', 'My applications'], ['/marketplace/saved', 'Saved & alerts'], ['/marketplace/categories', 'Categories'], ['/marketplace/map', 'Map']] },
@@ -32,6 +32,8 @@ export const MODULES: Module[] = [
   { key: 'capacity', label: 'Capacity', icon: 'calendar', home: '/capacity', match: ['/capacity'], tabs: [['/capacity', 'Find capacity'], ['/capacity/calendar', 'Calendar'], ['/capacity/mine', 'My capacity & bookings']] },
   { key: 'pools', label: 'Demand pools', icon: 'users', home: '/pools', match: ['/pools'], tabs: [['/pools', 'Open pools'], ['/pools/new', 'Start a pool'], ['/pools/mine', 'My pools & quotes']] },
   { key: 'commit', label: 'Commit', icon: 'contracts', home: '/commit', match: ['/commit'], tabs: [['/commit', 'My commitments'], ['/commit/new', 'New commitment']] },
+  { key: 'powertrade', label: 'POWERTRADE', icon: 'zap', home: '/powertrade', match: ['/powertrade'],
+    tabs: [['/powertrade', 'Overview'], ['/powertrade/power', 'Get discounted power'], ['/powertrade/matches', 'Matches'], ['/powertrade/collaborations', 'My collaborations'], ['/powertrade/finance', 'Finance & savings'], ['/powertrade/join', 'My POWERTRADE profile']] },
   { key: 'energy', label: 'Energy · Green Park', icon: 'value', home: '/energy', match: ['/energy'],
     tabs: [['/energy', 'Marketplace'], ['/energy/map', 'State map'], ['/energy/register', 'Register'], ['/energy/calculator', 'Cost calculator'], ['/energy/traders', 'Licensed traders'], ['/energy/mine', 'My listings & deals']] },
   { key: 'action-os', label: 'My tasks', icon: 'bell', home: '/action-os', match: ['/action-os'],
@@ -96,7 +98,7 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}, eb5?
   const item = (k: string) => { const m = byKey[k]; return { href: m.home, label: m.label, icon: m.icon, children: m.tabs?.filter(([h]) => h !== m.home).map(([href, label]) => ({ href, label })) }; };
   // Everyday things first; the long tail of tools sits in folded groups so the menu stays short.
   const GROUPS: [string, string[], boolean][] = [
-    ['Find & win business', ['opportunities', 'leads', 'business-offers', 'tenders'], false],
+    ['Find & win business', ['opportunities', 'powertrade', 'leads', 'business-offers', 'tenders'], false],
     ['Unite', ['ventures', 'dealer', 'board', 'unite-solar', 'energy', 'powertek'], false],
     ['Money', ['earnings', 'books', 'proof'], false],
     ['Work together', ['collab', 'collaboration', 'projects', 'micro', 'capacity', 'trading', 'pools', 'commit', 'launch', 'invest'], true],
