@@ -36,7 +36,7 @@ export default function VaiOpportunity() {
           <VaiHeader title={o.title} lead={<>{VAI_OPP_TYPES[o.type]} · {o.code} · proposed by {o.proposer}</>}>
             <div className="pt-cta"><OppStatus s={o.status} /> {o.sample && <SampleTag />} <ScoreBadge score={o.score?.result ?? null} />
               {o.mine && o.status === 'draft' && <Button size="sm" onClick={() => submit.run()} loading={submit.pending}>Submit to Unite for review</Button>}
-              {o.venture && <ButtonLink size="sm" href={`/venture-ai/rooms/${o.venture.id}`} variant="accent">Open Venture Room</ButtonLink>}</div>
+              {o.venture && (o.mine || o.staff) && <ButtonLink size="sm" href={`/venture-ai/rooms/${o.venture.id}`} variant="accent">Open Venture Room</ButtonLink>}</div>
           </VaiHeader>
           <VaiNav />
           {o.sample && <Alert tone="info">Sample — a Unite demonstration. Its evidence is assumptions only, and its numbers are illustrative until real quotes and data are added.</Alert>}

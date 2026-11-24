@@ -3839,7 +3839,7 @@ suites.push({
     await inv.getByText(/Why you were matched/).waitFor();
     await shot('invitation');
     await inv.getByRole('button', { name: 'Accept' }).click();
-    await page.getByRole('link', { name: 'Solar Conveyor for quarries' }).click();
+    await page.locator('a[href^="/venture-ai/rooms/"]').filter({ hasText: 'Solar Conveyor for quarries' }).click();
     await page.waitForURL(/\/venture-ai\/rooms\/[0-9a-f-]+$/);
     await page.getByText(/nothing here is binding by itself/).waitFor();
     await page.getByRole('tab', { name: 'AI agents' }).click();
