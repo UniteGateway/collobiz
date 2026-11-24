@@ -498,6 +498,13 @@
       "when": 1795539275397,
       "tag": "0070_powertrade",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1795544023776,
+      "tag": "0071_venture_ai",
+      "breakpoints": true
     }
   ]
 }

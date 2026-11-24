@@ -24,6 +24,11 @@ const Env = z.object({
   WEB_BASE_URL: z.string().url().default('http://localhost:3000'),
   IDENTITY_PROVIDER: z.enum(['local', 'oidc']).default('local'),
   AI_PROVIDER: z.enum(['rules', 'anthropic']).default('rules'),
+  ANTHROPIC_API_KEY: z.string().optional(),
+  VAI_MODEL_FAST: z.string().default('claude-haiku-5-5'),
+  VAI_MODEL_DEEP: z.string().default('claude-sonnet-5-5'),
+  VAI_PRICE_FAST_IN: z.coerce.number().default(0), VAI_PRICE_FAST_OUT: z.coerce.number().default(0),
+  VAI_PRICE_DEEP_IN: z.coerce.number().default(0), VAI_PRICE_DEEP_OUT: z.coerce.number().default(0),
   /** Growth Desk outreach sending. Off until a separate marketing e-mail domain/service is configured; approved drafts wait. */
   GROWTH_SENDING_ENABLED: bool.default(false),
   /** Unite Industry Club operator shown in the Club terms. Defaults are Unite Group's published company details; confirm the contracting entity with counsel. */
@@ -57,6 +62,7 @@ const Env = z.object({
   FEATURE_INVESTOR_DATA_ROOM: bool.default(false),
   FEATURE_FINANCE_INTRODUCTIONS: bool.default(false),
   FEATURE_POWERTRADE: bool.default(true),
+  FEATURE_VENTURE_AI: bool.default(true),
   ACCESS_TOKEN_TTL_SEC: z.coerce.number().default(900),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().default(14),
   /** Two-person approval threshold for payouts and awards (minor units, default ₹5 lakh). §7.1 */

@@ -84,6 +84,7 @@ export class SystemController {
       investorDataRoom: config().FEATURE_INVESTOR_DATA_ROOM,
       financeIntroductions: config().FEATURE_FINANCE_INTRODUCTIONS,
       powertrade: config().FEATURE_POWERTRADE,
+      ventureAi: config().FEATURE_VENTURE_AI,
       aiProvider: config().AI_PROVIDER,
       identityProvider: config().IDENTITY_PROVIDER,
     };
