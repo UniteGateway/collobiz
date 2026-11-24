@@ -59,7 +59,7 @@ export function PublicFooter() {
         </div>
         <div className="cz-bigfoot-grid">
           <nav aria-label="Get started"><h4>Get started</h4><Link href="/businesses">Buy from Unite</Link><Link href="/partner-with-unite">Sell Unite products</Link><Link href="/join">Grow my business</Link><Link href="/signup">Earn as a partner</Link></nav>
-          <nav aria-label="Explore"><h4>Explore</h4><Link href="/how-it-works">How it works</Link><Link href="/opportunities/public">Opportunities</Link><Link href="/club">Industry Club</Link><Link href="/catalogue">Catalogue</Link><Link href="/store">Store</Link><Link href="/membership">Membership</Link></nav>
+          <nav aria-label="Explore"><h4>Explore</h4><Link href="/how-it-works">How it works</Link><Link href="/opportunities/public">Opportunities</Link><Link href="/club">Industry Club</Link><Link href="/unite-club">Unite Club</Link><Link href="/catalogue">Catalogue</Link><Link href="/store">Store</Link><Link href="/membership">Membership</Link></nav>
           <nav aria-label="Company"><h4>Company</h4><Link href="/about">About</Link><Link href="/group-companies">Unite Group</Link><Link href="/success-stories">Success stories</Link><Link href="/locations">Partner locations</Link><Link href="/umeet">U meet</Link></nav>
           <nav aria-label="Support"><h4>Support</h4><Link href="/support/contact">Contact &amp; FAQs</Link><Link href="/club/terms">Terms</Link><Link href="/club/legal">Legal documents</Link><Link href="/verify-certificate">Verify a certificate</Link><Link href="/settings/privacy">Privacy &amp; data rights</Link></nav>
         </div>

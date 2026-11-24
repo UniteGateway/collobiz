@@ -3588,3 +3588,64 @@ suites.push({
     await shot('umeet-room');
   },
 });
+
+suites.push({
+  name: 'Unite Club · propose a chapter, admin approves, a member applies and is approved, online meeting with a U meet room, referral',
+  run: async ({ page, WEB, ADMIN, expect, shot, label }) => {
+    await page.context().clearCookies();
+    await page.goto(WEB + '/unite-club');
+    await page.getByRole('heading', { level: 1, name: /help each other grow/ }).waitFor();
+    if (label !== 'desktop') { await shot('landing'); return; }
+    await page.locator('[data-uc-empty]').waitFor();
+    await shot('landing');
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/my-club');
+    await page.getByRole('button', { name: 'Propose a chapter' }).click();
+    const f = page.locator('[data-form="uc-propose"]');
+    await f.getByLabel('Chapter name').fill('Unite Club Pune Central');
+    await f.getByLabel('City').fill('Pune');
+    await f.getByLabel('When it meets').fill('Every Tuesday, 7:30 am');
+    await f.getByLabel('Your business category').fill('Solar EPC contractor');
+    await f.getByLabel('What the chapter is about').fill('Business owners in central Pune who meet every week to pass referrals and serve the city.');
+    await f.getByRole('button', { name: 'Propose this chapter' }).click();
+    await page.getByText('Your chapter is proposed').waitFor();
+    const admin = await page.context().browser().newPage();
+    await adminLogin(admin, ADMIN, 'unite.admin@collabiz.local');
+    await admin.goto(ADMIN + '/unite-club');
+    await admin.getByRole('button', { name: 'Approve chapter' }).click();
+    await admin.getByText('No chapters in this state.').waitFor();
+    await admin.close();
+    // Ravi applies from the public chapter page
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/unite-club/unite-club-pune-central');
+    await page.getByLabel('Your business category').fill('Solar EPC contractors');
+    expect(await page.getByRole('button', { name: 'Apply to join' }).isDisabled(), 'a taken category cannot apply');
+    await page.getByLabel('Your business category').fill('Electrical trader');
+    await page.getByRole('button', { name: 'Apply to join' }).click();
+    await page.getByText('Application sent').waitFor();
+    await shot('chapter-public');
+    // Asha approves, schedules an online meeting, passes a referral
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/my-club/unite-club-pune-central');
+    await page.getByRole('button', { name: /Applications/ }).click();
+    await page.locator('[data-application="Ravi Patel"]').getByRole('button', { name: 'Approve' }).click();
+    await page.getByText('No applications waiting').waitFor();
+    await page.getByRole('button', { name: 'Meetings & events' }).click();
+    await page.getByRole('button', { name: 'Schedule a meeting or event' }).click();
+    const ev = page.locator('[data-form="uc-event"]');
+    await ev.getByLabel('Date').fill(new Date(Date.now() + 2 * 86_400_000).toISOString().slice(0, 10));
+    await ev.getByLabel('Online — open a U meet room for every member').check();
+    await ev.getByRole('button', { name: 'Schedule' }).click();
+    await page.locator('[data-event="Weekly chapter meeting"]').getByRole('link', { name: 'Open U meet room' }).waitFor();
+    await page.getByRole('button', { name: 'Referrals' }).click();
+    const rf = page.locator('[data-form="uc-referral"]');
+    await rf.getByLabel('Person who needs it').fill('Meghana Rao');
+    await rf.getByLabel('Their phone').fill('9876511111');
+    await rf.getByLabel('What do they need?').fill('Cables and a distribution board for a new shop.');
+    await rf.getByLabel('They agreed that I can pass their details to this member').check();
+    await rf.getByRole('button', { name: 'Pass referral' }).click();
+    await page.getByText('Referral sent.').waitFor();
+    await page.locator('[data-referral="Meghana Rao"]').waitFor();
+    await shot('chapter-dashboard');
+  },
+});

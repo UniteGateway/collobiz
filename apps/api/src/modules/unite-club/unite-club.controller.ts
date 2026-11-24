@@ -150,7 +150,7 @@ export class UniteClubController {
     const visible = refs.filter(({ r }) => r.fromUserId === ctx.userId || r.toUserId === ctx.userId);
     return {
       chapter: { ...publicChapter(c, members.length, members.map((x) => x.m.category)), venue: c.venue, status: c.status },
-      me: mine ? { role: mine.role, category: mine.category } : null, isOfficer,
+      me: mine ? { role: mine.role, category: mine.category, userId: mine.userId } : null, isOfficer,
       members: members.map((x) => ({ id: x.m.id, userId: x.m.userId, name: x.name, org: x.org, category: x.m.category, role: x.m.role, joinedAt: x.m.joinedAt })),
       applications: applications.map((x) => ({ id: x.m.id, name: x.name, org: x.org, category: x.m.category, intro: x.m.intro, appliedAt: x.m.createdAt })),
       events: evs.map((e) => ({ id: e.id, kind: e.kind, title: e.title, details: e.details, startsAt: e.startsAt, endsAt: e.endsAt, venue: e.venue, cancelled: e.cancelled, room: e.meetingId ? `/meetings/${e.meetingId}/room` : null,

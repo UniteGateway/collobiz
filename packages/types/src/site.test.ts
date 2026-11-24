@@ -17,5 +17,7 @@ describe('site content', () => {
     expect(guideReply('solar for my roof').links[0].href).toBe('/businesses/sunx');
     expect(guideReply('can I talk to a person?').handover).toBe(true);
     expect(guideReply('xyz').links.length).toBe(4);
+    expect(guideReply('Is there a business club like Rotary?').links[0].href).toBe('/unite-club');
+    expect(guideReply('How do I join the Industry Club?').links[0].href).toBe('/join');
   });
 });

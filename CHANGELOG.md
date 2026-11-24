@@ -4,6 +4,10 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Unite Club
+- A business club with local chapters (like Rotary, Lions or BNI): propose and approve chapters, apply with one seat per business category, officers and roles, chapter meetings with U meet rooms, RSVPs, service hours, consent-based referrals with member-reported business won. Public landing and chapter pages; members' dashboard; admin approvals. See docs/unite-club.md.
+- UNIECO microsite filled from the Eco-Living Catalogue (range, Mighty Mug, benefits); brand products gain admin-editable range and benefits.
+
 ### Website content, guide chat, U meet and page redesign
 - Admin-managed social links in a large footer on every page and a strip on signed-in pages; YouTube video library placed on pages, products and modules.
 - COLLABIZ guide chat on every page with handover to the Unite team (Admin → Guide chats).
