@@ -37,6 +37,7 @@ export const MODULES: Module[] = [
   { key: 'action-os', label: 'My tasks', icon: 'bell', home: '/action-os', match: ['/action-os'],
     tabs: [['/action-os', 'My action board'], ['/action-os/plans', 'Plans'], ['/action-os/settings', 'Schedule & channels']] },
   { key: 'community', label: 'Community', icon: 'teams', home: '/community', match: ['/community'] },
+  { key: 'unite-club', label: 'Unite Club', icon: 'teams', home: '/my-club', match: ['/my-club'] },
   { key: 'invest', label: 'Invest together', icon: 'building', home: '/invest', match: ['/invest'] },
   { key: 'messages', label: 'Messages', icon: 'messages', home: '/inbox', match: ['/inbox', '/chat', '/meetings', '/umeet', '/announcements', '/notifications'],
     tabs: [['/inbox', 'Inbox'], ['/umeet', 'U meet'], ['/meetings', 'Meetings'], ['/announcements', 'Announcements'], ['/notifications', 'Notifications']] },
@@ -99,7 +100,7 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}, eb5?
     ['Unite', ['ventures', 'dealer', 'board', 'unite-solar', 'energy', 'powertek'], false],
     ['Money', ['earnings', 'books', 'proof'], false],
     ['Work together', ['collab', 'collaboration', 'projects', 'micro', 'capacity', 'trading', 'pools', 'commit', 'launch', 'invest'], true],
-    ['Network', ['community', 'global', 'growth'], true],
+    ['Network', ['unite-club', 'community', 'global', 'growth'], true],
   ];
   sections.push({ items: [item('home'), item('action-os'), item('messages')] });
   const eb = eb5Section(eb5); if (eb) sections.push(eb);

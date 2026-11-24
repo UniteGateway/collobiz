@@ -484,6 +484,13 @@
       "when": 1795530949211,
       "tag": "0068_unieco_catalogue",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1795531444868,
+      "tag": "0069_unite_club",
+      "breakpoints": true
     }
   ]
 }

@@ -48,3 +48,4 @@ export * from './club-legal';
 export * from './connectors';
 export * from './brand-channels';
 export * from './site';
+export * from './unite-club';
