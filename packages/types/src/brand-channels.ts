@@ -162,6 +162,9 @@ export const BrandProductSchema = z.object({
   accent: z.tuple([z.string().regex(/^#[0-9A-Fa-f]{6}$/), z.string().regex(/^#[0-9A-Fa-f]{6}$/)]).default(['#011E48', '#2E7D32']),
   oemPartner: z.string().trim().max(160).optional(),
   oemStatus: z.enum(['planned', 'agreement_signed', 'producing']).default('planned'),
+  /** Logo and product photo: a path on the site (/brands/…, /photos/…) or an https address. */
+  logo: z.string().trim().regex(/^(\/[\w./-]+|https:\/\/\S+)$/, 'Use a site path like /brands/logo.png or an https address').max(300).optional().or(z.literal('').transform(() => undefined)),
+  heroImage: z.string().trim().regex(/^(\/[\w./-]+|https:\/\/\S+)$/, 'Use a site path like /photos/product.webp or an https address').max(300).optional().or(z.literal('').transform(() => undefined)),
 });
 export type BrandProductInput = z.infer<typeof BrandProductSchema>;
 export const BrandProductUpdateSchema = BrandProductSchema.omit({ slug: true });

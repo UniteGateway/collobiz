@@ -7,7 +7,7 @@ import { ErrorState, LoadingState } from '@collabiz/ui';
 import { ChannelApplyForm, ChannelMatcher } from '@/components/BrandChannels';
 import { useQuery } from '@/lib/hooks';
 
-interface P { slug: string; name: string; tagline: string; roles: string[]; buyers: string; oem: { status: string; partner: string | null } | null }
+interface P { slug: string; logo?: string | null; name: string; tagline: string; roles: string[]; buyers: string; oem: { status: string; partner: string | null } | null }
 
 function Inner() {
   const q = useQuery<{ items: P[] }>('/public/brand-products');
@@ -26,6 +26,7 @@ function Inner() {
         {q.error ? <ErrorState error={q.error} onRetry={q.reload} /> : !q.data ? <LoadingState /> : (
           <div className="cz-board-grid">{q.data.items.map((p) => (
             <article key={p.slug} className="cz-card cz-board-card" data-brand-product={p.slug}>
+              {p.logo && <img src={p.logo} alt={`${p.name} logo`} className="cz-brand-logo" loading="lazy" />}
               <h3>{p.name}</h3><p className="cz-muted">{p.tagline}. Sold to {p.buyers}.</p>
               <p style={{ fontSize: 14 }}>Partners: {p.roles.map((r) => CHANNEL_ROLES.find((x) => x.code === r)?.label).join(', ')}</p>
               {p.oem && <p className="cz-muted" style={{ fontSize: 13.5 }}>Made under the Unite brand by {p.oem.partner ?? 'an approved manufacturer'} · {p.oem.status}</p>}

@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Sunora Paints by Unite Group (2026-11-24)
+- Sunora Paints added as a Unite brand product (sunora. microsite) with the Sunora logo and the Sunora Luxe tin as its product photo; dealer/store/franchise/manufacturer applications, matching and dealer routing as for other brand products. Brand products now carry a logo and product photo (admin form, directory tiles, partner cards). Migration 0065.
+
 ### Simpler, clearer site (2026-11-24)
 - Organised around four paths — Buy from Unite, Sell Unite products, Grow my business, Earn as a partner — on the home page and a new /start page. Public header cut from 11 links to 5 with one Get started button; home page cut from 12 sections to 7 (detail moved to How it works and the footer); member menu regrouped with the long tail folded. No page removed. See docs/navigation.md.
 

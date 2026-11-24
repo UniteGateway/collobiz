@@ -22,11 +22,12 @@ export function stagePill(stage: string): { label: string; tone: 'live' | 'pilot
   return { label: stage === 'building' ? 'In development' : 'Coming soon', tone: 'soon' };
 }
 
-export function ProductTile({ p }: { p: Pick<Product, 'slug' | 'name' | 'sector' | 'tagline' | 'stage'> }) {
+export function ProductTile({ p }: { p: Pick<Product, 'slug' | 'name' | 'sector' | 'tagline' | 'stage'> & { logo?: string | null } }) {
   const s = stagePill(p.stage);
+  const logo = appBrand(p.slug)?.logo ?? p.logo ?? null;
   return (
     <Link href={`/businesses/${p.slug}`} className="cz-gp-tile" data-product={p.slug}>
-      {appBrand(p.slug)?.logo ? <span className="cz-gp-tile-logo" aria-hidden><img src={appBrand(p.slug)!.logo} alt="" loading="lazy" /></span> : <VentureMark name={p.name} sector={p.sector} slug={p.slug} size={56} />}
+      {logo ? <span className="cz-gp-tile-logo" aria-hidden><img src={logo} alt="" loading="lazy" /></span> : <VentureMark name={p.name} sector={p.sector} slug={p.slug} size={56} />}
       <strong>{p.name}</strong>
       <span className="cz-gp-tile-tag">{p.tagline}</span>
       {s.tone !== 'live' && <span className={`cz-gp-pill cz-gp-pill-${s.tone}`}>{s.label}</span>}

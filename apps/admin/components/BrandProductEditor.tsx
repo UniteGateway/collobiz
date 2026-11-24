@@ -7,9 +7,9 @@ import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
-interface Row { id: string; slug: string; subdomain: string; name: string; category: string; sector: string; tagline: string; summary: string; buyers: string; roles: string[]; strong: string[]; good: string[]; bulk: boolean; showroom: boolean; features: { title: string; text: string; planned?: boolean }[]; workflow: { title: string; text: string }[]; accent: string[]; status: string; open: boolean; oemPartner: string | null; oemStatus: string | null; applications: number; partners: number }
-type Form = { name: string; slug: string; subdomain: string; category: string; sector: string; tagline: string; summary: string; buyers: string; roles: string[]; strong: string[]; good: string[]; bulk: boolean; showroom: boolean; features: { title: string; text: string; planned: boolean }[]; workflow: { title: string; text: string }[]; accent: [string, string]; oemPartner: string; oemStatus: string };
-const empty: Form = { name: '', slug: '', subdomain: '', category: 'Building Materials · Unite brand', sector: 'manufacturing', tagline: '', summary: '', buyers: '', roles: ['distributor', 'dealer', 'store', 'franchise'], strong: [], good: [], bulk: false, showroom: true, features: [], workflow: [], accent: ['#011E48', '#2E7D32'], oemPartner: '', oemStatus: 'planned' };
+interface Row { id: string; slug: string; subdomain: string; name: string; category: string; sector: string; tagline: string; summary: string; buyers: string; roles: string[]; strong: string[]; good: string[]; bulk: boolean; showroom: boolean; features: { title: string; text: string; planned?: boolean }[]; workflow: { title: string; text: string }[]; accent: string[]; logo: string | null; heroImage: string | null; status: string; open: boolean; oemPartner: string | null; oemStatus: string | null; applications: number; partners: number }
+type Form = { name: string; slug: string; subdomain: string; category: string; sector: string; tagline: string; summary: string; buyers: string; roles: string[]; strong: string[]; good: string[]; bulk: boolean; showroom: boolean; features: { title: string; text: string; planned: boolean }[]; workflow: { title: string; text: string }[]; accent: [string, string]; oemPartner: string; oemStatus: string; logo: string; heroImage: string };
+const empty: Form = { name: '', slug: '', subdomain: '', category: 'Building Materials · Unite brand', sector: 'manufacturing', tagline: '', summary: '', buyers: '', roles: ['distributor', 'dealer', 'store', 'franchise'], strong: [], good: [], bulk: false, showroom: true, features: [], workflow: [], accent: ['#011E48', '#2E7D32'], oemPartner: '', oemStatus: 'planned', logo: '', heroImage: '' };
 const web = process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000';
 const types = BUSINESS_TYPES.map((b) => ({ value: b.code, label: b.label }));
 
@@ -28,7 +28,7 @@ export function BrandProducts() {
             <thead><tr><th>Product</th><th>Web address</th><th>Status</th><th>Applications</th><th>Partners</th><th /></tr></thead>
             <tbody>{q.data.items.map((r) => (
               <tr key={r.id} data-brand-row={r.slug}>
-                <td><strong>{r.name}</strong><div className="cz-muted">{r.tagline}</div></td>
+                <td style={{ display: 'flex', gap: 10, alignItems: 'center' }}>{r.logo && <img src={r.logo.startsWith('/') ? `${web}${r.logo}` : r.logo} alt="" style={{ height: 36, width: 'auto' }} />}<div><strong>{r.name}</strong><div className="cz-muted">{r.tagline}</div></div></td>
                 <td>{r.subdomain}.</td>
                 <td><StatusBadge status={r.status} label={r.status === 'published' ? (r.open ? 'Live · open to partners' : 'Live') : 'Draft'} tone={r.status === 'published' ? 'success' : 'neutral'} /></td>
                 <td>{r.applications}</td><td>{r.partners}</td>
@@ -48,7 +48,7 @@ export function BrandProducts() {
 }
 
 function Editor({ row, onDone }: { row: Row | null; onDone: () => void }) {
-  const [f, setF] = useState<Form>(row ? { ...empty, ...row, accent: [row.accent[0] ?? '#011E48', row.accent[1] ?? '#2E7D32'], features: row.features.map((x) => ({ ...x, planned: !!x.planned })), oemPartner: row.oemPartner ?? '', oemStatus: row.oemStatus ?? 'planned' } : empty);
+  const [f, setF] = useState<Form>(row ? { ...empty, ...row, accent: [row.accent[0] ?? '#011E48', row.accent[1] ?? '#2E7D32'], features: row.features.map((x) => ({ ...x, planned: !!x.planned })), oemPartner: row.oemPartner ?? '', oemStatus: row.oemStatus ?? 'planned', logo: row.logo ?? '', heroImage: row.heroImage ?? '' } : empty);
   const [touched, setTouched] = useState(!!row);
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((x) => ({ ...x, [k]: v }));
   const name = (v: string) => setF((x) => ({ ...x, name: v, ...(touched ? {} : { slug: slugify(v), subdomain: slugify(v).replace(/^unite-/, '') }) }));
@@ -104,6 +104,9 @@ function Editor({ row, onDone }: { row: Row | null; onDone: () => void }) {
         <div className="cz-grid cz-grid-2">
           <TextInput label="OEM manufacturer (internal)" value={f.oemPartner} onChange={(e) => set('oemPartner', e.target.value)} />
           <Select label="OEM status" value={f.oemStatus} onChange={(e) => set('oemStatus', e.target.value)} options={Object.entries(OEM_STATUS).map(([value, label]) => ({ value, label }))} />
+          <TextInput label="Logo" value={f.logo} onChange={(e) => set('logo', e.target.value)} error={fe.logo} hint="/brands/your-logo.png or an https address" />
+          <TextInput label="Product photo" value={f.heroImage} onChange={(e) => set('heroImage', e.target.value)} error={fe.heroImage} hint="/photos/your-product.webp or an https address" />
+          {(f.logo || f.heroImage) && <div style={{ display: 'flex', gap: 12, alignItems: 'center', gridColumn: '1 / -1' }}>{f.logo && <img src={f.logo.startsWith('/') ? `${web}${f.logo}` : f.logo} alt="Logo preview" style={{ height: 56 }} />}{f.heroImage && <img src={f.heroImage.startsWith('/') ? `${web}${f.heroImage}` : f.heroImage} alt="Photo preview" style={{ height: 80, borderRadius: 8 }} />}</div>}
           <TextInput label="Brand colour 1" type="color" value={f.accent[0]} onChange={(e) => set('accent', [e.target.value, f.accent[1]])} />
           <TextInput label="Brand colour 2" type="color" value={f.accent[1]} onChange={(e) => set('accent', [f.accent[0], e.target.value])} />
         </div>

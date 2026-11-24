@@ -9,6 +9,7 @@
 | Unite Ply | `ply.` / `/businesses/unite-ply` | To be selected (Gujarat); manufacturers can apply |
 | Unite Carpets | `carpets.` / `/businesses/unite-carpets` | To be selected (Gujarat); manufacturers can apply |
 | Unite Furniture | `furniture.` / `/businesses/unite-furniture` | Multiple manufacturers; manufacturers can apply |
+| **Sunora Paints** (by Unite Group) | `sunora.` / `/businesses/sunora-paints` | Not yet recorded; paint manufacturers can apply. Uses the Sunora logo and the Sunora Luxe tin. |
 
 ## How manufacturer names are shown
 - **Public pages:** they show "an approved manufacturer" and the status (being finalised, agreement signed, or in production) until a super admin makes the name public. That should only happen once the OEM agreement allows it.
@@ -77,7 +78,7 @@
 - Matching rules: which business types are a strong fit and which are a good fit, and whether the product is sold in bulk or from a showroom.
 - Microsite features (each can be marked "planned"), plus "how it works" steps.
 - OEM manufacturer and status.
-- Brand colours.
+- Brand colours, plus a **logo** and a **product photo**: a site path (`/brands/…`, `/photos/…`) or an https address, previewed in the form.
 
 **Save as draft:** nothing is public yet.
 

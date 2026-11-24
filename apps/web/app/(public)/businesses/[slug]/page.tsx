@@ -14,7 +14,7 @@ import { isNotFound, useQuery } from '@/lib/hooks';
 const url0 = (m: Record<string, string>) => Object.values(m)[0];
 const IC: Record<string, string> = { doc: 'documents', globe: 'map', search: 'search', sparkle: 'award', chart: 'earnings', grid: 'package', shield: 'verify', flag: 'bookmark', people: 'users', clock: 'clock', bell: 'bell', check: 'check', map: 'location' };
 
-type P = Product & { showcase?: { kind: 'property'; items: ShowProject[] } | { kind: 'courses'; items: ShowCourse[] } | null; work?: { open: number; done: number } | null; connector?: ConnectorView | null; channel?: boolean; brand?: { subdomain: string; features: { title: string; text: string; planned?: boolean }[]; workflow: { title: string; text: string }[]; accent: string[] } | null; oem?: { status: string; partner: string | null } | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
+type P = Product & { showcase?: { kind: 'property'; items: ShowProject[] } | { kind: 'courses'; items: ShowCourse[] } | null; work?: { open: number; done: number } | null; connector?: ConnectorView | null; channel?: boolean; brand?: { subdomain: string; logo?: string | null; heroImage?: string | null; features: { title: string; text: string; planned?: boolean }[]; workflow: { title: string; text: string }[]; accent: string[] } | null; oem?: { status: string; partner: string | null } | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
 
 /** A Unite product's own page: overview, features, what it works with, and an enquiry form wired into COLLABIZ. */
 export default function ProductPage() {
@@ -33,6 +33,7 @@ export default function ProductPage() {
   // Built-in brand settings, overridden by what Unite admins set for a brand product in the admin console.
   const base = appBrand(p.slug);
   const b: AppBrand | undefined = p.brand ? { ...(base ?? { accent: [p.brand.accent[0], p.brand.accent[1]] as [string, string], features: [] }),
+    ...(p.brand.logo ? { logo: p.brand.logo } : {}),
     ...(p.brand.features.length ? { features: p.brand.features.map((x): AppFeature => ({ ...x, icon: 'check' })) } : {}), ...(p.brand.workflow.length ? { workflow: p.brand.workflow } : {}) } : base;
   const pill = stagePill(p.stage);
   const summary = p.summary.replace(/\s*www\.[^\s]+$/, '');
@@ -67,7 +68,7 @@ export default function ProductPage() {
           </dl>
         </div>
         <div className="cz-gp-phero-media">
-          <img src={b?.artwork ?? venturePhoto(p.slug, p.sector)} alt={b?.artwork ? `${p.name} artwork` : ''} />
+          <img src={b?.artwork ?? p.brand?.heroImage ?? venturePhoto(p.slug, p.sector)} alt={b?.artwork ? `${p.name} artwork` : p.brand?.heroImage ? `${p.name} product` : ''} className={p.brand?.heroImage ? 'cz-gp-phero-product' : undefined} />
           {!b?.artwork && <span className="cz-gp-phero-logo">{b?.logo ? <img src={b.logo} alt={`${p.name} logo`} /> : <VentureMark name={p.name} sector={p.sector} size={64} />}</span>}
         </div>
       </section>

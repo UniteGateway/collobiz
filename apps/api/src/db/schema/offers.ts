@@ -230,6 +230,9 @@ export const brandProducts = pgTable('brand_products', {
   features: jsonb('features').notNull().default(sql`'[]'::jsonb`),
   workflow: jsonb('workflow').notNull().default(sql`'[]'::jsonb`),
   accent: text('accent').array().notNull().default(sql`'{#011E48,#2E7D32}'::text[]`),
+  /** Brand logo and a product photo (site paths such as /brands/x.png, or https URLs). */
+  logo: text('logo'),
+  heroImage: text('hero_image'),
   status: text('status').notNull().default('draft'), // draft | published
   publishedAt: timestamp('published_at', { withTimezone: true }),
   createdBy: uuid('created_by').references(() => users.id),

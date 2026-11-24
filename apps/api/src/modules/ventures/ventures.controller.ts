@@ -117,7 +117,8 @@ export class VenturesController {
   async products() {
     const rows = await this.db.select({ v: uniteVentures, company: organizations.displayName }).from(uniteVentures).leftJoin(organizations, eq(organizations.id, uniteVentures.groupCompanyOrgId))
       .where(or(isNull(uniteVentures.regulatedReason), isNotNull(uniteVentures.clearedAt))).orderBy(asc(uniteVentures.num));
-    return rows.map((r) => { const { roles: _r, rewardNote: _n, ...v } = this.svc.view(r.v, r.company); return v; });
+    const logos = new Map((await this.brands.published()).filter((x) => x.b.logo).map((x) => [x.b.slug, x.b.logo]));
+    return rows.map((r) => { const { roles: _r, rewardNote: _n, ...v } = this.svc.view(r.v, r.company); return { ...v, logo: logos.get(v.slug) ?? null }; });
   }
 
   @Public()
@@ -143,7 +144,7 @@ export class VenturesController {
     // Unite brand products: OEM status always; the manufacturer's name only once a super admin made it public.
     const oem = r.v.oemStatus ? { status: OEM_STATUS[r.v.oemStatus as keyof typeof OEM_STATUS] ?? r.v.oemStatus, partner: r.v.oemPublic ? r.v.oemPartner : null } : null;
     const bp = await this.brands.bySlug(slug);
-    const brand = bp ? { subdomain: bp.b.subdomain, roles: bp.b.roles, buyers: bp.b.buyers, features: bp.b.features, workflow: bp.b.workflow, accent: bp.b.accent } : null;
+    const brand = bp ? { subdomain: bp.b.subdomain, roles: bp.b.roles, buyers: bp.b.buyers, features: bp.b.features, workflow: bp.b.workflow, accent: bp.b.accent, logo: bp.b.logo, heroImage: bp.b.heroImage } : null;
     return { ...v, work, showcase, connector, oem, channel: !!bp, brand, related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
   }
 

@@ -61,7 +61,7 @@ export class BrandChannelsController {
   @Public()
   @Get('public/brand-products')
   async products() {
-    return { items: (await this.brands.published()).map(({ b, v }) => ({ slug: b.slug, subdomain: b.subdomain, name: v.name, tagline: v.tagline, stage: v.stage, roles: b.roles, buyers: b.buyers, oem: this.oemPublic(v) })) };
+    return { items: (await this.brands.published()).map(({ b, v }) => ({ slug: b.slug, subdomain: b.subdomain, logo: b.logo, heroImage: b.heroImage, name: v.name, tagline: v.tagline, stage: v.stage, roles: b.roles, buyers: b.buyers, oem: this.oemPublic(v) })) };
   }
 
   /** The matching agent: which Unite product and role fits this business, and why. */
