@@ -3527,3 +3527,64 @@ suites.push({
     await shot('member-menu');
   },
 });
+
+suites.push({
+  name: 'Website content, guide chat and U meet · admin videos and social links appear on pages; guide hands over to the team; instant meeting with chat',
+  run: async ({ page, WEB, ADMIN, expect, shot, label }) => {
+    await page.context().clearCookies();
+    if (label === 'desktop') {
+      await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+      await page.goto(ADMIN + '/site');
+      await page.getByRole('button', { name: 'Social links' }).click();
+      await page.getByLabel('YouTube').fill('https://www.youtube.com/@e2e-test-channel');
+      await page.getByRole('button', { name: 'Save social links' }).click();
+      await page.getByText('Saved. The links now appear').waitFor();
+      await page.getByRole('button', { name: 'Videos' }).click();
+      await page.getByRole('button', { name: 'Add a video' }).click();
+      await page.getByLabel('YouTube link').fill('https://youtu.be/dQw4w9WgXcQ');
+      await page.getByLabel('Title', { exact: true }).fill('E2E test video');
+      await page.locator('[data-form="site-video"]').getByLabel('About').check();
+      await shot('admin-video');
+      await page.getByRole('button', { name: 'Add video' }).click();
+      await page.getByRole('heading', { name: 'E2E test video' }).waitFor();
+      await page.context().clearCookies();
+    }
+    await page.goto(WEB + '/about');
+    await page.locator('[data-hero="cover"]').waitFor();
+    await page.locator('footer [data-network="youtube"]').waitFor();
+    await page.locator('[data-video="dQw4w9WgXcQ"]').scrollIntoViewIfNeeded();
+    await page.getByRole('button', { name: 'Play video: E2E test video' }).click();
+    expect(await page.locator('iframe[src*="youtube-nocookie.com/embed/dQw4w9WgXcQ"]').count() === 1, 'the video player loads on click');
+    // Guide chat
+    await page.getByRole('button', { name: 'Open the COLLABIZ guide chat' }).click();
+    await page.getByLabel('Your message').fill('I want to become a dealer');
+    await page.keyboard.press('Enter');
+    await page.locator('.cz-guide').getByRole('link', { name: 'Find my fit and apply' }).waitFor();
+    await page.getByRole('button', { name: 'Talk to a person' }).click();
+    await page.locator('.cz-guide-who').getByLabel('Email').fill(`visitor-${label}@example.com`);
+    await page.getByRole('button', { name: 'Ask for a person' }).click();
+    await page.getByText('A person from the Unite team will reply here').waitFor();
+    await shot('guide');
+    if (label !== 'desktop') return;
+    const admin = await page.context().browser().newPage();
+    await adminLogin(admin, ADMIN, 'unite.admin@collabiz.local');
+    await admin.goto(ADMIN + '/guide-chats');
+    await admin.getByRole('button', { name: 'Open' }).first().click();
+    await admin.getByLabel('Your reply').fill('Hello from the Unite team');
+    await admin.getByRole('button', { name: 'Send reply' }).click();
+    await admin.getByText('Hello from the Unite team').waitFor();
+    await admin.close();
+    await page.locator('.cz-guide-msg.is-staff', { hasText: 'Hello from the Unite team' }).waitFor({ timeout: 20000 });
+    // U meet
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/umeet');
+    await page.getByLabel('Meeting name').fill('E2E quick call');
+    await page.getByRole('button', { name: 'Start meeting now' }).click();
+    await page.waitForURL(/\/meetings\/[0-9a-f-]+\/room/);
+    await page.getByRole('heading', { name: 'E2E quick call' }).waitFor();
+    await page.getByLabel('Message', { exact: true }).fill('Agenda: Pune order');
+    await page.getByRole('button', { name: 'Send message' }).click();
+    await page.locator('[data-meeting-chat] li.is-mine', { hasText: 'Agenda: Pune order' }).waitFor();
+    await shot('umeet-room');
+  },
+});

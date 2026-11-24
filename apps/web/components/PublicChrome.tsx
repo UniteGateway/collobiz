@@ -48,13 +48,12 @@ export function PublicFooter() {
       <div className="cz-container">
         <div className="cz-bigfoot-top">
           <div className="cz-bigfoot-brand">
-            <img src="/brand/collabiz-logo.png" alt="COLLABIZ — Connect. Collaborate. Grow." width={210} />
+            <span className="cz-bigfoot-logo"><img src="/brand/collabiz-mark.png" alt="" />COLLABIZ</span>
             <p>The Unite-first B2B collaboration network. Buy from Unite, sell Unite products, grow your business and earn as a partner — in one account.</p>
             <a className="cz-bigfoot-phone" href="tel:+919667660773">+91 96676 60773</a>
           </div>
           <div className="cz-bigfoot-follow">
-            <h4>Follow Unite Group</h4>
-            <SocialIcons size="lg" />
+            <SocialIcons size="lg" heading={<h4>Follow Unite Group</h4>} />
             <Link href="/start" className="cz-btn cz-btn-accent">Get started free</Link>
           </div>
         </div>

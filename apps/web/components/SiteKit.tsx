@@ -38,18 +38,18 @@ const ICON: Record<SocialKey, React.ReactNode> = {
 };
 
 /** Social icons for the links admins have set (none shown when none are set — never placeholder links). */
-export function SocialIcons({ size = 'lg', className = '' }: { size?: 'md' | 'lg'; className?: string }) {
+export function SocialIcons({ size = 'lg', className = '', heading }: { size?: 'md' | 'lg'; className?: string; heading?: React.ReactNode }) {
   const s = useSite();
   const links = SOCIAL_NETWORKS.filter((n) => s?.social?.[n.key]);
   if (!links.length) return null;
   return (
-    <ul className={`cz-social cz-social-${size} ${className}`} aria-label="Unite Group on social media" data-social>
+    <>{heading}<ul className={`cz-social cz-social-${size} ${className}`} aria-label="Unite Group on social media" data-social>
       {links.map((n) => (
         <li key={n.key}><a href={s!.social[n.key]} target="_blank" rel="noopener noreferrer" aria-label={`${n.label} (opens in a new tab)`} data-network={n.key}>
           <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden>{ICON[n.key]}</svg><span>{n.label}</span>
         </a></li>
       ))}
-    </ul>
+    </ul></>
   );
 }
 

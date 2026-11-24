@@ -4,6 +4,13 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Website content, guide chat, U meet and page redesign
+- Admin-managed social links in a large footer on every page and a strip on signed-in pages; YouTube video library placed on pages, products and modules.
+- COLLABIZ guide chat on every page with handover to the Unite team (Admin → Guide chats).
+- U meet: instant meetings, video embedded in the room (Jitsi), attendee-only meeting chat.
+- Public inner pages redesigned with photo heroes, mosaics and photo cards, each module with its own colour and layout.
+- UNIECO eco tableware added as a Unite brand product. See docs/website-content-guide-umeet.md.
+
 ### Sunora Paints by Unite Group (2026-11-24)
 - Sunora Paints added as a Unite brand product (sunora. microsite) with the Sunora logo and the Sunora Luxe tin as its product photo; dealer/store/franchise/manufacturer applications, matching and dealer routing as for other brand products. Brand products now carry a logo and product photo (admin form, directory tiles, partner cards). Migration 0065.
 
