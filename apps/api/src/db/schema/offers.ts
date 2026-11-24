@@ -148,6 +148,10 @@ export const uniteVentures = pgTable('unite_ventures', {
   clearanceNote: text('clearance_note'),
   groupCompanyOrgId: uuid('group_company_org_id').references(() => organizations.id),
   rewardNote: text('reward_note'),
+  /** Unite-branded products made by an OEM partner. Shown publicly only when oemPublic is set by a super admin. */
+  oemPartner: text('oem_partner'),
+  oemStatus: text('oem_status'), // planned | agreement_signed | producing
+  oemPublic: boolean('oem_public').notNull().default(false),
   updatedBy: uuid('updated_by').references(() => users.id),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
@@ -169,3 +173,34 @@ export const ventureInterests = pgTable('venture_interests', {
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (t) => [uniqueIndex('venture_interests_uq').on(t.ventureId, t.organizationId)]);
+
+/** Applications to sell or make a Unite-branded product: distributor, dealer, store, franchise or manufacturer (OEM). */
+export const channelApplications = pgTable('channel_applications', {
+  id: id(),
+  code: text('code').notNull().unique(),
+  ventureId: uuid('venture_id').notNull().references(() => uniteVentures.id),
+  role: text('role').notNull(),
+  businessType: text('business_type').notNull(),
+  name: text('name').notNull(),
+  email: text('email').notNull(),
+  phone: text('phone').notNull(),
+  company: text('company'),
+  state: text('state').notNull(),
+  district: text('district'),
+  city: text('city').notNull(),
+  territory: text('territory'),
+  details: jsonb('details').notNull().default(sql`'{}'::jsonb`), // currentBrands, experienceYears, warehouseSqft, showroomSqft, capacity, message
+  /** The matching agent's score and reasons for this product and role at the time of applying. */
+  match: jsonb('match'),
+  /** Linked once the applicant has (or creates) a COLLABIZ business account with the same email. */
+  orgId: uuid('org_id').references(() => organizations.id),
+  userId: uuid('user_id').references(() => users.id),
+  status: text('status').notNull().default('submitted'), // submitted | shortlisted | approved | declined
+  approvedTerritory: text('approved_territory'),
+  decisionNote: text('decision_note'),
+  decidedBy: uuid('decided_by').references(() => users.id),
+  decidedAt: timestamp('decided_at', { withTimezone: true }),
+  history: jsonb('history').notNull().default(sql`'[]'::jsonb`),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+}, (t) => [index('channel_app_venture_idx').on(t.ventureId, t.status), index('channel_app_email_idx').on(t.email), index('channel_app_org_idx').on(t.orgId)]);

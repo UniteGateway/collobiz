@@ -8,7 +8,7 @@ const ALIASES: Record<string, string> = {
   'green-wallet': 'greenwallet', 'ev-saathi': 'evsaathi', 'u-meet': 'umeet', 'real-bricks': 'realbricks', 'hnw-club': 'hnwclub',
   'payslip-app': 'payslip', 'solar-village-mission': 'solarvillage', 'unite-powertek': 'powertek', 'power-partner': 'powerpartner',
   'unite-digital-bank': 'digitalbank', 'universal-trade-coin': 'utc', 'moveon-video': 'moveon', 'unite-learning': 'learning',
-  'help-today': 'helptoday', 'unite-biofix': 'biofix', 'unite-aqua': 'aqua',
+  'help-today': 'helptoday', 'unite-biofix': 'biofix', 'unite-aqua': 'aqua', 'unite-cement': 'cement', 'unite-steel': 'steel', 'unite-ply': 'ply', 'unite-carpets': 'carpets', 'unite-furniture': 'furniture',
 };
 /** Subdomains that belong to the platform itself and never resolve to a product. */
 export const RESERVED_SUBDOMAINS = ['www', 'app', 'admin', 'api', 'power', 'mail', 'static', 'cdn', 'status', 'docs', 'auth', 'login'] as const;

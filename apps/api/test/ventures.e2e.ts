@@ -13,13 +13,13 @@ describe('Unite Group businesses (ventures)', () => {
   beforeAll(async () => { await resetDatabase(); await seed(); app = await bootApp(); t = await loginAll(app); pool = new Pool({ connectionString: process.env.DATABASE_URL }); });
   afterAll(async () => { await pool?.end(); await app?.close(); });
 
-  it('all 48 businesses are loaded across sectors, not only solar; regulated ones are hidden from partners and the public', async () => {
+  it('all 53 businesses (47 portfolio + BIZO + 5 Unite brand products) are loaded across sectors, not only solar; regulated ones are hidden from partners and the public', async () => {
     const admin = await api(app).get('/v1/admin/ventures').set(auth(t.uniteAdmin)).expect(200);
-    expect(admin.body).toHaveLength(48);
+    expect(admin.body).toHaveLength(53);
     expect(new Set(admin.body.map((v: any) => v.sector)).size).toBeGreaterThanOrEqual(10);
     expect(admin.body.filter((v: any) => v.regulated).map((v: any) => v.slug)).toEqual(expect.arrayContaining(['unite-digital-bank', 'bestpe', 'universal-trade-coin', 'payslip-app']));
     const partner = await api(app).get('/v1/ventures').set(auth(t.asha)).expect(200);
-    expect(partner.body.length).toBe(48 - admin.body.filter((v: any) => v.regulated).length);
+    expect(partner.body.length).toBe(53 - admin.body.filter((v: any) => v.regulated).length);
     expect(partner.body.some((v: any) => v.slug === 'universal-trade-coin')).toBe(false);
     await api(app).get('/v1/ventures/universal-trade-coin').set(auth(t.asha)).expect(404);
     const pub = await api(app).get('/v1/public/ventures').expect(200);

@@ -9,6 +9,46 @@ import type { AppBrand } from './app-brands';
 const p = (title: string, icon = 'check') => ({ title, text: '', icon, planned: true });
 
 export const PORTFOLIO_BRANDS: Record<string, AppBrand> = {
+  'unite-cement': { accent: ['#3A3F47', '#C9A227'], features: [
+    { title: 'Become a channel partner', text: 'Apply online as distributor, dealer, store or franchise for your territory.', icon: 'people' },
+    { title: 'Matching agent', text: 'Tells you which Unite product and role fits your business, and why.', icon: 'sparkle' },
+    { title: 'Dealer sales CRM', text: 'Approved partners track leads, quotations and orders for this product in COLLABIZ.', icon: 'chart' },
+    p('Product range and grades', 'grid'),
+    p('Dealer price lists and schemes', 'doc'),
+    p('Order and dispatch tracking', 'clock'),
+  ] },
+  'unite-steel': { accent: ['#1F2937', '#B91C1C'], features: [
+    { title: 'Become a channel partner', text: 'Apply online as distributor, dealer, store or franchise for your territory.', icon: 'people' },
+    { title: 'Matching agent', text: 'Tells you which Unite product and role fits your business, and why.', icon: 'sparkle' },
+    { title: 'Dealer sales CRM', text: 'Approved partners track leads, quotations and orders for this product in COLLABIZ.', icon: 'chart' },
+    p('TMT grades and sizes', 'grid'),
+    p('Mill test certificates', 'doc'),
+    p('Order and dispatch tracking', 'clock'),
+  ] },
+  'unite-ply': { accent: ['#5B3A1A', '#C08A3E'], features: [
+    { title: 'Become a channel partner', text: 'Apply online as distributor, dealer, store or franchise for your territory.', icon: 'people' },
+    { title: 'Matching agent', text: 'Tells you which Unite product and role fits your business, and why.', icon: 'sparkle' },
+    { title: 'Dealer sales CRM', text: 'Approved partners track leads, quotations and orders for this product in COLLABIZ.', icon: 'chart' },
+    { title: 'Make for Unite', text: 'Plywood and board manufacturers can apply to make Unite Ply.', icon: 'flag' },
+    p('Grades, thickness and warranty', 'grid'),
+    p('Showroom display kit', 'doc'),
+  ] },
+  'unite-carpets': { accent: ['#4C1D3D', '#D97706'], features: [
+    { title: 'Become a channel partner', text: 'Apply online as distributor, dealer, store or franchise for your territory.', icon: 'people' },
+    { title: 'Matching agent', text: 'Tells you which Unite product and role fits your business, and why.', icon: 'sparkle' },
+    { title: 'Dealer sales CRM', text: 'Approved partners track leads, quotations and orders for this product in COLLABIZ.', icon: 'chart' },
+    { title: 'Make for Unite', text: 'Carpet and rug makers can apply to make Unite Carpets.', icon: 'flag' },
+    p('Catalogue and samples', 'grid'),
+    p('Project orders for hotels and offices', 'doc'),
+  ] },
+  'unite-furniture': { accent: ['#0F3D3E', '#C2410C'], features: [
+    { title: 'Become a channel partner', text: 'Apply online as distributor, dealer, store or franchise for your territory.', icon: 'people' },
+    { title: 'Matching agent', text: 'Tells you which Unite product and role fits your business, and why.', icon: 'sparkle' },
+    { title: 'Dealer sales CRM', text: 'Approved partners track leads, quotations and orders for this product in COLLABIZ.', icon: 'chart' },
+    { title: 'Many makers, one brand', text: 'Furniture manufacturers apply to make ranges for Unite to a common specification.', icon: 'flag' },
+    p('Unified catalogue', 'grid'),
+    p('Showroom and franchise formats', 'doc'),
+  ] },
   'sungate': { logo: '/brands/sungate.png', accent: ['#9E4A08', '#0C2454'], features: [p("Bill-upload assessment", 'check'), p("Committee approval records", 'doc'), p("Scenario comparison", 'chart'), p("Resident FAQs", 'check'), p("Savings reconciliation", 'chart')] },
   'digital-seed': { logo: '/brands/digital-seed.png', accent: ['#0C2354', '#0C9C24'], features: [p("Referral attribution", 'check'), p("Partner agreements", 'people'), p("Approved campaign assets", 'check'), p("Commission ledger", 'doc'), p("Dispute-resolution history", 'check')] },
   'green-wallet': { logo: '/brands/green-wallet.png', accent: ['#0C543B', '#54846C'], features: [p("Standard project fact sheet", 'check'), p("Permission-based data rooms", 'shield'), p("Document version history", 'doc'), p("EOI tracking", 'check'), p("Diligence checklist", 'check'), p("Milestone updates", 'check')] },

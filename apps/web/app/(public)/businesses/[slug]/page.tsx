@@ -4,8 +4,9 @@ import { useParams } from 'next/navigation';
 import { appBrand } from '@collabiz/types';
 import { ButtonLink, EmptyState, ErrorState, Icon, LoadingState } from '@collabiz/ui';
 import { VentureMark, stageLabel } from '@/components/Ventures';
+import { ChannelApplyForm, ChannelMatcher } from '@/components/BrandChannels';
 import { BiofixSchemes, ConnectorPanel, CourseShowcase, ProductEnquiry, type ConnectorView, ProductTile, ProjectShowcase, STATUS_LABEL, SolarLeadForm, WorkPanel, type ShowCourse, type ShowProject, groupName, stagePill, worksWith, type Product } from '@/components/Products';
-import { SOLAR_LEAD_SOURCES, productSubdomain } from '@collabiz/types';
+import { SOLAR_LEAD_SOURCES, channelProduct, productSubdomain } from '@collabiz/types';
 import { useEffect, useState } from 'react';
 import { venturePhoto } from '@/lib/photos';
 import { isNotFound, useQuery } from '@/lib/hooks';
@@ -13,7 +14,7 @@ import { isNotFound, useQuery } from '@/lib/hooks';
 const url0 = (m: Record<string, string>) => Object.values(m)[0];
 const IC: Record<string, string> = { doc: 'documents', globe: 'map', search: 'search', sparkle: 'award', chart: 'earnings', grid: 'package', shield: 'verify', flag: 'bookmark', people: 'users', clock: 'clock', bell: 'bell', check: 'check', map: 'location' };
 
-type P = Product & { showcase?: { kind: 'property'; items: ShowProject[] } | { kind: 'courses'; items: ShowCourse[] } | null; work?: { open: number; done: number } | null; connector?: ConnectorView | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
+type P = Product & { showcase?: { kind: 'property'; items: ShowProject[] } | { kind: 'courses'; items: ShowCourse[] } | null; work?: { open: number; done: number } | null; connector?: ConnectorView | null; channel?: boolean; oem?: { status: string; partner: string | null } | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
 
 /** A Unite product's own page: overview, features, what it works with, and an enquiry form wired into COLLABIZ. */
 export default function ProductPage() {
@@ -124,6 +125,16 @@ export default function ProductPage() {
           <section className="cz-gp-section" aria-labelledby="live-h" id="live">
             <h2 id="live-h">Live from COLLABIZ {p.connector.module}</h2>
             <ConnectorPanel c={p.connector} onAsk={(id) => { setAsk(id); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }} />
+          </section>
+        )}
+
+        {p.channel && (
+          <section className="cz-gp-section" aria-labelledby="sell-h" id="sell">
+            <h2 id="sell-h">Sell {p.name}</h2>
+            {p.oem && <p className="cz-muted" data-oem>Made under the Unite brand by {p.oem.partner ?? 'an approved manufacturer'} · {p.oem.status}.</p>}
+            <p>Become a {p.name} distributor, dealer, store or franchise{channelProduct(p.slug)?.roles.includes('manufacturer') ? ' — or apply to manufacture for the Unite brand' : ''}. Approved partners get a dealer dashboard and sales CRM in COLLABIZ.</p>
+            <details className="cz-card" style={{ marginBottom: 12 }}><summary><strong>Not sure which role fits? Ask the matching agent</strong></summary><div style={{ marginTop: 12 }}><ChannelMatcher /></div></details>
+            <div className="cz-card"><ChannelApplyForm product={p.slug} fixedProduct /></div>
           </section>
         )}
 

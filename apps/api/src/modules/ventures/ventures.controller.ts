@@ -17,7 +17,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { and, asc, desc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { BIOFIX_FEEDSTOCKS, MICRO_SOURCES, VENTURE_ROLES, VENTURE_STAGES, pageIntent, ventureAvailability } from '@collabiz/types';
+import { BIOFIX_FEEDSTOCKS, CHANNEL_SLUGS, MICRO_SOURCES, OEM_STATUS, VENTURE_ROLES, VENTURE_STAGES, pageIntent, ventureAvailability } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import { courses, crmActivities, crmDeals, customers, microContracts, propertyProjects, propertyUnits, directOfferRecipients, directOffers, enquiries, memberships, solarReferralCodes, notifications, offerSales, organizations, uniteVentures, ventureInterests } from '../../db/schema';
 import { body } from '../../common/http';
@@ -135,7 +135,9 @@ export class VenturesController {
         .map((c) => ({ id: c.id, title: c.title, summary: c.summary, level: c.level, minutes: c.minutes, modules: (c.modules as unknown[]).length })) }
       : null;
     const connector = await this.connectors.forPage(slug);
-    return { ...v, work, showcase, connector, related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
+    // Unite brand products: OEM status always; the manufacturer's name only once a super admin made it public.
+    const oem = r.v.oemStatus ? { status: OEM_STATUS[r.v.oemStatus as keyof typeof OEM_STATUS] ?? r.v.oemStatus, partner: r.v.oemPublic ? r.v.oemPartner : null } : null;
+    return { ...v, work, showcase, connector, oem, channel: CHANNEL_SLUGS.includes(slug), related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
   }
 
   /** Enquiry from a business page. Stored with the business; its operating company (or Unite admins) is notified. */

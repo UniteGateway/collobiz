@@ -8,6 +8,8 @@ export const crmDeals = pgTable('crm_deals', {
   organizationId: uuid('organization_id').notNull().references(() => organizations.id),
   customerId: uuid('customer_id').notNull().references(() => customers.id),
   leadClaimId: uuid('lead_claim_id').references(() => leadClaims.id),
+  /** Unite product this deal is for (dealer sales CRM). */
+  ventureId: uuid('venture_id'),
   title: text('title').notNull(),
   value: bigint('value', { mode: 'number' }),
   currency: text('currency').notNull().default('INR'),

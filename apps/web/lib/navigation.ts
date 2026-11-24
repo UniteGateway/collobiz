@@ -9,6 +9,7 @@ export interface Module { key: string; label: string; icon: IconName; home: stri
 
 export const MODULES: Module[] = [
   { key: 'home', label: 'Home', icon: 'home', home: '/dashboard', match: ['/dashboard'] },
+  { key: 'dealer', label: 'Dealer dashboard', icon: 'briefcase', home: '/dealer', match: ['/dealer'] },
   { key: 'board', label: 'Industry Club', icon: 'sector', home: '/board', match: ['/board', '/club/products', '/club/power', '/club/agreements'], tabs: [['/board', 'My club board'], ['/club/products', 'My products'], ['/club/agreements', 'Agreements'], ['/club/power', 'Buy power']] },
   { key: 'collab', label: 'Collab', icon: 'teams', home: '/collab', match: ['/collab'], tabs: [['/collab', 'Start'], ['/collab/matches', 'Matches'], ['/collab/requests', 'Requests & deals'], ['/collab/programs', 'Unite programmes'], ['/collab/workspace', 'My collaborations']] },
   { key: 'business-offers', label: 'Business Offers', icon: 'briefcase', home: '/business-offers', match: ['/business-offers'], tabs: [['/business-offers', 'Browse'], ['/business-offers/new', 'Publish'], ['/business-offers/mine', 'My offers']] },
@@ -94,7 +95,7 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}, eb5?
   const item = (k: string) => { const m = byKey[k]; return { href: m.home, label: m.label, icon: m.icon, children: m.tabs?.filter(([h]) => h !== m.home).map(([href, label]) => ({ href, label })) }; };
   const GROUPS: [string, string[]][] = [
     ['Grow your business', ['collab', 'business-offers', 'launch', 'opportunities', 'leads', 'collaboration']],
-    ['Unite programmes', ['energy', 'unite-solar', 'powertek', 'invest', 'ventures']],
+    ['Unite programmes', ['dealer', 'energy', 'unite-solar', 'powertek', 'invest', 'ventures']],
     ['Deliver & trade', ['tenders', 'projects', 'micro', 'capacity', 'trading', 'pools', 'commit']],
     ['Money', ['earnings', 'books', 'proof']],
     ['Network & growth', ['community', 'messages', 'global', 'growth']],

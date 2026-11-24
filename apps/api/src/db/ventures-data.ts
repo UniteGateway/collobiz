@@ -106,4 +106,15 @@ export const VENTURES: VentureSeed[] = [
     summary: 'Fish and shrimp feed products and container-based feed-production systems for aquaculture farmers.' },
   { num: 48, slug: 'bizo', name: 'BIZO', category: 'Business Intelligence · Software', sector: 'technology', tagline: 'Business Operating System — business intelligence that adapts', stage: 'pilot', open: true, roles: ['refer_customers', 'sell_products'],
     summary: 'One corporate workspace that combines market research, prospect discovery, source-backed qualification, AI proposals and CRM. The dashboard configures itself around each company’s industry, products, target markets and goals, with a dedicated AI Growth Agent. www.bizo.one' },
+  // Unite brand products (OEM-made, sold through channel partners). Migration 0063 inserts them with their OEM records.
+  { num: 49, slug: 'unite-cement', name: 'Unite Cement', category: 'Building Materials · Unite brand', sector: 'construction_epc', tagline: 'Cement under the Unite brand', stage: 'concept', open: false, roles: ['refer_customers', 'sell_products'],
+    summary: 'Unite-branded cement made by an established cement manufacturer under an OEM arrangement, sold through Unite distributors, dealers, stores and franchises to builders, contractors and homeowners.' },
+  { num: 50, slug: 'unite-steel', name: 'Unite Steel', category: 'Building Materials · Unite brand', sector: 'construction_epc', tagline: 'TMT and structural steel under the Unite brand', stage: 'concept', open: false, roles: ['refer_customers', 'sell_products'],
+    summary: 'Unite-branded steel made by an established steel plant under an OEM arrangement, sold through Unite distributors and dealers to builders, contractors and fabricators.' },
+  { num: 51, slug: 'unite-ply', name: 'Unite Ply', category: 'Interiors · Unite brand', sector: 'manufacturing', tagline: 'Plywood, blockboard and laminates under the Unite brand', stage: 'concept', open: false, roles: ['refer_customers', 'sell_products', 'supply_products'],
+    summary: 'Unite-branded plywood and boards made by a manufacturer in Gujarat under an OEM arrangement, sold through dealers, stores and franchises to carpenters, interior designers and homeowners.' },
+  { num: 52, slug: 'unite-carpets', name: 'Unite Carpets', category: 'Interiors · Unite brand', sector: 'manufacturing', tagline: 'Carpets and rugs under the Unite brand', stage: 'concept', open: false, roles: ['refer_customers', 'sell_products', 'supply_products'],
+    summary: 'Unite-branded carpets, rugs and floor coverings made by a manufacturer in Gujarat under an OEM arrangement, for homes, hotels, offices and institutions.' },
+  { num: 53, slug: 'unite-furniture', name: 'Unite Furniture', category: 'Interiors · Unite brand', sector: 'manufacturing', tagline: 'Furniture from many makers, one Unite brand', stage: 'concept', open: false, roles: ['refer_customers', 'sell_products', 'supply_products'],
+    summary: 'Home, office and hospitality furniture made by several manufacturers to Unite specifications and sold under the Unite brand through stores, dealers and franchises.' },
 ];

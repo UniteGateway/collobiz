@@ -27,7 +27,7 @@ describe('Production bootstrap (fresh database, no demo data)', () => {
     const ag = (await pool.query("select code, version, status, legal_reviewed from agreement_templates where required_for <> 'club' order by code")).rows;
     expect(ag.map((a) => a.code)).toEqual(['lead_registration', 'partner_terms', 'privacy_notice']);
     expect(ag.every((a) => a.status === 'active' && a.legal_reviewed === false)).toBe(true);
-    expect(await one('select count(*)::int n, count(*) filter (where open)::int open from unite_ventures')).toEqual({ n: 48, open: 0 }); // 47 portfolio businesses + BIZO
+    expect(await one('select count(*)::int n, count(*) filter (where open)::int open from unite_ventures')).toEqual({ n: 53, open: 0 }); // 47 portfolio businesses + BIZO + 5 Unite brand products
     // Running again changes nothing.
     await bootstrap(db, {}, log);
     expect((await one('select count(*)::int n from organizations')).n).toBe(1);

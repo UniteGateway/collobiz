@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Unite brand products and channel partners (2026-11-24)
+- Unite Cement, Steel, Ply, Carpets and Furniture microsites (cement., steel., ply., carpets., furniture.) with internal OEM manufacturer records (public only when a super admin allows). Distributor / dealer / store / franchise / manufacturer applications on every product microsite, the home page and /partner-with-unite; rules-based matching agent with reasons; admin review (shortlist, approve with territory, decline with reason); dealer dashboard with a product-tagged sales CRM. Migrations 0062–0063. See docs/unite-brand-products.md.
+
 ### BIZO connected by file, linked to bizo.one (2026-11-24)
 - Pricing removed from the BIZO microsite. Start free / Log in open the BIZO app (leaddna.bizo.one); every feature links to its bizo.one page; BIZO industry pages linked. Members' BIZO page: app links, industry link, partner links, lead exchange both ways (customer import; BIZO-ready CSV export that withholds contacts without outreach consent, neutralises formulas, audited). BIZO on Industry Club boards for trading and exports.
 

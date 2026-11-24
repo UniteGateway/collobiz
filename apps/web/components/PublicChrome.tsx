@@ -10,6 +10,7 @@ const NAV = [
   { href: '/group-companies', label: 'Unite Group' },
   { href: '/businesses', label: 'Businesses' },
   { href: '/club', label: 'Industry Club' },
+  { href: '/partner-with-unite', label: 'Sell Unite products' },
   { href: '/catalogue', label: 'Catalogue' },
   { href: '/store', label: 'Store' },
   { href: '/opportunities/public', label: 'Opportunities' },

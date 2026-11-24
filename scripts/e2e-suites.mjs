@@ -3386,3 +3386,64 @@ suites.push({
     await shot('bizo-members');
   },
 });
+
+suites.push({
+  name: 'Unite brand products · matching agent, apply as a store, Unite approves, dealer adds a lead in the sales CRM',
+  run: async ({ page, WEB, ADMIN, expect, shot, label }) => {
+    await page.goto(WEB + '/');
+    await page.locator('[data-home-brands]').getByRole('link', { name: /Find my fit and apply/ }).click();
+    await page.getByRole('heading', { level: 1, name: /Become a Unite distributor/ }).waitFor();
+    await page.locator('[data-brand-product="unite-furniture"]').waitFor();
+    const fit = page.locator('[data-matcher]');
+    await fit.getByLabel('What does your business do today?').selectOption('furniture_store');
+    await fit.getByLabel('Showroom (sq ft, optional)').fill('1200');
+    await fit.getByRole('button', { name: 'Find my fit' }).click();
+    const top = page.locator('[data-match]').first();
+    expect(await top.getAttribute('data-match') === 'unite-furniture', 'furniture comes first for a furniture showroom');
+    await shot('brand-matcher');
+    await top.getByRole('button', { name: /Apply for Unite Furniture/ }).click();
+    const form = page.locator('[data-form="channel-apply"]');
+    expect(await form.getByLabel('I want to be a').inputValue() === 'store', 'the suggested role is pre-filled');
+    const email = label === 'desktop' ? 'ravi@sunrise.example' : `store.${Date.now()}@example.com`;
+    await form.getByLabel('Your name').fill('Ravi Patel');
+    await form.getByLabel('Email').fill(email);
+    await form.getByLabel('Mobile').fill('9825022222');
+    await form.getByLabel('State').selectOption('Gujarat');
+    await form.getByLabel('Town or city').fill('Ahmedabad');
+    await form.getByLabel(/I agree that Unite Group may contact me about this application/).check();
+    await form.getByRole('button', { name: 'Apply' }).click();
+    await page.getByText(/Application CHN-\d{4}-\d{6} received/).waitFor();
+    // The cement microsite has its own sell section; the manufacturer stays private
+    await page.goto(WEB + '/businesses/unite-cement');
+    await page.getByRole('heading', { name: 'Sell Unite Cement' }).waitFor();
+    expect((await page.locator('[data-oem]').textContent()).includes('an approved manufacturer'), 'OEM name is private');
+    await shot('brand-cement-microsite');
+    if (label !== 'desktop') return;
+    // Ravi signs in: the application links to Sunrise Traders
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/dealer');
+    await page.locator('[data-application]', { hasText: 'Unite Furniture' }).getByText('Received').waitFor();
+    // Unite admin approves with a territory
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/brand-channels');
+    const card = page.locator('[data-channel-app]', { hasText: 'Ravi Patel' }).filter({ hasText: 'Unite Furniture' });
+    await card.getByLabel('Territory (for approval)').fill('Ahmedabad city');
+    await shot('brand-admin-review');
+    await card.getByRole('button', { name: 'Approve' }).click();
+    await card.waitFor({ state: 'detached' });
+    // The dealer adds a lead
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/dealer');
+    const ch = page.locator('[data-dealer-channel="unite-furniture"]');
+    await ch.getByText('Store · Ahmedabad city').waitFor();
+    await ch.getByRole('button', { name: 'Add a lead' }).click();
+    const lead = page.locator('[data-form="dealer-lead"]');
+    await lead.getByLabel('Customer (business or person)').fill('Hotel Sapphire');
+    await lead.getByLabel('What they need').fill('120 room chairs and 40 tables');
+    await lead.getByLabel('Expected value in ₹ (optional)').fill('950000');
+    await lead.getByRole('button', { name: 'Add lead' }).click();
+    await ch.getByText('120 room chairs and 40 tables').waitFor();
+    expect((await ch.locator('[data-stage="new"] strong').textContent()).trim() === '1', 'the lead is in the New column');
+    await shot('brand-dealer-dashboard');
+  },
+});

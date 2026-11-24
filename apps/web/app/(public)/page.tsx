@@ -220,6 +220,19 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ---------- Unite brand products: become a channel partner ---------- */}
+      <section className="cz-hx-section" aria-labelledby="brand-h" data-home-brands>
+        <div className="cz-hx-head">
+          <p className="cz-hx-eyebrow">New · Unite brand products</p>
+          <h2 id="brand-h">Sell Unite Cement, Steel, Ply, Carpets and Furniture.</h2>
+          <p className="cz-hx-sub">Made by established manufacturers under the Unite brand. Become a distributor, dealer, store or franchise — our matching agent tells you which product fits your business.</p>
+        </div>
+        <div className="cz-board-why" style={{ marginBottom: 16 }}>
+          {[['unite-cement', 'Unite Cement'], ['unite-steel', 'Unite Steel'], ['unite-ply', 'Unite Ply'], ['unite-carpets', 'Unite Carpets'], ['unite-furniture', 'Unite Furniture']].map(([s, n]) => <Link key={s} className="cz-chip" href={`/businesses/${s}`}>{n}</Link>)}
+        </div>
+        <div className="cz-hx-ctas"><Link href="/partner-with-unite" className="cz-hx-btn cz-hx-btn-light cz-hx-btn-dark">Find my fit and apply<Icon name="arrow" size={16} /></Link></div>
+      </section>
+
       {/* ---------- Closing CTA ---------- */}
       <section className="cz-hx-cta" aria-labelledby="cta-h">
         <img src="/photos/collab-overhead.webp" alt="" aria-hidden loading="lazy" />
