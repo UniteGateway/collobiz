@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Stepper } from '@collabiz/ui';
+import { PlatformGrid } from '@/components/PlatformGrid';
 export const metadata: Metadata = { title: 'How Collaboration Works' };
 
 const LIFECYCLE = ['Draft', 'Submitted', 'Consent check', 'Duplicate review', 'Verified', 'Unite priority review', 'Accepted / Released', 'Qualification', 'Proposal', 'Award', 'Execution', 'Milestone certification', 'Settlement', 'Closed'];
@@ -31,6 +32,11 @@ export default function HowItWorksPage() {
           <li>Escalation to the category owner and central operations before auto-release where consent and rules allow.</li>
           <li>A partner can never approve their own KYC, deal award or commission payout.</li>
         </ul>
+      </section>
+      <section style={{ marginTop: 24 }} aria-labelledby="platform-h" className="cz-hx">
+        <h2 id="platform-h">Everything in COLLABIZ</h2>
+        <p className="cz-muted">Every capability works with the others — the same customer, team and ledger from first call to final payment.</p>
+        <PlatformGrid />
       </section>
     </div>
   );

@@ -9,7 +9,8 @@ const suites = [
       await page.goto(WEB + '/');
       await page.getByRole('heading', { level: 1 }).waitFor();
       expect(await page.locator('[data-screen="001"]').count() === 1, 'screen 001 marker missing');
-      expect(await page.getByRole('link', { name: 'Join as a partner' }).count() > 0, 'join CTA missing');
+      expect(await page.getByRole('link', { name: 'Get started' }).count() > 0, 'get started CTA missing');
+      expect(await page.locator('[data-home-paths] [data-path]').count() === 4, 'the four ways in are shown');
       await shot('001-home');
     },
   },
@@ -2874,7 +2875,7 @@ suites.push({
   run: async ({ page, WEB, expect, shot }) => {
     await page.context().clearCookies();
     await page.goto(WEB + '/');
-    await page.getByRole('heading', { name: 'Three ways in. One network behind them.' }).waitFor();
+    await page.getByRole('heading', { name: 'What would you like to do?' }).waitFor();
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.getByRole('heading', { name: 'What do you want to do today?' }).waitFor();
     await page.getByRole('heading', { name: 'Get set up' }).waitFor();
@@ -3224,8 +3225,10 @@ suites.push({
 suites.push({
   name: 'Unite Industry Club · join, accept terms, submit a product, Unite approves, both sign the licence online, it sells in Powertek, buy power',
   run: async ({ page, WEB, ADMIN, expect, shot, label }) => {
+    await page.context().clearCookies(); // starts as a signed-out visitor
     await page.goto(WEB + '/');
-    await page.getByRole('link', { name: 'Unite Industry Club' }).first().click();
+    await page.locator('[data-home-paths] [data-path="grow"]').waitFor();
+    await page.goto(WEB + '/club');
     await page.getByRole('heading', { level: 1, name: /We brand it, power it and sell it/ }).waitFor();
     await page.locator('[data-benefit="power_free"]').waitFor();
     await shot('club-landing');
@@ -3497,5 +3500,30 @@ suites.push({
     await webLogin(page, WEB, 'ravi@sunrise.example');
     await page.goto(WEB + '/dealer');
     await page.locator('[data-dealer-channel="unite-furniture"]').getByText(/Unite Furniture enquiry BIZ-/).waitFor();
+  },
+});
+
+suites.push({
+  name: 'Simple navigation · four ways in from home and /start; short header; member menu folds the long tail',
+  run: async ({ page, WEB, expect, shot, label }) => {
+    await page.context().clearCookies();
+    await page.goto(WEB + '/');
+    for (const [k, href] of [['buy', '/businesses'], ['sell', '/partner-with-unite'], ['grow', '/join'], ['earn', '/signup']]) {
+      expect(await page.locator(`[data-home-paths] [data-path="${k}"] a`).getAttribute('href') === href, `${k} path goes to ${href}`);
+    }
+    if (label === 'desktop') expect(await page.locator('header nav[aria-label="Primary"] a').count() === 5, 'header has five links');
+    await page.getByRole('link', { name: 'Get started' }).first().click();
+    await page.getByRole('heading', { level: 1, name: 'What would you like to do?' }).waitFor();
+    await shot('start');
+    await page.locator('[data-path="sell"]').getByRole('link').click();
+    await page.getByRole('heading', { level: 1, name: /Become a Unite distributor/ }).waitFor();
+    if (label !== 'desktop') return;
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    const side = page.locator('#cz-sidebar');
+    await side.getByRole('link', { name: 'Opportunities' }).first().waitFor();
+    expect(!(await side.getByRole('link', { name: 'Demand pools' }).isVisible()), '"Work together" starts folded');
+    await side.getByRole('button', { name: 'Work together' }).click();
+    await side.getByRole('link', { name: 'Demand pools' }).waitFor();
+    await shot('member-menu');
   },
 });

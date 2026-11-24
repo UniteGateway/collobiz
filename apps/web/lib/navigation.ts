@@ -9,7 +9,7 @@ export interface Module { key: string; label: string; icon: IconName; home: stri
 
 export const MODULES: Module[] = [
   { key: 'home', label: 'Home', icon: 'home', home: '/dashboard', match: ['/dashboard'] },
-  { key: 'dealer', label: 'Dealer dashboard', icon: 'briefcase', home: '/dealer', match: ['/dealer'] },
+  { key: 'dealer', label: 'Sell Unite products', icon: 'briefcase', home: '/dealer', match: ['/dealer'] },
   { key: 'board', label: 'Industry Club', icon: 'sector', home: '/board', match: ['/board', '/club/products', '/club/power', '/club/agreements'], tabs: [['/board', 'My club board'], ['/club/products', 'My products'], ['/club/agreements', 'Agreements'], ['/club/power', 'Buy power']] },
   { key: 'collab', label: 'Collab', icon: 'teams', home: '/collab', match: ['/collab'], tabs: [['/collab', 'Start'], ['/collab/matches', 'Matches'], ['/collab/requests', 'Requests & deals'], ['/collab/programs', 'Unite programmes'], ['/collab/workspace', 'My collaborations']] },
   { key: 'business-offers', label: 'Business Offers', icon: 'briefcase', home: '/business-offers', match: ['/business-offers'], tabs: [['/business-offers', 'Browse'], ['/business-offers/new', 'Publish'], ['/business-offers/mine', 'My offers']] },
@@ -34,7 +34,7 @@ export const MODULES: Module[] = [
   { key: 'commit', label: 'Commit', icon: 'contracts', home: '/commit', match: ['/commit'], tabs: [['/commit', 'My commitments'], ['/commit/new', 'New commitment']] },
   { key: 'energy', label: 'Energy · Green Park', icon: 'value', home: '/energy', match: ['/energy'],
     tabs: [['/energy', 'Marketplace'], ['/energy/map', 'State map'], ['/energy/register', 'Register'], ['/energy/calculator', 'Cost calculator'], ['/energy/traders', 'Licensed traders'], ['/energy/mine', 'My listings & deals']] },
-  { key: 'action-os', label: 'Action board', icon: 'bell', home: '/action-os', match: ['/action-os'],
+  { key: 'action-os', label: 'My tasks', icon: 'bell', home: '/action-os', match: ['/action-os'],
     tabs: [['/action-os', 'My action board'], ['/action-os/plans', 'Plans'], ['/action-os/settings', 'Schedule & channels']] },
   { key: 'community', label: 'Community', icon: 'teams', home: '/community', match: ['/community'] },
   { key: 'invest', label: 'Invest together', icon: 'building', home: '/invest', match: ['/invest'] },
@@ -93,16 +93,17 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}, eb5?
   // Modules grouped by what partners do; each module's own pages appear as an expandable sub-menu.
   const byKey = Object.fromEntries(MODULES.map((m) => [m.key, m]));
   const item = (k: string) => { const m = byKey[k]; return { href: m.home, label: m.label, icon: m.icon, children: m.tabs?.filter(([h]) => h !== m.home).map(([href, label]) => ({ href, label })) }; };
-  const GROUPS: [string, string[]][] = [
-    ['Grow your business', ['collab', 'business-offers', 'launch', 'opportunities', 'leads', 'collaboration']],
-    ['Unite programmes', ['dealer', 'energy', 'unite-solar', 'powertek', 'invest', 'ventures']],
-    ['Deliver & trade', ['tenders', 'projects', 'micro', 'capacity', 'trading', 'pools', 'commit']],
-    ['Money', ['earnings', 'books', 'proof']],
-    ['Network & growth', ['community', 'messages', 'global', 'growth']],
+  // Everyday things first; the long tail of tools sits in folded groups so the menu stays short.
+  const GROUPS: [string, string[], boolean][] = [
+    ['Find & win business', ['opportunities', 'leads', 'business-offers', 'tenders'], false],
+    ['Unite', ['ventures', 'dealer', 'board', 'unite-solar', 'energy', 'powertek'], false],
+    ['Money', ['earnings', 'books', 'proof'], false],
+    ['Work together', ['collab', 'collaboration', 'projects', 'micro', 'capacity', 'trading', 'pools', 'commit', 'launch', 'invest'], true],
+    ['Network', ['community', 'global', 'growth'], true],
   ];
-  sections.push({ items: [item('home'), item('board'), item('action-os')] });
+  sections.push({ items: [item('home'), item('action-os'), item('messages')] });
   const eb = eb5Section(eb5); if (eb) sections.push(eb);
-  for (const [title, keys] of GROUPS) sections.push({ title, collapsible: true, items: keys.filter((k) => byKey[k]).map(item) });
+  for (const [title, keys, collapsed] of GROUPS) sections.push({ title, collapsible: true, collapsed, items: keys.filter((k) => byKey[k]).map(item) });
   if (me?.capabilities.includes('commission.approve')) sections.push({ title: 'Finance', items: [{ href: '/commissions/approvals', label: 'Commission approvals', icon: 'verify' }] });
   sections.push({ title: 'Account', collapsible: true, items: [{ href: '/library', label: 'Catalogues & documents', icon: 'package' }, { href: '/vault', label: 'My documents', icon: 'documents' }, { href: '/profile', label: 'Settings', icon: 'settings' }, { href: '/help', label: 'Help & support', icon: 'help' }] });
   void counts;

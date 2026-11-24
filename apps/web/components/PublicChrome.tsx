@@ -4,18 +4,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from '@/lib/session';
 
+/** Five destinations only; everything else is one click away in the footer. */
 const NAV = [
-  { href: '/about', label: 'About' },
-  { href: '/how-it-works', label: 'How it works' },
-  { href: '/group-companies', label: 'Unite Group' },
-  { href: '/businesses', label: 'Businesses' },
-  { href: '/club', label: 'Industry Club' },
+  { href: '/businesses', label: 'Unite businesses' },
   { href: '/partner-with-unite', label: 'Sell Unite products' },
-  { href: '/catalogue', label: 'Catalogue' },
-  { href: '/store', label: 'Store' },
+  { href: '/club', label: 'Industry Club' },
   { href: '/opportunities/public', label: 'Opportunities' },
-  { href: '/membership', label: 'Membership' },
-  { href: '/support/contact', label: 'Contact' },
+  { href: '/how-it-works', label: 'How it works' },
 ];
 
 export function PublicHeader() {
@@ -27,7 +22,7 @@ export function PublicHeader() {
       <header className="cz-topbar">
         <details className="cz-public-menu">
           <summary aria-label="Open menu">Menu</summary>
-          <nav aria-label="Mobile">{NAV.map((n) => <Link key={n.href} href={n.href}>{n.label}</Link>)}{!me && <Link href="/login">Sign in</Link>}</nav>
+          <nav aria-label="Mobile">{NAV.map((n) => <Link key={n.href} href={n.href}>{n.label}</Link>)}{!me && <><Link href="/start">Get started</Link><Link href="/login">Sign in</Link></>}</nav>
         </details>
         <Link href="/" className="cz-brand" aria-label="COLLABIZ home"><img src="/brand/collabiz-mark.png" alt="" width={30} height={30} /><span>collabiz</span></Link>
         <nav aria-label="Primary">
@@ -37,7 +32,7 @@ export function PublicHeader() {
         {me ? <Link href="/dashboard" className="cz-btn cz-btn-accent cz-btn-sm">My dashboard</Link> : (
           <>
             <Link href="/login" className="cz-btn cz-btn-ghost cz-btn-sm cz-hide-xs">Sign in</Link>
-            <Link href="/signup" className="cz-btn cz-btn-accent cz-btn-sm">Join as partner</Link>
+            <Link href="/start" className="cz-btn cz-btn-accent cz-btn-sm">Get started</Link>
           </>
         )}
       </header>
@@ -54,9 +49,10 @@ export function PublicFooter() {
             <img src="/brand/collabiz-logo.png" alt="COLLABIZ — Connect. Collaborate. Grow." width={188} />
             <p className="cz-muted" style={{ marginTop: 14, maxWidth: 320 }}>The Unite-first B2B collaboration network. Powered by Unite Group.</p>
           </div>
-          <nav aria-label="Platform"><h4>Platform</h4><Link href="/how-it-works">How it works</Link><Link href="/opportunities/public">Opportunities</Link><Link href="/catalogue">Catalogue</Link><Link href="/membership">Membership</Link></nav>
-          <nav aria-label="Company"><h4>Company</h4><Link href="/about">About</Link><Link href="/group-companies">Unite Group</Link><Link href="/businesses">Unite businesses</Link><Link href="/success-stories">Success stories</Link><Link href="/locations">Partner locations</Link></nav>
-          <nav aria-label="Support"><h4>Support</h4><Link href="/support/contact">Contact &amp; FAQs</Link><Link href="/verify-certificate">Verify a certificate</Link><Link href="/settings/privacy">Privacy &amp; data rights</Link></nav>
+          <nav aria-label="Get started"><h4>Get started</h4><Link href="/businesses">Buy from Unite</Link><Link href="/partner-with-unite">Sell Unite products</Link><Link href="/join">Grow my business</Link><Link href="/signup">Earn as a partner</Link></nav>
+          <nav aria-label="Explore"><h4>Explore</h4><Link href="/how-it-works">How it works</Link><Link href="/opportunities/public">Opportunities</Link><Link href="/club">Industry Club</Link><Link href="/catalogue">Catalogue</Link><Link href="/store">Store</Link><Link href="/membership">Membership</Link></nav>
+          <nav aria-label="Company"><h4>Company</h4><Link href="/about">About</Link><Link href="/group-companies">Unite Group</Link><Link href="/success-stories">Success stories</Link><Link href="/locations">Partner locations</Link></nav>
+          <nav aria-label="Support"><h4>Support</h4><Link href="/support/contact">Contact &amp; FAQs</Link><Link href="/club/terms">Terms</Link><Link href="/club/legal">Legal documents</Link><Link href="/verify-certificate">Verify a certificate</Link><Link href="/settings/privacy">Privacy &amp; data rights</Link></nav>
         </div>
         <p className="cz-footer-legal">
           COLLABIZ is not an escrow bank, lender, securities exchange or regulated investment intermediary. Legal entities act as principals only

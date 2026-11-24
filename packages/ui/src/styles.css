@@ -386,7 +386,7 @@ fieldset.cz-fieldset { border: 0; padding: 0; margin: 0 0 16px; } fieldset.cz-fi
 .cz-home-cta { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; padding: 44px 48px; border-radius: 24px; background: linear-gradient(135deg, var(--cz-navy-900), var(--cz-navy-700)); color: #fff; }
 .cz-home-cta h2 { color: #fff; font-size: 30px; margin: 0 0 6px; } .cz-home-cta p { color: rgba(255,255,255,.8); margin: 0; font-size: 16px; }
 .cz-btn-onnavy { background: transparent; color: #fff; border-color: rgba(255,255,255,.45); } .cz-btn-onnavy:hover { border-color: #fff; color: #fff; }
-.cz-footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; }
+.cz-footer-grid { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: 32px; }
 .cz-footer nav { display: flex; flex-direction: column; gap: 10px; }
 .cz-footer h4 { font-size: 12.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--cz-grey-600); margin: 0 0 4px; }
 .cz-footer nav a { color: var(--cz-grey-700); text-decoration: none; } .cz-footer nav a:hover { color: var(--cz-navy-900); }
@@ -2953,3 +2953,13 @@ a.cz-card:hover, .cz-card[href]:hover, .cz-venture:hover, .cz-kpi:hover { box-sh
 .cz-gp-flink { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 14px; font-weight: 500; }
 .cz-match-score { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: #EAF4EA; color: #1B5E20; font-size: 12.5px; font-weight: 600; }
 .cz-hx-btn-dark { background: #011E48 !important; color: #fff !important; }
+/* ---------- Get started: four clear paths ---------- */
+.cz-start { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.cz-start li { display: flex; flex-direction: column; gap: 8px; background: #fff; border: 1px solid #E1E3E1; border-radius: 20px; padding: 22px; }
+.cz-start h3 { margin: 6px 0 0; font-size: 21px; font-weight: 600; color: #011E48; }
+.cz-start p { margin: 0; color: #444746; line-height: 1.5; }
+.cz-start .cz-start-who { font-size: 14px; font-weight: 600; color: #2E7D32; }
+.cz-start .cz-start-ex { font-size: 13.5px; color: #5E5E5E; }
+.cz-start .cz-btn { margin-top: auto; align-self: flex-start; display: inline-flex; gap: 6px; align-items: center; }
+.cz-start-ic { display: inline-grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; background: #E9EEF6; color: #011E48; }
+.cz-start li:hover { border-color: #011E48; }

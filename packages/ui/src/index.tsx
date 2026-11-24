@@ -51,7 +51,7 @@ export function Logo({ src = '/brand/collabiz-mark.png', label = 'collabiz', hre
 // ---------------- Shell ----------------
 export interface NavItem { href: string; label: string; screen?: string; icon?: IconName; count?: number; children?: { href: string; label: string }[] }
 /** A titled section can be collapsed; items with children show an expandable sub-menu. Open/closed state is remembered. */
-export interface NavSection { title?: string; items: NavItem[]; collapsible?: boolean }
+export interface NavSection { title?: string; items: NavItem[]; collapsible?: boolean; /** Start folded (opens when one of its pages is open or the user unfolds it). */ collapsed?: boolean }
 export function AppShell({
   topNav = [], sections, currentPath, userInitials, userMenu, children, brandLabel, logoSrc, product, tools, banner, sidebarFooter,
 }: {
@@ -90,7 +90,7 @@ export function AppShell({
         <aside id="cz-sidebar" className="cz-sidebar" data-open={open} aria-label="Section navigation">
           {sections.map((s, i) => {
             const sk = `s:${s.title ?? i}`;
-            const sOpen = !s.collapsible || s.items.some(holds) || fold[sk] !== false;
+            const sOpen = !s.collapsible || s.items.some(holds) || (fold[sk] ?? !s.collapsed) !== false;
             return (
               <div key={i} className="cz-nav-sec" data-open={sOpen}>
                 {s.title && (s.collapsible

@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Simpler, clearer site (2026-11-24)
+- Organised around four paths — Buy from Unite, Sell Unite products, Grow my business, Earn as a partner — on the home page and a new /start page. Public header cut from 11 links to 5 with one Get started button; home page cut from 12 sections to 7 (detail moved to How it works and the footer); member menu regrouped with the long tail folded. No page removed. See docs/navigation.md.
+
 ### Add Unite brand products from one admin page; customers routed to local dealers (2026-11-24)
 - Admin console → Unite brand products → Products: one form (name, web address, description, buyers, partner roles, matching rules, features, steps, OEM, colours); publishing creates the microsite, web address, partner applications, matching, dealer CRM and home-page listing without code changes. Products are now data (table brand_products, migration 0064).
 - Buyers' enquiries on a brand microsite go straight into the CRM of the approved partner for their area (with consent), else to the Unite team.
