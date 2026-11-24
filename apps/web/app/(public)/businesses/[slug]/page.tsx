@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { appBrand } from '@collabiz/types';
+import { appBrand, type AppBrand, type AppFeature } from '@collabiz/types';
 import { ButtonLink, EmptyState, ErrorState, Icon, LoadingState } from '@collabiz/ui';
 import { VentureMark, stageLabel } from '@/components/Ventures';
 import { ChannelApplyForm, ChannelMatcher } from '@/components/BrandChannels';
@@ -14,7 +14,7 @@ import { isNotFound, useQuery } from '@/lib/hooks';
 const url0 = (m: Record<string, string>) => Object.values(m)[0];
 const IC: Record<string, string> = { doc: 'documents', globe: 'map', search: 'search', sparkle: 'award', chart: 'earnings', grid: 'package', shield: 'verify', flag: 'bookmark', people: 'users', clock: 'clock', bell: 'bell', check: 'check', map: 'location' };
 
-type P = Product & { showcase?: { kind: 'property'; items: ShowProject[] } | { kind: 'courses'; items: ShowCourse[] } | null; work?: { open: number; done: number } | null; connector?: ConnectorView | null; channel?: boolean; oem?: { status: string; partner: string | null } | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
+type P = Product & { showcase?: { kind: 'property'; items: ShowProject[] } | { kind: 'courses'; items: ShowCourse[] } | null; work?: { open: number; done: number } | null; connector?: ConnectorView | null; channel?: boolean; brand?: { subdomain: string; features: { title: string; text: string; planned?: boolean }[]; workflow: { title: string; text: string }[]; accent: string[] } | null; oem?: { status: string; partner: string | null } | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
 
 /** A Unite product's own page: overview, features, what it works with, and an enquiry form wired into COLLABIZ. */
 export default function ProductPage() {
@@ -30,7 +30,10 @@ export default function ProductPage() {
   if (q.error) return <div className="cz-gp-body">{isNotFound(q.error)
     ? <EmptyState title="Product not found"><Link href="/businesses">See all Unite products</Link></EmptyState> : <ErrorState error={q.error} onRetry={q.reload} />}</div>;
   const p = q.data!;
-  const b = appBrand(p.slug);
+  // Built-in brand settings, overridden by what Unite admins set for a brand product in the admin console.
+  const base = appBrand(p.slug);
+  const b: AppBrand | undefined = p.brand ? { ...(base ?? { accent: [p.brand.accent[0], p.brand.accent[1]] as [string, string], features: [] }),
+    ...(p.brand.features.length ? { features: p.brand.features.map((x): AppFeature => ({ ...x, icon: 'check' })) } : {}), ...(p.brand.workflow.length ? { workflow: p.brand.workflow } : {}) } : base;
   const pill = stagePill(p.stage);
   const summary = p.summary.replace(/\s*www\.[^\s]+$/, '');
   const accent = b?.accent ?? ['#0B3D91', '#1F9D55'];
@@ -60,7 +63,7 @@ export default function ProductPage() {
             <div><dt>Status</dt><dd><span className={`cz-gp-pill cz-gp-pill-${pill.tone}`}>{pill.label}</span></dd></div>
             <div><dt>Category</dt><dd>{p.category}</dd></div>
             {p.company && <div><dt>Operated by</dt><dd>{p.company}</dd></div>}
-            {process.env.NEXT_PUBLIC_PRODUCTS_DOMAIN && <div><dt>Web address</dt><dd>{productSubdomain(p.slug)}.{process.env.NEXT_PUBLIC_PRODUCTS_DOMAIN}</dd></div>}
+            {process.env.NEXT_PUBLIC_PRODUCTS_DOMAIN && <div><dt>Web address</dt><dd>{p.brand?.subdomain ?? productSubdomain(p.slug)}.{process.env.NEXT_PUBLIC_PRODUCTS_DOMAIN}</dd></div>}
           </dl>
         </div>
         <div className="cz-gp-phero-media">
@@ -171,7 +174,7 @@ export default function ProductPage() {
               </div>
               {mode === 'solar' ? <SolarLeadForm p={p} refCode={ref} /> : <ProductEnquiry p={p} refCode={ref} />}
             </div>
-          ) : <ProductEnquiry p={p} refCode={ref} projects={p.showcase?.kind === 'property' ? p.showcase.items : undefined} projectId={visit} items={p.connector?.items} itemId={ask} />}
+          ) : <ProductEnquiry p={p} refCode={ref} projects={p.showcase?.kind === 'property' ? p.showcase.items : undefined} projectId={visit} items={p.connector?.items} itemId={ask} dealers={p.channel} />}
         </section>
         <p className="cz-muted cz-gp-note">{p.stage === 'live' ? '' : `${p.name} is at an early stage and may be available only in some areas. `}Nothing on this page is an offer of investment, credit or financial products, and no earnings are guaranteed.</p>
       </div>

@@ -6,6 +6,8 @@
  * such; an AI model can re-rank results when the AI provider is switched on, but the reasons stay.
  */
 import { z } from 'zod';
+import { SECTOR_CODES } from './taxonomy';
+import { RESERVED_SUBDOMAINS } from './product-domains';
 
 export const CHANNEL_ROLES = [
   { code: 'distributor', label: 'Distributor', text: 'Stock in bulk and supply dealers and projects across a district or region.' },
@@ -98,7 +100,8 @@ export function recommendChannels(i: MatchInput, products: readonly ChannelProdu
 
 const opt = (max: number) => z.string().trim().max(max).optional().or(z.literal('').transform(() => undefined));
 export const ChannelApplicationSchema = z.object({
-  productSlug: z.string().refine((s) => CHANNEL_SLUGS.includes(s), 'Choose a Unite product'),
+  /** Checked against the published brand products (and the roles each takes) on the server. */
+  productSlug: z.string().trim().min(3, 'Choose a Unite product').max(80),
   role: z.enum(CHANNEL_ROLE_CODES),
   businessType: z.enum(BUSINESS_TYPE_CODES),
   name: z.string().trim().min(2, 'Enter your name').max(120),
@@ -112,8 +115,7 @@ export const ChannelApplicationSchema = z.object({
   capacity: opt(300), message: opt(1500),
   consent: z.literal(true, { message: 'Consent is required so Unite can contact you' }),
   website: z.string().max(0).optional(),
-}).refine((x) => channelProduct(x.productSlug)?.roles.includes(x.role) ?? false, { message: 'This product does not take that role', path: ['role'] })
-  .refine((x) => x.role !== 'manufacturer' || (x.capacity?.length ?? 0) >= 5, { message: 'Describe your production capacity', path: ['capacity'] });
+}).refine((x) => x.role !== 'manufacturer' || (x.capacity?.length ?? 0) >= 5, { message: 'Describe your production capacity', path: ['capacity'] });
 export type ChannelApplicationInput = z.infer<typeof ChannelApplicationSchema>;
 
 export const MatchSchema = z.object({
@@ -128,10 +130,38 @@ export const ChannelDecisionSchema = z.object({
   .refine((x) => x.decision !== 'approve' || (x.territory?.length ?? 0) >= 2, { message: 'Set the territory', path: ['territory'] });
 
 export const ChannelLeadSchema = z.object({
-  productSlug: z.string().refine((s) => CHANNEL_SLUGS.includes(s), 'Choose a Unite product'),
+  productSlug: z.string().trim().min(3).max(80),
   customer: z.string().trim().min(2).max(200), contactName: opt(120), phone: opt(20), city: opt(80),
   title: z.string().trim().min(3).max(200), value: z.number().int().positive().max(1_000_000_000_00).optional(),
 });
 
 /** OEM manufacturing status, shown publicly only when a super admin marks it public. */
 export const OEM_STATUS = { planned: 'Being finalised', agreement_signed: 'Agreement signed', producing: 'In production' } as const;
+
+// ---------------------------------------------------------------- admin: add a brand product
+const slugRe = /^[a-z0-9](?:[a-z0-9-]{1,58}[a-z0-9])$/;
+export const slugify = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+const Feature = z.object({ title: z.string().trim().min(3).max(80), text: z.string().trim().min(5).max(300), planned: z.boolean().default(false) });
+export const BrandProductSchema = z.object({
+  name: z.string().trim().min(3).max(80),
+  slug: z.string().trim().toLowerCase().regex(slugRe, 'Lower-case letters, numbers and hyphens'),
+  subdomain: z.string().trim().toLowerCase().regex(/^[a-z0-9](?:[a-z0-9-]{0,40}[a-z0-9])?$/, 'Lower-case letters, numbers and hyphens')
+    .refine((s) => !(RESERVED_SUBDOMAINS as readonly string[]).includes(s), 'This web address is reserved'),
+  category: z.string().trim().min(3).max(80),
+  sector: z.enum(SECTOR_CODES),
+  tagline: z.string().trim().min(3).max(160),
+  summary: z.string().trim().min(30).max(1200),
+  buyers: z.string().trim().min(5).max(200),
+  roles: z.array(z.enum(CHANNEL_ROLE_CODES)).min(1).max(5),
+  strong: z.array(z.enum(BUSINESS_TYPE_CODES)).min(1, 'Choose at least one business type that already sells to these buyers').max(13),
+  good: z.array(z.enum(BUSINESS_TYPE_CODES)).max(13).default([]),
+  bulk: z.boolean().default(false),
+  showroom: z.boolean().default(false),
+  features: z.array(Feature).max(12).default([]),
+  workflow: z.array(z.object({ title: z.string().trim().min(3).max(60), text: z.string().trim().min(5).max(200) })).max(6).default([]),
+  accent: z.tuple([z.string().regex(/^#[0-9A-Fa-f]{6}$/), z.string().regex(/^#[0-9A-Fa-f]{6}$/)]).default(['#011E48', '#2E7D32']),
+  oemPartner: z.string().trim().max(160).optional(),
+  oemStatus: z.enum(['planned', 'agreement_signed', 'producing']).default('planned'),
+});
+export type BrandProductInput = z.infer<typeof BrandProductSchema>;
+export const BrandProductUpdateSchema = BrandProductSchema.omit({ slug: true });

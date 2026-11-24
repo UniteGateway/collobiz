@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CHANNEL_ROLES } from '@collabiz/types';
-import { LoadingState } from '@collabiz/ui';
+import { ErrorState, LoadingState } from '@collabiz/ui';
 import { ChannelApplyForm, ChannelMatcher } from '@/components/BrandChannels';
 import { useQuery } from '@/lib/hooks';
 
@@ -23,7 +23,7 @@ function Inner() {
       </header>
       <section aria-labelledby="pp-h" style={{ marginTop: 24 }}>
         <h2 id="pp-h">Unite brand products</h2>
-        {!q.data ? <LoadingState /> : (
+        {q.error ? <ErrorState error={q.error} onRetry={q.reload} /> : !q.data ? <LoadingState /> : (
           <div className="cz-board-grid">{q.data.items.map((p) => (
             <article key={p.slug} className="cz-card cz-board-card" data-brand-product={p.slug}>
               <h3>{p.name}</h3><p className="cz-muted">{p.tagline}. Sold to {p.buyers}.</p>

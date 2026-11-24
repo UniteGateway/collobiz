@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { OFFER_CATEGORIES, SECTORS, appBrand, sectorName } from '@collabiz/types';
 import { Icon, Skeleton, type IconName } from '@collabiz/ui';
 import { useQuery } from '@/lib/hooks';
+import { useBrandProducts } from '@/components/BrandChannels';
 
 const inrShort = (minor: number) => {
   const r = minor / 100;
@@ -53,6 +54,7 @@ export default function HomePage() {
   const stats = useQuery<{ verifiedPartners: number; groupCompanies: number; openOpportunities: number; openValue: number; activeSectors: number; protectedLeads: number; asOf: string }>('/public/stats');
   const featured = useQuery<any[]>('/public/opportunities');
   const companies = useQuery<any[]>('/public/group-companies');
+  const brands = useBrandProducts();
   const products = useQuery<{ slug: string; name: string; tagline: string }[]>('/public/products');
   const opp = (featured.data ?? [])[0];
   const s = stats.data;
@@ -224,11 +226,11 @@ export default function HomePage() {
       <section className="cz-hx-section" aria-labelledby="brand-h" data-home-brands>
         <div className="cz-hx-head">
           <p className="cz-hx-eyebrow">New · Unite brand products</p>
-          <h2 id="brand-h">Sell Unite Cement, Steel, Ply, Carpets and Furniture.</h2>
+          <h2 id="brand-h">Sell Unite brand products.</h2>
           <p className="cz-hx-sub">Made by established manufacturers under the Unite brand. Become a distributor, dealer, store or franchise — our matching agent tells you which product fits your business.</p>
         </div>
         <div className="cz-board-why" style={{ marginBottom: 16 }}>
-          {[['unite-cement', 'Unite Cement'], ['unite-steel', 'Unite Steel'], ['unite-ply', 'Unite Ply'], ['unite-carpets', 'Unite Carpets'], ['unite-furniture', 'Unite Furniture']].map(([s, n]) => <Link key={s} className="cz-chip" href={`/businesses/${s}`}>{n}</Link>)}
+          {(brands.data?.items ?? []).map((x) => <Link key={x.slug} className="cz-chip" href={`/businesses/${x.slug}`}>{x.name}</Link>)}
         </div>
         <div className="cz-hx-ctas"><Link href="/partner-with-unite" className="cz-hx-btn cz-hx-btn-light cz-hx-btn-dark">Find my fit and apply<Icon name="arrow" size={16} /></Link></div>
       </section>

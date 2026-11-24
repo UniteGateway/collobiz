@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { OEM_STATUS } from '@collabiz/types';
 import { Alert, Button, Card, Checkbox, EmptyState, LoadingState, Segmented, Select, StatusBadge, TextInput } from '@collabiz/ui';
 import { BannerHeader } from '@/components/Banner';
+import { BrandProducts } from '@/components/BrandProductEditor';
 import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
@@ -12,12 +13,12 @@ interface Oem { slug: string; name: string; oemPartner: string | null; oemStatus
 
 /** Unite brand products — channel-partner applications and OEM manufacturer records. */
 export default function BrandChannelsAdmin() {
-  const [tab, setTab] = useState('apps');
+  const [tab, setTab] = useState('products');
   return (
     <div className="cz-stack" style={{ gap: 16 }}>
-      <BannerHeader title="Unite brand products" description="Distributor, dealer, store, franchise and manufacturer applications for Unite Cement, Steel, Ply, Carpets and Furniture — with the matching agent's score and reasons — and each product's OEM manufacturer record." />
-      <Segmented label="Show" value={tab} onChange={setTab} options={[{ value: 'apps', label: 'Applications' }, { value: 'oem', label: 'OEM manufacturers' }]} />
-      {tab === 'apps' ? <Apps /> : <Oems />}
+      <BannerHeader title="Unite brand products" description="Add a product once — its microsite, web address, partner applications, matching rules and dealer CRM are created when you publish. Review distributor, dealer, store, franchise and manufacturer applications, and keep each product's OEM manufacturer record." />
+      <Segmented label="Show" value={tab} onChange={setTab} options={[{ value: 'products', label: 'Products' }, { value: 'apps', label: 'Applications' }, { value: 'oem', label: 'OEM manufacturers' }]} />
+      {tab === 'products' ? <BrandProducts /> : tab === 'apps' ? <Apps /> : <Oems />}
     </div>
   );
 }

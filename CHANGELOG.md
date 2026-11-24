@@ -4,6 +4,10 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Add Unite brand products from one admin page; customers routed to local dealers (2026-11-24)
+- Admin console → Unite brand products → Products: one form (name, web address, description, buyers, partner roles, matching rules, features, steps, OEM, colours); publishing creates the microsite, web address, partner applications, matching, dealer CRM and home-page listing without code changes. Products are now data (table brand_products, migration 0064).
+- Buyers' enquiries on a brand microsite go straight into the CRM of the approved partner for their area (with consent), else to the Unite team.
+
 ### Unite brand products and channel partners (2026-11-24)
 - Unite Cement, Steel, Ply, Carpets and Furniture microsites (cement., steel., ply., carpets., furniture.) with internal OEM manufacturer records (public only when a super admin allows). Distributor / dealer / store / franchise / manufacturer applications on every product microsite, the home page and /partner-with-unite; rules-based matching agent with reasons; admin review (shortlist, approve with territory, decline with reason); dealer dashboard with a product-tagged sales CRM. Migrations 0062–0063. See docs/unite-brand-products.md.
 

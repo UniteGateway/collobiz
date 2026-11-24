@@ -72,4 +72,39 @@ describe('Unite brand products and channel partners', () => {
     const a = await pool.query("select action from audit_events where action like 'brand_channel.%' order by seq");
     expect(a.rows.map((x) => x.action)).toEqual(expect.arrayContaining(['brand_channel.application_approved', 'brand_channel.lead_added', 'brand_channel.oem_updated']));
   });
+
+  it('admins add a new product from one form; publishing creates its microsite, web address, applications and matching', async () => {
+    const product = { name: 'Unite Paints', slug: 'unite-paints', subdomain: 'paints', category: 'Building Materials · Unite brand', sector: 'manufacturing', tagline: 'Interior and exterior paints under the Unite brand',
+      summary: 'Interior and exterior paints made by an OEM partner to Unite specifications and sold through Unite dealers and stores.', buyers: 'painters, contractors and homeowners',
+      roles: ['distributor', 'dealer', 'store'], strong: ['hardware_store'], good: ['building_materials_dealer', 'interior_designer'], showroom: true,
+      features: [{ title: 'Shade cards and tinting', text: 'Dealers get shade cards and a tinting guide.', planned: true }], workflow: [{ title: 'Apply', text: 'Apply as a dealer for your area.' }] };
+    await post('/admin/brand-products/catalogue', product, t.asha).expect(403);
+    await post('/admin/brand-products/catalogue', { ...product, slug: 'sunx' }, t.uniteAdmin).expect(409); // an existing business
+    const draft = (await post('/admin/brand-products/catalogue', product, t.uniteAdmin).expect(201)).body;
+    expect(draft.status).toBe('draft');
+    await get('/public/products/unite-paints').expect(404); // not live until published
+    expect((await get('/public/brand-products').expect(200)).body.items.map((x: { slug: string }) => x.slug)).not.toContain('unite-paints');
+    await post('/admin/brand-products/catalogue/unite-paints/publish', { oemPartner: 'To be selected' }, t.uniteAdmin).expect(200);
+    const page = (await get('/public/products/unite-paints').expect(200)).body;
+    expect(page).toMatchObject({ name: 'Unite Paints', channel: true, open: false });
+    expect(page.brand.features[0].title).toBe('Shade cards and tinting'); expect(page.brand.subdomain).toBe('paints');
+    expect((await get('/public/products/paints').expect(200)).body.slug).toBe('unite-paints'); // its own web address
+    expect(JSON.stringify(page)).not.toContain('To be selected'); // OEM stays internal
+    const fit = (await post('/public/brand-products/match', { businessType: 'hardware_store', showroomSqft: 600 }).expect(200)).body.items;
+    expect(fit.map((x: { slug: string }) => x.slug)).toContain('unite-paints');
+    await post('/public/brand-products/applications', { ...apply, email: 'paint.dealer@example.com', productSlug: 'unite-paints', role: 'franchise', businessType: 'hardware_store' }).expect(400); // role not offered
+    await post('/public/brand-products/applications', { ...apply, email: 'paint.dealer@example.com', productSlug: 'unite-paints', role: 'dealer', businessType: 'hardware_store' }).expect(201);
+    await api(app).put('/v1/admin/brand-products/catalogue/unite-paints').set(auth(t.uniteAdmin)).send({ ...product, tagline: 'Paints and primers under the Unite brand' }).expect(200);
+    expect((await get('/public/products/unite-paints').expect(200)).body.tagline).toBe('Paints and primers under the Unite brand');
+  });
+
+  it('a customer’s enquiry on a brand microsite goes straight into the approved dealer’s CRM for their area', async () => {
+    const r = (await post('/public/products/unite-cement/enquiries', { kind: 'customer', name: 'Meghana Rao', email: 'meghana@example.com', phone: '9876511111', city: 'Pune', message: 'Need 300 bags for my house next month.', consent: true }).expect(201)).body;
+    expect(r.dealer).toBe('Volt EPC');
+    const deal = (await pool.query("select d.title, d.stage, c.contact_email, c.restricted_contacts from crm_deals d join customers c on c.id = d.customer_id join organizations o on o.id = d.organization_id where o.display_name = 'Volt EPC' and d.title like $1", [`%${r.reference}%`])).rows[0];
+    expect(deal).toMatchObject({ stage: 'new', contact_email: 'meghana@example.com', restricted_contacts: false });
+    const far = (await post('/public/products/unite-cement/enquiries', { kind: 'customer', name: 'Arun', email: 'arun@example.com', city: 'Kochi', message: 'Need cement for a small shop.', consent: true }).expect(201)).body;
+    expect(far.dealer).toBeNull(); // no dealer there yet — the Unite team handles it
+  });
 });
+

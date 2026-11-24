@@ -2,10 +2,14 @@
 /** Unite brand products — the matching agent and the channel-partner application form (microsites, home, /partner-with-unite). */
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { BUSINESS_TYPES, CHANNEL_PRODUCTS, CHANNEL_ROLES, INDIA_STATES, channelProduct, channelRoleLabel, type ChannelMatch } from '@collabiz/types';
+import { BUSINESS_TYPES, CHANNEL_ROLES, INDIA_STATES, channelRoleLabel, type ChannelMatch } from '@collabiz/types';
 import { Alert, Button, Select, TextArea, TextInput } from '@collabiz/ui';
 import { api } from '@/lib/api';
-import { useMutation } from '@/lib/hooks';
+import { useMutation, useQuery } from '@/lib/hooks';
+
+export interface BrandProductItem { slug: string; subdomain: string; name: string; tagline: string; roles: string[]; buyers: string; oem: { status: string; partner: string | null } | null }
+/** Published Unite brand products (added by Unite admins). */
+export const useBrandProducts = () => useQuery<{ items: BrandProductItem[] }>('/public/brand-products');
 
 const num = (v: string) => (v.trim() ? Math.max(0, Math.round(Number(v))) : undefined);
 
@@ -42,11 +46,13 @@ export function ChannelMatcher({ onPick }: { onPick?: (slug: string, role: strin
 }
 
 export function ChannelApplyForm({ product, role, businessType, sizes, fixedProduct }: { product?: string; role?: string; businessType?: string; sizes?: { warehouse: string; showroom: string }; fixedProduct?: boolean }) {
-  const first = product ?? CHANNEL_PRODUCTS[0].slug;
+  const list = useBrandProducts().data?.items ?? [];
+  const first = product ?? '';
   const [f, setF] = useState({ productSlug: first, role: role ?? 'dealer', businessType: businessType ?? 'building_materials_dealer', name: '', email: '', phone: '', company: '', state: 'Telangana', district: '', city: '', territory: '', currentBrands: '', experienceYears: '', warehouse: sizes?.warehouse ?? '', showroom: sizes?.showroom ?? '', capacity: '', message: '', consent: false });
+  useEffect(() => { if (!f.productSlug && list.length) setF((x) => ({ ...x, productSlug: list[0].slug })); }, [list, f.productSlug]);
   useEffect(() => { setF((x) => ({ ...x, ...(product ? { productSlug: product } : {}), ...(role ? { role } : {}), ...(businessType ? { businessType } : {}), ...(sizes ? { warehouse: sizes.warehouse, showroom: sizes.showroom } : {}) })); }, [product, role, businessType, sizes]);
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((x) => ({ ...x, [k]: e.target.value }));
-  const p = channelProduct(f.productSlug);
+  const p = list.find((x) => x.slug === f.productSlug);
   const roles = CHANNEL_ROLES.filter((r) => p?.roles.includes(r.code));
   const [done, setDone] = useState<{ code: string; alsoFits: ChannelMatch[] } | null>(null);
   const [hp, setHp] = useState('');
@@ -68,7 +74,7 @@ export function ChannelApplyForm({ product, role, businessType, sizes, fixedProd
     <form noValidate className="cz-stack" style={{ gap: 12 }} onSubmit={(e) => { e.preventDefault(); m.run(); }} data-form="channel-apply">
       {m.error && <Alert tone="danger" title={m.error}>{Object.keys(fe).length ? 'Please check the highlighted fields.' : null}</Alert>}
       <div className="cz-grid cz-grid-2">
-        {!fixedProduct && <Select label="Unite product" value={f.productSlug} onChange={set('productSlug')} options={CHANNEL_PRODUCTS.map((x) => ({ value: x.slug, label: x.name }))} />}
+        {!fixedProduct && <Select label="Unite product" value={f.productSlug} onChange={set('productSlug')} options={list.map((x) => ({ value: x.slug, label: x.name }))} />}
         <Select label="I want to be a" value={roles.some((x) => x.code === f.role) ? f.role : roles[0]?.code ?? ''} onChange={set('role')} options={roles.map((r) => ({ value: r.code, label: r.label }))} error={fe.role} />
         <Select label="My business today" value={f.businessType} onChange={set('businessType')} options={BUSINESS_TYPES.map((b) => ({ value: b.code, label: b.label }))} />
         <TextInput label="Your name" autoComplete="name" value={f.name} onChange={set('name')} error={fe.name} />

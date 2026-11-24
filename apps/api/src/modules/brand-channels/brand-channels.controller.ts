@@ -9,17 +9,18 @@
  *    with the product). They see only their own leads.
  *  - OEM manufacturer names stay internal until a super admin marks them public.
  */
-import { Body, ConflictException, Controller, ForbiddenException, Get, HttpCode, Module, NotFoundException, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, HttpCode, Module, NotFoundException, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
-  CHANNEL_PRODUCTS, CHANNEL_SLUGS, CHANNEL_STATUS, ChannelApplicationSchema, ChannelDecisionSchema, ChannelLeadSchema, MatchSchema, OEM_STATUS, PIPELINE_STAGES,
-  businessTypeLabel, channelProduct, channelRoleLabel, recommendChannels, type BusinessType,
+  BrandProductSchema, BrandProductUpdateSchema, CHANNEL_STATUS, ChannelApplicationSchema, ChannelDecisionSchema, ChannelLeadSchema, MatchSchema, OEM_STATUS, PIPELINE_STAGES,
+  businessTypeLabel, channelRoleLabel, recommendChannels, type BusinessType,
 } from '@collabiz/types';
+import { BrandProductsService } from './brand-products.service';
 import { InjectDb, type Db } from '../../db/client';
-import { channelApplications, crmActivities, crmDeals, customers, memberships, notifications, uniteVentures, users } from '../../db/schema';
+import { brandProducts, channelApplications, crmActivities, crmDeals, customers, memberships, notifications, uniteVentures, users } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, Public, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
@@ -34,12 +35,12 @@ const OemSchema = z.object({ oemPartner: z.string().trim().min(2).max(160).optio
 @ApiTags('brand-channels')
 @Controller()
 export class BrandChannelsController {
-  constructor(@InjectDb() private db: Db, private audit: AuditService, private mail: MailService) {}
+  constructor(@InjectDb() private db: Db, private audit: AuditService, private mail: MailService, private brands: BrandProductsService) {}
 
   private async ventures() {
-    const vs = await this.db.select().from(uniteVentures).where(inArray(uniteVentures.slug, CHANNEL_SLUGS));
-    return new Map(vs.map((v) => [v.slug, v]));
+    return new Map((await this.brands.published()).map((x) => [x.b.slug, x.v]));
   }
+  private async catalogue() { return (await this.brands.published()).map((x) => x.product); }
   private oemPublic(v: typeof uniteVentures.$inferSelect) {
     if (!v.oemStatus) return null;
     return { status: OEM_STATUS[v.oemStatus as keyof typeof OEM_STATUS] ?? v.oemStatus, partner: v.oemPublic ? v.oemPartner : null };
@@ -60,8 +61,7 @@ export class BrandChannelsController {
   @Public()
   @Get('public/brand-products')
   async products() {
-    const vs = await this.ventures();
-    return { items: CHANNEL_PRODUCTS.filter((p) => vs.has(p.slug)).map((p) => { const v = vs.get(p.slug)!; return { slug: p.slug, name: v.name, tagline: v.tagline, stage: v.stage, roles: p.roles, buyers: p.buyers, oem: this.oemPublic(v) }; }) };
+    return { items: (await this.brands.published()).map(({ b, v }) => ({ slug: b.slug, subdomain: b.subdomain, name: v.name, tagline: v.tagline, stage: v.stage, roles: b.roles, buyers: b.buyers, oem: this.oemPublic(v) })) };
   }
 
   /** The matching agent: which Unite product and role fits this business, and why. */
@@ -69,8 +69,8 @@ export class BrandChannelsController {
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @Post('public/brand-products/match')
   @HttpCode(200)
-  match(@Body(body(MatchSchema)) b: z.infer<typeof MatchSchema>) {
-    return { items: recommendChannels(b), engine: 'rules', note: 'Suggestions from the rules shown with each one: your business, your space and the role you want. Unite decides every application.' };
+  async match(@Body(body(MatchSchema)) b: z.infer<typeof MatchSchema>) {
+    return { items: recommendChannels(b, await this.catalogue()), engine: 'rules', note: 'Suggestions from the rules shown with each one: your business, your space and the role you want. Unite decides every application.' };
   }
 
   @Public()
@@ -78,13 +78,14 @@ export class BrandChannelsController {
   @Post('public/brand-products/applications')
   @HttpCode(201)
   async apply(@Body(body(ChannelApplicationSchema)) b: z.infer<typeof ChannelApplicationSchema>) {
-    const vs = await this.ventures();
-    const v = vs.get(b.productSlug);
-    if (!v) throw new NotFoundException('This product is not open for applications');
+    const bp = await this.brands.bySlug(b.productSlug);
+    if (!bp) throw new NotFoundException('This product is not open for applications');
+    if (!bp.product.roles.includes(b.role)) throw new BadRequestException({ statusCode: 400, message: 'Please correct the highlighted fields', issues: [{ path: 'role', message: `${bp.v.name} does not take ${channelRoleLabel(b.role).toLowerCase()}s` }] });
+    const v = bp.v; const catalogue = await this.catalogue();
     const dup = await this.db.select({ code: channelApplications.code }).from(channelApplications)
       .where(and(eq(channelApplications.ventureId, v.id), eq(channelApplications.email, b.email), eq(channelApplications.role, b.role), inArray(channelApplications.status, ['submitted', 'shortlisted']))).limit(1);
     if (dup.length) throw new ConflictException(`You already applied (${dup[0].code}). Unite will contact you.`);
-    const m = recommendChannels({ businessType: b.businessType, role: b.role, warehouseSqft: b.warehouseSqft, showroomSqft: b.showroomSqft, products: [b.productSlug] })[0] ?? null;
+    const m = recommendChannels({ businessType: b.businessType, role: b.role, warehouseSqft: b.warehouseSqft, showroomSqft: b.showroomSqft, products: [b.productSlug] }, catalogue)[0] ?? null;
     const code = `CHN-${new Date().getFullYear()}-${randomDigits(6)}`;
     const [a] = await this.db.insert(channelApplications).values({
       code, ventureId: v.id, role: b.role, businessType: b.businessType, name: b.name, email: b.email, phone: b.phone, company: b.company ?? null, state: b.state, district: b.district ?? null, city: b.city, territory: b.territory ?? null,
@@ -94,7 +95,7 @@ export class BrandChannelsController {
     }).returning();
     await this.notifyStaff(`New ${channelRoleLabel(b.role).toLowerCase()} application for ${v.name}`, `${b.name}${b.company ? ` (${b.company})` : ''} · ${b.city}, ${b.state} · ${businessTypeLabel(b.businessType)} (${code})`, '/brand-channels');
     await this.mail.send('email', b.email, `${v.name}: application ${code} received`, `Thank you ${b.name.split(' ')[0]}. Unite received your application to be a ${channelRoleLabel(b.role).toLowerCase()} for ${v.name} (${code}). The team will contact you. To follow it and get your dealer dashboard, create a free COLLABIZ business account with this email address.`);
-    const others = recommendChannels({ businessType: b.businessType, warehouseSqft: b.warehouseSqft, showroomSqft: b.showroomSqft }).filter((x) => x.slug !== b.productSlug).slice(0, 3);
+    const others = recommendChannels({ businessType: b.businessType, warehouseSqft: b.warehouseSqft, showroomSqft: b.showroomSqft }, catalogue).filter((x) => x.slug !== b.productSlug).slice(0, 3);
     return { code: a.code, status: a.status, alsoFits: others };
   }
 
@@ -123,7 +124,7 @@ export class BrandChannelsController {
       };
     });
     const latest = apps[0];
-    const recommendations = latest ? recommendChannels({ businessType: latest.businessType as BusinessType, warehouseSqft: (latest.details as { warehouseSqft?: number }).warehouseSqft ?? undefined, showroomSqft: (latest.details as { showroomSqft?: number }).showroomSqft ?? undefined })
+    const recommendations = latest ? recommendChannels({ businessType: latest.businessType as BusinessType, warehouseSqft: (latest.details as { warehouseSqft?: number }).warehouseSqft ?? undefined, showroomSqft: (latest.details as { showroomSqft?: number }).showroomSqft ?? undefined }, await this.catalogue())
       .filter((r) => !apps.some((a) => byId.get(a.ventureId)?.slug === r.slug)) : [];
     return { channels, applications: apps.map((a) => this.view(a, byId.get(a.ventureId)?.name)), recommendations };
   }
@@ -181,8 +182,7 @@ export class BrandChannelsController {
   @Get('admin/brand-products/oem')
   async oem(@Ctx() ctx: RequestContext) {
     if (!staff(ctx)) throw new ForbiddenException();
-    const vs = await this.ventures();
-    return { items: CHANNEL_PRODUCTS.filter((p) => vs.has(p.slug)).map((p) => { const v = vs.get(p.slug)!; return { slug: p.slug, name: v.name, oemPartner: v.oemPartner, oemStatus: v.oemStatus, oemPublic: v.oemPublic, open: v.open, stage: v.stage }; }), canPublish: ctx.platformRoles.includes('super_admin') };
+    return { items: (await this.brands.published()).map(({ b, v }) => ({ slug: b.slug, name: v.name, oemPartner: v.oemPartner, oemStatus: v.oemStatus, oemPublic: v.oemPublic, open: v.open, stage: v.stage })), canPublish: ctx.platformRoles.includes('super_admin') };
   }
 
   /** Unite admins update the OEM record; only a super admin makes the manufacturer's name public. */
@@ -191,7 +191,7 @@ export class BrandChannelsController {
   async setOem(@Ctx() ctx: RequestContext, @Param('slug') slug: string, @Body(body(OemSchema)) b: z.infer<typeof OemSchema>) {
     if (!staff(ctx)) throw new ForbiddenException();
     if (b.oemPublic !== undefined && !ctx.platformRoles.includes('super_admin')) throw new ForbiddenException('Only a super admin makes the manufacturer public');
-    if (!channelProduct(slug)) throw new NotFoundException();
+    if (!(await this.brands.bySlug(slug))) throw new NotFoundException();
     const [u] = await this.db.update(uniteVentures).set({ ...b, updatedBy: ctx.userId, updatedAt: new Date() }).where(eq(uniteVentures.slug, slug)).returning();
     if (!u) throw new NotFoundException();
     await this.audit.record(ctx, { action: 'brand_channel.oem_updated', objectType: 'unite_venture', objectId: u.id, after: b });
@@ -199,5 +199,74 @@ export class BrandChannelsController {
   }
 }
 
-@Module({ controllers: [BrandChannelsController] })
+
+/**
+ * Admin console: add and edit Unite brand products. Publishing creates the business record, so the microsite, web
+ * address, partner applications, matching rules, dealer CRM and home-page listing appear without code changes.
+ */
+@ApiTags('brand-channels')
+@Controller('admin/brand-products/catalogue')
+export class BrandProductsAdminController {
+  constructor(@InjectDb() private db: Db, private audit: AuditService) {}
+  private check(ctx: RequestContext) { if (!staff(ctx)) throw new ForbiddenException('Only Unite admins manage brand products'); }
+
+  @Get()
+  async list(@Ctx() ctx: RequestContext) {
+    this.check(ctx);
+    const rows = await this.db.select({ b: brandProducts, v: uniteVentures }).from(brandProducts).leftJoin(uniteVentures, eq(uniteVentures.id, brandProducts.ventureId)).orderBy(desc(brandProducts.createdAt));
+    const counts = await this.db.select({ v: channelApplications.ventureId, n: sql<number>`count(*)::int`, approved: sql<number>`count(*) filter (where ${channelApplications.status} = 'approved')::int` }).from(channelApplications).groupBy(channelApplications.ventureId);
+    return { items: rows.map(({ b, v }) => ({ ...b, open: v?.open ?? false, stage: v?.stage ?? null, oemPartner: v?.oemPartner ?? null, oemStatus: v?.oemStatus ?? null,
+      applications: counts.find((c) => c.v === b.ventureId)?.n ?? 0, partners: counts.find((c) => c.v === b.ventureId)?.approved ?? 0 })) };
+  }
+
+  @Post()
+  @HttpCode(201)
+  async create(@Ctx() ctx: RequestContext, @Body(body(BrandProductSchema)) b: z.infer<typeof BrandProductSchema>) {
+    this.check(ctx);
+    const [clash] = await this.db.select({ id: uniteVentures.id }).from(uniteVentures).where(eq(uniteVentures.slug, b.slug)).limit(1);
+    if (clash) throw new ConflictException('A Unite business already uses this address. Choose another.');
+    const { oemPartner: _p, oemStatus: _s, ...rest } = b;
+    const [row] = await this.db.insert(brandProducts).values({ ...rest, accent: [...b.accent], createdBy: ctx.userId, updatedBy: ctx.userId }).onConflictDoNothing().returning();
+    if (!row) throw new ConflictException('That product address or web address is already taken');
+    await this.audit.record(ctx, { action: 'brand_product.created', objectType: 'brand_product', objectId: row.id, after: { slug: b.slug, name: b.name } });
+    return row;
+  }
+
+  @Put(':slug')
+  async update(@Ctx() ctx: RequestContext, @Param('slug') slug: string, @Body(body(BrandProductUpdateSchema)) b: z.infer<typeof BrandProductUpdateSchema>) {
+    this.check(ctx);
+    const [cur] = await this.db.select().from(brandProducts).where(eq(brandProducts.slug, slug)).limit(1);
+    if (!cur) throw new NotFoundException();
+    const { oemPartner, oemStatus, ...rest } = b;
+    const [row] = await this.db.update(brandProducts).set({ ...rest, accent: [...b.accent], updatedBy: ctx.userId, updatedAt: new Date() }).where(eq(brandProducts.id, cur.id)).returning();
+    // Published: the public business record follows the edit.
+    if (row.ventureId) await this.db.update(uniteVentures).set({ name: b.name, category: b.category, sector: b.sector, tagline: b.tagline, summary: b.summary, oemPartner: oemPartner ?? null, oemStatus, updatedBy: ctx.userId, updatedAt: new Date() }).where(eq(uniteVentures.id, row.ventureId));
+    await this.audit.record(ctx, { action: 'brand_product.updated', objectType: 'brand_product', objectId: row.id, after: { name: b.name } });
+    return row;
+  }
+
+  /** Creates the business record (closed to partner promotion until an admin opens it) and makes the microsite live. */
+  @Post(':slug/publish')
+  @HttpCode(200)
+  async publish(@Ctx() ctx: RequestContext, @Param('slug') slug: string, @Body() raw: { oemPartner?: string; oemStatus?: string } = {}) {
+    this.check(ctx);
+    const [cur] = await this.db.select().from(brandProducts).where(eq(brandProducts.slug, slug)).limit(1);
+    if (!cur) throw new NotFoundException();
+    if (cur.status === 'published') throw new ConflictException('Already published');
+    const out = await this.db.transaction(async (tx) => {
+      const [{ n }] = await tx.select({ n: sql<number>`coalesce(max(${uniteVentures.num}), 0)::int` }).from(uniteVentures);
+      const [v] = await tx.insert(uniteVentures).values({
+        num: n + 1, slug: cur.slug, name: cur.name, category: cur.category, sector: cur.sector, tagline: cur.tagline, summary: cur.summary, stage: 'concept', open: false,
+        roles: ['refer_customers', 'sell_products', ...(cur.roles.includes('manufacturer') ? ['supply_products'] : [])], rewardNote: 'Channel margins are set in each distributor or dealer agreement.',
+        oemPartner: typeof raw.oemPartner === 'string' && raw.oemPartner.trim() ? raw.oemPartner.trim().slice(0, 160) : null, oemStatus: ['planned', 'agreement_signed', 'producing'].includes(String(raw.oemStatus)) ? String(raw.oemStatus) : 'planned', updatedBy: ctx.userId,
+      }).returning();
+      const [b] = await tx.update(brandProducts).set({ ventureId: v.id, status: 'published', publishedAt: new Date(), updatedBy: ctx.userId, updatedAt: new Date() }).where(eq(brandProducts.id, cur.id)).returning();
+      return b;
+    });
+    await this.audit.record(ctx, { action: 'brand_product.published', objectType: 'brand_product', objectId: out.id, after: { slug, subdomain: out.subdomain } });
+    return out;
+  }
+}
+
+@Module({ controllers: [BrandChannelsController, BrandProductsAdminController], providers: [BrandProductsService], exports: [BrandProductsService] })
 export class BrandChannelsModule {}

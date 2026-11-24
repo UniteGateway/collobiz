@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ChannelApplicationSchema, recommendChannels } from './brand-channels';
+import { BrandProductSchema, ChannelApplicationSchema, recommendChannels, slugify } from './brand-channels';
 
 describe('channel matching agent', () => {
   it('ranks cement and steel first for a building materials dealer with storage, as distributor', () => {
@@ -24,8 +24,16 @@ describe('channel matching agent', () => {
   it('validates roles per product and asks manufacturers for capacity', () => {
     const base = { productSlug: 'unite-cement', businessType: 'cement_steel_trader', name: 'Raju', email: 'raju@example.com', phone: '9876543210', state: 'Telangana', city: 'Warangal', consent: true };
     expect(ChannelApplicationSchema.safeParse({ ...base, role: 'dealer' }).success).toBe(true);
-    expect(ChannelApplicationSchema.safeParse({ ...base, role: 'manufacturer' }).success).toBe(false); // cement OEM is chosen by Unite
-    expect(ChannelApplicationSchema.safeParse({ ...base, productSlug: 'unite-furniture', role: 'manufacturer' }).success).toBe(false);
+    expect(ChannelApplicationSchema.safeParse({ ...base, productSlug: 'unite-furniture', role: 'manufacturer' }).success).toBe(false); // capacity needed
     expect(ChannelApplicationSchema.safeParse({ ...base, productSlug: 'unite-furniture', role: 'manufacturer', capacity: '400 chairs a month' }).success).toBe(true);
+  });
+
+  it('admin product form: slug, reserved web addresses and fit rules are checked', () => {
+    const base = { name: 'Unite Paints', slug: 'unite-paints', subdomain: 'paints', category: 'Building Materials · Unite brand', sector: 'manufacturing', tagline: 'Paints under the Unite brand', summary: 'Interior and exterior paints made by an OEM partner and sold through Unite dealers.', buyers: 'painters, contractors and homeowners', roles: ['dealer', 'store'], strong: ['hardware_store'] };
+    expect(BrandProductSchema.safeParse(base).success).toBe(true);
+    expect(BrandProductSchema.safeParse({ ...base, subdomain: 'admin' }).success).toBe(false);
+    expect(BrandProductSchema.safeParse({ ...base, slug: 'Unite Paints' }).success).toBe(false);
+    expect(BrandProductSchema.safeParse({ ...base, strong: [] }).success).toBe(false);
+    expect(slugify('Unite Tiles & Sanitaryware')).toBe('unite-tiles-sanitaryware');
   });
 });

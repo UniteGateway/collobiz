@@ -204,3 +204,36 @@ export const channelApplications = pgTable('channel_applications', {
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 }, (t) => [index('channel_app_venture_idx').on(t.ventureId, t.status), index('channel_app_email_idx').on(t.email), index('channel_app_org_idx').on(t.orgId)]);
+
+/**
+ * Unite brand products added from the admin console. A draft is only configuration; publishing creates the business
+ * (unite_ventures row), so its microsite, web address, partner applications, matching rules and dealer CRM all work
+ * without code changes.
+ */
+export const brandProducts = pgTable('brand_products', {
+  id: id(),
+  slug: text('slug').notNull().unique(),
+  subdomain: text('subdomain').notNull().unique(),
+  ventureId: uuid('venture_id').references(() => uniteVentures.id),
+  name: text('name').notNull(),
+  category: text('category').notNull(),
+  sector: text('sector').notNull(),
+  tagline: text('tagline').notNull(),
+  summary: text('summary').notNull(),
+  buyers: text('buyers').notNull(),
+  roles: text('roles').array().notNull(),
+  strong: text('strong').array().notNull(),
+  good: text('good').array().notNull().default(sql`'{}'::text[]`),
+  bulk: boolean('bulk').notNull().default(false),
+  showroom: boolean('showroom').notNull().default(false),
+  /** Shown on the microsite; empty means the built-in feature list for that product (if any). */
+  features: jsonb('features').notNull().default(sql`'[]'::jsonb`),
+  workflow: jsonb('workflow').notNull().default(sql`'[]'::jsonb`),
+  accent: text('accent').array().notNull().default(sql`'{#011E48,#2E7D32}'::text[]`),
+  status: text('status').notNull().default('draft'), // draft | published
+  publishedAt: timestamp('published_at', { withTimezone: true }),
+  createdBy: uuid('created_by').references(() => users.id),
+  updatedBy: uuid('updated_by').references(() => users.id),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});

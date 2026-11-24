@@ -67,4 +67,37 @@
 
 **Tests:** `apps/api/test/brand-channels.e2e.ts`, `packages/types/src/brand-channels.test.ts`, and the browser suite "Unite brand products".
 
-**Adding a product:** add a row through a migration, or later from an admin screen, and add an entry to `CHANNEL_PRODUCTS` (roles, fit rules, buyers).
+## Adding a product — one admin page (admin console → Unite brand products → Products)
+
+**The form asks for:**
+- Name. The page address and web address are suggested from it.
+- Category and industry.
+- Tagline, description, and who buys the product.
+- Partner roles offered.
+- Matching rules: which business types are a strong fit and which are a good fit, and whether the product is sold in bulk or from a showroom.
+- Microsite features (each can be marked "planned"), plus "how it works" steps.
+- OEM manufacturer and status.
+- Brand colours.
+
+**Save as draft:** nothing is public yet.
+
+**Publish** creates the business record and, with no code change:
+- the microsite at `/businesses/<page address>` and `<web address>.<domain>`
+- its place in "Sell Unite products", the matching agent, partner applications, the dealer CRM, the home page section, the sitemap and the admin review queue
+
+The product starts closed to partner promotion; open it on the Unite businesses page. Editing a published product updates the live page. The five launch products moved into the same table (migration 0064), and admin-set features override their built-in ones.
+
+## Customers routed to the local dealer
+- **Routing:** a buyer's enquiry on a brand product's microsite ("I want to buy") goes straight into the CRM of the approved partner whose territory or town matches the customer's city, or failing that their state. If several partners match, the one with the fewest open leads gets it.
+- **Consent:** the customer agrees to be contacted by "Unite Group and its authorised partner for my area".
+- **What each side sees:**
+  - the customer sees which partner will contact them
+  - the dealer is notified and the lead appears on their dashboard
+  - the enquiry records which dealer received it
+- **No dealer for the area:** the Unite team handles the enquiry as before.
+
+| Endpoint | Purpose |
+|---|---|
+| `GET/POST /v1/admin/brand-products/catalogue` | List and add products. |
+| `PUT /v1/admin/brand-products/catalogue/:slug` | Edit a product. |
+| `POST /v1/admin/brand-products/catalogue/:slug/publish` | Publish a product. |

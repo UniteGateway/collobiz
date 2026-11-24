@@ -131,9 +131,9 @@ export const STATUS_LABEL = { connected: 'Connected', link_only: 'Link only', no
 export interface ShowProject { id: string; name: string; kind: string; city: string; region: string; reraNumber: string | null; available: number; priceFrom: number | null; priceTo: number | null }
 export interface ShowCourse { id: string; title: string; summary: string; level: string; minutes: number; modules: number }
 
-export function ProductEnquiry({ p, refCode, projects, projectId, items, itemId }: { p: Product; refCode?: string; projects?: ShowProject[]; projectId?: string; items?: ConnectorItem[]; itemId?: string }) {
+export function ProductEnquiry({ p, refCode, projects, projectId, items, itemId, dealers }: { p: Product; refCode?: string; projects?: ShowProject[]; projectId?: string; items?: ConnectorItem[]; itemId?: string; dealers?: boolean }) {
   const intents = PAGE_INTENTS[p.slug];
-  const kinds: { k: 'customer' | 'partner' | 'interest'; label: string }[] = p.stage === 'live' || p.stage === 'pilot'
+  const kinds: { k: 'customer' | 'partner' | 'interest'; label: string }[] = dealers ? [{ k: 'customer', label: 'I want to buy' }, { k: 'partner', label: 'I want to sell it' }] : p.stage === 'live' || p.stage === 'pilot'
     ? [{ k: 'customer', label: 'I want to use it' }, { k: 'partner', label: 'I want to partner' }]
     : [{ k: 'interest', label: 'Notify me at launch' }, { k: 'partner', label: 'I want to partner' }];
   const [f, setF] = useState({ kind: kinds[0].k as string, name: '', email: '', phone: '', city: '', organization: '', message: '', consent: false, projectId: projectId ?? '', visitDate: '', itemId: itemId ?? '', intent: intents?.[0]?.code ?? '', quantity: '', feedstock: '', state: '' });
@@ -141,8 +141,9 @@ export function ProductEnquiry({ p, refCode, projects, projectId, items, itemId 
   useEffect(() => { if (itemId) setF((x) => ({ ...x, itemId })); }, [itemId]);
   const [hp, setHp] = useState('');
   const [ref, setRef] = useState<string | null>(null);
-  const send = useMutation(async () => { const r = await api.post<{ reference: string }>(`/public/products/${p.slug}/enquiries`, { ...f, kind: intents ? (f.intent === 'partner' ? 'partner' : 'customer') : f.kind, projectId: f.projectId || undefined, visitDate: f.visitDate || undefined, itemId: f.itemId || undefined, intent: f.intent || undefined, quantity: f.quantity ? Number(f.quantity) : undefined, feedstock: f.feedstock || undefined, state: f.state || undefined, website: hp || undefined, ref: refCode }); setRef(r.reference); return r; });
-  if (ref) return <Alert tone="success" title={`Thank you — reference ${ref}`}>The {p.name} team has your message and will reply by email. A confirmation is on its way to {f.email}.</Alert>;
+  const [dealer, setDealer] = useState<string | null>(null);
+  const send = useMutation(async () => { const r = await api.post<{ reference: string; dealer?: string | null }>(`/public/products/${p.slug}/enquiries`, { ...f, kind: intents ? (f.intent === 'partner' ? 'partner' : 'customer') : f.kind, projectId: f.projectId || undefined, visitDate: f.visitDate || undefined, itemId: f.itemId || undefined, intent: f.intent || undefined, quantity: f.quantity ? Number(f.quantity) : undefined, feedstock: f.feedstock || undefined, state: f.state || undefined, website: hp || undefined, ref: refCode }); setRef(r.reference); setDealer(r.dealer ?? null); return r; });
+  if (ref) return <Alert tone="success" title={`Thank you — reference ${ref}`}>{dealer ? `Your local ${p.name} partner, ${dealer}, has your request and will contact you.` : `The ${p.name} team has your message and will reply by email.`} A confirmation is on its way to {f.email}.</Alert>;
   return (
     <form noValidate className="cz-gp-form" onSubmit={(e) => { e.preventDefault(); send.run(); }}>
       {send.error && <Alert tone="danger" title={send.error}>{Object.keys(send.fieldErrors).length ? 'Please check the highlighted fields.' : null}</Alert>}
@@ -170,11 +171,12 @@ export function ProductEnquiry({ p, refCode, projects, projectId, items, itemId 
         <Select label="Project (optional)" value={f.projectId} onChange={(e) => setF({ ...f, projectId: e.target.value })} options={[{ value: '', label: 'Not sure yet' }, ...projects.map((x) => ({ value: x.id, label: `${x.name} — ${x.city}` }))]} error={send.fieldErrors.projectId} />
         <TextInput label="Preferred site-visit date (optional)" type="date" value={f.visitDate} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setF({ ...f, visitDate: e.target.value })} disabled={!f.projectId} error={send.fieldErrors.visitDate} />
       </div> : null}
+      {dealers && !intents ? <Select label="State (to find your nearest partner)" value={f.state} onChange={(e) => setF({ ...f, state: e.target.value })} options={[{ value: '', label: 'Choose (optional)' }, ...INDIA_STATES.map(([, n]) => ({ value: n, label: n }))]} /> : null}
       {items?.length ? <Select label="About (optional)" value={f.itemId} onChange={(e) => setF({ ...f, itemId: e.target.value })} options={[{ value: '', label: 'General enquiry' }, ...items.map((x) => ({ value: x.id, label: x.title }))]} error={send.fieldErrors.itemId} /> : null}
       {f.kind === 'partner' && <TextInput label="Company (optional)" autoComplete="organization" value={f.organization} onChange={(e) => setF({ ...f, organization: e.target.value })} />}
       <TextArea label="How can we help?" rows={4} value={f.message} onChange={(e) => setF({ ...f, message: e.target.value })} error={send.fieldErrors.message} />
       <label className="cz-hp" aria-hidden="true">Website<input tabIndex={-1} autoComplete="off" value={hp} onChange={(e) => setHp(e.target.value)} /></label>
-      <label className="cz-gp-consent"><input type="checkbox" checked={f.consent} onChange={(e) => setF({ ...f, consent: e.target.checked })} />I agree that Unite Group may contact me about this request. <Link href="/settings/privacy">Privacy</Link></label>
+      <label className="cz-gp-consent"><input type="checkbox" checked={f.consent} onChange={(e) => setF({ ...f, consent: e.target.checked })} />{dealers ? 'I agree that Unite Group and its authorised partner for my area may contact me about this request.' : 'I agree that Unite Group may contact me about this request.'} <Link href="/settings/privacy">Privacy</Link></label>
       {send.fieldErrors.consent && <p className="cz-error-text">{send.fieldErrors.consent}</p>}
       <div><Button type="submit" loading={send.pending}>Send</Button></div>
     </form>

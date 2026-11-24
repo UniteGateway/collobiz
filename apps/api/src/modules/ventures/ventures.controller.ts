@@ -17,7 +17,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { and, asc, desc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
-import { BIOFIX_FEEDSTOCKS, CHANNEL_SLUGS, MICRO_SOURCES, OEM_STATUS, VENTURE_ROLES, VENTURE_STAGES, pageIntent, ventureAvailability } from '@collabiz/types';
+import { BIOFIX_FEEDSTOCKS, MICRO_SOURCES, OEM_STATUS, VENTURE_ROLES, VENTURE_STAGES, pageIntent, ventureAvailability } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
 import { courses, crmActivities, crmDeals, customers, microContracts, propertyProjects, propertyUnits, directOfferRecipients, directOffers, enquiries, memberships, solarReferralCodes, notifications, offerSales, organizations, uniteVentures, ventureInterests } from '../../db/schema';
 import { body } from '../../common/http';
@@ -27,6 +27,8 @@ import { MailService } from '../../common/adapters';
 import { randomDigits } from '../../common/crypto';
 import { SolarModule, SolarService } from '../solar/solar.controller';
 import { ConnectorService } from './connectors';
+import { BrandChannelsModule } from '../brand-channels/brand-channels.controller';
+import { BrandProductsService } from '../brand-channels/brand-products.service';
 
 type Venture = typeof uniteVentures.$inferSelect;
 /** Unite products whose pages show live data from a COLLABIZ module. */
@@ -98,7 +100,7 @@ export class VenturesService {
 @ApiTags('ventures')
 @Controller()
 export class VenturesController {
-  constructor(@InjectDb() private db: Db, private svc: VenturesService, private audit: AuditService, private mail: MailService, private solar: SolarService, private connectors: ConnectorService) {}
+  constructor(@InjectDb() private db: Db, private svc: VenturesService, private audit: AuditService, private mail: MailService, private solar: SolarService, private connectors: ConnectorService, private brands: BrandProductsService) {}
 
   // ---------- Public ----------
   @Public()
@@ -121,6 +123,9 @@ export class VenturesController {
   @Public()
   @Get('public/products/:slug')
   async product(@Param('slug') slug: string) {
+    // A brand product's own web address (e.g. paints.<domain> → /businesses/paints) resolves to its business.
+    const alias = await this.brands.slugForSubdomain(slug);
+    if (alias && alias !== slug) slug = alias;
     const r = await this.svc.bySlug(slug);
     if (!r || regulatedLocked(r.v)) throw new NotFoundException();
     const { roles: _r, rewardNote: _n, ...v } = this.svc.view(r.v, r.company);
@@ -137,7 +142,9 @@ export class VenturesController {
     const connector = await this.connectors.forPage(slug);
     // Unite brand products: OEM status always; the manufacturer's name only once a super admin made it public.
     const oem = r.v.oemStatus ? { status: OEM_STATUS[r.v.oemStatus as keyof typeof OEM_STATUS] ?? r.v.oemStatus, partner: r.v.oemPublic ? r.v.oemPartner : null } : null;
-    return { ...v, work, showcase, connector, oem, channel: CHANNEL_SLUGS.includes(slug), related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
+    const bp = await this.brands.bySlug(slug);
+    const brand = bp ? { subdomain: bp.b.subdomain, roles: bp.b.roles, buyers: bp.b.buyers, features: bp.b.features, workflow: bp.b.workflow, accent: bp.b.accent } : null;
+    return { ...v, work, showcase, connector, oem, channel: !!bp, brand, related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
   }
 
   /** Enquiry from a business page. Stored with the business; its operating company (or Unite admins) is notified. */
@@ -186,11 +193,15 @@ export class VenturesController {
       const team = await this.db.select({ userId: memberships.userId }).from(memberships).where(and(eq(memberships.organizationId, item.ownerOrgId), eq(memberships.status, 'active')));
       if (team.length) await this.db.insert(notifications).values(team.map((m) => ({ userId: m.userId, kind: 'venture', title: `${r.v.name}: interest in “${item!.title}”`, body: `A visitor${b.city ? ` from ${b.city}` : ''} asked about your listing through ${r.v.name} (${reference}). The ${r.v.name} team will introduce you.`, link: '/notifications' })));
     }
+    // Unite brand products: the approved dealer for the customer's area gets the lead in their CRM straight away.
+    const bpe = await this.brands.bySlug(slug);
+    const dealer = bpe && b.kind !== 'partner' ? await this.brands.routeToDealer(r.v.id, { name: b.name, email: b.email, phone: b.phone, city: b.city, state: b.state, message: b.message, reference, productName: r.v.name }) : null;
+    if (dealer) await this.db.update(enquiries).set({ details: sql`coalesce(${enquiries.details}, '{}'::jsonb) || ${JSON.stringify({ dealer: { orgId: dealer.orgId, name: dealer.name, dealId: dealer.dealId } })}::jsonb` }).where(eq(enquiries.reference, reference));
     const label = request ? request.intentLabel.toLowerCase() + ' request' : details?.visitDate ? 'site-visit request' : b.kind === 'partner' ? 'partnership enquiry' : b.kind === 'interest' ? 'registration of interest' : 'enquiry';
     await this.mail.send('email', b.email, `${r.v.name} ${label} ${reference}`, `Thank you ${b.name}. ${r.v.name} received your ${label} (${reference}). The team will reply by email.`);
     const users = await this.svc.deciders(r.v);
     if (users.length) await this.db.insert(notifications).values(users.map((u) => ({ userId: u, kind: 'venture', title: `New ${label} for ${r.v.name}`, body: `${b.name}${b.city ? ` · ${b.city}` : ''}${item ? ` · about “${item.title}”` : ''}${request ? ` · ${request.intentLabel}${request.quantity ? `: ${request.quantity} ${request.unit}` : ''}${request.feedstock ? ` of ${request.feedstock.toLowerCase()}` : ''}` : ''}${details ? ` · ${details.projectName}${details.visitDate ? ` on ${details.visitDate}` : ''}` : ''}: ${b.message.slice(0, 160)}`, link: `/ventures/${r.v.id}` })));
-    return { reference };
+    return { reference, dealer: dealer ? dealer.name : null };
   }
 
   /** Unite property projects open to partners and selling: public facts only (no commission, no buyer data). */
@@ -394,5 +405,5 @@ export class VenturesController {
   }
 }
 
-@Module({ imports: [SolarModule], controllers: [VenturesController], providers: [VenturesService, ConnectorService] })
+@Module({ imports: [SolarModule, BrandChannelsModule], controllers: [VenturesController], providers: [VenturesService, ConnectorService] })
 export class VenturesModule {}

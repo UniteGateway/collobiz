@@ -3403,6 +3403,7 @@ suites.push({
     await shot('brand-matcher');
     await top.getByRole('button', { name: /Apply for Unite Furniture/ }).click();
     const form = page.locator('[data-form="channel-apply"]');
+    await form.getByLabel('I want to be a').locator('option[value="store"]:checked').waitFor({ state: 'attached' }); // the suggested role is pre-filled
     expect(await form.getByLabel('I want to be a').inputValue() === 'store', 'the suggested role is pre-filled');
     const email = label === 'desktop' ? 'ravi@sunrise.example' : `store.${Date.now()}@example.com`;
     await form.getByLabel('Your name').fill('Ravi Patel');
@@ -3426,6 +3427,7 @@ suites.push({
     // Unite admin approves with a territory
     await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
     await page.goto(ADMIN + '/brand-channels');
+    await page.getByRole('radio', { name: 'Applications' }).or(page.getByRole('button', { name: 'Applications' })).first().click();
     const card = page.locator('[data-channel-app]', { hasText: 'Ravi Patel' }).filter({ hasText: 'Unite Furniture' });
     await card.getByLabel('Territory (for approval)').fill('Ahmedabad city');
     await shot('brand-admin-review');
@@ -3445,5 +3447,55 @@ suites.push({
     await ch.getByText('120 room chairs and 40 tables').waitFor();
     expect((await ch.locator('[data-stage="new"] strong').textContent()).trim() === '1', 'the lead is in the New column');
     await shot('brand-dealer-dashboard');
+  },
+});
+
+suites.push({
+  name: 'Unite brand products admin · add a product from one form, publish, microsite and web address live; customer enquiry reaches the local dealer',
+  only: 'desktop',
+  run: async ({ page, WEB, ADMIN, expect, shot }) => {
+    await adminLogin(page, ADMIN, 'unite.admin@collabiz.local');
+    await page.goto(ADMIN + '/brand-channels');
+    await page.getByRole('button', { name: 'Add a product' }).click();
+    const f = page.locator('[data-form="brand-product"]');
+    await f.getByLabel('Product name').fill('Unite Tiles');
+    expect(await f.getByLabel('Web address (subdomain)').inputValue() === 'tiles', 'web address is suggested from the name');
+    await f.getByLabel('Tagline').fill('Floor and wall tiles under the Unite brand');
+    await f.getByLabel('Description').fill('Ceramic and vitrified floor and wall tiles made by an OEM partner and sold through Unite dealers and stores.');
+    await f.getByLabel('Who buys it').fill('builders, contractors and homeowners');
+    await f.getByRole('button', { name: 'Hardware or sanitary store' }).first().click();
+    await f.getByRole('button', { name: 'Add a feature' }).click();
+    await f.getByLabel('Feature 1').fill('Display boards for dealers');
+    await f.getByLabel('Description', { exact: true }).last().fill('Dealers get display boards and sample kits.');
+    await shot('brand-admin-form');
+    await f.getByRole('button', { name: 'Save as draft' }).click();
+    const row = page.locator('[data-brand-row="unite-tiles"]');
+    await row.getByText('Draft').waitFor();
+    await row.getByRole('button', { name: 'Publish' }).click();
+    await row.getByText('Live').waitFor();
+    await shot('brand-admin-list');
+    // The microsite is live, at its page and its own web address (seen as a signed-out visitor)
+    await page.context().clearCookies();
+    const host = new URL(WEB).host;
+    await page.goto(`http://tiles.${host}/`);
+    await page.getByRole('heading', { level: 1, name: 'Unite Tiles' }).waitFor();
+    await page.getByText('Display boards for dealers').waitFor();
+    await page.getByRole('heading', { name: 'Sell Unite Tiles' }).waitFor();
+    await page.goto(WEB + '/partner-with-unite');
+    await page.locator('[data-brand-product="unite-tiles"]').waitFor();
+    // A customer near the approved Unite Furniture store (Ahmedabad) is routed straight to that dealer
+    await page.goto(WEB + '/businesses/unite-furniture');
+    const c = page.locator('#contact');
+    await c.getByLabel('Your name').fill('Kavya Shah');
+    await c.getByLabel('Email').fill('kavya.shah@example.com');
+    await c.getByLabel('City (optional)').fill('Ahmedabad');
+    await c.getByLabel('How can we help?').fill('I need a dining table and six chairs for my new flat.');
+    await c.getByLabel(/authorised partner for my area/).check();
+    await c.getByRole('button', { name: 'Send' }).click();
+    await page.getByText(/Your local Unite Furniture partner, Sunrise Traders, has your request/).waitFor();
+    await shot('brand-customer-routed');
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/dealer');
+    await page.locator('[data-dealer-channel="unite-furniture"]').getByText(/Unite Furniture enquiry BIZ-/).waitFor();
   },
 });
