@@ -3691,7 +3691,7 @@ suites.push({
     await page.getByRole('heading', { level: 1, name: /COLLABIZ\s*PowerTrade/ }).waitFor();
     await page.getByRole('heading', { name: 'How you can collaborate' }).waitFor();
     if (label !== 'desktop') { await shot('home'); return; }
-    await page.getByRole('link', { name: 'Join POWERTRADE' }).click();
+    await page.locator('.pt-cta').getByRole('link', { name: 'Join POWERTRADE' }).click();
     const id = page.locator('[data-form="pt-identity"]');
     await id.getByLabel('Industry').fill('Steel manufacturer');
     await id.getByLabel('State').selectOption('Maharashtra');

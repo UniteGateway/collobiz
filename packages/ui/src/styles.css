@@ -3442,3 +3442,12 @@ a.pt-widget:hover { border-color: #C9D6EA; }
 @media (max-width: 1280px) { .pt-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .pt-ways { grid-template-columns: repeat(3, minmax(0, 1fr)); } .pt-row3 { grid-template-columns: 1fr 1fr; } .pt-row3 > :last-child { grid-column: span 2; } }
 @media (max-width: 900px) { .pt-head { grid-template-columns: 1fr; } .pt-banner { height: 170px; } .pt-banner > div { max-width: 75%; } .pt-row3 { grid-template-columns: 1fr; } .pt-row3 > :last-child { grid-column: auto; } .pt-how { grid-template-columns: 1fr 1fr; } .pt-how li::after { display: none; } }
 @media (max-width: 600px) { .pt-kpis, .pt-ways { grid-template-columns: 1fr 1fr; } .pt-how { grid-template-columns: 1fr; } .pt-banner > div { max-width: 100%; padding: 18px; } .pt-banner img { width: 100%; opacity: .25; -webkit-mask-image: none; mask-image: none; } .pt-mix { grid-template-columns: 1fr; justify-items: center; } }
+/* POWERTRADE v2 fixes: banner text never over the photo; figure cards stack icon above text so values fit */
+.pt-banner img { width: 48%; -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 30%); mask-image: linear-gradient(90deg, transparent 0%, #000 30%); }
+.pt-banner > div { max-width: 56%; padding: 22px 24px; }
+.pt-kpi { flex-direction: column; gap: 8px; }
+.pt-kpi strong { font-size: 19px; white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+@media (max-width: 900px) { .pt-banner > div { max-width: 70%; } }
+.pt-row3 { align-items: start; }
+.pt-track { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; } .pt-track li { display: grid; grid-template-columns: 12px 1fr; gap: 10px; align-items: start; font-size: 13.5px; }
+.pt-track i { width: 12px; height: 12px; border-radius: 3px; margin-top: 4px; } .pt-track span { display: flex; flex-direction: column; } .pt-track small { color: #5B6574; font-size: 12.5px; }

@@ -79,7 +79,14 @@ export default function PowertradeHome() {
 
             <section className="pt-panel" aria-labelledby="mix-h">
               <div className="pt-panel-head"><h2 id="mix-h">Energy savings + business earnings</h2></div>
-              {d.joined && f ? <Mix f={f} /> : <p className="cz-muted">After you join, your savings, sales, earned benefits and net power cost appear here — from your own records only.</p>}
+              {d.joined && f ? <Mix f={f} /> : (
+                <ul className="pt-track">
+                  <li><i style={{ background: '#1E7A3C' }} /><span><strong>Product sales</strong><small>Accepted purchase orders — shown as turnover, not profit</small></span></li>
+                  <li><i style={{ background: '#5CC46B' }} /><span><strong>Power savings</strong><small>Bill before vs bill now, verified by Unite finance</small></span></li>
+                  <li><i style={{ background: '#8FD3FF' }} /><span><strong>Benefits collected</strong><small>Commissions, rebates and margins actually received</small></span></li>
+                  <li><i style={{ background: '#0B2C66' }} /><span><strong>Net power cost</strong><small>Your bill minus approved support — from your own records only</small></span></li>
+                </ul>
+              )}
               {d.joined && d.series && <Trend series={d.series} />}
             </section>
 
