@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### COLLABIZ VENTURE AI — Global Business Creation Engine (Phase 1–2 foundation)
+- Phase 1 audit and integration plan; deterministic engines (weighted scoring with mandatory-check override, five-year financial model with sensitivity, Solar Conveyor PV/battery sizing, transparent role matching); `vai_*` tables (migration 0071); opportunity → Unite approval → Venture Room API with consent-based invitations, tasks, human approvals and AI agents (rules templates until a Claude key and budget are set; kill switch; run log with cost); member screens, admin console and six Sample pilots. See docs/venture-ai.
+
 ### COLLABIZ POWERTRADE — Do Business. Save on Power. Grow Together.
 - New collaboration layer (COLLAB → Energy & Business Tie-Ups): join wizard, electricity profile, contributions, power comparison through the Power Lab engine (eligibility, provenance, objectives), energy + business and reverse matching, six collaboration models with documents, tax review and attributed workflow, benefit ledger with verification, collection and approved allocation, finance summary and calculator, admin review page, microsite section, ACTION OS connector, feature flag. Migration 0070. See docs/powertrade.
 - Design v5: Apple type, navy sidebar, solid phone menu, vector logo, member home redesigned; cover figures removed.

@@ -3451,3 +3451,77 @@ a.pt-widget:hover { border-color: #C9D6EA; }
 .pt-row3 { align-items: start; }
 .pt-track { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; } .pt-track li { display: grid; grid-template-columns: 12px 1fr; gap: 10px; align-items: start; font-size: 13.5px; }
 .pt-track i { width: 12px; height: 12px; border-radius: 3px; margin-top: 4px; } .pt-track span { display: flex; flex-direction: column; } .pt-track small { color: #5B6574; font-size: 12.5px; }
+
+/* ---------------------------------------------------------------- COLLABIZ VENTURE AI */
+.vai-banner { background: linear-gradient(135deg, #061A3D 0%, #0E3A7A 60%, #1F7A4D 130%); color: #fff; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.vai-banner strong { display: block; font-size: 15px; margin-bottom: 4px; }
+.vai-banner span { font-size: 13px; line-height: 1.45; opacity: .9; }
+.vai-flow { display: flex; gap: 8px; }
+.vai-flow > span { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: rgba(255,255,255,.14); opacity: 1; }
+.vai-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.vai-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 0 14px; }
+.vai-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0 12px; align-items: end; padding-bottom: 6px; border-bottom: 1px dashed var(--cz-grey-200); margin-bottom: 10px; }
+.vai-list { list-style: none; margin: 0; padding: 0; }
+.vai-list > li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--cz-grey-100, #eef1f5); }
+.vai-list > li:last-child { border-bottom: 0; }
+.vai-list p { margin: 2px 0 0; color: var(--cz-grey-600); font-size: 13.5px; }
+.vai-dl { display: grid; gap: 10px; margin: 8px 0 0; }
+.vai-dl dt { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--cz-grey-600); }
+.vai-dl dd { margin: 2px 0 0; }
+.vai-muted { color: var(--cz-grey-600); font-size: 13.5px; }
+.vai-sample { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #8A5A00; background: #FFF3D6; border: 1px solid #F3D48A; border-radius: 6px; padding: 1px 6px; vertical-align: middle; }
+.vai-score { display: inline-flex; align-items: baseline; gap: 6px; font-weight: 700; font-size: 15px; border-radius: 999px; padding: 3px 10px; background: #EEF2F7; color: #34475F; }
+.vai-score small { font-weight: 500; font-size: 12px; }
+.vai-score[data-c="priority"] { background: #E3F5EA; color: #13663A; }
+.vai-score[data-c="validate"] { background: #FFF3D6; color: #8A5A00; }
+.vai-score[data-c="uncertain"], .vai-score[data-c="incomplete"] { background: #EEF2F7; color: #34475F; }
+.vai-score[data-c="blocked"] { background: #FDE7E7; color: #A12020; }
+.vai-match { font-size: 12.5px; font-weight: 700; color: #13663A; background: #E3F5EA; border-radius: 999px; padding: 1px 8px; margin-left: 6px; }
+.vai-pill { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 10px; background: #EEF2F7; color: #34475F; white-space: nowrap; }
+.vai-pill[data-s="accepted"], .vai-pill[data-s="owner"] { background: #E3F5EA; color: #13663A; }
+.vai-pill[data-s="invited"] { background: #FFF3D6; color: #8A5A00; }
+.vai-pill[data-s="declined"] { background: #FDE7E7; color: #A12020; }
+.vai-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.vai-table th, .vai-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--cz-grey-100, #eef1f5); white-space: nowrap; }
+.vai-table th { font-size: 12px; color: var(--cz-grey-600); font-weight: 600; }
+.vai-table .cz-input { min-width: 80px; padding: 6px 8px; }
+.vai-scroll { overflow-x: auto; }
+.vai-checks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.vai-checks label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+.vai-h3 { margin: 12px 0 6px; font-size: 15px; }
+.vai-big { display: flex; align-items: center; gap: 12px; }
+.vai-big .vai-score { font-size: 26px; padding: 6px 16px; }
+.vai-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.vai-bars li { display: grid; grid-template-columns: 160px 1fr 36px 64px; gap: 10px; align-items: center; font-size: 13.5px; }
+.vai-bar { height: 8px; border-radius: 999px; background: #EEF2F7; overflow: hidden; }
+.vai-bar i { display: block; height: 100%; background: linear-gradient(90deg, #0E3A7A, #1F9D57); }
+.vai-bars small { color: var(--cz-grey-600); text-align: right; }
+.vai-stat { border: 1px solid var(--cz-grey-200); border-radius: 14px; padding: 12px 14px; background: #fff; display: grid; gap: 4px; }
+.vai-stat span { font-size: 12.5px; color: var(--cz-grey-600); }
+.vai-stat strong { font-size: 18px; color: #061A3D; }
+.vai-sens { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+.vai-sens li { border: 1px solid var(--cz-grey-200); border-radius: 12px; padding: 10px 12px; display: grid; gap: 2px; }
+.vai-sens span { font-size: 12.5px; color: var(--cz-grey-600); }
+.vai-sens strong[data-neg] { color: #A12020; }
+.vai-ev h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--cz-grey-600); margin: 10px 0 4px; }
+.vai-ev ul { margin: 0; padding-left: 18px; }
+.vai-ev[data-kind="verified"] h3 { color: #13663A; }
+.vai-ev[data-kind="forecast"] h3 { color: #0E3A7A; }
+.vai-ev small { color: var(--cz-grey-600); }
+.vai-rules { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: 14px; }
+.vai-runs { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.vai-runs > li { border: 1px solid var(--cz-grey-200); border-radius: 14px; padding: 12px 14px; }
+.vai-runs header { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.vai-runs header small { color: var(--cz-grey-600); }
+.vai-out { white-space: pre-wrap; font-family: inherit; font-size: 13.5px; background: #F7F9FC; border-radius: 10px; padding: 12px; margin: 8px 0 0; max-height: 420px; overflow: auto; }
+@media (max-width: 860px) {
+  .vai-two { grid-template-columns: minmax(0, 1fr); }
+  .vai-checks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vai-bars li { grid-template-columns: 110px 1fr 32px; }
+  .vai-bars small { display: none; }
+  .vai-list > li { flex-direction: column; align-items: flex-start; }
+}
+.pt-banner.vai-banner { height: auto; min-height: 170px; }
+.pt-banner.vai-banner > div { max-width: none; padding: 0; gap: 4px; }
+.pt-banner.vai-banner strong { color: #fff; font-size: clamp(16px, 1.5vw, 19px); }
+.pt-banner.vai-banner span { color: rgba(255,255,255,.88); }

@@ -3753,3 +3753,100 @@ suites.push({
     await shot('overview');
   },
 });
+
+suites.push({
+  name: 'VENTURE AI · Solar Conveyor: propose, score, size, model, Unite approves, invite with consent, Venture Room agent (rules, labelled)',
+  run: async ({ page, WEB, ADMIN, expect, shot, label }) => {
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/venture-ai');
+    await page.getByRole('heading', { level: 1, name: /Venture\s*AI/ }).waitFor();
+    await page.getByText('How Venture AI decides').waitFor();
+    await shot('home');
+    if (label !== 'desktop') return;
+    // A conveyor maker publishes its capabilities (owner/admin only).
+    await webLogin(page, WEB, 'vikram@greenbuild.example');
+    await page.goto(WEB + '/venture-ai/capabilities');
+    await page.getByRole('button', { name: 'Manufacturer', exact: true }).click();
+    await page.getByLabel('Product categories').fill('Conveyors, Structures');
+    await page.getByLabel('Spare capacity').fill('30% of fabrication shop');
+    await page.getByRole('button', { name: 'Save capabilities' }).click();
+    await page.getByText('Saved. You will be suggested for matching roles.').waitFor();
+    // Volt EPC proposes the Solar Conveyor.
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/venture-ai/new');
+    await page.getByLabel('Product or business name').fill('Solar Conveyor for quarries');
+    await page.getByLabel('Customer problem').fill('Quarry conveyors run 10 hours a day on diesel or grid power; power is a large share of operating cost.');
+    await page.getByLabel(/^Market gap/).fill('Conveyor makers and solar EPC firms sell separately; nobody sells a packaged solar-assisted conveyor.');
+    await page.getByLabel('Target customers').fill('Quarries and aggregate plants');
+    await page.getByLabel('Proposed solution').fill('Package a conveyor, PV array, LFP battery and drives with monitoring as one product.');
+    await page.getByLabel('Investment needed (₹ lakh)').fill('200');
+    await page.locator('[data-role-row="0"]').getByLabel('Categories').fill('Conveyors');
+    await page.getByLabel('Statement').fill('Quarries run conveyors on most days of the year');
+    await shot('propose');
+    await page.getByRole('button', { name: 'Save draft' }).click();
+    await page.waitForURL(/\/venture-ai\/opportunities\/[0-9a-f-]+$/);
+    const oppUrl = page.url();
+    await page.getByText('Quarries run conveyors on most days of the year').waitFor();
+    // Score
+    await page.getByRole('tab', { name: 'Score' }).click();
+    for (const c of ['Market demand', 'Profitability', 'Supplier readiness', 'Competitive advantage', 'Capital availability', 'Member capability', 'Scalability', 'Regulatory readiness']) await page.getByLabel(`${c} value`).fill('82');
+    await page.getByRole('button', { name: 'Calculate score' }).click();
+    await page.locator('[data-score-result]').getByText('82', { exact: false }).first().waitFor();
+    await shot('score');
+    // Combination studio: Solar Conveyor sizing
+    await page.getByRole('tab', { name: 'Combination studio' }).click();
+    await page.getByRole('button', { name: 'Size the system' }).click();
+    await page.locator('[data-conveyor-result]').getByText('39.5 kWp').waitFor();
+    await page.locator('[data-conveyor-result]').getByText(/not certified engineering/).waitFor();
+    await shot('conveyor');
+    // Financial model
+    await page.getByRole('tab', { name: 'Financial model' }).click();
+    await page.getByLabel('Selling price per unit (₹)').fill('6000000');
+    await page.getByLabel('Unit cost — BOM + manufacturing (₹)').fill('4000000');
+    await page.getByLabel('Units in year 1').fill('10');
+    await page.getByLabel('Growth per year %').fill('30');
+    await page.getByLabel('Fixed costs per year (₹)').fill('5000000');
+    await page.getByRole('button', { name: 'Calculate' }).click();
+    await page.getByText(/Five-year model · version 1/).waitFor();
+    await page.getByText('Sensitivity — final-year net profit').waitFor();
+    await shot('finance');
+    await page.getByRole('button', { name: 'Submit to Unite for review' }).click();
+    await page.getByText('In review', { exact: true }).first().waitFor();
+    // Unite admin approves → Venture Room.
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/venture-ai');
+    await page.getByText(/Solar Conveyor for quarries/).waitFor();
+    await shot('admin-review');
+    await page.getByRole('button', { name: 'Approve — open Venture Room' }).click();
+    await page.getByText('Nothing to review').waitFor();
+    await page.getByRole('button', { name: 'AI controls' }).click();
+    await page.getByLabel('Kill switch — pause all AI agents now').waitFor();
+    await shot('admin-controls');
+    // Owner finds a matched member and invites — no contact details on screen.
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(oppUrl);
+    await page.getByRole('tab', { name: 'Roles & members' }).click();
+    const cand = page.locator('[data-candidate]').filter({ hasText: /Conveyors/ }).first();
+    await cand.waitFor();
+    expect(!/@|\+91/.test(await page.locator('main').innerText()), 'no email or phone on the match list');
+    await shot('matches');
+    await cand.getByRole('button', { name: 'Invite' }).click();
+    await page.getByText(/Invitation sent for Manufacturer/).waitFor();
+    // The member decides.
+    await webLogin(page, WEB, 'vikram@greenbuild.example');
+    await page.goto(WEB + '/venture-ai');
+    const inv = page.locator('[data-invitation]').first();
+    await inv.getByText(/Why you were matched/).waitFor();
+    await shot('invitation');
+    await inv.getByRole('button', { name: 'Accept' }).click();
+    await page.getByRole('link', { name: 'Solar Conveyor for quarries' }).click();
+    await page.waitForURL(/\/venture-ai\/rooms\/[0-9a-f-]+$/);
+    await page.getByText(/nothing here is binding by itself/).waitFor();
+    await page.getByRole('tab', { name: 'AI agents' }).click();
+    await page.getByLabel('Agent').selectOption('strategy');
+    await page.getByLabel('Instruction').fill('Plan the first 120 days of the pilot');
+    await page.getByRole('button', { name: 'Run' }).click();
+    await page.locator('[data-run="strategy"][data-status="completed"]').getByText('Rules template').waitFor();
+    await shot('room-agent');
+  },
+});

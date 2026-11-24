@@ -265,3 +265,15 @@ Mobile column: **native** = dedicated Expo screen; **responsive** = responsive w
 | 163 | Partner Reputation Profile | 14 | web `/partners/[id]/reputation` | partner | reputation | mobile-first | native | planned |  |
 | 164 | Verified Performance & Reviews | 14 | web `/reputation/reviews` | partner | reputation | mobile-first | native | planned |  |
 | 165 | Partner Excellence & Certification | 14 | web `/reputation/excellence` | partner | reputation | mobile-first | native | planned |  |
+
+### VENTURE AI (consolidated screens)
+| Screen | Route | Access | Status |
+|---|---|---|---|
+| Command centre (invitations, rooms, proposals, open opportunities) | web `/venture-ai` | partner | built |
+| Opportunity marketplace (type filter, score, Sample label) | web `/venture-ai/opportunities` | partner | built |
+| Propose a product (roles, evidence) | web `/venture-ai/new` | partner owner/admin | built |
+| Opportunity workspace: evidence · score · financial model · combination studio · roles & matches | web `/venture-ai/opportunities/[id]` | proposer / staff / all once approved | built |
+| Member capability profile | web `/venture-ai/capabilities` | partner owner/admin | built |
+| Venture Room: team · tasks · approvals · AI agents | web `/venture-ai/rooms/[id]` | owner, accepted members, staff | built |
+| Venture AI admin: review · AI controls · runs & cost · pilots | admin `/venture-ai` | Unite admin / super admin | built |
+| Creative studio, agreements, COMEARN, procurement, mobile | — | — | planned |
