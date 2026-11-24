@@ -3843,7 +3843,7 @@ suites.push({
     await page.waitForURL(/\/venture-ai\/rooms\/[0-9a-f-]+$/);
     await page.getByText(/nothing here is binding by itself/).waitFor();
     await page.getByRole('tab', { name: 'AI agents' }).click();
-    await page.getByLabel('Agent').selectOption('strategy');
+    await page.getByLabel('Agent', { exact: true }).selectOption('strategy');
     await page.getByLabel('Instruction').fill('Plan the first 120 days of the pilot');
     await page.getByRole('button', { name: 'Run' }).click();
     await page.locator('[data-run="strategy"][data-status="completed"]').getByText('Rules template').waitFor();
