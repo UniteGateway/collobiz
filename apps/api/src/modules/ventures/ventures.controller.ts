@@ -144,7 +144,7 @@ export class VenturesController {
     // Unite brand products: OEM status always; the manufacturer's name only once a super admin made it public.
     const oem = r.v.oemStatus ? { status: OEM_STATUS[r.v.oemStatus as keyof typeof OEM_STATUS] ?? r.v.oemStatus, partner: r.v.oemPublic ? r.v.oemPartner : null } : null;
     const bp = await this.brands.bySlug(slug);
-    const brand = bp ? { subdomain: bp.b.subdomain, roles: bp.b.roles, buyers: bp.b.buyers, features: bp.b.features, workflow: bp.b.workflow, accent: bp.b.accent, logo: bp.b.logo, heroImage: bp.b.heroImage } : null;
+    const brand = bp ? { subdomain: bp.b.subdomain, roles: bp.b.roles, buyers: bp.b.buyers, features: bp.b.features, workflow: bp.b.workflow, range: bp.b.range, benefits: bp.b.benefits, accent: bp.b.accent, logo: bp.b.logo, heroImage: bp.b.heroImage } : null;
     return { ...v, work, showcase, connector, oem, channel: !!bp, brand, related: related.map((x) => ({ slug: x.slug, name: x.name, sector: x.sector, tagline: x.tagline, stage: x.stage })) };
   }
 

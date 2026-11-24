@@ -7,9 +7,9 @@ import { ApiErrorView } from '@/components/Screen';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
-interface Row { id: string; slug: string; subdomain: string; name: string; category: string; sector: string; tagline: string; summary: string; buyers: string; roles: string[]; strong: string[]; good: string[]; bulk: boolean; showroom: boolean; features: { title: string; text: string; planned?: boolean }[]; workflow: { title: string; text: string }[]; accent: string[]; logo: string | null; heroImage: string | null; status: string; open: boolean; oemPartner: string | null; oemStatus: string | null; applications: number; partners: number }
-type Form = { name: string; slug: string; subdomain: string; category: string; sector: string; tagline: string; summary: string; buyers: string; roles: string[]; strong: string[]; good: string[]; bulk: boolean; showroom: boolean; features: { title: string; text: string; planned: boolean }[]; workflow: { title: string; text: string }[]; accent: [string, string]; oemPartner: string; oemStatus: string; logo: string; heroImage: string };
-const empty: Form = { name: '', slug: '', subdomain: '', category: 'Building Materials · Unite brand', sector: 'manufacturing', tagline: '', summary: '', buyers: '', roles: ['distributor', 'dealer', 'store', 'franchise'], strong: [], good: [], bulk: false, showroom: true, features: [], workflow: [], accent: ['#011E48', '#2E7D32'], oemPartner: '', oemStatus: 'planned', logo: '', heroImage: '' };
+interface Row { id: string; slug: string; subdomain: string; name: string; category: string; sector: string; tagline: string; summary: string; buyers: string; roles: string[]; strong: string[]; good: string[]; bulk: boolean; showroom: boolean; features: { title: string; text: string; planned?: boolean }[]; workflow: { title: string; text: string }[]; range?: { title: string; text: string; image?: string; items: string[] }[]; benefits?: { title: string; items: string[] }[]; accent: string[]; logo: string | null; heroImage: string | null; status: string; open: boolean; oemPartner: string | null; oemStatus: string | null; applications: number; partners: number }
+type Form = { name: string; slug: string; subdomain: string; category: string; sector: string; tagline: string; summary: string; buyers: string; roles: string[]; strong: string[]; good: string[]; bulk: boolean; showroom: boolean; features: { title: string; text: string; planned: boolean }[]; workflow: { title: string; text: string }[]; range: { title: string; text: string; image: string; items: string }[]; benefits: { title: string; items: string }[]; accent: [string, string]; oemPartner: string; oemStatus: string; logo: string; heroImage: string };
+const empty: Form = { name: '', slug: '', subdomain: '', category: 'Building Materials · Unite brand', sector: 'manufacturing', tagline: '', summary: '', buyers: '', roles: ['distributor', 'dealer', 'store', 'franchise'], strong: [], good: [], bulk: false, showroom: true, features: [], workflow: [], range: [], benefits: [], accent: ['#011E48', '#2E7D32'], oemPartner: '', oemStatus: 'planned', logo: '', heroImage: '' };
 const web = process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000';
 const types = BUSINESS_TYPES.map((b) => ({ value: b.code, label: b.label }));
 
@@ -48,12 +48,14 @@ export function BrandProducts() {
 }
 
 function Editor({ row, onDone }: { row: Row | null; onDone: () => void }) {
-  const [f, setF] = useState<Form>(row ? { ...empty, ...row, accent: [row.accent[0] ?? '#011E48', row.accent[1] ?? '#2E7D32'], features: row.features.map((x) => ({ ...x, planned: !!x.planned })), oemPartner: row.oemPartner ?? '', oemStatus: row.oemStatus ?? 'planned', logo: row.logo ?? '', heroImage: row.heroImage ?? '' } : empty);
+  const [f, setF] = useState<Form>(row ? { ...empty, ...row, accent: [row.accent[0] ?? '#011E48', row.accent[1] ?? '#2E7D32'], features: row.features.map((x) => ({ ...x, planned: !!x.planned })), oemPartner: row.oemPartner ?? '', oemStatus: row.oemStatus ?? 'planned', logo: row.logo ?? '', heroImage: row.heroImage ?? '', range: (row.range ?? []).map((x) => ({ title: x.title, text: x.text, image: x.image ?? '', items: x.items.join(', ') })), benefits: (row.benefits ?? []).map((x) => ({ title: x.title, items: x.items.join('\n') })) } : empty);
   const [touched, setTouched] = useState(!!row);
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((x) => ({ ...x, [k]: v }));
   const name = (v: string) => setF((x) => ({ ...x, name: v, ...(touched ? {} : { slug: slugify(v), subdomain: slugify(v).replace(/^unite-/, '') }) }));
   const save = useMutation(async () => {
-    const payload = { ...f, oemPartner: f.oemPartner || undefined, features: f.features.filter((x) => x.title.trim()), workflow: f.workflow.filter((x) => x.title.trim()) };
+    const payload = { ...f, oemPartner: f.oemPartner || undefined, features: f.features.filter((x) => x.title.trim()), workflow: f.workflow.filter((x) => x.title.trim()),
+      range: f.range.filter((x) => x.title.trim()).map((x) => ({ title: x.title, text: x.text, image: x.image || undefined, items: x.items.split(',').map((i) => i.trim()).filter(Boolean) })),
+      benefits: f.benefits.filter((x) => x.title.trim()).map((x) => ({ title: x.title, items: x.items.split('\n').map((i) => i.trim()).filter(Boolean) })) };
     if (row) await api.put(`/admin/brand-products/catalogue/${row.slug}`, (({ slug: _s, ...rest }) => rest)(payload));
     else await api.post('/admin/brand-products/catalogue', payload);
     onDone(); return true;
@@ -100,6 +102,30 @@ function Editor({ row, onDone }: { row: Row | null; onDone: () => void }) {
             </div>
           ))}
           <Button type="button" variant="secondary" size="sm" onClick={() => set('workflow', [...f.workflow, { title: '', text: '' }])} disabled={f.workflow.length >= 6}>Add a step</Button>
+        </fieldset>
+        <fieldset className="cz-fieldset"><legend>Product range (shown as photo cards)</legend>
+          {f.range.map((x, i) => (
+            <div key={i} className="cz-grid cz-grid-2" style={{ alignItems: 'end' }} data-range-row={i}>
+              <TextInput label={`Range ${i + 1} name`} value={x.title} onChange={(e) => set('range', f.range.map((y, j) => (j === i ? { ...y, title: e.target.value } : y)))} />
+              <TextInput label="Photo" value={x.image} onChange={(e) => set('range', f.range.map((y, j) => (j === i ? { ...y, image: e.target.value } : y)))} hint="/photos/….webp or an https address" />
+              <TextInput label="Description" value={x.text} onChange={(e) => set('range', f.range.map((y, j) => (j === i ? { ...y, text: e.target.value } : y)))} />
+              <TextInput label="Products or details (comma separated)" value={x.items} onChange={(e) => set('range', f.range.map((y, j) => (j === i ? { ...y, items: e.target.value } : y)))} />
+              <Button type="button" variant="ghost" size="sm" onClick={() => set('range', f.range.filter((_, j) => j !== i))}>Remove</Button>
+            </div>
+          ))}
+          {fe.range && <p role="alert" style={{ color: '#B3261E', margin: 0 }}>{fe.range}</p>}
+          <Button type="button" variant="secondary" size="sm" onClick={() => set('range', [...f.range, { title: '', text: '', image: '', items: '' }])} disabled={f.range.length >= 12}>Add a range</Button>
+        </fieldset>
+        <fieldset className="cz-fieldset"><legend>Benefits by audience</legend>
+          {f.benefits.map((x, i) => (
+            <div key={i} className="cz-grid cz-grid-2" style={{ alignItems: 'start' }}>
+              <TextInput label={`Audience ${i + 1}`} placeholder="For retailers" value={x.title} onChange={(e) => set('benefits', f.benefits.map((y, j) => (j === i ? { ...y, title: e.target.value } : y)))} />
+              <TextArea label="Benefits — one per line" rows={4} value={x.items} onChange={(e) => set('benefits', f.benefits.map((y, j) => (j === i ? { ...y, items: e.target.value } : y)))} />
+              <Button type="button" variant="ghost" size="sm" onClick={() => set('benefits', f.benefits.filter((_, j) => j !== i))}>Remove</Button>
+            </div>
+          ))}
+          {fe.benefits && <p role="alert" style={{ color: '#B3261E', margin: 0 }}>{fe.benefits}</p>}
+          <Button type="button" variant="secondary" size="sm" onClick={() => set('benefits', [...f.benefits, { title: '', items: '' }])} disabled={f.benefits.length >= 6}>Add an audience</Button>
         </fieldset>
         <div className="cz-grid cz-grid-2">
           <TextInput label="OEM manufacturer (internal)" value={f.oemPartner} onChange={(e) => set('oemPartner', e.target.value)} />

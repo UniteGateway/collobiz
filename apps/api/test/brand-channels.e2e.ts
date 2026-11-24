@@ -18,6 +18,10 @@ describe('Unite brand products and channel partners', () => {
     expect(sunora).toMatchObject({ slug: 'sunora-paints', name: 'Sunora Paints', tagline: 'Colours That Shine.' });
     expect(sunora.brand).toMatchObject({ logo: '/brands/sunora-paints.png', heroImage: '/photos/sunora-luxe-tin.webp', subdomain: 'sunora' });
     for (const s of list) expect(s.oem.partner).toBeNull();
+    const eco = (await get('/public/products/unieco').expect(200)).body.brand; // from the UNIECO catalogue
+    expect(eco.range.map((r: { title: string }) => r.title)).toEqual(['01 Tableware', 'Mighty Mug', '02 Travel', '03 Home and Garden', '04 Personal Care', '05 Pet Care', '06 Wellness and Spa']);
+    expect(eco.benefits.map((b: { title: string }) => b.title)).toEqual(['For your customers', 'For the planet', 'For retailers and cafes', 'For corporates and institutions']);
+    expect(JSON.stringify(eco)).not.toMatch(/Rs\.|₹/); // no prices
     const p = (await get('/public/products/unite-cement').expect(200)).body;
     expect(p.channel).toBe(true); expect(p.oem).toEqual({ status: 'Being finalised', partner: null });
     expect(JSON.stringify(p)).not.toContain('CCI');
@@ -91,6 +95,7 @@ describe('Unite brand products and channel partners', () => {
     const page = (await get('/public/products/unite-paints').expect(200)).body;
     expect(page).toMatchObject({ name: 'Unite Paints', channel: true, open: false });
     expect(page.brand.features[0].title).toBe('Shade cards and tinting'); expect(page.brand.subdomain).toBe('paints');
+    expect(page.brand.range).toEqual([]);
     expect((await get('/public/products/paints').expect(200)).body.slug).toBe('unite-paints'); // its own web address
     expect(JSON.stringify(page)).not.toContain('To be selected'); // OEM stays internal
     const fit = (await post('/public/brand-products/match', { businessType: 'hardware_store', showroomSqft: 600 }).expect(200)).body.items;
@@ -99,6 +104,10 @@ describe('Unite brand products and channel partners', () => {
     await post('/public/brand-products/applications', { ...apply, email: 'paint.dealer@example.com', productSlug: 'unite-paints', role: 'dealer', businessType: 'hardware_store' }).expect(201);
     await api(app).put('/v1/admin/brand-products/catalogue/unite-paints').set(auth(t.uniteAdmin)).send({ ...product, tagline: 'Paints and primers under the Unite brand' }).expect(200);
     expect((await get('/public/products/unite-paints').expect(200)).body.tagline).toBe('Paints and primers under the Unite brand');
+    await api(app).put('/v1/admin/brand-products/catalogue/unite-paints').set(auth(t.uniteAdmin)).send({ ...product, range: [{ title: 'Interior', text: 'Emulsions for walls and ceilings.', image: 'javascript:x', items: [] }] }).expect(400);
+    await api(app).put('/v1/admin/brand-products/catalogue/unite-paints').set(auth(t.uniteAdmin)).send({ ...product, range: [{ title: 'Interior', text: 'Emulsions for walls and ceilings.', image: '/photos/property-interior.webp', items: ['Emulsion', 'Primer'] }], benefits: [{ title: 'For painters', items: ['Easy to apply'] }] }).expect(200);
+    const painted = (await get('/public/products/unite-paints').expect(200)).body.brand;
+    expect(painted.range[0]).toMatchObject({ title: 'Interior', items: ['Emulsion', 'Primer'] }); expect(painted.benefits).toEqual([{ title: 'For painters', items: ['Easy to apply'] }]);
   });
 
   it('a customer’s enquiry on a brand microsite goes straight into the approved dealer’s CRM for their area', async () => {

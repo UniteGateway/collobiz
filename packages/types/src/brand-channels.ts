@@ -159,6 +159,11 @@ export const BrandProductSchema = z.object({
   showroom: z.boolean().default(false),
   features: z.array(Feature).max(12).default([]),
   workflow: z.array(z.object({ title: z.string().trim().min(3).max(60), text: z.string().trim().min(5).max(200) })).max(6).default([]),
+  /** Product range on the microsite: a category with a photo and a few named products (from the brand's own catalogue). */
+  range: z.array(z.object({ title: z.string().trim().min(2).max(60), text: z.string().trim().min(5).max(300), image: z.string().trim().regex(/^(\/[\w./-]+|https:\/\/\S+)$/).max(300).optional().or(z.literal('').transform(() => undefined)),
+    items: z.array(z.string().trim().min(2).max(120)).max(12).default([]) })).max(12).default([]),
+  /** Benefits by audience (e.g. for customers, for retailers), each a short list. */
+  benefits: z.array(z.object({ title: z.string().trim().min(3).max(60), items: z.array(z.string().trim().min(3).max(160)).min(1).max(8) })).max(6).default([]),
   accent: z.tuple([z.string().regex(/^#[0-9A-Fa-f]{6}$/), z.string().regex(/^#[0-9A-Fa-f]{6}$/)]).default(['#011E48', '#2E7D32']),
   oemPartner: z.string().trim().max(160).optional(),
   oemStatus: z.enum(['planned', 'agreement_signed', 'producing']).default('planned'),

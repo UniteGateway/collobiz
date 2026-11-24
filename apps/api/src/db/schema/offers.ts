@@ -229,6 +229,8 @@ export const brandProducts = pgTable('brand_products', {
   /** Shown on the microsite; empty means the built-in feature list for that product (if any). */
   features: jsonb('features').notNull().default(sql`'[]'::jsonb`),
   workflow: jsonb('workflow').notNull().default(sql`'[]'::jsonb`),
+  range: jsonb('range').notNull().default(sql`'[]'::jsonb`),
+  benefits: jsonb('benefits').notNull().default(sql`'[]'::jsonb`),
   accent: text('accent').array().notNull().default(sql`'{#011E48,#2E7D32}'::text[]`),
   /** Brand logo and a product photo (site paths such as /brands/x.png, or https URLs). */
   logo: text('logo'),

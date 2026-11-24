@@ -102,3 +102,10 @@ The product starts closed to partner promotion; open it on the Unite businesses 
 | `GET/POST /v1/admin/brand-products/catalogue` | List and add products. |
 | `PUT /v1/admin/brand-products/catalogue/:slug` | Edit a product. |
 | `POST /v1/admin/brand-products/catalogue/:slug/publish` | Publish a product. |
+
+## Product range and benefits (any brand product)
+Admins can add a **product range** (name, photo, description, products or details) and **benefits by audience** (one list per
+audience) in Admin → Unite brand products → Edit. The microsite shows them as photo cards and coloured benefit columns.
+UNIECO is filled in from the Unite Group Eco-Living Catalogue 2026 (Tableware, Mighty Mug 400 ml, Travel, Home and Garden,
+Personal Care, Pet Care, Wellness and Spa; benefits for customers, the planet, retailers and cafes, corporates and institutions).
+No prices are shown. Photos are cropped from Unite's own catalogue pages; third-party shop images and prices are not used.

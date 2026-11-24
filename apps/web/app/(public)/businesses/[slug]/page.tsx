@@ -8,13 +8,14 @@ import { ChannelApplyForm, ChannelMatcher } from '@/components/BrandChannels';
 import { BiofixSchemes, ConnectorPanel, CourseShowcase, ProductEnquiry, type ConnectorView, ProductTile, ProjectShowcase, STATUS_LABEL, SolarLeadForm, WorkPanel, type ShowCourse, type ShowProject, groupName, stagePill, worksWith, type Product } from '@/components/Products';
 import { SOLAR_LEAD_SOURCES, channelProduct, productSubdomain } from '@collabiz/types';
 import { useEffect, useState } from 'react';
+import { PhotoCards } from '@/components/PageHero';
 import { venturePhoto } from '@/lib/photos';
 import { isNotFound, useQuery } from '@/lib/hooks';
 
 const url0 = (m: Record<string, string>) => Object.values(m)[0];
 const IC: Record<string, string> = { doc: 'documents', globe: 'map', search: 'search', sparkle: 'award', chart: 'earnings', grid: 'package', shield: 'verify', flag: 'bookmark', people: 'users', clock: 'clock', bell: 'bell', check: 'check', map: 'location' };
 
-type P = Product & { showcase?: { kind: 'property'; items: ShowProject[] } | { kind: 'courses'; items: ShowCourse[] } | null; work?: { open: number; done: number } | null; connector?: ConnectorView | null; channel?: boolean; brand?: { subdomain: string; logo?: string | null; heroImage?: string | null; features: { title: string; text: string; planned?: boolean }[]; workflow: { title: string; text: string }[]; accent: string[] } | null; oem?: { status: string; partner: string | null } | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
+type P = Product & { showcase?: { kind: 'property'; items: ShowProject[] } | { kind: 'courses'; items: ShowCourse[] } | null; work?: { open: number; done: number } | null; connector?: ConnectorView | null; channel?: boolean; brand?: { subdomain: string; logo?: string | null; heroImage?: string | null; features: { title: string; text: string; planned?: boolean }[]; workflow: { title: string; text: string }[]; range?: { title: string; text: string; image?: string; items: string[] }[]; benefits?: { title: string; items: string[] }[]; accent: string[] } | null; oem?: { status: string; partner: string | null } | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
 
 /** A Unite product's own page: overview, features, what it works with, and an enquiry form wired into COLLABIZ. */
 export default function ProductPage() {
@@ -43,7 +44,7 @@ export default function ProductPage() {
       <nav className="cz-gp-subnav" aria-label={`${p.name} page`}>
         <div className="cz-gp-subnav-in">
           <Link href="/businesses" className="cz-gp-subnav-brand"><VentureMark name={p.name} sector={p.sector} slug={p.slug} size={30} /><span>{p.name}</span></Link>
-          <div className="cz-gp-subnav-links"><a href="#overview">Overview</a>{b?.features?.length ? <a href="#features">Features</a> : null}<a href="#works-with">Works with</a><a href="#contact">Contact</a></div>
+          <div className="cz-gp-subnav-links"><a href="#overview">Overview</a>{b?.features?.length ? <a href="#features">Features</a> : null}{p.brand?.range?.length ? <a href="#range">Range</a> : null}{p.brand?.benefits?.length ? <a href="#benefits">Benefits</a> : null}<a href="#works-with">Works with</a><a href="#contact">Contact</a></div>
           <a href="#contact" className="cz-btn cz-btn-primary cz-btn-sm">{p.stage === 'live' || p.stage === 'pilot' ? 'Get started' : 'Register interest'}</a>
         </div>
       </nav>
@@ -79,6 +80,22 @@ export default function ProductPage() {
             <h2 id="f-h">{b.features.every((x) => x.planned) ? `Planned for ${p.name}` : `What you can do with ${p.name}`}</h2>
             {b.features.some((x) => x.planned) && <p className="cz-muted" style={{ marginTop: -6 }}>Features marked “Planned” are on the roadmap and not available yet.</p>}
             <ul className="cz-gp-features">{b.features.map((x) => <li key={x.title}><span className="cz-gp-ficon"><Icon name={(IC[x.icon] ?? 'check') as never} size={20} /></span><strong>{x.title}</strong>{x.text ? <p>{x.text}</p> : null}{x.planned && <span className="cz-gp-pill cz-gp-pill-soon">Planned</span>}{x.href && <a className="cz-gp-flink" href={x.href} target="_blank" rel="noopener noreferrer">Learn more on {new URL(x.href).host} <Icon name="external" size={13} /></a>}</li>)}</ul>
+          </section>
+        ) : null}
+
+        {p.brand?.range?.length ? (
+          <section id="range" className="cz-gp-section" aria-labelledby="range-h" data-brand-range>
+            <h2 id="range-h">The {p.name} range</h2>
+            <PhotoCards items={p.brand.range.map((r) => ({ image: r.image ?? p.brand?.heroImage ?? venturePhoto(p.slug, p.sector), title: r.title, text: <>{r.text}{r.items.length > 0 && <span className="cz-range-tags">{r.items.map((i) => <span key={i}>{i}</span>)}</span>}</> }))} />
+          </section>
+        ) : null}
+
+        {p.brand?.benefits?.length ? (
+          <section id="benefits" className="cz-gp-section" aria-labelledby="ben-h" data-brand-benefits>
+            <h2 id="ben-h">Benefits at a glance</h2>
+            <div className="cz-benefits">{p.brand.benefits.map((g, i) => (
+              <article key={g.title} className={`cz-benefit cz-benefit-${i % 4}`}><h3>{g.title}</h3><ul>{g.items.map((x) => <li key={x}>{x}</li>)}</ul></article>
+            ))}</div>
           </section>
         ) : null}
 
