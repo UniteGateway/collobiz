@@ -39,7 +39,7 @@ export class VentureAiController {
   private async settings(): Promise<Settings> { const [s] = await this.db.select().from(siteSettings).where(eq(siteSettings.key, 'venture_ai')).limit(1); return { killSwitch: false, monthlyBudgetPaise: 0, ...((s?.value as Partial<Settings>) ?? {}) }; }
   private async opp(id: string) { const [o] = await this.db.select().from(vaiOpportunities).where(or(eq(vaiOpportunities.id, id), eq(vaiOpportunities.code, id))).limit(1); if (!o) throw new NotFoundException('Opportunity not found'); return o; }
   private canSee(ctx: RequestContext, o: Opp) { if (o.status !== 'approved' && o.orgId !== ctx.orgId && !staff(ctx)) throw new NotFoundException('Opportunity not found'); }
-  private canEditOpp(ctx: RequestContext, o: Opp) { if (o.orgId !== ctx.orgId && !staff(ctx)) throw new ForbiddenException(); if (!['draft', 'in_review'].includes(o.status) && !staff(ctx)) throw new ConflictException('Approved opportunities are changed through a new version by Unite'); }
+  private canEditOpp(ctx: RequestContext, o: Opp) { this.canSee(ctx, o); if (o.orgId !== ctx.orgId && !staff(ctx)) throw new ForbiddenException(); if (!['draft', 'in_review'].includes(o.status) && !staff(ctx)) throw new ConflictException('Approved opportunities are changed through a new version by Unite'); }
   private async room(ctx: RequestContext, id: string) {
     const [v] = await this.db.select().from(vaiVentures).where(or(eq(vaiVentures.id, id), eq(vaiVentures.code, id))).limit(1);
     if (!v) throw new NotFoundException('Venture Room not found');
