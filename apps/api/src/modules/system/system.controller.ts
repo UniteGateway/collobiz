@@ -83,6 +83,7 @@ export class SystemController {
       demoMode: config().DEMO_MODE,
       investorDataRoom: config().FEATURE_INVESTOR_DATA_ROOM,
       financeIntroductions: config().FEATURE_FINANCE_INTRODUCTIONS,
+      powertrade: config().FEATURE_POWERTRADE,
       aiProvider: config().AI_PROVIDER,
       identityProvider: config().IDENTITY_PROVIDER,
     };

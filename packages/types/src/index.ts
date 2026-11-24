@@ -49,3 +49,4 @@ export * from './connectors';
 export * from './brand-channels';
 export * from './site';
 export * from './unite-club';
+export * from './powertrade';

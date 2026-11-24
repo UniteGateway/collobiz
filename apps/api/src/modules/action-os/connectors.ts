@@ -31,6 +31,27 @@ const c = (x: Partial<Candidate> & Pick<Candidate, 'sourceApp' | 'sourceModule' 
 
 export const CONNECTORS: { key: string; app: string; label: string; collect: (db: Db, p: Principal, now: Date) => Promise<Candidate[]> }[] = [
   {
+    key: 'powertrade', app: 'powertrade', label: 'POWERTRADE collaborations, documents and benefits',
+    async collect(db, p) {
+      const orgs = p.memberships.filter((m) => MANAGER.includes(m.role)).map((m) => m.orgId); if (!orgs.length) return [];
+      const out: Candidate[] = [];
+      const cs = await rows<{ id: string; code: string; title: string; status: string; org_id: string; counterparty_org_id: string | null; documents: Record<string, { status: string }>; model: string }>(db, sql`
+        select id, code, title, status, org_id, counterparty_org_id, documents, model from pt_collaborations
+        where status in ('submitted','under_review','awaiting_documents','negotiating','contracted','in_progress','partially_fulfilled') and (org_id in (${list(orgs)}) or counterparty_org_id in (${list(orgs)}))`);
+      for (const x of cs) {
+        const mine = orgs.includes(x.org_id) ? x.org_id : x.counterparty_org_id!;
+        const missing = Object.values(x.documents ?? {}).filter((d) => d.status === 'rejected').length;
+        out.push(c({ sourceApp: 'powertrade', sourceModule: 'collaborations', sourceRecordId: x.id, organizationId: mine, kind: x.status === 'awaiting_documents' || missing ? 'missing_info' : 'follow_up',
+          title: x.status === 'awaiting_documents' ? `${x.code}: documents needed` : `${x.code}: ${x.status.replace(/_/g, ' ')}`, summary: x.title, recordUrl: `/powertrade/collaborations/${x.id}`, commitment: true, risk: x.model === 'product_for_power' ? 'contractual' : 'none', sourceStatus: x.status }));
+      }
+      const need = await rows<{ org_id: string }>(db, sql`select p.org_id from pt_profiles p where p.org_id in (${list(orgs)}) and ('buy_power' = any(p.interests) or 'group_captive' = any(p.interests)) and not exists (select 1 from pt_energy_needs e where e.org_id = p.org_id)`);
+      for (const n of need) out.push(c({ sourceApp: 'powertrade', sourceModule: 'energy', sourceRecordId: `energy:${n.org_id}`, organizationId: n.org_id, kind: 'missing_info', title: 'Add your electricity profile for POWERTRADE', summary: 'Units, tariff and contract demand are needed to compare power options.', recordUrl: '/powertrade/power', sourceStatus: 'missing' }));
+      const al = await rows<{ id: string; org_id: string; amount_paise: number; period: string }>(db, sql`select id, org_id, amount_paise, period from pt_allocations where status = 'approved' and org_id in (${list(orgs)}) and created_at > now() - interval '7 days'`);
+      for (const a of al) out.push(c({ sourceApp: 'powertrade', sourceModule: 'allocations', sourceRecordId: a.id, organizationId: a.org_id, kind: 'payment', title: `Benefit allocation approved for ${a.period}`, recordUrl: '/powertrade/finance', valuePaise: Number(a.amount_paise), sourceStatus: 'approved' }));
+      return out;
+    },
+  },
+  {
     key: 'crm_tasks', app: 'crm', label: 'CRM tasks assigned to me',
     async collect(db, p) {
       const orgs = p.memberships.map((m) => m.orgId); if (!orgs.length) return [];
