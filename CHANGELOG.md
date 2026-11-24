@@ -4,6 +4,10 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### COLLABIZ POWERTRADE — Do Business. Save on Power. Grow Together.
+- New collaboration layer (COLLAB → Energy & Business Tie-Ups): join wizard, electricity profile, contributions, power comparison through the Power Lab engine (eligibility, provenance, objectives), energy + business and reverse matching, six collaboration models with documents, tax review and attributed workflow, benefit ledger with verification, collection and approved allocation, finance summary and calculator, admin review page, microsite section, ACTION OS connector, feature flag. Migration 0070. See docs/powertrade.
+- Design v5: Apple type, navy sidebar, solid phone menu, vector logo, member home redesigned; cover figures removed.
+
 ### Unite Club
 - A business club with local chapters (like Rotary, Lions or BNI): propose and approve chapters, apply with one seat per business category, officers and roles, chapter meetings with U meet rooms, RSVPs, service hours, consent-based referrals with member-reported business won. Public landing and chapter pages; members' dashboard; admin approvals. See docs/unite-club.md.
 - UNIECO microsite filled from the Eco-Living Catalogue (range, Mighty Mug, benefits); brand products gain admin-editable range and benefits.

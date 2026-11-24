@@ -32,7 +32,7 @@ export const MODULES: Module[] = [
   { key: 'capacity', label: 'Capacity', icon: 'calendar', home: '/capacity', match: ['/capacity'], tabs: [['/capacity', 'Find capacity'], ['/capacity/calendar', 'Calendar'], ['/capacity/mine', 'My capacity & bookings']] },
   { key: 'pools', label: 'Demand pools', icon: 'users', home: '/pools', match: ['/pools'], tabs: [['/pools', 'Open pools'], ['/pools/new', 'Start a pool'], ['/pools/mine', 'My pools & quotes']] },
   { key: 'commit', label: 'Commit', icon: 'contracts', home: '/commit', match: ['/commit'], tabs: [['/commit', 'My commitments'], ['/commit/new', 'New commitment']] },
-  { key: 'powertrade', label: 'POWERTRADE', icon: 'zap', home: '/powertrade', match: ['/powertrade'],
+  { key: 'powertrade', label: 'POWERTRADE', icon: 'zap', home: '/powertrade', match: ['/powertrade'], ownTabs: true,
     tabs: [['/powertrade', 'Overview'], ['/powertrade/power', 'Get discounted power'], ['/powertrade/matches', 'Matches'], ['/powertrade/collaborations', 'My collaborations'], ['/powertrade/finance', 'Finance & savings'], ['/powertrade/join', 'My POWERTRADE profile']] },
   { key: 'energy', label: 'Energy · Green Park', icon: 'value', home: '/energy', match: ['/energy'],
     tabs: [['/energy', 'Marketplace'], ['/energy/map', 'State map'], ['/energy/register', 'Register'], ['/energy/calculator', 'Cost calculator'], ['/energy/traders', 'Licensed traders'], ['/energy/mine', 'My listings & deals']] },

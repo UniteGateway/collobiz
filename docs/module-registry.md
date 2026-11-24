@@ -27,3 +27,6 @@ One line per module: where it lives and where it is documented. Earlier modules 
 
 BIZO (www.bizo.one) is listed as Unite business #48 with its brochure features, indicative plans and a link-out. Single
 sign-on and data sync need BIZO's API details and credentials.
+
+## POWERTRADE
+Energy + business collaboration layer — `/powertrade`, API `modules/powertrade`, tables `pt_*`, docs `docs/powertrade/`. Feature flag `FEATURE_POWERTRADE`.
