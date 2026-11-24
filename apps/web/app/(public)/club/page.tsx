@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ClubBenefits, ClubShowcase } from '@/components/Club';
+import { PageHero, PhotoCards, PhotoMosaic } from '@/components/PageHero';
 
 export const metadata: Metadata = {
   title: 'Unite Industry Club',
@@ -14,21 +15,16 @@ const STEPS = [
   ['Sign online', 'You and Unite Powertek sign the brand licence on COLLABIZ — no paper, any country.'],
   ['Sold across the network', 'Listed in the Unite Powertek catalogue; every COLLABIZ partner, franchise and store can sell it.'],
 ] as const;
+const STEP_PHOTOS = ['team-handshake', 'industry-engineer', 'team-laptop', 'deal-signing', 'trade-warehouse-team'];
 
 /** Unite Industry Club — public landing page. */
 export default function ClubPage() {
   return (
-    <div className="cz-container cz-section" data-screen="club">
-      <header className="cz-join-hero">
-        <p className="cz-hx-eyebrow">Unite Industry Club</p>
-        <h1>Make it. We brand it, power it and sell it.</h1>
-        <p className="cz-hx-sub">Any industry, any product, anywhere in the world. Sell your products under the Unite Powertek brand with free solar power for your customers, buy green power for your own factory, and grow through the whole Unite network.</p>
-        <div className="cz-join-actions">
-          <Link href="/join" className="cz-btn cz-btn-primary cz-btn-lg">Join the Industry Club</Link>
-          <Link href="/club/products" className="cz-btn cz-btn-secondary cz-btn-lg">Submit a product</Link>
-        </div>
-      </header>
-
+    <div className="cz-page" data-screen="club">
+      <PageHero layout="band" tone="forest" image="industry-engineer" second="energy-panel-roof" eyebrow="Unite Industry Club" title="Make it. We brand it, power it and sell it."
+        lead="Any industry, any product, anywhere in the world. Sell your products under the Unite Powertek brand with free solar power for your customers, buy green power for your own factory, and grow through the whole Unite network."
+        actions={<><Link href="/join" className="cz-btn cz-btn-accent cz-btn-lg">Join the Industry Club</Link><Link href="/club/products" className="cz-btn cz-btn-secondary cz-btn-lg">Submit a product</Link></>} />
+      <div className="cz-container">
       <section aria-labelledby="club-benefits" style={{ marginTop: 40 }}>
         <h2 id="club-benefits">What members get</h2>
         <ClubBenefits />
@@ -36,7 +32,11 @@ export default function ClubPage() {
 
       <section aria-labelledby="club-oem" style={{ marginTop: 40 }}>
         <h2 id="club-oem">How selling under the Unite brand works</h2>
-        <ol className="cz-join-how">{STEPS.map(([t, d], i) => <li key={t}><span>{i + 1}</span><strong>{t}</strong><p>{d}</p></li>)}</ol>
+        <PhotoCards items={STEPS.map(([t, d], i) => ({ image: STEP_PHOTOS[i], badge: `Step ${i + 1}`, title: t, text: d }))} />
+      </section>
+
+      <section aria-label="Club members at work" style={{ marginTop: 40 }}>
+        <PhotoMosaic photos={[['industry-worker', 'A factory worker'], ['energy-wind-solar', 'Wind and solar power'], ['trade-port', 'Exports from a port'], ['unieco-tableware', 'Eco tableware made from rice husk'], ['energy-solar-sky', 'Solar panels under a blue sky']]} />
       </section>
 
       <section aria-labelledby="club-products" style={{ marginTop: 40 }}>
@@ -47,6 +47,7 @@ export default function ClubPage() {
       <p className="cz-muted" style={{ marginTop: 32, fontSize: 14 }}>
         Membership is free. Read the <Link href="/club/terms">Club Terms and Conditions</Link> and all <Link href="/club/legal">legal documents</Link>. Brand use needs Unite’s approval and a signed brand licence; commercial terms are agreed in the licence and are not charged through COLLABIZ. Free-power offers are made by the member with its product. Power is supplied by plant owners and DISCOMs under their own agreements; COLLABIZ does not sell power or quote tariffs.
       </p>
+      </div>
     </div>
   );
 }

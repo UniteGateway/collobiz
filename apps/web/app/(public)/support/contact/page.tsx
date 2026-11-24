@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, Button, Select, TextArea, TextInput, Checkbox } from '@collabiz/ui';
 import { api } from '@/lib/api';
 import { useMutation } from '@/lib/hooks';
+import { PageHero, PhotoMosaic } from '@/components/PageHero';
 
 const FAQ: [string, string][] = [
   ['Is joining COLLABIZ free?', 'Yes. Registration and verification are free. Commercial rewards are defined in signed agreements per opportunity.'],
@@ -19,9 +20,11 @@ export default function ContactPage() {
   const m = useMutation(() => api.post<{ reference: string }>('/public/enquiries', form));
   const set = (k: keyof typeof form) => (e: { target: { value: string } }) => setForm({ ...form, [k]: e.target.value });
   return (
-    <div className="cz-container cz-section" data-screen="010">
-      <h1>Contact, FAQs &amp; support</h1>
-      <div className="cz-grid cz-grid-2" style={{ marginTop: 16, alignItems: 'start' }}>
+    <div className="cz-page" data-screen="010">
+      <PageHero layout="split" tone="ocean" image="office-open" second="team-desk" eyebrow="Support" title="Contact, FAQs & support"
+        lead={<>Write to us below, chat with the COLLABIZ guide (bottom right) or call <a href="tel:+919667660773">+91 96676 60773</a>. Our partner team responds within two business days.</>} />
+      <div className="cz-container">
+      <div className="cz-grid cz-grid-2 cz-page-block" style={{ alignItems: 'start' }}>
         <section className="cz-card">
           <h2>Send us a message</h2>
           {done ? (
@@ -52,6 +55,8 @@ export default function ContactPage() {
             </details>
           ))}
         </section>
+      </div>
+      <div className="cz-page-block"><PhotoMosaic photos={[['team-meeting', 'The Unite team in a meeting'], ['office-loft', 'The Unite office'], ['person-laptop', 'Support on a laptop']]} /></div>
       </div>
     </div>
   );

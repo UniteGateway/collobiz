@@ -5,6 +5,7 @@ import { INDIA_STATES, type PricedLine } from '@collabiz/types';
 import { Alert, Button, Checkbox, Dialog, Segmented, Select, Skeleton, TextArea, TextInput } from '@collabiz/ui';
 import { api } from '@/lib/api';
 import { useMutation } from '@/lib/hooks';
+import { PageHero } from '@/components/PageHero';
 
 interface Product { ref: string; name: string; sector: string; price: number; description: string; kind: 'kit' | 'item'; capacityKw?: number; system?: string; offer: { id: string; label: string; name: string } | null }
 interface Store { products: Product[]; offers: { id: string; name: string; label: string; terms: string; endsAt: string; maxFreePerOrder: number }[] }
@@ -37,10 +38,10 @@ export default function OnlineStore() {
   const count = lines.reduce((a, l) => a + l.qty, 0);
 
   return (
-    <div className="cz-container cz-section">
-      <p className="cz-eyebrow">COLLABIZ store · by Unite Group</p>
-      <h1>Solar and energy-saving products</h1>
-      <p style={{ fontSize: 17, color: 'var(--cz-grey-700)', maxWidth: 720 }}>Order online and Unite will call you to confirm delivery, installation and payment. Live offers are applied automatically. Prefer a shop? <Link href="/store/offers">Get an in-store voucher</Link>.</p>
+    <div className="cz-page">
+      <PageHero layout="split" tone="sunrise" image="energy-solar-sky" second="property-solar-home" eyebrow="COLLABIZ store · by Unite Group" title="Solar and energy-saving products"
+        lead={<>Order online and Unite will call you to confirm delivery, installation and payment. Live offers are applied automatically. Prefer a shop? <Link href="/store/offers">Get an in-store voucher</Link>.</>} />
+    <div className="cz-container cz-page-block">
       {store?.offers.map((o) => <Alert key={o.id} tone="success" title={`${o.label} — ${o.name}`}>{o.terms} Ends {new Date(o.endsAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' })}.</Alert>)}
       {err ? <Alert tone="danger">{err}</Alert> : !store ? <Skeleton height={400} /> : placed ? (
         <div className="cz-card cz-stack" style={{ gap: 10, maxWidth: 640 }}>
@@ -87,6 +88,7 @@ export default function OnlineStore() {
       )}
       {priced && !placed && <div className="cz-cart-bar"><span><strong>{count} in cart</strong> · {rupees(priced.subtotal)}{priced.freeValue ? ` · ${rupees(priced.freeValue)} free` : ''}</span><Button size="sm" onClick={() => setCheckout(true)}>Place order</Button></div>}
       <Checkout open={checkout} lines={lines} onClose={() => setCheckout(false)} onDone={(r) => { setCheckout(false); setCart({}); setPlaced(r); }} />
+    </div>
     </div>
   );
 }

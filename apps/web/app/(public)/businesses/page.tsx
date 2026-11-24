@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { ButtonLink, EmptyState, ErrorState, LoadingState } from '@collabiz/ui';
 import { PRODUCT_GROUP_ORDER, ProductTile, groupName, type Product } from '@/components/Products';
 import { venturePhoto } from '@/lib/photos';
+import { PageHero, PhotoMosaic } from '@/components/PageHero';
 import { useQuery } from '@/lib/hooks';
 
 const FEATURED = ['sunite', 'unite-powertek', 'wakin'];
@@ -25,16 +26,14 @@ export default function BusinessesPage() {
   const filtering = !!term.trim() || !!group;
   return (
     <div className="cz-gp" data-screen="businesses">
-      <header className="cz-gp-hero">
-        <p className="cz-gp-eyebrow">Unite Group</p>
-        <h1>Products for homes, businesses and communities</h1>
-        <p className="cz-gp-lede">Energy, property, commerce, jobs, learning, media and more — every Unite business in one place, connected through COLLABIZ.</p>
-        <div className="cz-gp-search" role="search">
+      <PageHero layout="cover" tone="graphite" image="energy-wind-solar" eyebrow="Unite Group" title="Products for homes, businesses and communities"
+        lead="Energy, property, commerce, jobs, learning, media and more — every Unite business in one place, connected through COLLABIZ.">
+        <div className="cz-gp-search cz-ph-search" role="search">
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" /><path d="m20 20-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
           <label htmlFor="gp-q" className="cz-sr-only">Search Unite products</label>
           <input id="gp-q" type="search" placeholder="Search products" value={term} onChange={(e) => setTerm(e.target.value)} />
         </div>
-      </header>
+      </PageHero>
 
       <nav className="cz-gp-chips" aria-label="Product categories">
         <button type="button" className={!group ? 'is-on' : ''} aria-pressed={!group} onClick={() => setGroup('')}>All products</button>
@@ -65,6 +64,8 @@ export default function BusinessesPage() {
                 <ul className="cz-gp-grid">{list.filter((p) => p.sector === g).map((p) => <li key={p.slug}><ProductTile p={p} /></li>)}</ul>
               </section>
             ))}
+
+            {!filtering && <section className="cz-gp-section" aria-label="Unite Group at work"><PhotoMosaic photos={[['energy-rooftop-install', 'Rooftop solar installation'], ['property-modern-house', 'A modern home'], ['unieco-tableware', 'UNIECO eco tableware'], ['trade-port', 'A cargo port'], ['team-laptop', 'A learning session']]} /></section>}
 
             <section className="cz-gp-band" aria-labelledby="gp-int">
               <div>

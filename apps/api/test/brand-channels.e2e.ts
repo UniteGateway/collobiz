@@ -13,7 +13,7 @@ describe('Unite brand products and channel partners', () => {
 
   it('five Unite brand products have microsites; the OEM partner is private until a super admin makes it public', async () => {
     const list = (await get('/public/brand-products').expect(200)).body.items;
-    expect(list.map((x: { slug: string }) => x.slug)).toEqual(['unite-cement', 'unite-steel', 'unite-ply', 'unite-carpets', 'unite-furniture', 'sunora-paints']);
+    expect(list.map((x: { slug: string }) => x.slug)).toEqual(['unite-cement', 'unite-steel', 'unite-ply', 'unite-carpets', 'unite-furniture', 'sunora-paints', 'unieco']);
     const sunora = (await get('/public/products/sunora').expect(200)).body; // its own web address
     expect(sunora).toMatchObject({ slug: 'sunora-paints', name: 'Sunora Paints', tagline: 'Colours That Shine.' });
     expect(sunora.brand).toMatchObject({ logo: '/brands/sunora-paints.png', heroImage: '/photos/sunora-luxe-tin.webp', subdomain: 'sunora' });

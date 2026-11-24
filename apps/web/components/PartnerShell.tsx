@@ -7,6 +7,8 @@ import { useQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
 import { api } from '@/lib/api';
 import { openLiveStream, useLive } from '@/lib/live';
+import { GuideChat } from './GuideChat';
+import { AppFooter, PageVideos } from './SiteKit';
 
 export function DemoRibbon() {
   const f = useQuery<{ demoMode?: boolean }>('/meta/features');
@@ -66,6 +68,9 @@ export function PartnerShell({ children }: { children: React.ReactNode }) {
     <AppShell sections={partnerNav(me, {}, eb5.data)} currentPath={path} product="Partner" tools={tools} userMenu={menu} banner={<DemoRibbon />}
       sidebarFooter={me ? <><div className="cz-sidebar-user"><span className="cz-avatar" aria-hidden>{initials}</span><span><strong>{me.fullName}</strong><span>{me.activeOrg?.name ?? 'No organization yet'}</span></span></div><button type="button" className="cz-sidebar-signout" onClick={logout}><Icon name="logout" size={16} />Sign out</button></> : undefined}>
       {children}
+      <PageVideos app heading="Videos" />
+      <AppFooter />
+      <GuideChat />
       <div className="cz-toast-wrap" aria-live="polite">{toast && <UiLink href={toast.link ?? '/notifications'} className="cz-toast" onClick={() => setToast(null)}><Icon name="bell" size={16} />{toast.title}</UiLink>}</div>
     </AppShell>
   );

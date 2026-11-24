@@ -7,6 +7,8 @@ import { Screen, ApiErrorView } from '@/components/Screen';
 import { initials } from '@/components/Comms';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
+import { MeetingChat } from '@/components/UMeet';
+import { useSession } from '@/lib/session';
 
 interface Room {
   id: string; title: string; agenda: string | null; startsAt: string; endsAt: string; status: string; cancelReason: string | null; minutes: string | null; actionItems: { text: string; due?: string }[] | null;
@@ -21,7 +23,11 @@ export default function MeetingRoom() {
   const q = useQuery<Room>(`/meetings/${id}`);
   const [minutes, setMinutes] = useState<string | null>(null);
   const [items, setItems] = useState<string>('');
-  const join = useMutation(async () => { await api.post(`/meetings/${id}/join`); if (q.data?.video.joinUrl) window.open(q.data.video.joinUrl, '_blank', 'noopener'); await q.reload(); return true; });
+  const { me } = useSession();
+  const [inCall, setInCall] = useState(false);
+  // Video plays inside the room (U meet) when a provider is connected; attendance is recorded on join.
+  const join = useMutation(async () => { await api.post(`/meetings/${id}/join`); if (q.data?.video.joinUrl) setInCall(true); await q.reload(); return true; });
+  const embed = (url: string) => `${url}#userInfo.displayName=${encodeURIComponent(JSON.stringify(me?.fullName ?? ''))}&config.prejoinConfig.enabled=false&config.disableDeepLinking=true`;
   const save = useMutation(async () => {
     await api.put(`/meetings/${id}/minutes`, { minutes, actionItems: items.split('\n').map((x) => x.trim()).filter((x) => x.length >= 3).map((text) => ({ text })) });
     setMinutes(null); await q.reload(); return true;
@@ -47,15 +53,22 @@ export default function MeetingRoom() {
 
             <div className="cz-od-grid">
               <div className="cz-od-main">
+                {inCall && m.video.joinUrl && m.status === 'scheduled' ? (
+                  <section className="cz-umeet-stage" aria-label="Video call" data-umeet-video style={{ minHeight: 480 }}>
+                    <iframe src={embed(m.video.joinUrl)} title={`Video call: ${m.title}`} allow="camera; microphone; display-capture; fullscreen; autoplay; clipboard-write" />
+                  </section>
+                ) : (
                 <section className="cz-room-stage" aria-label="Video">
                   <span className="cz-room-stage-icon"><Icon name="users" size={28} /></span>
                   {m.status !== 'scheduled' ? <p>This meeting has ended.</p>
                     : !m.video.joinable ? <p>The room opens 15 minutes before the start time.</p>
                     : !m.video.configured ? <><p><strong>Video isn’t connected in this environment.</strong></p><p className="cz-muted">Join to record your attendance; use your usual call link for audio and video. Your administrator can connect a video provider.</p></>
                     : <p>The room is open.</p>}
-                  {m.status === 'scheduled' && m.video.joinable && <Button variant="accent" size="lg" onClick={() => join.run()} loading={join.pending}><Icon name="external" size={17} />{m.video.configured ? 'Join video call' : 'Mark me as joined'}</Button>}
+                  {m.status === 'scheduled' && m.video.joinable && <Button variant="accent" size="lg" onClick={() => join.run()} loading={join.pending}><Icon name="users" size={17} />{m.video.configured ? 'Join video call here' : 'Mark me as joined'}</Button>}
                   {join.error && <Alert tone="danger">{join.error}</Alert>}
                 </section>
+                )}
+                {inCall && m.video.joinUrl && <div className="cz-row" style={{ gap: 8 }}><Button variant="secondary" size="sm" onClick={() => setInCall(false)}>Leave call</Button><a className="cz-btn cz-btn-ghost cz-btn-sm" href={m.video.joinUrl} target="_blank" rel="noopener noreferrer"><Icon name="external" size={14} />Open in a new tab</a></div>}
 
                 <section className="cz-od-section" aria-labelledby="agenda-h">
                   <h3 id="agenda-h">Agenda</h3>
@@ -80,7 +93,8 @@ export default function MeetingRoom() {
                 </section>
               </div>
 
-              <aside className="cz-od-panel" aria-label="Attendees">
+              <aside className="cz-od-panel" aria-label="Chat and attendees">
+                <MeetingChat meetingId={m.id} />
                 <div className="cz-od-card">
                   <h3>People</h3>
                   <ul className="cz-room-people">

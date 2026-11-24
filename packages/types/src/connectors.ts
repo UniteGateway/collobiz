@@ -38,7 +38,7 @@ export const CONNECTORS: Record<string, Connector> = {
   withme: { module: 'Community', feed: { kind: 'community', topics: ['events', 'general'] }, text: 'Members meet through community events and posts; one-to-one services open after verification.', member: { label: 'Join the community', href: '/community' } },
   weekend: { module: 'Announcements', feed: { kind: 'announcements' }, text: 'Editions and notices published to all COLLABIZ members.', member: { label: 'Read announcements', href: '/announcements' } },
   ibrain: { module: 'ACTION OS', feed: { kind: 'actions' }, text: 'Commitments captured by members become follow-ups on the ACTION OS board.', member: { label: 'Open my action board', href: '/action-os' } },
-  'u-meet': { module: 'Meetings', feed: { kind: 'meetings' }, text: 'Meetings scheduled and held by members inside COLLABIZ.', member: { label: 'Schedule a meeting', href: '/meetings' } },
+  'u-meet': { module: 'Meetings', feed: { kind: 'meetings' }, text: 'Meetings scheduled and held by members inside COLLABIZ.', member: { label: 'Open U meet', href: '/umeet' } },
   'nano-bazar': { module: 'Business QR', feed: { kind: 'storefronts' }, text: 'Shops with a live Business QR page that opens their verified profile.', member: { label: 'Create my shop’s Business QR', href: '/business-qr' } },
 };
 export const connectorFor = (slug: string): Connector | undefined => CONNECTORS[slug];
