@@ -45,7 +45,7 @@ function Showcase({ mode }: { mode: Mode }) {
       <img className="cz-auth-photo" src="/photos/energy-installer.webp" alt="" />
       <div className="cz-auth-aurora"><span /><span /><span /></div>
       <div className="cz-auth-show-inner">
-        <div className="cz-auth-brand"><img src="/brand/collabiz-mark.png" alt="" width={36} height={36} /><span>collabiz</span></div>
+        <div className="cz-auth-brand"><img src="/brand/collabiz-mark.svg" alt="" width={36} height={36} /><span>collabiz</span></div>
         <div className="cz-auth-scene">
           <svg viewBox="0 0 520 400" role="presentation">
             <defs>

@@ -8,8 +8,9 @@ import { useQuery } from '@/lib/hooks';
 import { useSession } from '@/lib/session';
 import { AppsTray, InvestHighlight, LatestOpportunities, OnlineStrip } from '@/components/HomeExtras';
 import { NoticeBoard } from '@/components/ActionOS';
-import { BusinessNews, EnergyDesk, IntentBox, ProgrammeTiles, SetupChecklist } from '@/components/HomeLive';
-import { AdCarousel, AreaChart, NewsCard, ThemeHero, VideoCard, type Ad, type News, type Theme, type Video } from '@/components/DashboardKit';
+import { BusinessNews, EnergyDesk, IntentBox, SetupChecklist } from '@/components/HomeLive';
+import { BusinessPerformance, EcosystemBrands, FeaturedOpportunities, HomeFigures, HomeHero, HomeTiles, MatchAgent } from '@/components/HomeCockpit';
+import { AdCarousel, AreaChart, NewsCard, VideoCard, type Ad, type News, type Theme, type Video } from '@/components/DashboardKit';
 
 interface Home {
   figures: Record<string, number>;
@@ -54,18 +55,21 @@ export default function DashboardPage() {
   const maxStage = Math.max(1, ...(d?.pipeline ?? []).map((p) => p.value));
   return (
     <Screen id="023" header={false} title={me && today ? `${today.greet}, ${me.fullName.split(' ')[0]}` : 'Welcome'}>
-      <ThemeHero theme={fd?.theme ?? 'collabiz'} themeLabel={fd?.themeLabel ?? 'COLLABIZ'} eyebrow={today?.date ?? '\u00a0'} title={me && today ? `${today.greet}, ${me.fullName.split(' ')[0]}` : 'Welcome'}
-        actions={org && <><ButtonLink href="/marketplace" variant="secondary">Find opportunities</ButtonLink><ButtonLink href="/leads/new" variant="accent"><Icon name="leads" size={16} />Register a lead</ButtonLink></>}>
-        {org && <p className="cz-dhero-sub">{org.name} <StatusBadge status={org.verificationStatus} label={org.verificationStatus === 'verified' ? (org.membershipLevel === 'verified' ? 'Verified partner' : `Verified · ${org.membershipLevel.replace('_', ' ')} level`) : undefined} /></p>}
-      </ThemeHero>
+      <HomeHero greet={today?.greet ?? 'Welcome'} name={me ? me.fullName.split(' ')[0] : ''} org={org && <>{org.name} <StatusBadge status={org.verificationStatus} label={org.verificationStatus === 'verified' ? 'Verified partner' : undefined} /></>} />
       {me && !me.emailVerified && <Alert tone="warning" title="Verify your email.">Some actions stay locked until your email is verified. <Link href="/verify">Verify now</Link></Alert>}
       {me && !org ? (
         <div className="cz-card"><EmptyState icon="verify" title="Set up your partner account" action={<ButtonLink href="/onboarding/account-type" variant="accent">Get started</ButtonLink>}>Create your company profile to discover opportunities, register protected leads and collaborate with verified partners.</EmptyState></div>
       ) : org && org.verificationStatus !== 'verified' ? (
         <Alert tone="info" title="Finish verification to unlock the network.">Applying to opportunities and registering leads open once your company is verified. <Link href="/onboarding/status">See what’s left</Link></Alert>
       ) : null}
-      {org && <div className="cz-home-start"><IntentBox /><SetupChecklist /></div>}
-      {org && <ProgrammeTiles />}
+      {org && <>
+        <HomeTiles />
+        <HomeFigures f={f} loading={!d} />
+        <div className="v5-row"><FeaturedOpportunities /><MatchAgent /></div>
+        <div className="v5-row"><BusinessPerformance f={f} trend={fd?.trend} /><EcosystemBrands /></div>
+        <h2 className="v5-section-title">Your workspace</h2>
+        <div className="cz-home-start"><IntentBox /><SetupChecklist /></div>
+      </>}
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : org && (
         <div className="cz-dash">
           {/* ---------- ACTION OS notice board (always on the home dashboard) ---------- */}
@@ -122,21 +126,6 @@ export default function DashboardPage() {
             )}
           </section>
 
-          {/* ---------- Figures ---------- */}
-          <div className="cz-dash-figures">
-            {[
-              { label: 'Open pipeline', value: d ? inr(f.pipelineValue) : null, hint: d ? `${f.openDeals} open deal${f.openDeals === 1 ? '' : 's'}` : '', icon: 'crm' as IconName, href: '/crm/pipeline' },
-              { label: 'Active leads', value: d ? String(f.activeLeads) : null, hint: d ? `${f.protectedLeads} protected` : '', icon: 'leads' as IconName, href: '/my/leads' },
-              { label: 'Active projects', value: d ? String(f.activeProjects) : null, hint: 'Owner, lead or subcontractor', icon: 'projects' as IconName, href: '/projects' },
-              { label: 'Open applications', value: d ? String(f.openApplications) : null, hint: 'Submitted or shortlisted', icon: 'opportunities' as IconName, href: '/my/opportunities' },
-            ].map((k) => (
-              <Link key={k.label} href={k.href} className="cz-kpi cz-kpi-link">
-                <div className="cz-kpi-top"><span>{k.label}</span><Icon name={k.icon} size={16} /></div>
-                <div className="cz-kpi-value">{k.value ?? <Skeleton height={30} width={90} />}</div>
-                <div className="cz-kpi-hint">{k.hint}</div>
-              </Link>
-            ))}
-          </div>
 
           {/* ---------- Recommendations ---------- */}
           <section className="cz-card cz-dash-recs" aria-labelledby="rec-h">

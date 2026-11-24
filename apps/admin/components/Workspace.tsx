@@ -52,7 +52,7 @@ export function Hero({ eyebrow, title, accent, sub, chips }: { eyebrow?: string;
         <p>{sub}</p>
         {chips && <ul>{chips.map((c) => <li key={c}><Icon name="check" size={14} />{c}</li>)}</ul>}
       </div>
-      <img src="/brand/collabiz-mark.png" alt="" className="cz-ws-hero-mark" width={150} height={150} />
+      <img src="/brand/collabiz-mark.svg" alt="" className="cz-ws-hero-mark" width={150} height={150} />
     </section>
   );
 }

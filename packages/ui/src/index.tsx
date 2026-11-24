@@ -8,6 +8,7 @@ import {
   AlertTriangle, ArrowRight, BadgeCheck, Bell, BookOpen, Briefcase, Building2, CalendarClock, ChartColumn, CheckCircle2, ChevronLeft, ChevronRight, CircleHelp, ClipboardList, FileSignature,
   FileText, FolderKanban, Gavel, Handshake, Inbox, Info, LayoutDashboard, Lock, LogOut, Map, Menu, MessageSquare, Package, Search, Settings, ShieldCheck, Store, Truck, Users, Wallet, X,
   Award, Bookmark, Building, Check, CircleAlert, Clock, Download, ExternalLink, Eye, IndianRupee, Layers, MapPin, Pencil, Plus, Share2, SlidersHorizontal, UserRound, XCircle,
+  Sun, Zap, Globe, Repeat, Sparkles, Coins, Rocket, Factory, House, TrendingUp, Leaf, Target,
   type LucideIcon,
 } from 'lucide-react';
 import { toneForStatus, toneColors, humanize, type Tone } from './tokens';
@@ -22,6 +23,7 @@ export const ICONS = {
   audit: ClipboardList, documents: FileText, map: Map, calendar: CalendarClock, learning: BookOpen, briefcase: Briefcase, package: Package, lock: Lock, bell: Bell, search: Search,
   info: Info, warning: AlertTriangle, success: CheckCircle2, arrow: ArrowRight, logout: LogOut, menu: Menu, close: X, prev: ChevronLeft, next: ChevronRight,
   bookmark: Bookmark, filter: SlidersHorizontal, sector: Layers, location: MapPin, company: Building, clock: Clock, value: IndianRupee, check: Check, cross: XCircle, alert: CircleAlert, share: Share2, download: Download, external: ExternalLink, eye: Eye, edit: Pencil, plus: Plus, award: Award, user: UserRound,
+  sun: Sun, zap: Zap, globe: Globe, barter: Repeat, sparkles: Sparkles, coins: Coins, rocket: Rocket, factory: Factory, roof: House, trend: TrendingUp, leaf: Leaf, target: Target,
 } satisfies Record<string, LucideIcon>;
 export type IconName = keyof typeof ICONS;
 export function Icon({ name, size = 18, className, label }: { name: IconName; size?: number; className?: string; label?: string }) {
@@ -38,7 +40,7 @@ export const UiLink = (p: React.ComponentProps<LinkLike>) => { const L = useCont
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
 
 // ---------------- Brand ----------------
-export function Logo({ src = '/brand/collabiz-mark.png', label = 'collabiz', href = '/', product }: { src?: string; label?: string; href?: string; product?: string }) {
+export function Logo({ src = '/brand/collabiz-mark.svg', label = 'collabiz', href = '/', product }: { src?: string; label?: string; href?: string; product?: string }) {
   return (
     <UiLink href={href} className="cz-brand">
       <img src={src} alt="" width={30} height={30} />
@@ -88,6 +90,7 @@ export function AppShell({
       <div className="cz-layout">
         <div className="cz-scrim" data-open={open} onClick={() => setOpen(false)} aria-hidden />
         <aside id="cz-sidebar" className="cz-sidebar" data-open={open} aria-label="Section navigation">
+          <div className="cz-drawer-head"><Logo label={brandLabel} src={logoSrc} product={product} /><button type="button" className="cz-drawer-close" onClick={() => setOpen(false)} aria-label="Close menu"><Icon name="close" size={18} /></button></div>
           {sections.map((s, i) => {
             const sk = `s:${s.title ?? i}`;
             const sOpen = !s.collapsible || s.items.some(holds) || (fold[sk] ?? !s.collapsed) !== false;

@@ -26,7 +26,7 @@ export function PublicHeader() {
           <summary aria-label="Open menu">Menu</summary>
           <nav aria-label="Mobile">{NAV.map((n) => <Link key={n.href} href={n.href}>{n.label}</Link>)}{!me && <><Link href="/start">Get started</Link><Link href="/login">Sign in</Link></>}</nav>
         </details>
-        <Link href="/" className="cz-brand" aria-label="COLLABIZ home"><img src="/brand/collabiz-mark.png" alt="" width={30} height={30} /><span>collabiz</span></Link>
+        <Link href="/" className="cz-brand" aria-label="COLLABIZ home"><img src="/brand/collabiz-mark.svg" alt="" width={30} height={30} /><span>collabiz</span></Link>
         <nav aria-label="Primary">
           {NAV.map((n) => <Link key={n.href} href={n.href} aria-current={path === n.href ? 'page' : undefined}>{n.label}</Link>)}
         </nav>
@@ -48,7 +48,7 @@ export function PublicFooter() {
       <div className="cz-container">
         <div className="cz-bigfoot-top">
           <div className="cz-bigfoot-brand">
-            <span className="cz-bigfoot-logo"><img src="/brand/collabiz-mark.png" alt="" />COLLABIZ</span>
+            <span className="cz-bigfoot-logo"><img src="/brand/collabiz-mark.svg" alt="" />COLLABIZ</span>
             <p>The Unite-first B2B collaboration network. Buy from Unite, sell Unite products, grow your business and earn as a partner — in one account.</p>
             <a className="cz-bigfoot-phone" href="tel:+919667660773">+91 96676 60773</a>
           </div>

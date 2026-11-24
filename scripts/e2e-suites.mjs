@@ -1497,7 +1497,10 @@ suites.push({
     await visit('/onboarding/individual', 'Individual Partner Registration'); // 014
     await page.getByLabel('Name shown to partners').waitFor();
     await page.goto(WEB + '/dashboard'); // 023
-    await page.getByRole('heading', { name: /^Good (morning|afternoon|evening), Asha$/ }).waitFor();
+    await page.getByText(/^Good (morning|afternoon|evening), Asha/).first().waitFor();
+    await page.getByRole('heading', { level: 1, name: /A business network for/ }).waitFor();
+    await page.locator('.v5-tiles').getByRole('link', { name: /XCHANGE/ }).waitFor(); // module tiles
+    await page.locator('.v5-figures').getByText('Open pipeline').waitFor(); // live figures
     await page.getByText('Needs your attention').waitFor();
     await visit('/marketplace/unite', 'Unite Group Opportunities', /2 MW rooftop solar EPC/); // 032
     await visit('/marketplace/exchange', 'Approved Partner Exchange', /Originator identity is withheld/); // 033
@@ -3649,3 +3652,33 @@ suites.push({
     await shot('chapter-dashboard');
   },
 });
+
+suites.push({
+  name: 'Design v5 · home has no platform figures on the cover; the phone menu is solid and readable; month fields stay inside their column',
+  run: async ({ page, WEB, expect, shot, label }) => {
+    await page.context().clearCookies();
+    await page.goto(WEB + '/');
+    await page.getByRole('heading', { level: 1, name: /Win more business/ }).waitFor();
+    expect(await page.getByText('Verified partners', { exact: true }).count() === 0, 'no platform figures on the cover');
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/dashboard');
+    await page.getByRole('heading', { level: 1, name: /A business network for/ }).waitFor();
+    if (label === 'desktop') { await shot('home'); return; }
+    await page.getByRole('button', { name: 'Menu' }).click();
+    const drawer = page.locator('#cz-sidebar');
+    await drawer.getByRole('link', { name: 'Home' }).waitFor();
+    const bg = await drawer.evaluate((el) => getComputedStyle(el).backgroundImage);
+    expect(bg.includes('gradient'), 'drawer has a solid navy background');
+    const box = await drawer.getByRole('link', { name: 'Home' }).boundingBox();
+    expect(box && box.y > 40, 'Home is not hidden behind the top bar');
+    await shot('drawer');
+    await drawer.getByRole('button', { name: 'Close menu' }).click();
+    await page.goto(WEB + '/franchise');
+    const month = page.locator('input[type="month"]').first();
+    if (await month.count()) {
+      const m = await month.boundingBox(); const card = await month.evaluate((el) => el.closest('.cz-card, form, section')?.getBoundingClientRect().right ?? 9999);
+      expect(m && m.x + m.width <= card + 1, 'month field stays inside its card');
+    }
+  },
+});
+

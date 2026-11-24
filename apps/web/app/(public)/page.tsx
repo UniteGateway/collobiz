@@ -52,14 +52,6 @@ export default function HomePage() {
             <Link href="/businesses" className="cz-hx-btn cz-hx-btn-glass">Explore Unite businesses</Link>
           </div>
         </div>
-        <dl className="cz-hx-stats" aria-label="Live platform figures">
-          {[
-            ['Verified partners', s?.verifiedPartners],
-            ['Unite Group companies', s?.groupCompanies],
-            ['Open opportunities', s?.openOpportunities],
-            ['Open pipeline value', s ? inrShort(s.openValue) : undefined],
-          ].map(([k, v]) => <div key={k as string}><dt>{k}</dt><dd>{v ?? <Skeleton height={26} width={60} />}</dd></div>)}
-        </dl>
       </section>
 
       {/* ---------- Four clear paths ---------- */}
