@@ -3364,3 +3364,25 @@ suites.push({
     expect(await tpd() === before + 25, 'the register total includes the new feedstock');
   },
 });
+
+suites.push({
+  name: 'BIZO · microsite without pricing, links to bizo.one and the BIZO app; members download a BIZO-ready file',
+  run: async ({ page, WEB, expect, shot, label }) => {
+    await page.goto(WEB + '/businesses/bizo');
+    await page.getByRole('heading', { level: 1, name: 'BIZO' }).waitFor();
+    expect(!(await page.getByText(/₹\s?\d/).count()), 'no prices on the BIZO microsite');
+    expect(await page.locator('[data-app-link="signup"]').getAttribute('href') === 'https://leaddna.bizo.one/?signup=1', 'Start free opens the BIZO app');
+    expect(await page.locator('[data-app-link="login"]').getAttribute('href') === 'https://leaddna.bizo.one/', 'Log in opens the BIZO app');
+    expect(await page.locator('a.cz-gp-flink[href^="https://bizo.one/solutions/"]').count() >= 9, 'every feature links to its bizo.one page');
+    await page.getByRole('heading', { name: 'BIZO for your industry' }).waitFor();
+    await shot('bizo-microsite');
+    if (label !== 'desktop') return;
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/bizo');
+    await page.getByRole('heading', { name: 'Move leads between BIZO and COLLABIZ' }).waitFor();
+    const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Download \d+ customers/ }).click()]);
+    expect(/collabiz-customers-for-bizo-\d{4}-\d{2}-\d{2}\.csv/.test(dl.suggestedFilename()), 'the file has the BIZO export name');
+    await page.getByText(/Last download/).waitFor();
+    await shot('bizo-members');
+  },
+});

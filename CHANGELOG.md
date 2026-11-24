@@ -4,6 +4,9 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### BIZO connected by file, linked to bizo.one (2026-11-24)
+- Pricing removed from the BIZO microsite. Start free / Log in open the BIZO app (leaddna.bizo.one); every feature links to its bizo.one page; BIZO industry pages linked. Members' BIZO page: app links, industry link, partner links, lead exchange both ways (customer import; BIZO-ready CSV export that withholds contacts without outreach consent, neutralises formulas, audited). BIZO on Industry Club boards for trading and exports.
+
 ### Unite Biofix — Bio-CNG and green hydrogen microsite (2026-11-23)
 - Biofix becomes the Bio-CNG and green hydrogen business: microsite with features, workflow, public programmes (facts only) and a validated register (feedstock type and tonnes/day, land, Bio-CNG/manure/hydrogen offtake, EPC/O&M partners) with live totals. Industry Club: new Bio-energy choice and Bio-CNG / green hydrogen power requests, counted as Biofix demand. Migration 0061.
 

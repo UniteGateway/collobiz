@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { venturePhoto } from '@/lib/photos';
 import { isNotFound, useQuery } from '@/lib/hooks';
 
+const url0 = (m: Record<string, string>) => Object.values(m)[0];
 const IC: Record<string, string> = { doc: 'documents', globe: 'map', search: 'search', sparkle: 'award', chart: 'earnings', grid: 'package', shield: 'verify', flag: 'bookmark', people: 'users', clock: 'clock', bell: 'bell', check: 'check', map: 'location' };
 
 type P = Product & { showcase?: { kind: 'property'; items: ShowProject[] } | { kind: 'courses'; items: ShowCourse[] } | null; work?: { open: number; done: number } | null; connector?: ConnectorView | null; related: { slug: string; name: string; sector: string; tagline: string; stage: string }[] };
@@ -50,6 +51,8 @@ export default function ProductPage() {
           <p className="cz-gp-lede">{summary}</p>
           <div className="cz-row" style={{ gap: 10, flexWrap: 'wrap' }}>
             <a href="#contact" className="cz-btn cz-btn-primary">{p.stage === 'live' || p.stage === 'pilot' ? 'Talk to the team' : 'Notify me at launch'}</a>
+            {b?.app && <a className="cz-btn cz-btn-accent" href={b.app.signup} target="_blank" rel="noopener noreferrer" data-app-link="signup">Start free on {p.name} <Icon name="external" size={14} /></a>}
+            {b?.app && <a className="cz-btn cz-btn-ghost" href={b.app.login} target="_blank" rel="noopener noreferrer" data-app-link="login">Log in to {p.name}</a>}
             {b?.website && <a className="cz-btn cz-btn-secondary" href={b.website} target="_blank" rel="noopener noreferrer">Visit {b.website.replace(/^https?:\/\//, '')} <Icon name="external" size={14} /></a>}
           </div>
           <dl className="cz-gp-facts">
@@ -70,9 +73,19 @@ export default function ProductPage() {
           <section id="features" className="cz-gp-section" aria-labelledby="f-h">
             <h2 id="f-h">{b.features.every((x) => x.planned) ? `Planned for ${p.name}` : `What you can do with ${p.name}`}</h2>
             {b.features.some((x) => x.planned) && <p className="cz-muted" style={{ marginTop: -6 }}>Features marked “Planned” are on the roadmap and not available yet.</p>}
-            <ul className="cz-gp-features">{b.features.map((x) => <li key={x.title}><span className="cz-gp-ficon"><Icon name={(IC[x.icon] ?? 'check') as never} size={20} /></span><strong>{x.title}</strong>{x.text ? <p>{x.text}</p> : null}{x.planned && <span className="cz-gp-pill cz-gp-pill-soon">Planned</span>}</li>)}</ul>
+            <ul className="cz-gp-features">{b.features.map((x) => <li key={x.title}><span className="cz-gp-ficon"><Icon name={(IC[x.icon] ?? 'check') as never} size={20} /></span><strong>{x.title}</strong>{x.text ? <p>{x.text}</p> : null}{x.planned && <span className="cz-gp-pill cz-gp-pill-soon">Planned</span>}{x.href && <a className="cz-gp-flink" href={x.href} target="_blank" rel="noopener noreferrer">Learn more on {new URL(x.href).host} <Icon name="external" size={13} /></a>}</li>)}</ul>
           </section>
         ) : null}
+
+        {b?.industryPages && (
+          <section className="cz-gp-section" aria-labelledby="ind-h" id="industries">
+            <h2 id="ind-h">{p.name} for your industry</h2>
+            <div className="cz-board-why">{[...new Map(Object.entries(b.industryPages).map(([sec, url]) => [url, sec])).entries()].map(([url, sec]) => (
+              <a key={url} className="cz-chip" href={url} target="_blank" rel="noopener noreferrer">{groupName(sec)} ↗</a>
+            ))}</div>
+            <p className="cz-muted" style={{ fontSize: 13.5 }}>Opens the industry page on {new URL(b.website ?? url0(b.industryPages)).host}. COLLABIZ members can also move leads between {p.name} and their COLLABIZ CRM — <Link href="/bizo">see how</Link>.</p>
+          </section>
+        )}
 
         {b?.workflow?.length ? (
           <section className="cz-gp-section" aria-labelledby="w-h">

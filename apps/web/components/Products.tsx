@@ -53,6 +53,7 @@ const MODULE_FOR: Record<string, string> = {
  * Shown as "Next" — planned, not live. Regulated businesses have none until regulatory clearance.
  */
 export const NEXT_INTEGRATION: Record<string, { title: string; text: string }> = {
+  bizo: { title: 'Single sign-on and automatic sync', text: 'When BIZO’s public API launches (listed by BIZO as planned). Until then leads move by file.' },
   wakin: { title: 'Teams & Capacity', text: 'Employer verification and interview scheduling from the partner network.' },
   socpost: { title: 'AI Growth Desk', text: 'Approved social posts and campaigns from the Growth Desk.' },
   vidplay: { title: 'AI Growth Desk & Commissions', text: 'Creator campaigns with budget caps and payout reconciliation.' },

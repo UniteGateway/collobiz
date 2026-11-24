@@ -4,7 +4,7 @@
  * without supplied artwork use a lettered mark. Prices shown for BIZO are the brochure's indicative figures.
  */
 /** `planned` marks a feature that is on the roadmap, not yet built; pages label it "Planned". */
-export interface AppFeature { title: string; text: string; icon: string; planned?: boolean }
+export interface AppFeature { title: string; text: string; icon: string; planned?: boolean; /** Page on the business's own website that explains this feature. */ href?: string }
 export interface AppBrand {
   logo?: string; mark?: string; accent: [string, string]; website?: string;
   /** Wide brand artwork (used as the page hero) when there is no standalone logo. */
@@ -12,6 +12,10 @@ export interface AppBrand {
   features: AppFeature[]; workflow?: { title: string; text: string }[];
   plans?: { name: string; price: string; per: string; text: string; featured?: boolean }[]; planNote?: string;
   integration?: { status: 'not_connected' | 'link_only' | 'connected'; text: string };
+  /** The business's own application: sign-in and sign-up addresses. */
+  app?: { login: string; signup: string };
+  /** COLLABIZ sector → the page on the business's website for that industry. */
+  industryPages?: Record<string, string>;
 }
 
 import { PORTFOLIO_BRANDS } from './app-brands-portfolio';
@@ -20,28 +24,32 @@ const f = (title: string, text: string, icon = 'check'): AppFeature => ({ title,
 
 export const APP_BRANDS: Record<string, AppBrand> = {
   bizo: {
-    logo: '/brands/bizo.png', mark: '/brands/bizo-mark.png', accent: ['#0E7BF0', '#19D3C5'], website: 'https://www.bizo.one',
+    logo: '/brands/bizo.png', mark: '/brands/bizo-mark.png', accent: ['#0E7BF0', '#19D3C5'], website: 'https://bizo.one',
+    app: { login: 'https://leaddna.bizo.one/', signup: 'https://leaddna.bizo.one/?signup=1' },
     features: [
-      f('Global market intelligence', 'Import demand, country rankings, competitor markets and price context.', 'globe'),
-      f('Evidence-backed buyer research', 'Company profiles, available public contacts and shipment evidence where licensed.', 'search'),
-      f('Personal AI Growth Agent', 'Research briefs, prioritised opportunities, weekly alerts and recommended actions.', 'sparkle'),
-      f('Proposals and AI client conversations', 'Branded quotations, approved email outreach and supervised inbound chat.', 'doc'),
-      f('Unified CRM and automation', 'Track tasks, RFQs, meetings, deals and reports in one workspace.', 'chart'),
-      f('Adaptive industry dashboard', 'The workspace configures itself around your industry, products, target markets and goals.', 'grid'),
+      { ...f('Opportunity discovery', 'Find tenders, buyers and projects that match your Business DNA.', 'search'), href: 'https://bizo.one/solutions/opportunity-discovery' },
+      { ...f('Global buyer intelligence', 'Importers, distributors and buyers by country, with available public contacts and shipment evidence where licensed.', 'globe'), href: 'https://bizo.one/solutions/global-buyers' },
+      { ...f('Market intelligence', 'Import demand, country rankings, competitor markets and price context from official trade data.', 'chart'), href: 'https://bizo.one/solutions/market-intelligence' },
+      { ...f('Business verification', 'Check a company before you work with it.', 'shield'), href: 'https://bizo.one/solutions/business-verification' },
+      { ...f('Personal AI Growth Agent', 'Research briefs, prioritised opportunities, weekly alerts and recommended actions — drafts wait for your approval.', 'sparkle'), href: 'https://bizo.one/solutions/ai-growth-agent' },
+      { ...f('CRM and deal management', 'Leads, pipeline, tasks, quotations and reports in one workspace.', 'grid'), href: 'https://bizo.one/solutions/crm' },
+      { ...f('AI proposal studio', 'Branded proposals and quotations.', 'doc'), href: 'https://bizo.one/solutions/proposal-studio' },
+      { ...f('Outreach and AI client chatbot', 'Approved email outreach and a supervised chatbot for inbound enquiries.', 'people'), href: 'https://bizo.one/solutions/outreach' },
+      { ...f('Automation and analytics', 'Automations and dashboards that adapt to your industry.', 'clock'), href: 'https://bizo.one/solutions/automation' },
     ],
     workflow: [
       { title: 'Register your company', text: 'Website, sector, products and business objectives.' },
       { title: 'BIZO understands', text: 'AI reviews your business profile and suggests ideal customers.' },
       { title: 'Your dashboard appears', text: 'Relevant tools, pipeline stages and research widgets.' },
       { title: 'Research begins', text: 'Connected sources help identify relevant opportunities.' },
-      { title: 'Your team converts', text: 'Qualify prospects, approve outreach and manage deals.' },
+      { title: 'Your team converts', text: 'Qualify prospects, approve outreach and manage deals — and move leads between BIZO and COLLABIZ.' },
     ],
-    plans: [
-      { name: 'Corporate Growth', price: '₹1,00,000', per: 'per company / month', text: 'Custom market research, CRM, proposals and agent-led opportunity workflows.' },
-      { name: 'Enterprise Intelligence', price: '₹3,00,000', per: 'corporate package', text: 'Advanced intelligence and tailored service scope, subject to a signed proposal.', featured: true },
-    ],
-    planNote: 'Indicative prices from the BIZO brochure; GST extra. Package scope is confirmed in a signed proposal. Source access varies by plan.',
-    integration: { status: 'link_only', text: 'COLLABIZ links to www.bizo.one. Single sign-on and data sync need BIZO’s API details and credentials — not connected yet.' },
+    industryPages: {
+      solar: 'https://bizo.one/industries/solar', power_equipment: 'https://bizo.one/industries/solar', manufacturing: 'https://bizo.one/industries/manufacturing', construction_epc: 'https://bizo.one/industries/construction',
+      infrastructure: 'https://bizo.one/industries/construction', real_estate: 'https://bizo.one/industries/real-estate', trading: 'https://bizo.one/industries/trade', logistics: 'https://bizo.one/industries/logistics',
+      technology: 'https://bizo.one/industries/it', education: 'https://bizo.one/industries/education', agri_food: 'https://bizo.one/industries/trade', local_commerce: 'https://bizo.one/industries/trade',
+    },
+    integration: { status: 'connected', text: 'Leads move between BIZO and the COLLABIZ CRM today: export from BIZO and import into COLLABIZ, or download your COLLABIZ customers in a BIZO-ready file. Single sign-on and automatic sync follow when BIZO’s public API launches (planned by BIZO).' },
   },
   roofz: { logo: '/brands/roofz.png', accent: ['#E11D2E', '#111827'], features: [
     f('Roof-rights checklist', 'Document checklist for ownership and roof rights before listing.', 'doc'), f('Structural review status', 'Track structural assessment before any use is offered.', 'shield'),

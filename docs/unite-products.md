@@ -172,3 +172,31 @@ Every request is validated, stored as structured data with its enquiry, and show
 - **Partners:** EPC, O&M and equipment partners come in through teams, tenders and micro-contracts.
 - **Still planned:** mass-balance and quality records, a plant operating dashboard, and carbon and by-product records.
 - **Existing databases:** migration 0061 updates Biofix's text only if it is still the original seed text.
+
+## BIZO — connected by file, linked to bizo.one (24 Nov 2026)
+
+What bizo.one says (checked 24 Nov 2026):
+- The app is at `leaddna.bizo.one` (sign-in, and sign-up at `?signup=1`).
+- *"A public API is planned for the Business and Enterprise plans."*
+- *"You can import and export CSV today."*
+
+**Microsite (`/businesses/bizo`):**
+- **No pricing.** The plans have been removed from the BIZO data, so prices no longer appear on the public or member pages.
+- **Buttons:** "Start free on BIZO" and "Log in to BIZO" open the BIZO app.
+- **Features:** each feature links to its page under bizo.one/solutions.
+- **"BIZO for your industry":** links to BIZO's industry pages (solar, manufacturing, construction, real estate, trade, logistics, IT, education).
+- **"Works with":** shows the file exchange as Connected, with single sign-on and automatic sync marked "Next".
+
+**Members' page (`/bizo`, menu: Unite businesses → BIZO):**
+- Open BIZO.
+- BIZO for your industry, taken from the member's Industry Club profile.
+- The member's BIZO partner link, plus BIZO's own partner programme.
+- Lead exchange:
+  - **BIZO → COLLABIZ:** a BIZO CSV export goes in through the existing customer import (column mapping, duplicate checks, consent basis).
+  - **COLLABIZ → BIZO:** the owner or an admin downloads their own customers as a BIZO-ready CSV (`GET /v1/bizo/export.csv`). Customers without outreach consent are exported without personal contact details. Spreadsheet formulas are neutralised, and each download is audited.
+
+**Industry Club:** BIZO appears on the boards of members who chose trading or exports and imports.
+
+**Next:** single sign-on and automatic sync, once BIZO's public API exists. Network access to bizo.one, www.bizo.one and api.bizo.one is allowed in the collobiz environment.
+
+Tests: `apps/api/test/bizo.e2e.ts` and the browser suite "BIZO".
