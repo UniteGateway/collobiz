@@ -3688,7 +3688,8 @@ suites.push({
   run: async ({ page, WEB, expect, shot, label }) => {
     await webLogin(page, WEB, 'vikram@greenbuild.example');
     await page.goto(WEB + '/powertrade');
-    await page.getByRole('heading', { level: 1, name: /Do Business\. Save on Power\. Grow Together\./ }).waitFor();
+    await page.getByRole('heading', { level: 1, name: /COLLABIZ\s*PowerTrade/ }).waitFor();
+    await page.getByRole('heading', { name: 'How you can collaborate' }).waitFor();
     if (label !== 'desktop') { await shot('home'); return; }
     await page.getByRole('link', { name: 'Join POWERTRADE' }).click();
     const id = page.locator('[data-form="pt-identity"]');
@@ -3745,5 +3746,10 @@ suites.push({
     await page.goto(WEB + '/powertrade/finance');
     await page.locator('[data-pt-residual]').getByText('₹2.50 L').waitFor();
     await shot('finance');
+    await page.goto(WEB + '/powertrade');
+    await page.locator('[data-pt-kpis]').getByText('Active collaborations').waitFor();
+    await page.getByRole('heading', { name: /My energy & business collaboration/ }).waitFor();
+    await page.getByRole('cell', { name: /Product-for-Power/ }).first().waitFor();
+    await shot('overview');
   },
 });

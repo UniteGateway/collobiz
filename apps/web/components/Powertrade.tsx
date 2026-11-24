@@ -1,6 +1,7 @@
 'use client';
 /** COLLABIZ POWERTRADE — shared pieces for the web screens. */
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { PT_STATUS, type PtStatus } from '@collabiz/types';
 import { Icon, StatusBadge, type IconName } from '@collabiz/ui';
 
@@ -15,28 +16,31 @@ export const toPaise = (rupeeText: string) => Math.round(Number(rupeeText.replac
 const TONE: Partial<Record<PtStatus, string>> = { approved: 'success', contracted: 'success', completed: 'success', in_progress: 'info', partially_fulfilled: 'info', awaiting_documents: 'warning', disputed: 'danger', cancelled: 'neutral', expired: 'neutral' };
 export const PtStatusBadge = ({ s }: { s: string }) => <StatusBadge status={s} tone={(TONE[s as PtStatus] ?? 'brand') as never} label={PT_STATUS[s as PtStatus] ?? s} />;
 
-/** Header used on every POWERTRADE screen. */
+/** Header used on every POWERTRADE screen: product title on the left, photo banner with the tagline on the right. */
 export function PtHeader({ title, lead, children }: { title?: string; lead?: React.ReactNode; children?: React.ReactNode }) {
   return (
     <header className="pt-head" data-screen="powertrade">
-      <div>
-        <p className="pt-brand"><Icon name="zap" size={16} />COLLABIZ POWERTRADE</p>
-        <h1>{title ?? 'Do Business. Save on Power. Grow Together.'}</h1>
+      <div className="pt-head-title">
+        <p className="pt-brand">Unite business programme</p>
+        <h1>{title ?? <>COLLABIZ <span className="pt-power">Power</span><span className="pt-trade">Trade</span></>}</h1>
         <p className="pt-lead">{lead ?? 'Business collaboration + discounted renewable power + product sales + barter + commercial savings.'}</p>
         {children}
       </div>
-      <img src="/photos/energy-solar-sky.webp" alt="" aria-hidden />
+      <div className="pt-banner">
+        <img src="/photos/energy-panel-roof.webp" alt="" aria-hidden />
+        <div><strong>Do business. Save on power. Grow together.</strong><span>Collaborate through products, sales, services, rooftops, EPC, barter or investment — and unlock lower power costs with real business growth.</span></div>
+      </div>
     </header>
   );
 }
 
+const TABS: [string, string, IconName][] = [
+  ['/powertrade', 'Overview', 'home'], ['/powertrade/power', 'Get discounted power', 'zap'], ['/powertrade/finance', 'Earn power benefits', 'coins'], ['/powertrade/matches', 'Sell my products', 'package'],
+  ['/xchange', 'Barter / XCHANGE', 'barter'], ['/powertrade/collaborations?model=solar_integration', 'Become EPC partner', 'factory'], ['/powertrade/collaborations', 'My collaborations', 'teams'], ['/powertrade/join', 'Partner microsite', 'building'],
+];
 export function PtNav() {
-  const items: [string, string, IconName][] = [
-    ['/powertrade', 'Overview', 'home'], ['/powertrade/power', 'Get discounted power', 'sun'], ['/powertrade/finance', 'Earn power benefits', 'coins'], ['/powertrade/matches', 'Sell my products', 'package'],
-    ['/powertrade/collaborations?model=product_for_power', 'Product-for-Power', 'barter'], ['/xchange', 'XCHANGE / Barter', 'barter'], ['/unite-solar', 'EPC partners', 'factory'],
-    ['/powertrade/collaborations', 'My collaborations', 'teams'], ['/powertrade/finance', 'Finance & savings', 'earnings'], ['/vault', 'Documents', 'documents'], ['/action-os', 'Action plan', 'calendar'],
-  ];
-  return <nav className="pt-nav" aria-label="POWERTRADE">{items.map(([h, l, i]) => <Link key={l} href={h}><Icon name={i} size={15} />{l}</Link>)}</nav>;
+  const path = usePathname();
+  return <nav className="pt-nav" aria-label="POWERTRADE">{TABS.map(([h, l, i]) => <Link key={l} href={h} aria-current={path === h ? 'page' : undefined}><Icon name={i} size={16} />{l}</Link>)}</nav>;
 }
 
 export function Widget({ label, value, hint, href, tone = 'blue', icon }: { label: string; value: React.ReactNode; hint?: React.ReactNode; href?: string; tone?: string; icon: IconName }) {

@@ -394,8 +394,15 @@ export class PowertradeController {
       this.db.select({ id: ptScenarios.id, results: ptScenarios.results, createdAt: ptScenarios.createdAt }).from(ptScenarios).where(eq(ptScenarios.orgId, ctx.orgId!)).orderBy(desc(ptScenarios.createdAt)).limit(1),
     ]);
     const active = collabs.items.filter((c) => !['completed', 'cancelled', 'expired'].includes(c.status));
+    // Last six months: verified savings (bills) and sales turnover (accepted purchase orders), for the chart.
+    const months = Array.from({ length: 6 }, (_, i) => { const d = new Date(); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() - (5 - i)); return d.toISOString().slice(0, 7); });
+    const sav = await this.db.select().from(ptEnergySavings).where(eq(ptEnergySavings.orgId, ctx.orgId!));
+    const sales = await this.db.select({ m: sql<string>`to_char(${purchaseOrders.createdAt}, 'YYYY-MM')`, s: sql<number>`coalesce(sum(${purchaseOrders.total}),0)::bigint` }).from(purchaseOrders)
+      .where(and(eq(purchaseOrders.supplierOrgId, ctx.orgId!), inArray(purchaseOrders.status, ['accepted', 'in_fulfilment', 'shipped', 'delivered', 'closed']))).groupBy(sql`1`);
+    const series = months.map((m) => ({ month: m, salesPaise: Number(sales.find((x) => x.m === m)?.s ?? 0), savingsPaise: sav.filter((x) => x.period === m).reduce((t, x) => t + (x.baselinePaise - x.actualPaise), 0), savingsVerified: sav.some((x) => x.period === m && x.verified) }));
+    const m = await this.pt.matches(ctx.orgId!);
     return { joined: true, profile, energy, contributions, collaborations: collabs.items.slice(0, 8), activeCount: active.length, finance: fin, lastScenario: scen[0] ?? null,
-      actions: this.actionsFor(profile, energy, contributions.length, collabs.items, fin) };
+      actions: this.actionsFor(profile, energy, contributions.length, collabs.items, fin), series, matchCount: m.items.length, matches: m.items.slice(0, 5).map((x) => ({ type: x.type, partner: x.partner, title: x.title, arrangement: x.arrangement, href: x.next.href })) };
   }
 
   /** Source-linked priorities (the same rules feed ACTION OS). */
