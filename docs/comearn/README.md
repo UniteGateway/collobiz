@@ -37,6 +37,21 @@ requirements, offers, earnings).
 - **Company-side posting on mobile**: companies post and record stages on the web.
 - **comearn.app as a separate site with single sign-on**: same backend, later.
 
+## Unite review, margin, ratings, guarantee (part 3)
+
+- **Review before publishing**: companies submit; Unite reviews, may send counter-proposals (the company accepts or keeps its
+  terms), then sets the **Unite margin** and releases. Members see only the commission after the margin; the company sees its
+  offer, the margin and the member rate. Each commission records the member share (`gross_paise`) and the Unite margin
+  (`unite_margin_paise`) separately. Editing a released listing sends it back to review; members who already accepted keep
+  their frozen terms.
+- **Ratings**: after a commission is paid, the member rates the company and the company rates the member (1–5 stars + comment),
+  one per side. Averages show on listings, offers and team suggestions. Only real ratings — "No ratings yet" otherwise.
+- **Unite Guaranteed**: a super admin can mark live listings, only after the guarantee terms are written in COMEARN settings and
+  legal review is confirmed. The badge shows on cards; the terms show on the listing; Explore can filter to guaranteed listings.
+  The guarantee is a financial commitment of Unite — the terms must be approved by Unite legal and finance before real use.
+- **Sample listings**: Admin → COMEARN → Review → "Load sample listings" creates 25 labelled **Sample** listings across Unite
+  businesses and demo companies with illustrative commissions (loaded in the demo database). They are excluded from admin counts.
+
 ## Money rules
 
 - Commission is paid by the **posting company directly to the member**. COMEARN records it; COLLABIZ does not hold the money.
