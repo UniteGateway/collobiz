@@ -62,6 +62,7 @@ export default function ComearnEngagement() {
           )}
           {['earner', 'team'].includes(e.side) && <Team e={e} done={q.reload} />}
           {['earner', 'company'].includes(e.side) && e.lead && <Tools e={e} />}
+          {['earner', 'company'].includes(e.side) && e.commissions.some((c) => c.status === 'paid') && <RateCard e={e} />}
           <div className="ce-two">
             <Card title="History">
               <ol className="ce-history">{e.events.map((x) => <li key={x.id}><strong>{e.stages.find((s) => s.key === x.stage)?.label ?? x.stage}</strong><small>{new Date(x.createdAt).toLocaleString('en-IN')}{x.amountPaise ? ` · ${rupees(x.amountPaise)}` : ''}{x.reference ? ` · ref ${x.reference}` : ''}</small>{x.note && <p>{x.note}</p>}</li>)}</ol>
@@ -225,6 +226,25 @@ function Tools({ e }: { e: Eng }) {
       {crm.error && <Alert tone="danger">{crm.error}</Alert>}
       {crm.data && <Alert tone="success">{crm.data.existed ? 'Already in your CRM.' : 'Added to your CRM as a deal.'} <Link href="/crm">Open CRM →</Link></Alert>}
       {assist.data && <div data-ce-draft><p className="ce-muted">{assist.data.label}</p><pre className="ce-agreement">{assist.data.text}</pre></div>}
+    </Card>
+  );
+}
+
+/** Rate the other side once a commission has been paid. */
+function RateCard({ e }: { e: Eng }) {
+  const [stars, setStars] = useState(0); const [comment, setComment] = useState('');
+  const m = useMutation(async () => api.post(`/comearn/engagements/${e.id}/rate`, { stars, comment: comment || undefined }));
+  const who = e.side === 'earner' ? e.opportunity.company : e.earner;
+  return (
+    <Card title={`Rate ${who}`} subtitle="Ratings are shown on COMEARN listings and offers. One rating per side, after payment.">
+      {m.data ? <Alert tone="success">Thank you — your rating is recorded.</Alert> : (
+        <form className="cz-stack" style={{ gap: 8 }} data-form="ce-rate" onSubmit={(x) => { x.preventDefault(); m.run(); }}>
+          {m.error && <Alert tone="danger">{m.error}</Alert>}
+          <div className="ce-stars-pick" role="radiogroup" aria-label="Stars">{[1, 2, 3, 4, 5].map((n) => <button key={n} type="button" role="radio" aria-checked={stars === n} aria-label={`${n} star${n > 1 ? 's' : ''}`} onClick={() => setStars(n)} data-on={n <= stars || undefined}>★</button>)}</div>
+          <TextArea label="Comment (optional)" value={comment} onChange={(x) => setComment(x.target.value)} rows={2} />
+          <div><Button type="submit" disabled={!stars} loading={m.pending}>Submit rating</Button></div>
+        </form>
+      )}
     </Card>
   );
 }

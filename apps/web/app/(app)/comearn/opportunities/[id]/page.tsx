@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { CE_CATEGORIES, CE_MODELS, CE_TRIGGERS, CE_TYPES, type CeType } from '@collabiz/types';
 import { Alert, Button, ButtonLink, Card, Checkbox, Skeleton } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
-import { CeHeader, CeNav, RepLine, SOURCE_LABEL, commissionLabel, rupees, type CeCard, type CeRep } from '@/components/Comearn';
+import { CeHeader, CeNav, GuaranteedBadge, RepLine, SOURCE_LABEL, Stars, commissionLabel, rupees, type CeCard, type CeRep } from '@/components/Comearn';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
-interface Detail extends CeCard { companyOrgId: string; description: string; idealEarner: string | null; milestones: { label: string; pct: number }[]; recurringMonths: number | null; paymentDays: number; maxEarners: number | null; licenceNote: string | null; version: number; restricted: boolean; agreement: string; engagement: { id: string; stage: string; status: string } | null }
+interface Detail extends CeCard { companyOrgId: string; guaranteeTerms: string | null; companyRateBps?: number | null; companyFixedPaise?: number | null; uniteMarginBps?: number | null; uniteMarginPaise?: number | null; description: string; idealEarner: string | null; milestones: { label: string; pct: number }[]; recurringMonths: number | null; paymentDays: number; maxEarners: number | null; licenceNote: string | null; version: number; restricted: boolean; agreement: string; engagement: { id: string; stage: string; status: string } | null }
 
 /** Opportunity: terms, what earns the commission, and joining by accepting the commission agreement. */
 export default function ComearnOpportunity() {
@@ -27,10 +27,13 @@ export default function ComearnOpportunity() {
         <>
           <CeHeader title={o.title} lead={<>{o.company} · {CE_CATEGORIES[o.category]} · {CE_TYPES[o.type as CeType]?.label} · {o.territory}</>} />
           <CeNav />
+          {o.sample && <Alert tone="info">Sample listing — a demonstration with an illustrative commission. It is not a live offer from this business.</Alert>}
+          {o.uniteGuaranteed && <div className="ce-guarantee-box" data-ce-guarantee><GuaranteedBadge /><p style={{ margin: '8px 0 0' }}>{o.guaranteeTerms}</p></div>}
           {o.restricted && <Alert tone="warning">Regulated sector. The company has recorded its licence{o.licenceNote ? `: ${o.licenceNote}` : ''}. Check whether your own work here needs a licence or registration before you start.</Alert>}
           <div className="ce-two">
             <Card title="The opportunity">
               <p className="ce-muted"><strong>{o.company}</strong> <RepLine rep={rep.data} as="company" /></p>
+              {!rep.data && <Stars rating={o.rating} />}
               {o.source && <p className="ce-muted">{SOURCE_LABEL[o.source.module] ?? o.source.module} · {o.source.id}</p>}
               <p className="ce-pre">{o.description}</p>
               {o.idealEarner && <p className="ce-muted"><strong>Who does well here:</strong> {o.idealEarner}</p>}
@@ -45,6 +48,8 @@ export default function ComearnOpportunity() {
                 {o.estimatedValuePaise != null && <div><dt>Typical business value</dt><dd>{rupees(o.estimatedValuePaise)} — potential commission {rupees(o.potentialPaise)} (estimate, not a promise)</dd></div>}
                 <div><dt>Members working on it</dt><dd>{o.earners ?? 0}{o.maxEarners ? ` of ${o.maxEarners}` : ''}</dd></div>
               </dl>
+              {o.mine && o.companyRateBps != null && o.uniteMarginBps != null && <p className="ce-muted">Your offer {(o.companyRateBps / 100)}% · Unite margin {(o.uniteMarginBps / 100)}% · members see {((o.rateBps ?? 0) / 100)}%</p>}
+              {o.mine && o.companyFixedPaise != null && o.uniteMarginPaise != null && <p className="ce-muted">Your offer {rupees(o.companyFixedPaise)} · Unite margin {rupees(o.uniteMarginPaise)} · members see {rupees(o.fixedPaise)}</p>}
               {o.mine ? <ButtonLink href="/comearn/offer" variant="secondary">Manage in Offer commissions</ButtonLink>
                 : o.engagement ? <ButtonLink href={`/comearn/engagements/${o.engagement.id}`}>Open my tracker</ButtonLink>
                 : !joined && <><Button onClick={() => join.run()} loading={join.pending}>Start earning</Button>{join.error && <Alert tone="danger">{join.error}</Alert>}</>}

@@ -17,8 +17,9 @@ function Inner() {
   const [type, setType] = useState('');
   const [text, setText] = useState('');
   const [view, setView] = useState(sp.get('view') ?? 'opportunities');
+  const [onlyG, setOnlyG] = useState(false);
   const rq = useQuery<{ canBid: boolean; items: { id: string; code: string; title: string; category: keyof typeof CE_CATEGORIES; description: string; city: string; estimatedValuePaise: number | null; closesOn: string; bids: number; myBid: { status: string } | null }[] }>(view === 'requirements' ? '/comearn/requirements' : null);
-  const q = useQuery<{ items: CeCard[] }>('/comearn/opportunities', { category, type: type || undefined, q: text || undefined });
+  const q = useQuery<{ items: CeCard[] }>('/comearn/opportunities', { category, type: type || undefined, q: text || undefined, guaranteed: onlyG ? '1' : undefined });
   return (
     <Screen page={{ key: 'comearn-explore', title: 'Explore earning opportunities', access: 'partner' }} header={false}>
       <CeHeader title="Earn commissions" lead="Live earning opportunities from verified COLLABIZ businesses. Commission is earned only when the company verifies the business — potential amounts are estimates." />
@@ -28,10 +29,12 @@ function Inner() {
       <Segmented label="Category" value={category} onChange={setCategory} options={[{ value: 'all', label: 'All' }, ...Object.entries(CE_CATEGORIES).map(([value, label]) => ({ value, label }))]} />
       <div className="ce-filters">
         <SearchInput label="Search opportunities" value={text} onChange={(e) => setText(e.target.value)} />
+        <label className="ce-toggle"><input type="checkbox" checked={onlyG} onChange={(e) => setOnlyG(e.target.checked)} /> Unite Guaranteed only</label>
         <Select label="Opportunity type" value={type} onChange={(e) => setType(e.target.value)} options={[{ value: '', label: 'All types' }, ...Object.entries(CE_TYPES).map(([value, t]) => ({ value, label: t.label }))]} />
       </div>
-      {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !q.data ? <Skeleton height={240} /> : q.data.items.length ? (
-        <div className="ce-grid">{q.data.items.map((o) => <OppCard key={o.id} o={o} />)}</div>
+      {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !q.data ? <Skeleton height={240} /> : q.data.items.length ? (<>
+        <p className="ce-muted" data-ce-count>{q.data.items.length} listing{q.data.items.length === 1 ? '' : 's'}{q.data.items.some((o) => o.sample) ? ' · listings marked Sample are demonstrations with illustrative rates' : ''}</p>
+        <div className="ce-grid">{q.data.items.map((o) => <OppCard key={o.id} o={o} />)}</div></>
       ) : <EmptyState icon="search" title="No opportunities here yet">Try another category, or post a customer requirement.</EmptyState>}
       </>}
     </Screen>

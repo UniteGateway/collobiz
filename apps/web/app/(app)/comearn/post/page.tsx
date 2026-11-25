@@ -27,10 +27,10 @@ function Inner() {
       milestones: f.model === 'milestone' ? ms.map((m) => ({ label: m.label, pct: Number(m.pct) })) : [], recurringMonths: f.model === 'recurring' && f.recurringMonths ? Number(f.recurringMonths) : undefined,
       trigger: f.trigger, paymentDays: Number(f.paymentDays || 30), maxEarners: f.maxEarners ? Number(f.maxEarners) : undefined, licenceNote: f.licenceNote || undefined, source });
     if (publish) {
-      try { await api.post(`/comearn/opportunities/${r.id}/status`, { status: 'live' }); }
+      try { await api.post(`/comearn/opportunities/${r.id}/status`, { status: 'submit' }); }
       catch (e) { router.push(`/comearn/offer?unpublished=${encodeURIComponent((e as Error).message)}`); return true; }
     }
-    router.push(publish ? `/comearn/opportunities/${r.id}` : '/comearn/offer'); return true;
+    router.push(publish ? '/comearn/offer?submitted=1' : '/comearn/offer'); return true;
   });
   const fe = save.fieldErrors;
   return (
@@ -76,8 +76,8 @@ function Inner() {
           )}
           <div className="ce-potential" data-ce-potential><span>Potential commission</span><strong>{potential != null ? rupees(potential) : '—'}</strong><small>Estimate per deal. Actual commission is calculated from the amount you verify.</small></div>
         </Card>
-        <div className="cz-row" style={{ gap: 8 }}><Button type="submit" loading={save.pending}>Generate opportunity &amp; agreement</Button><Button type="button" variant="ghost" onClick={() => save.run(false)}>Save as draft</Button></div>
-        <p className="ce-muted">Publishing needs a verified business. Posting is free. Members accept a commission agreement generated from these terms; changing terms later creates a new version and does not change what members already accepted.</p>
+        <div className="cz-row" style={{ gap: 8 }}><Button type="submit" loading={save.pending}>Submit to Unite for review</Button><Button type="button" variant="ghost" onClick={() => save.run(false)}>Save as draft</Button></div>
+        <p className="ce-muted">Unite reviews every listing before members see it: we may suggest better terms, then add the Unite margin and release it. Members see the commission after the margin; you always see your full offer and the margin. Needs a verified business. Posting is free. Members accept a commission agreement generated from these terms; changing terms later creates a new version and does not change what members already accepted.</p>
       </form>
     </Screen>
   );

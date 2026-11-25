@@ -3869,8 +3869,8 @@ suites.push({
 });
 
 suites.push({
-  name: 'COMEARN · company offers a commission, member joins, accepts terms, registers a protected lead; company verifies payment and pays; earnings update',
-  run: async ({ page, WEB, expect, shot, label }) => {
+  name: 'COMEARN · company offers a commission, Unite releases it with a margin, member joins, accepts terms, registers a protected lead; company verifies payment and pays; ratings; earnings update',
+  run: async ({ page, WEB, ADMIN, expect, shot, label }) => {
     await webLogin(page, WEB, 'ravi@sunrise.example');
     await page.goto(WEB + '/comearn');
     await page.getByRole('img', { name: /comearn — Opportunities to Earn/ }).waitFor();
@@ -3888,11 +3888,20 @@ suites.push({
     await f.getByLabel('Territory').fill('Telangana');
     await f.getByLabel('Estimated business value (₹)').fill('30000000');
     await f.getByLabel('Describe the opportunity').fill('Introduce factories that want rooftop solar. We design, supply, install and maintain the plant.');
-    await f.getByLabel('Commission percentage').fill('2');
-    await page.locator('[data-ce-potential]').getByText('₹6.00 L').waitFor();
+    await f.getByLabel('Commission percentage').fill('2.5');
+    await page.locator('[data-ce-potential]').getByText('₹7.50 L').waitFor();
     await shot('post');
-    await f.getByRole('button', { name: /Generate opportunity/ }).click();
-    await page.waitForURL(/\/comearn\/opportunities\/[0-9a-f-]+$/);
+    await f.getByRole('button', { name: 'Submit to Unite for review' }).click();
+    await page.getByText(/Submitted to Unite/).waitFor();
+    // Unite reviews, keeps a 0.5% margin and releases at 2% to members.
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/comearn');
+    await page.getByText('1 MW rooftop solar for factories in Telangana').first().waitFor();
+    await page.getByLabel('Unite margin (%)').fill('0.5');
+    await page.locator('[data-ce-preview]').getByText('Members will see 2%').waitFor();
+    await shot('admin-release');
+    await page.getByRole('button', { name: 'Release to members' }).click();
+    await page.getByText('Nothing waiting for review').waitFor();
     // Sunrise finds it, accepts the agreement and registers its customer.
     await webLogin(page, WEB, 'ravi@sunrise.example');
     await page.goto(WEB + '/comearn/explore?category=solar');
@@ -3940,11 +3949,38 @@ suites.push({
     await page.getByRole('button', { name: 'Confirm received' }).click();
     await page.getByText('Receipt confirmed').waitFor();
     await shot('tracker-paid');
+    const rate = page.locator('[data-form="ce-rate"]');
+    await rate.getByRole('radio', { name: '5 stars' }).click();
+    await rate.getByLabel('Comment (optional)').fill('Clear updates and paid on time.');
+    await rate.getByRole('button', { name: 'Submit rating' }).click();
+    await page.getByText('Thank you — your rating is recorded.').waitFor();
+    await page.goto(WEB + '/comearn/explore?category=solar');
+    await page.locator('[data-ce-opp="1 MW rooftop solar for factories in Telangana"] [data-ce-stars="5"]').waitFor();
     await page.goto(WEB + '/comearn');
     await page.locator('[data-ce-earned]').getByText('₹5.70 L').waitFor();
     await shot('home');
     await page.goto(WEB + '/dashboard');
     expect(await page.getByRole('link', { name: /COMEARN/ }).count() > 0, 'COMEARN is reachable from the member home');
+    // Unite Guaranteed (needs written, legally reviewed terms) and sample listings.
+    await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
+    await page.goto(ADMIN + '/comearn');
+    await page.getByRole('button', { name: 'Load sample listings' }).click();
+    await page.getByRole('button', { name: 'Fees & sectors' }).click();
+    await page.getByLabel(/Unite Guarantee terms/).fill('If the paying company does not pay an approved commission within 30 days of its due date, Unite pays the member and recovers it from the company. Draft for demonstration — to be confirmed by Unite legal.');
+    await page.getByLabel('Legal review of the Unite Guarantee terms is complete').check();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByRole('button', { name: /^Opportunities/ }).click();
+    await page.getByRole('row').filter({ hasText: '1 MW rooftop solar for factories in Telangana' }).getByRole('button', { name: 'Unite Guaranteed' }).click();
+    await page.getByRole('row').filter({ hasText: '1 MW rooftop solar for factories in Telangana' }).getByText(/Guaranteed/).first().waitFor();
+    await webLogin(page, WEB, 'deepak@deccan.example');
+    await page.goto(WEB + '/comearn/explore');
+    await page.locator('[data-ce-count]').getByText(/listings marked Sample/).waitFor();
+    await shot('explore-many');
+    await page.getByLabel('Unite Guaranteed only').check();
+    await page.locator('[data-ce-opp="1 MW rooftop solar for factories in Telangana"]').getByText('Unite Guaranteed').waitFor();
+    await page.locator('[data-ce-opp="1 MW rooftop solar for factories in Telangana"]').click();
+    await page.locator('[data-ce-guarantee]').getByText(/Unite pays the member/).waitFor();
+    await shot('guaranteed');
   },
 });
 
