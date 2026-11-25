@@ -14,7 +14,7 @@ export default function TradingMarket() {
   const m = useQuery<any>('/trading/market', { q: q || undefined, sector: sector || undefined });
   const d = m.data;
   return (
-    <Screen id="085" actions={<ButtonLink href="/trading/requirements/new">Post a requirement</ButtonLink>}>
+    <Screen id="085" actions={<span className="cz-row" style={{ gap: 8 }}><ButtonLink href="/trading/requirements/new">Post a requirement</ButtonLink><ButtonLink variant="ghost" href={`/comearn/post?source=exim&sourceId=unite-exim&type=export_orders&category=exports&title=${encodeURIComponent('Export orders for our products')}`}>Pay commission for export orders</ButtonLink></span>}>
       <TradingTabs />
       <div className="cz-row" style={{ alignItems: 'flex-end' }}>
         <TextInput label="Search products" value={q} onChange={(e) => setQ(e.target.value)} />

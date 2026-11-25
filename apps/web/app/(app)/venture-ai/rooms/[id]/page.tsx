@@ -67,7 +67,7 @@ function Team({ r, reload }: { r: Room; reload: () => void }) {
               </div>
             </li>))}</ul>
         </Card>
-        <Card title="Roles needed" actions={r.owner ? <Link href={`/venture-ai/opportunities/${r.opportunity.id}`}>Find members →</Link> : undefined}>
+        <Card title="Roles needed" actions={r.owner ? <span className="cz-row" style={{ gap: 10 }}><Link href={`/venture-ai/opportunities/${r.opportunity.id}`}>Find members →</Link><Link data-ce-link href={`/comearn/post?source=venture_ai&sourceId=${r.venture.code}&type=dealer_development&category=other&title=${encodeURIComponent(`Distributors and dealers for ${r.venture.name}`)}`}>Offer commission in COMEARN →</Link></span> : undefined}>
           <ul className="vai-list">{r.opportunity.roles.map((x, i) => { const n = filled(x.role); return <li key={`${x.role}-${i}`}><div><strong>{r.members.find((m) => m.role === x.role)?.roleLabel ?? x.role.replace(/_/g, ' ')}</strong><p>{n} of {x.count} filled</p></div><span className="vai-pill" data-s={n >= x.count ? 'accepted' : 'invited'}>{n >= x.count ? 'Filled' : 'Open'}</span></li>; })}</ul>
         </Card>
       </div>

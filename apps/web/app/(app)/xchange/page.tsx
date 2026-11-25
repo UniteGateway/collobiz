@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { CAPACITY_CATEGORIES, INDIA_STATES, VALUE_BASIS_LABELS, XCHANGE_CATEGORIES, XCHANGE_CATEGORY_LABELS, regionLabel } from '@collabiz/types';
-import { Alert, Button, Card, ChipSelect, Dialog, EmptyState, LoadingState, Segmented, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
+import { Alert, Button, ButtonLink, Card, ChipSelect, Dialog, EmptyState, LoadingState, Segmented, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { XchangeNav, inr } from '@/components/Xchange';
 import { api } from '@/lib/api';
@@ -23,7 +23,7 @@ export default function XchangeMarket() {
   return (
     <Screen page={{ key: 'xchange', title: 'XCHANGE — business barter', access: 'partner' }}
       description="Exchange products, services, machinery, surplus stock and idle capacity with verified businesses — directly, with part-cash, or in exchanges between three or four companies."
-      actions={d?.canTrade ? <Button onClick={() => setListing(true)}>List an offer or need</Button> : undefined}>
+      actions={<span className="cz-row" style={{ gap: 8 }}>{d?.canTrade && <Button onClick={() => setListing(true)}>List an offer or need</Button>}<ButtonLink variant="ghost" href={`/comearn/post?source=xchange&sourceId=xchange&type=business_introduction&category=industrial&title=${encodeURIComponent('Introduce barter partners for our surplus stock')}`}>Pay commission for introductions</ButtonLink></span>}>
       <XchangeNav />
       <Alert tone="info">Barter is not tax-free: each supply is a separate taxable supply at open-market value. Every exchange shows invoice data for your accountant.</Alert>
       <div className="cz-row" style={{ gap: 12, alignItems: 'flex-end' }}>

@@ -12,7 +12,7 @@ interface Settings { platformFeeBps: number; feePayer: 'company' | 'earner'; res
 interface O {
   counts: { live: number; opportunities: number; engagements: number; leads: number; paid: number; pending: number; fees: number }; settings: Settings;
   disputes: { id: string; reason: string; status: string; ruling: string | null; engagementCode: string; opportunity: string; raisedByOrg: string; createdAt: string }[];
-  opportunities: { id: string; code: string; title: string; category: string; status: string; company: string; model: string; rateBps: number | null; fixedPaise: number | null }[];
+  opportunities: { id: string; code: string; title: string; category: string; status: string; company: string; model: string; rateBps: number | null; fixedPaise: number | null; featured?: boolean }[];
 }
 
 /** COMEARN admin: monitoring, disputes, pausing listings, platform fee and restricted sectors. */
@@ -21,6 +21,7 @@ export default function ComearnAdmin() {
   const [tab, setTab] = useState('disputes');
   const act = useMutation(async (fn: () => Promise<unknown>) => { const r = await fn(); q.reload(); return r; });
   const d = q.data;
+  const reqs = useQuery<{ items: { id: string; code: string; title: string; category: string; city: string; status: string; member: string; bids: number }[] }>(tab === 'reqs' ? '/admin/comearn/requirements' : null);
   return (
     <div className="cz-stack" style={{ gap: 16 }}>
       <img src="/brands/comearn.png" alt="comearn — Opportunities to Earn. Powered by COLLABIZ" style={{ height: 56, width: 'auto', alignSelf: 'flex-start' }} />
@@ -29,12 +30,19 @@ export default function ComearnAdmin() {
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !d ? <LoadingState /> : (
         <>
           <p className="cz-muted" style={{ margin: 0 }}>{d.counts.live} live of {d.counts.opportunities} opportunities · {d.counts.engagements} engagements · {d.counts.leads} protected leads · commissions paid {rupees(d.counts.paid)} · pending {rupees(d.counts.pending)} · platform fees {rupees(d.counts.fees)}</p>
-          <Segmented label="Show" value={tab} onChange={setTab} options={[{ value: 'disputes', label: `Disputes (${d.disputes.filter((x) => x.status === 'open').length} open)` }, { value: 'opps', label: `Opportunities (${d.opportunities.length})` }, { value: 'settings', label: 'Fees & sectors' }]} />
+          <Segmented label="Show" value={tab} onChange={setTab} options={[{ value: 'disputes', label: `Disputes (${d.disputes.filter((x) => x.status === 'open').length} open)` }, { value: 'opps', label: `Opportunities (${d.opportunities.length})` }, { value: 'reqs', label: 'Customer requirements' }, { value: 'settings', label: 'Fees & sectors' }]} />
           {tab === 'disputes' && (!d.disputes.length ? <Card><EmptyState icon="verify" title="No disputes" /></Card> : d.disputes.map((x) => <DisputeCard key={x.id} x={x} act={(fn) => act.run(fn)} />))}
           {tab === 'opps' && (
-            <Card flush><div className="vai-scroll"><table className="vai-table"><thead><tr><th>Opportunity</th><th>Company</th><th>Category</th><th>Commission</th><th>Status</th><th /></tr></thead>
+            <Card flush subtitle="Featured listings are granted by COLLABIZ; paid promotion needs payments, which are not connected yet."><div className="vai-scroll"><table className="vai-table"><thead><tr><th>Opportunity</th><th>Company</th><th>Category</th><th>Commission</th><th>Status</th><th /></tr></thead>
               <tbody>{d.opportunities.map((o) => <tr key={o.id}><td>{o.code} · {o.title}</td><td>{o.company}</td><td>{CE_CATEGORIES[o.category as keyof typeof CE_CATEGORIES]}</td><td>{o.model === 'fixed' ? rupees(o.fixedPaise) : `${(o.rateBps ?? 0) / 100}%`}</td><td><StatusBadge status={o.status} /></td>
-                <td>{o.status === 'live' && <Button size="sm" variant="ghost" onClick={() => { const reason = window.prompt('Reason for pausing (sent to the company)'); if (reason) act.run(() => api.post(`/admin/comearn/opportunities/${o.id}/pause`, { reason })); }}>Pause…</Button>}</td></tr>)}</tbody></table></div></Card>
+                <td className="cz-row" style={{ gap: 6 }}>{o.status === 'live' && <Button size="sm" variant="ghost" onClick={() => { const reason = window.prompt('Reason for pausing (sent to the company)'); if (reason) act.run(() => api.post(`/admin/comearn/opportunities/${o.id}/pause`, { reason })); }}>Pause…</Button>}
+                  {o.status === 'live' && (o.featured ? <Button size="sm" variant="ghost" onClick={() => act.run(() => api.put(`/admin/comearn/opportunities/${o.id}/feature`, { until: null }))}>Unfeature</Button>
+                    : <Button size="sm" variant="secondary" onClick={() => { const until = window.prompt('Feature until (YYYY-MM-DD)', new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10)); if (until) act.run(() => api.put(`/admin/comearn/opportunities/${o.id}/feature`, { until })); }}>Feature…</Button>)}</td></tr>)}</tbody></table></div></Card>
+          )}
+          {tab === 'reqs' && (
+            <Card flush title="Customer requirements" subtitle="Posted by members; customer identity is private to the member until they select an offer.">{!reqs.data ? <LoadingState /> : !reqs.data.items.length ? <EmptyState icon="verify" title="No requirements yet" /> : (
+              <div className="vai-scroll"><table className="vai-table"><thead><tr><th>Requirement</th><th>Member</th><th>Category</th><th>City</th><th>Offers</th><th>Status</th></tr></thead>
+                <tbody>{reqs.data.items.map((r) => <tr key={r.id}><td>{r.code} · {r.title}</td><td>{r.member}</td><td>{CE_CATEGORIES[r.category as keyof typeof CE_CATEGORIES]}</td><td>{r.city}</td><td>{r.bids}</td><td><StatusBadge status={r.status} /></td></tr>)}</tbody></table></div>)}</Card>
           )}
           {tab === 'settings' && <SettingsCard s={d.settings} save={(b) => act.run(() => api.put('/admin/comearn/settings', b))} />}
         </>

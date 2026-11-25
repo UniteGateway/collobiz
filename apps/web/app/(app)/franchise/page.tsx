@@ -18,7 +18,7 @@ export default function FranchisePage() {
   return (
     <Screen page={{ key: 'franchise', title: 'Franchise', access: 'verified-partner' }}
       description="Run a Unite brand in your city — a store, experience centre, kiosk or service point. Apply, follow the set-up checklist with Unite, then report your monthly sales."
-      actions={<Button onClick={() => setApplying(true)}>Apply for a franchise</Button>}>
+      actions={<span className="cz-row" style={{ gap: 8 }}><Button onClick={() => setApplying(true)}>Apply for a franchise</Button><ButtonLink variant="ghost" href={`/comearn/post?source=franchise&sourceId=franchise&type=franchise_development&category=franchise&title=${encodeURIComponent('Franchise partners for our brand')}`}>Pay commission for franchise leads</ButtonLink></span>}>
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !q.data ? <Skeleton height={240} /> : !q.data.length ? (
         <div className="cz-card"><EmptyState icon="location" title="You don’t run a Unite franchise yet" action={<Button onClick={() => setApplying(true)}>Apply for a franchise</Button>}>Unite reviews every application and agrees the fee, royalty and targets with you before anything is signed.</EmptyState></div>
       ) : (
