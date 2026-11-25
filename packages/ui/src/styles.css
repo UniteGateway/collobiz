@@ -3608,3 +3608,10 @@ a.pt-widget:hover { border-color: #C9D6EA; }
 
 .v5-tile-icon[data-img] { background: transparent; padding: 0; overflow: hidden; }
 .v5-tile-icon[data-img] img { width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
+.ce-head + .ce-nav { margin-top: 14px; }
+.ce-nav + * { margin-top: 14px; }
+@media (max-width: 860px) {
+  .ce-nav { overflow: visible; padding: 4px; gap: 2px; }
+  .ce-nav a { min-width: 0; flex: 1 1 0; padding: 8px 2px; font-size: 11.5px; white-space: nowrap; }
+  .ce-nav a span { overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+}
