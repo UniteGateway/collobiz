@@ -10,9 +10,9 @@ export { rupees, toPaise } from './Powertrade';
 export function CeHeader({ title, lead, children }: { title?: React.ReactNode; lead?: React.ReactNode; children?: React.ReactNode }) {
   return (
     <header className="ce-head" data-screen="comearn">
-      <div>
-        <p className="ce-brand"><span className="ce-word">com<b>earn</b></span><span>Powered by COLLABIZ</span></p>
-        <h1>{title ?? 'Opportunities to Earn'}</h1>
+      <Link href="/comearn" className="ce-logo" aria-label="COMEARN home"><img src="/brands/comearn.png" alt="comearn — Opportunities to Earn. Powered by COLLABIZ" width={1000} height={297} /></Link>
+      <div className="ce-head-text">
+        <h1>{title ?? 'Your earning home'}</h1>
         <p className="ce-lead">{lead ?? 'You bring the opportunity. We connect the business. You earn the commission.'}</p>
         {children}
       </div>

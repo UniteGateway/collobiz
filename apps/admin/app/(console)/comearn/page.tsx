@@ -23,6 +23,7 @@ export default function ComearnAdmin() {
   const d = q.data;
   return (
     <div className="cz-stack" style={{ gap: 16 }}>
+      <img src="/brands/comearn.png" alt="comearn — Opportunities to Earn. Powered by COLLABIZ" style={{ height: 56, width: 'auto', alignSelf: 'flex-start' }} />
       <BannerHeader title="COMEARN" description="Commission marketplace oversight: rule on disputes, pause listings that break the rules, and set the platform fee and regulated sectors. Companies pay members directly; COMEARN keeps the records." />
       {act.error && <Alert tone="danger">{act.error}</Alert>}
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !d ? <LoadingState /> : (

@@ -18,8 +18,8 @@ const inr = (minor = 0) => {
 };
 
 const GOALS: [string, string][] = [['Earn commissions', '/comearn'], ['Sell your products', '/partner-with-unite'], ['Get discounted power', '/powertrade/power'], ['Exchange & barter', '/xchange'], ['Find partners & investors', '/collab'], ['Launch a new business', '/launch']];
-const TILES: { label: string; sub: string; href: string; icon: IconName; tone: string }[] = [
-  { label: 'COMEARN', sub: 'Earn · Offer commissions', href: '/comearn', icon: 'coins', tone: 'green' },
+const TILES: { label: string; sub: string; href: string; icon: IconName; tone: string; img?: string }[] = [
+  { label: 'COMEARN', sub: 'Earn · Offer commissions', href: '/comearn', icon: 'coins', tone: 'green', img: '/brands/comearn-mark.png' },
   { label: 'Energy & Solar', sub: 'PPA · EPC · Captive', href: '/energy', icon: 'sun', tone: 'blue' },
   { label: 'ROOFZ', sub: 'Rooftop business & leasing', href: '/businesses/roofz', icon: 'roof', tone: 'red' },
   { label: 'Business Offers', sub: 'Buy · Sell · Source', href: '/business-offers', icon: 'briefcase', tone: 'indigo' },
@@ -32,7 +32,7 @@ const TILES: { label: string; sub: string; href: string; icon: IconName; tone: s
 ];
 const QUICK: [string, string][] = [['I want to buy power', '/powertrade/power'], ['I want to sell my product', '/club/products'], ['I have a rooftop or land', '/businesses/roofz'], ['I am looking for investment', '/invest'], ['I want a business partner', '/collab']];
 const SECTOR_PIC: Record<string, string> = { solar: 'energy-panel-roof', power_equipment: 'industry-engineer', infrastructure: 'build-site-team', real_estate: 'property-tower', local_commerce: 'trade-warehouse', technology: 'tech-data', consulting: 'team-boardroom', ev: 'energy-ev-carport', agri_food: 'growth-seedling', financial_services: 'finance-analysis' };
-const BRANDS: [string, string, string][] = [['Unite Solar', '/brands/sunx.png', '/businesses/sunx'], ['Unite Powertek', '/brands/unite-powertek.png', '/powertek'], ['ROOFZ', '/brands/roofz.png', '/businesses/roofz'], ['PRIZO', '/brands/prizo.png', '/businesses/prizo'], ['LeadDNA', '/brands/leaddna.png', '/businesses/leaddna'], ['UNIECO', '/brands/unieco.png', '/businesses/unieco']];
+const BRANDS: [string, string, string][] = [['COMEARN', '/brands/comearn.png', '/comearn'], ['Unite Solar', '/brands/sunx.png', '/businesses/sunx'], ['Unite Powertek', '/brands/unite-powertek.png', '/powertek'], ['ROOFZ', '/brands/roofz.png', '/businesses/roofz'], ['PRIZO', '/brands/prizo.png', '/businesses/prizo'], ['LeadDNA', '/brands/leaddna.png', '/businesses/leaddna'], ['UNIECO', '/brands/unieco.png', '/businesses/unieco']];
 
 interface Opp { id: string; title: string; sector: string; city: string | null; estimatedValue: number | null; deadline: string | null }
 interface Trend { months: string[]; earnings: number[]; leads: number[]; deals: number[] }
@@ -62,7 +62,7 @@ export function HomeTiles() {
     <nav className="v5-tiles" aria-label="Modules">
       {TILES.map((t) => (
         <Link key={t.label} href={t.href} className="v5-tile" data-tone={t.tone}>
-          <span className="v5-tile-icon"><Icon name={t.icon} size={26} /></span>
+          <span className="v5-tile-icon" data-img={t.img ? true : undefined}>{t.img ? <img src={t.img} alt="" /> : <Icon name={t.icon} size={26} />}</span>
           <strong>{t.label}</strong><span>{t.sub}</span>
         </Link>
       ))}

@@ -3873,11 +3873,13 @@ suites.push({
   run: async ({ page, WEB, expect, shot, label }) => {
     await webLogin(page, WEB, 'ravi@sunrise.example');
     await page.goto(WEB + '/comearn');
-    await page.getByRole('heading', { level: 1, name: 'Opportunities to Earn' }).waitFor();
+    await page.getByRole('img', { name: /comearn — Opportunities to Earn/ }).waitFor();
+    await page.getByRole('heading', { level: 1, name: 'Your earning home' }).waitFor();
     await page.getByRole('link', { name: /Earn Commissions/ }).waitFor();
-    await page.locator('[data-ce-earned]').getByText('₹0').waitFor(); // real figure — nothing earned yet
+    await page.locator('[data-ce-earned]').waitFor();
+    if (label !== 'desktop') { await shot('home'); return; }
+    await page.locator('[data-ce-earned]').getByText('₹0').waitFor(); // real figure — nothing earned yet (desktop runs first)
     await shot('home-empty');
-    if (label !== 'desktop') return;
     // Volt EPC (verified) posts and publishes.
     await webLogin(page, WEB, 'asha@voltepc.example');
     await page.goto(WEB + '/comearn/post');

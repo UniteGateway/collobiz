@@ -3527,14 +3527,13 @@ a.pt-widget:hover { border-color: #C9D6EA; }
 .pt-banner.vai-banner span { color: rgba(255,255,255,.88); }
 
 /* ---------------------------------------------------------------- COLLABIZ COMEARN */
-.ce-head { background: radial-gradient(120% 140% at 100% 0%, #1F9D57 0%, #0E5A3A 38%, #061A3D 100%); color: #fff; border-radius: 22px; padding: 24px 28px; }
-.ce-head h1 { margin: 6px 0 4px; font-size: clamp(24px, 2.6vw, 32px); color: #fff; letter-spacing: -0.02em; }
-.ce-lead { margin: 0; color: rgba(255,255,255,.85); max-width: 760px; }
-.ce-brand { display: flex; align-items: baseline; gap: 10px; margin: 0; }
-.ce-word { font-family: var(--cz-font-display, inherit); font-size: 22px; font-weight: 600; letter-spacing: -0.03em; color: #fff; }
-.ce-word b { color: #7CE3A6; font-weight: 800; }
-.ce-brand > span:last-child { font-size: 12px; color: rgba(255,255,255,.7); }
-.ce-head .pt-cta { margin-top: 14px; }
+.ce-head { display: grid; grid-template-columns: minmax(220px, 360px) 1fr; gap: 24px; align-items: center; background: linear-gradient(120deg, #fff 0%, #F3FBF6 60%, #EEF4FB 100%); border: 1px solid #E3EAF2; border-radius: 22px; padding: 20px 26px; }
+.ce-logo { display: block; }
+.ce-logo img { display: block; width: 100%; height: auto; }
+.ce-head-text { border-left: 1px solid #E3EAF2; padding-left: 24px; }
+.ce-head h1 { margin: 0 0 4px; font-size: clamp(22px, 2.3vw, 30px); color: #061A3D; letter-spacing: -0.02em; }
+.ce-lead { margin: 0; color: #4A5B70; max-width: 760px; }
+.ce-head .pt-cta { margin-top: 12px; }
 .ce-nav { display: flex; gap: 6px; background: #fff; border: 1px solid var(--cz-grey-200); border-radius: 16px; padding: 6px; overflow-x: auto; }
 .ce-nav a { flex: 1; min-width: 92px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 10px; border-radius: 12px; color: #34475F; font-size: 13px; font-weight: 600; text-decoration: none; }
 .ce-nav a[aria-current="page"] { background: #E3F5EA; color: #13663A; }
@@ -3602,5 +3601,10 @@ a.pt-widget:hover { border-color: #C9D6EA; }
   .ce-split, .ce-two, .ce-filters { grid-template-columns: minmax(0, 1fr); }
   .ce-trackrow { grid-template-columns: 1fr; }
   .ce-nav a { min-width: 72px; font-size: 12px; }
-  .ce-head { padding: 20px; }
+  .ce-head { grid-template-columns: 1fr; padding: 16px 18px; gap: 12px; }
+  .ce-logo img { max-width: 260px; }
+  .ce-head-text { border-left: 0; padding-left: 0; }
 }
+
+.v5-tile-icon[data-img] { background: transparent; padding: 0; overflow: hidden; }
+.v5-tile-icon[data-img] img { width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
