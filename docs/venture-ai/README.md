@@ -13,6 +13,7 @@ COLLABIZ members to build it. Feature flag `FEATURE_VENTURE_AI` (default on). Ph
 | AI provider adapter (rules templates; Claude when a key is configured) | `apps/api/src/modules/venture-ai/provider.ts` | Rules path tested; Claude path **blocked** on an API key and admin-set token prices |
 | Member screens | `/venture-ai`, `/venture-ai/opportunities`, `/venture-ai/new`, `/venture-ai/opportunities/[id]`, `/venture-ai/capabilities`, `/venture-ai/rooms/[id]` | Done, browser journey "VENTURE AI" |
 | Admin console | admin `/venture-ai` (review, AI controls, runs and cost, pilots) | Done |
+| Participation agreements (Phase 3) — owner proposes each member's terms → draft MoU in Contracts | `POST /venture-ai/rooms/:id/members/:memberId/agreement`, Team tab | Done, API test + browser journey |
 
 ## Flow
 
@@ -25,6 +26,21 @@ COLLABIZ members to build it. Feature flag `FEATURE_VENTURE_AI` (default on). Ph
 7. **Role matching** — every member capability profile is scored per role with a transparent percentage (role, categories, countries, investment range, certifications, availability, verification, completed collaborations), with reasons and gaps. The proposer's own business is excluded. **No contact details are returned.**
 8. The owner **invites** a member for a role, stating what they would do, how they earn and the risks. The member **accepts or declines**; only then can they see the room.
 9. In the room: members and open roles, tasks and milestones, **human approvals** (binding agreements, financial commitments, payments, purchase orders, public claims, sensitive data sharing, production release, safety/engineering decisions — the requester can never approve their own request), and **AI agents**.
+
+## Participation agreements (Phase 3)
+
+The venture owner (org owner/admin of the owning business) proposes terms for each accepted member: contribution, how they earn
+(revenue share %, margin %, fixed fee, equity or none), term, territory, exclusivity, IP ownership and exit notice. These are the
+parties' own terms — no rates are hard-coded.
+
+- Revenue shares across one venture can never exceed 100% (checked by `vaiShareTotal`).
+- Equity terms, or any investor, add a clause requiring legal and securities review before signature and stating that no
+  investment-related referral fee is payable (`vaiNeedsSecuritiesReview`).
+- A **draft** contract (issuer = owner business, counterparty = member) is created in the existing Contracts module with version 1
+  unsubmitted. From there the existing flow applies: the owner submits it, a second authorised person approves it, and both
+  businesses sign (typed, uploaded or e-sign). The member cannot see it in Contracts until it is submitted.
+- A `binding_agreement` approval is logged in the Venture Room for each draft.
+- Each member sees only their own terms; the owner sees everyone's.
 
 ## AI agents and controls
 
@@ -73,7 +89,6 @@ quotations or demand are claimed. They are excluded from admin counts. Re-runnin
 
 ## Next phases
 
-- Agreements: generate MoU/JV drafts into the existing Contracts vault and e-sign flow after approval.
 - COMEARN and revenue configuration per venture (admin-configured, not hard-coded).
 - Procurement: RFQs to matched suppliers through the existing RFQ/PO modules; Sales/LeadDNA hand-off.
 - Creative studio (blocked on an image provider), market data adapters, mobile screens.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { VaiEvidenceSchema, financialModel, matchRole, scoreOpportunity, vaiSensitivity, sizeSolarConveyor, type VaiFinanceInput } from './venture-ai';
+import { VaiEvidenceSchema, VaiTermsSchema, vaiShareTotal, vaiNeedsSecuritiesReview, financialModel, matchRole, scoreOpportunity, vaiSensitivity, sizeSolarConveyor, type VaiFinanceInput } from './venture-ai';
 
 describe('Venture AI scoring', () => {
   const all = (v: number) => Object.fromEntries(['market_demand', 'profitability', 'supplier_readiness', 'competitive_advantage', 'capital_availability', 'member_capability', 'scalability', 'regulatory_readiness'].map((k) => [k, { value: v, evidence: 'strong' as const }]));
@@ -57,5 +57,21 @@ describe('Role matching', () => {
   it('a verified fact needs a source and date', () => {
     expect(VaiEvidenceSchema.safeParse({ kind: 'verified', statement: 'Demand for cool-roof coatings grew' }).success).toBe(false);
     expect(VaiEvidenceSchema.safeParse({ kind: 'assumption', statement: 'Dealers will stock it within 90 days' }).success).toBe(true);
+  });
+});
+
+describe('Participation terms', () => {
+  const base = { contribution: 'Fabricate and supply the conveyor frames', termMonths: 24, territory: 'India', ipOwnership: 'joint' as const };
+  it('requires the figure for the chosen earning model', () => {
+    expect(VaiTermsSchema.safeParse({ ...base, earningModel: 'revenue_share' }).success).toBe(false);
+    expect(VaiTermsSchema.safeParse({ ...base, earningModel: 'revenue_share', sharePct: 20 }).success).toBe(true);
+    expect(VaiTermsSchema.safeParse({ ...base, earningModel: 'fixed_fee' }).success).toBe(false);
+  });
+  it('totals revenue shares and flags equity or investor terms for review', () => {
+    const t = VaiTermsSchema.parse({ ...base, earningModel: 'revenue_share', sharePct: 60 });
+    expect(vaiShareTotal([t, null], { ...t, sharePct: 45 })).toBe(105);
+    expect(vaiNeedsSecuritiesReview({ ...t, earningModel: 'equity' }, 'manufacturer')).toBe(true);
+    expect(vaiNeedsSecuritiesReview(t, 'investor')).toBe(true);
+    expect(vaiNeedsSecuritiesReview(t, 'manufacturer')).toBe(false);
   });
 });

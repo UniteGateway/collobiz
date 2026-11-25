@@ -3848,5 +3848,21 @@ suites.push({
     await page.getByRole('button', { name: 'Run' }).click();
     await page.locator('[data-run="strategy"][data-status="completed"]').getByText('Rules template').waitFor();
     await shot('room-agent');
+    // The owner proposes the manufacturer's terms → a draft participation MoU in Contracts.
+    const roomUrl = page.url();
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(roomUrl);
+    const row = page.locator('[data-member]').filter({ hasText: 'Manufacturer' });
+    await row.getByRole('button', { name: 'Propose terms' }).click();
+    const tf = page.locator('[data-form="vai-terms"]');
+    await tf.getByLabel('What they contribute').fill('Fabricate and supply the pilot conveyor frames');
+    await tf.getByLabel('Revenue share %').fill('20');
+    await shot('terms');
+    await tf.getByRole('button', { name: 'Create draft agreement' }).click();
+    await row.locator('[data-terms]').getByText(/Share of venture revenue 20%/).waitFor();
+    await row.getByRole('link', { name: 'Open in Contracts' }).click();
+    await page.waitForURL(/\/contracts\/[0-9a-f-]+$/);
+    await page.getByText(/Participation MoU/).first().waitFor();
+    await shot('agreement');
   },
 });

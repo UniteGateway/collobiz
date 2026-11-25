@@ -195,3 +195,31 @@ export const VaiConveyorSchema = z.object({
   solarCostPaisePerWp: z.number().int().min(500).max(20000).default(3800), batteryCostPaisePerKwh: z.number().int().min(100000).max(10000000).default(1800000), gridTariffPaisePerKwh: z.number().int().min(100).max(3000).default(850),
 });
 export const VaiAgentRunSchema = z.object({ agent: z.enum(['research', 'innovation', 'strategy', 'branding', 'legal', 'collaboration']), instruction: z.string().trim().min(5).max(2000) });
+
+// ---------------------------------------------------------------- participation terms (Phase 3)
+export const VAI_EARNING_MODELS = {
+  revenue_share: 'Share of venture revenue', margin: 'Margin on what they supply', fixed_fee: 'Fixed fee', equity: 'Equity in a venture company', none: 'No payment (strategic)',
+} as const;
+export type VaiEarningModel = keyof typeof VAI_EARNING_MODELS;
+export const VAI_IP_OWNERSHIP = { proposer: 'Venture owner', joint: 'Jointly owned', contributor: 'Stays with the contributor', as_agreed: 'To be agreed in an IP annex' } as const;
+export const VaiTermsSchema = z.object({
+  contribution: z.string().trim().min(10).max(800),
+  earningModel: z.enum(Object.keys(VAI_EARNING_MODELS) as [VaiEarningModel, ...VaiEarningModel[]]),
+  sharePct: z.number().min(0.01).max(100).optional(), marginPct: z.number().min(0).max(100).optional(), fixedFeePaise: z.number().int().min(1).optional(),
+  termMonths: z.number().int().min(1).max(120), territory: z.string().trim().min(2).max(200), exclusive: z.boolean().default(false),
+  ipOwnership: z.enum(Object.keys(VAI_IP_OWNERSHIP) as [keyof typeof VAI_IP_OWNERSHIP, ...(keyof typeof VAI_IP_OWNERSHIP)[]]), exitNoticeDays: z.number().int().min(0).max(365).default(90),
+}).superRefine((t, c) => {
+  if (t.earningModel === 'revenue_share' && t.sharePct == null) c.addIssue({ code: 'custom', path: ['sharePct'], message: 'Enter the revenue share %' });
+  if (t.earningModel === 'margin' && t.marginPct == null) c.addIssue({ code: 'custom', path: ['marginPct'], message: 'Enter the margin %' });
+  if (t.earningModel === 'fixed_fee' && t.fixedFeePaise == null) c.addIssue({ code: 'custom', path: ['fixedFeePaise'], message: 'Enter the fee' });
+});
+export type VaiTerms = z.infer<typeof VaiTermsSchema>;
+
+/** Revenue shares promised across a venture may not exceed 100%. Returns the total including the proposed terms. */
+export function vaiShareTotal(existing: (VaiTerms | null | undefined)[], proposed: VaiTerms) {
+  const pct = (t?: VaiTerms | null) => (t?.earningModel === 'revenue_share' ? t.sharePct ?? 0 : 0);
+  return Math.round((existing.reduce((s, t) => s + pct(t), 0) + pct(proposed)) * 100) / 100;
+}
+
+/** True when the terms need legal / securities review before anyone may sign (equity or investor money). */
+export const vaiNeedsSecuritiesReview = (t: VaiTerms, role: string) => t.earningModel === 'equity' || role === 'investor';

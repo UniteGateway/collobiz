@@ -5,6 +5,7 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 ## [Unreleased]
 
 ### COLLABIZ VENTURE AI — Global Business Creation Engine (Phase 1–2 foundation)
+- Phase 3: participation terms per member (earning model, term, territory, IP, exit) → draft MoU in Contracts using the existing review and signing flow; revenue shares capped at 100%; equity/investor terms flagged for legal and securities review. Migration 0072.
 - Phase 1 audit and integration plan; deterministic engines (weighted scoring with mandatory-check override, five-year financial model with sensitivity, Solar Conveyor PV/battery sizing, transparent role matching); `vai_*` tables (migration 0071); opportunity → Unite approval → Venture Room API with consent-based invitations, tasks, human approvals and AI agents (rules templates until a Claude key and budget are set; kill switch; run log with cost); member screens, admin console and six Sample pilots. See docs/venture-ai.
 
 ### COLLABIZ POWERTRADE — Do Business. Save on Power. Grow Together.

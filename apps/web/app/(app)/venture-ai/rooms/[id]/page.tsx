@@ -2,14 +2,14 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
-import { VAI_VENTURE_STATUS, type VaiFinanceResult, type VaiRole } from '@collabiz/types';
-import { Alert, Button, Card, EmptyState, Select, Skeleton, Tabs, TextArea, TextInput } from '@collabiz/ui';
+import { VAI_EARNING_MODELS, VAI_IP_OWNERSHIP, VAI_VENTURE_STATUS, type VaiEarningModel, type VaiFinanceResult, type VaiRole, type VaiTerms } from '@collabiz/types';
+import { Alert, Button, Card, Checkbox, Dialog, EmptyState, Select, Skeleton, Tabs, TextArea, TextInput } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
 import { SampleTag, VaiHeader, VaiNav, rupees, toPaise } from '@/components/VentureAi';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
-interface Member { id: string; org: string; role: VaiRole; roleLabel: string; status: string; matchPercent: number | null; matchReasons: string[] | null; mine: boolean }
+interface Member { id: string; org: string; role: VaiRole; roleLabel: string; status: string; matchPercent: number | null; matchReasons: string[] | null; mine: boolean; terms: VaiTerms | null; contract: { id: string; code: string; status: string } | null }
 interface Task { id: string; title: string; assigneeMemberId: string | null; dueOn: string | null; milestone: boolean; status: string }
 interface Appr { id: string; kind: string; title: string; detail: string | null; amountPaise: number | null; status: string; note: string | null; createdAt: string }
 interface Run { id: string; agent: string; instruction: string; provider: string; model: string | null; status: string; output: string | null; error: string | null; costPaise: number | null; createdAt: string }
@@ -36,7 +36,7 @@ export default function VaiRoom() {
           <VaiNav />
           <Alert tone="info">Legal structure: {r.venture.legalStructure ?? 'not decided'}. Partnerships, JVs and companies are formed only on signed agreements reviewed by qualified advisers — nothing here is binding by itself.</Alert>
           <Tabs value={tab} onChange={setTab} tabs={[{ value: 'team', label: 'Team & roles' }, { value: 'tasks', label: 'Tasks & milestones' }, { value: 'approvals', label: 'Approvals' }, { value: 'ai', label: 'AI agents' }]} />
-          {tab === 'team' && <Team r={r} />}
+          {tab === 'team' && <Team r={r} reload={q.reload} />}
           {tab === 'tasks' && <Tasks r={r} reload={q.reload} />}
           {tab === 'approvals' && <Approvals r={r} reload={q.reload} />}
           {tab === 'ai' && <Agents r={r} reload={q.reload} />}
@@ -46,18 +46,65 @@ export default function VaiRoom() {
   );
 }
 
-function Team({ r }: { r: Room }) {
+function Team({ r, reload }: { r: Room; reload: () => void }) {
   const filled = (role: VaiRole) => r.members.filter((m) => m.role === role && ['accepted', 'owner'].includes(m.status)).length;
+  const iOwn = r.members.some((m) => m.mine && m.status === 'owner');
+  const [terms, setTerms] = useState<Member | null>(null);
+  const shares = r.members.reduce((s, m) => s + (m.terms?.earningModel === 'revenue_share' ? m.terms.sharePct ?? 0 : 0), 0);
   return (
-    <div className="vai-two">
-      <Card title="Members">
-        <ul className="vai-list">{r.members.map((m) => (
-          <li key={m.id} data-member={m.org}><div><strong>{m.org}</strong>{m.mine && ' (you)'}<p>{m.roleLabel}{m.matchPercent != null ? ` · ${m.matchPercent}% match` : ''}</p></div><span className="vai-pill" data-s={m.status}>{m.status === 'owner' ? 'Owner' : m.status === 'invited' ? 'Invited' : m.status === 'accepted' ? 'Joined' : m.status === 'declined' ? 'Declined' : m.status}</span></li>))}</ul>
-      </Card>
-      <Card title="Roles needed" actions={r.owner ? <Link href={`/venture-ai/opportunities/${r.opportunity.id}`}>Find members →</Link> : undefined}>
-        <ul className="vai-list">{r.opportunity.roles.map((x, i) => { const n = filled(x.role); return <li key={`${x.role}-${i}`}><div><strong>{r.members.find((m) => m.role === x.role)?.roleLabel ?? x.role.replace(/_/g, ' ')}</strong><p>{n} of {x.count} filled</p></div><span className="vai-pill" data-s={n >= x.count ? 'accepted' : 'invited'}>{n >= x.count ? 'Filled' : 'Open'}</span></li>; })}</ul>
-      </Card>
+    <div className="cz-stack" style={{ gap: 16 }}>
+      <div className="vai-two">
+        <Card title="Members" subtitle={iOwn ? `Revenue shares promised so far: ${shares}% of 100%` : undefined}>
+          <ul className="vai-list">{r.members.map((m) => (
+            <li key={m.id} data-member={m.org}>
+              <div><strong>{m.org}</strong>{m.mine && ' (you)'}<p>{m.roleLabel}{m.matchPercent != null ? ` · ${m.matchPercent}% match` : ''}</p>
+                {m.terms && <p className="vai-muted" data-terms>{VAI_EARNING_MODELS[m.terms.earningModel]}{m.terms.sharePct != null && m.terms.earningModel === 'revenue_share' ? ` ${m.terms.sharePct}%` : ''}{m.terms.marginPct != null && m.terms.earningModel === 'margin' ? ` ${m.terms.marginPct}%` : ''}{m.terms.fixedFeePaise != null && m.terms.earningModel === 'fixed_fee' ? ` ${rupees(m.terms.fixedFeePaise)}` : ''} · {m.terms.termMonths} months · {m.terms.territory}</p>}
+                {m.contract && <p className="vai-muted">Agreement {m.contract.code} · {m.contract.status.replace(/_/g, ' ')}{iOwn || m.contract.status !== 'draft' ? <> · <Link href={`/contracts/${m.contract.id}`}>Open in Contracts</Link></> : ' · visible to you once the owner submits it for review'}</p>}
+              </div>
+              <div className="cz-row" style={{ gap: 8 }}>
+                <span className="vai-pill" data-s={m.status}>{m.status === 'owner' ? 'Owner' : m.status === 'invited' ? 'Invited' : m.status === 'accepted' ? 'Joined' : m.status === 'declined' ? 'Declined' : m.status}</span>
+                {iOwn && m.status === 'accepted' && !m.contract && <Button size="sm" variant="secondary" onClick={() => setTerms(m)}>Propose terms</Button>}
+              </div>
+            </li>))}</ul>
+        </Card>
+        <Card title="Roles needed" actions={r.owner ? <Link href={`/venture-ai/opportunities/${r.opportunity.id}`}>Find members →</Link> : undefined}>
+          <ul className="vai-list">{r.opportunity.roles.map((x, i) => { const n = filled(x.role); return <li key={`${x.role}-${i}`}><div><strong>{r.members.find((m) => m.role === x.role)?.roleLabel ?? x.role.replace(/_/g, ' ')}</strong><p>{n} of {x.count} filled</p></div><span className="vai-pill" data-s={n >= x.count ? 'accepted' : 'invited'}>{n >= x.count ? 'Filled' : 'Open'}</span></li>; })}</ul>
+        </Card>
+      </div>
+      {terms && <TermsDialog r={r} m={terms} onClose={() => setTerms(null)} onDone={() => { setTerms(null); reload(); }} />}
     </div>
+  );
+}
+
+function TermsDialog({ r, m, onClose, onDone }: { r: Room; m: Member; onClose: () => void; onDone: () => void }) {
+  const [f, setF] = useState({ contribution: '', earningModel: 'revenue_share' as VaiEarningModel, sharePct: '', marginPct: '', fee: '', termMonths: '24', territory: 'India', exclusive: false, ipOwnership: 'as_agreed', exitNoticeDays: '90' });
+  const save = useMutation(async () => {
+    await api.post(`/venture-ai/rooms/${r.venture.id}/members/${m.id}/agreement`, { contribution: f.contribution, earningModel: f.earningModel, sharePct: f.sharePct ? Number(f.sharePct) : undefined, marginPct: f.marginPct ? Number(f.marginPct) : undefined,
+      fixedFeePaise: f.fee ? toPaise(f.fee) : undefined, termMonths: Number(f.termMonths), territory: f.territory, exclusive: f.exclusive, ipOwnership: f.ipOwnership, exitNoticeDays: Number(f.exitNoticeDays) });
+    onDone(); return true;
+  });
+  const fe = save.fieldErrors;
+  return (
+    <Dialog open onClose={onClose} title={`Terms for ${m.org} — ${m.roleLabel}`}>
+      <form className="cz-stack" style={{ gap: 10 }} data-form="vai-terms" onSubmit={(e) => { e.preventDefault(); save.run(); }}>
+        <p className="vai-muted">Creates a draft participation MoU in Contracts. It is not binding: it must be submitted for review, approved by a second authorised person and signed by both businesses.{m.role === 'investor' ? ' Investor terms also need legal and securities review.' : ''}</p>
+        {save.error && <Alert tone="danger">{save.error}</Alert>}
+        <TextArea label="What they contribute" value={f.contribution} onChange={(e) => setF({ ...f, contribution: e.target.value })} error={fe.contribution} rows={2} />
+        <Select label="How they earn" value={f.earningModel} onChange={(e) => setF({ ...f, earningModel: e.target.value as VaiEarningModel })} options={Object.entries(VAI_EARNING_MODELS).map(([value, label]) => ({ value, label }))} />
+        {f.earningModel === 'revenue_share' && <TextInput label="Revenue share %" inputMode="decimal" value={f.sharePct} onChange={(e) => setF({ ...f, sharePct: e.target.value })} error={fe.sharePct} />}
+        {f.earningModel === 'margin' && <TextInput label="Margin %" inputMode="decimal" value={f.marginPct} onChange={(e) => setF({ ...f, marginPct: e.target.value })} error={fe.marginPct} />}
+        {f.earningModel === 'fixed_fee' && <TextInput label="Fee (₹)" inputMode="decimal" value={f.fee} onChange={(e) => setF({ ...f, fee: e.target.value })} error={fe.fixedFeePaise} />}
+        {f.earningModel === 'equity' && <Alert tone="warning">Equity is set out in a shareholders’ agreement after legal and securities review.</Alert>}
+        <div className="vai-grid">
+          <TextInput label="Term (months)" inputMode="numeric" value={f.termMonths} onChange={(e) => setF({ ...f, termMonths: e.target.value })} error={fe.termMonths} />
+          <TextInput label="Territory" value={f.territory} onChange={(e) => setF({ ...f, territory: e.target.value })} error={fe.territory} />
+          <Select label="Intellectual property" value={f.ipOwnership} onChange={(e) => setF({ ...f, ipOwnership: e.target.value })} options={Object.entries(VAI_IP_OWNERSHIP).map(([value, label]) => ({ value, label }))} />
+          <TextInput label="Exit notice (days)" inputMode="numeric" value={f.exitNoticeDays} onChange={(e) => setF({ ...f, exitNoticeDays: e.target.value })} />
+        </div>
+        <Checkbox label="Exclusive for this role in the territory" checked={f.exclusive} onChange={(e) => setF({ ...f, exclusive: e.target.checked })} />
+        <div className="cz-row" style={{ gap: 8 }}><Button type="submit" loading={save.pending}>Create draft agreement</Button><Button type="button" variant="ghost" onClick={onClose}>Cancel</Button></div>
+      </form>
+    </Dialog>
   );
 }
 

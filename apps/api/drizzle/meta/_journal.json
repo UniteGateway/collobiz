@@ -505,6 +505,13 @@
       "when": 1795544023776,
       "tag": "0071_venture_ai",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1795582944445,
+      "tag": "0072_venture_ai_terms",
+      "breakpoints": true
     }
   ]
 }

@@ -112,6 +112,36 @@ describe('COLLABIZ VENTURE AI', () => {
     await post(`/venture-ai/approvals/${a.id}/decide`, { decision: 'approve' }, t.asha).expect(409);
   });
 
+  it('participation agreements: drafted into Contracts, shares capped at 100%, investor terms flagged, private to the parties', async () => {
+    const deepakCap = (await get('/venture-ai/capabilities', t.deepak).expect(200)).body.capability.id;
+    const inv = (await post(`/venture-ai/rooms/${roomId}/invitations`, { capabilityId: deepakCap, role: 'investor', message: 'Would you fund the first ten conveyors?' }, t.asha).expect(201)).body.id;
+    await post(`/venture-ai/invitations/${inv}/respond`, { decision: 'accept' }, t.deepak).expect(200);
+    const room = (await get(`/venture-ai/rooms/${roomId}`, t.asha).expect(200)).body;
+    const vik = room.members.find((x: { role: string }) => x.role === 'manufacturer'); const dee = room.members.find((x: { role: string }) => x.role === 'investor');
+    const terms = { contribution: 'Fabricate and supply the pilot conveyor frames', earningModel: 'revenue_share', sharePct: 60, termMonths: 24, territory: 'India', ipOwnership: 'joint' };
+    await post(`/venture-ai/rooms/${roomId}/members/${vik.id}/agreement`, terms, t.vikram).expect(403); // not the owner
+    await post(`/venture-ai/rooms/${roomId}/members/${vik.id}/agreement`, terms, t.rohit).expect(403); // owner's org member, not admin
+    await post(`/venture-ai/rooms/${roomId}/members/${vik.id}/agreement`, { ...terms, sharePct: undefined }, t.asha).expect(400);
+    const a = (await post(`/venture-ai/rooms/${roomId}/members/${vik.id}/agreement`, terms, t.asha).expect(201)).body;
+    expect(a).toMatchObject({ shareTotalPct: 60, securitiesReview: false, contract: { status: 'draft' } });
+    await post(`/venture-ai/rooms/${roomId}/members/${vik.id}/agreement`, terms, t.asha).expect(409);
+    const over = await post(`/venture-ai/rooms/${roomId}/members/${dee.id}/agreement`, { ...terms, contribution: 'Fund the first ten conveyors', sharePct: 45 }, t.asha).expect(400);
+    expect(over.body.fields.sharePct).toMatch(/105%/);
+    const b = (await post(`/venture-ai/rooms/${roomId}/members/${dee.id}/agreement`, { ...terms, contribution: 'Fund the first ten conveyors', sharePct: 30 }, t.asha).expect(201)).body;
+    expect(b.securitiesReview).toBe(true);
+    const { rows } = await pool.query(`select c.status, c.issuer_org_id = o.org_id as issuer_is_owner, v.body from contracts c join contract_versions v on v.contract_id = c.id join vai_members o on o.venture_id = $1 and o.status = 'owner' where c.id = $2`, [roomId, b.contract.id]);
+    expect(rows[0]).toMatchObject({ status: 'draft', issuer_is_owner: true });
+    expect(rows[0].body).toMatch(/securities review/); expect(rows[0].body).toMatch(/DRAFT .* not binding/); expect(rows[0].body).toMatch(/no investment-related referral fee/);
+    // The participant cannot see the contract until the owner submits it for review; the owner can.
+    await get(`/contracts/${a.contract.id}`, t.vikram).expect(404);
+    expect((await get(`/contracts/${a.contract.id}`, t.asha).expect(200)).body.permissions.submit).toBe(true);
+    // Each member sees only their own terms; the owner sees all.
+    const asVik = (await get(`/venture-ai/rooms/${roomId}`, t.vikram).expect(200)).body;
+    expect(asVik.members.find((x: { role: string }) => x.role === 'manufacturer').terms.sharePct).toBe(60);
+    expect(asVik.members.find((x: { role: string }) => x.role === 'investor').terms).toBeNull();
+    expect(asVik.approvals.filter((x: { kind: string }) => x.kind === 'binding_agreement').length).toBeGreaterThanOrEqual(2);
+  });
+
   it('agents: rules output is labelled; the kill switch and missing budget block runs; only super admins change settings', async () => {
     const r = (await post(`/venture-ai/rooms/${roomId}/agent-runs`, { agent: 'strategy', instruction: 'Plan the first 120 days of the pilot' }, t.asha).expect(201)).body;
     expect(r.status).toBe('completed'); expect(r.provider).toBe('rules'); expect(r.output).toMatch(/rules|template/i);

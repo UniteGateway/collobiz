@@ -12,16 +12,17 @@ import { Throttle } from '@nestjs/throttler';
 import { and, desc, eq, gte, inArray, ne, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
-  VAI_ROLES, VaiAgentRunSchema, VaiCapabilitySchema, VaiConveyorSchema, VaiEvidenceSchema, VaiFinanceSchema, VaiInviteSchema, VaiOpportunitySchema, VaiScoreInputSchema, VaiTaskSchema,
+  VAI_EARNING_MODELS, VAI_IP_OWNERSHIP, VAI_ROLES, VaiTermsSchema, vaiNeedsSecuritiesReview, vaiShareTotal, type VaiTerms, VaiAgentRunSchema, VaiCapabilitySchema, VaiConveyorSchema, VaiEvidenceSchema, VaiFinanceSchema, VaiInviteSchema, VaiOpportunitySchema, VaiScoreInputSchema, VaiTaskSchema,
   financialModel, matchRole, scoreOpportunity, sizeSolarConveyor, vaiSensitivity, type VaiCheck, type VaiCriterion, type VaiRole,
 } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
-import { memberships, notifications, organizations, siteSettings, users, vaiAgentRuns, vaiApprovals, vaiCapabilities, vaiEvidence, vaiMembers, vaiOpportunities, vaiTasks, vaiVentures } from '../../db/schema';
+import { contractVersions, contracts, memberships, notifications, organizations, siteSettings, users, vaiAgentRuns, vaiApprovals, vaiCapabilities, vaiEvidence, vaiMembers, vaiOpportunities, vaiTasks, vaiVentures } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
 import { config } from '../../config';
 import { AGENTS, VentureAiProvider, type AgentKey } from './provider';
+import { randomDigits, sha256 } from '../../common/crypto';
 
 const staff = (ctx: RequestContext) => ctx.platformRoles.some((r) => r === 'super_admin' || r === 'unite_admin');
 const code = (p: string) => `${p}-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -252,7 +253,11 @@ export class VentureAiController {
     const runs = await this.db.select().from(vaiAgentRuns).where(eq(vaiAgentRuns.ventureId, v.id)).orderBy(desc(vaiAgentRuns.createdAt)).limit(20);
     const evidence = await this.db.select().from(vaiEvidence).where(eq(vaiEvidence.opportunityId, o.id));
     return { venture: v, opportunity: this.view(o), evidence, owner, myRole: me?.role ?? null,
-      members: members.map(({ m, org }) => ({ id: m.id, org, role: m.role, roleLabel: VAI_ROLES[m.role as VaiRole], status: m.status, matchPercent: m.matchPercent, matchReasons: m.matchReasons, mine: m.orgId === ctx.orgId })),
+      members: await Promise.all(members.map(async ({ m, org }) => {
+        const see = owner || m.orgId === ctx.orgId;
+        const [c] = see && m.contractId ? await this.db.select({ id: contracts.id, code: contracts.code, status: contracts.status }).from(contracts).where(eq(contracts.id, m.contractId)).limit(1) : [];
+        return { id: m.id, org, role: m.role, roleLabel: VAI_ROLES[m.role as VaiRole], status: m.status, matchPercent: m.matchPercent, matchReasons: m.matchReasons, mine: m.orgId === ctx.orgId, terms: see ? m.terms : null, contract: c ?? null };
+      })),
       tasks, approvals, runs, agents: Object.entries(AGENTS).map(([key, a]) => ({ key, ...a, estimate: this.ai.estimate(key as AgentKey) })), provider: this.ai.available() ? 'anthropic' : 'rules' };
   }
 
@@ -298,6 +303,59 @@ export class VentureAiController {
     await this.db.update(vaiApprovals).set({ status: b.decision === 'approve' ? 'approved' : 'rejected', decidedBy: ctx.userId, decidedAt: new Date(), note: b.note ?? null }).where(eq(vaiApprovals.id, id));
     await this.audit.record(ctx, { action: `venture_ai.approval_${b.decision}`, objectType: 'vai_approval', objectId: id, after: { kind: a.kind } });
     return { status: b.decision === 'approve' ? 'approved' : 'rejected' };
+  }
+
+  // ------------------------------------------------------------------ participation agreements (Phase 3)
+  /** The owner proposes a member's terms; a DRAFT participation MoU is created in Contracts, where it is reviewed, approved by a
+   *  second authorised person and signed by both businesses through the existing flow. Nothing here is binding by itself. */
+  @Post('venture-ai/rooms/:id/members/:memberId/agreement')
+  @RequireOrg()
+  @HttpCode(201)
+  async draftAgreement(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Param('memberId', ParseUUIDPipe) memberId: string, @Body(body(VaiTermsSchema)) t: VaiTerms) {
+    this.on(); const { v } = await this.room(ctx, id); if (!(await this.isOwnerOrg(v.id, ctx.orgId))) throw new ForbiddenException('Only the venture owner drafts participation agreements'); this.admin(ctx);
+    const all = await this.db.select().from(vaiMembers).where(eq(vaiMembers.ventureId, v.id));
+    const m = all.find((x) => x.id === memberId);
+    if (!m || m.status !== 'accepted') throw new BadRequestException('Agreements are drafted only for members who accepted');
+    if (m.contractId) {
+      const [c] = await this.db.select({ status: contracts.status }).from(contracts).where(eq(contracts.id, m.contractId)).limit(1);
+      if (c && !['cancelled', 'terminated', 'rejected'].includes(c.status)) throw new ConflictException('This member already has an agreement in Contracts — amend it there');
+    }
+    const total = vaiShareTotal(all.filter((x) => x.id !== m.id && ['owner', 'accepted'].includes(x.status)).map((x) => x.terms as VaiTerms | null), t);
+    if (total > 100) throw new BadRequestException({ message: 'Check the highlighted fields', fields: { sharePct: `Revenue shares in this venture would total ${total}% — more than 100%` } });
+    const ownerRow = all.find((x) => x.status === 'owner')!;
+    const orgs = await this.db.select({ id: organizations.id, n: organizations.displayName }).from(organizations).where(inArray(organizations.id, [ownerRow.orgId, m.orgId]));
+    const name = (oid: string) => orgs.find((o) => o.id === oid)?.n ?? '—';
+    const review = vaiNeedsSecuritiesReview(t, m.role);
+    const earn = t.earningModel === 'revenue_share' ? `${t.sharePct}% of the venture's net revenue actually received, per the revenue annex` : t.earningModel === 'margin' ? `a margin of ${t.marginPct}% on goods or services it supplies, invoiced separately` : t.earningModel === 'fixed_fee' ? `a fixed fee of ₹${((t.fixedFeePaise ?? 0) / 100).toLocaleString('en-IN')}` : t.earningModel === 'equity' ? 'equity in a venture company, on terms to be set out in a shareholders\' agreement' : 'no payment — strategic participation';
+    const text = [
+      `PARTICIPATION MEMORANDUM OF UNDERSTANDING — ${v.name} (${v.code})`,
+      `Between ${name(ownerRow.orgId)} ("Venture Owner") and ${name(m.orgId)} ("Participant"), formed in the COLLABIZ Venture Room ${v.code}.`,
+      `1. Role. ${VAI_ROLES[m.role as VaiRole]}.`,
+      `2. Contribution. ${t.contribution}`,
+      `3. Earnings. ${VAI_EARNING_MODELS[t.earningModel]}: ${earn}. Nothing is owed until this memorandum is executed and the conditions in it are met; no earnings are guaranteed.`,
+      `4. Term and territory. ${t.termMonths} months; ${t.territory}; ${t.exclusive ? 'exclusive for the role in this territory' : 'non-exclusive'}.`,
+      `5. Intellectual property. ${VAI_IP_OWNERSHIP[t.ipOwnership]}.`,
+      `6. Exit. Either party may withdraw with ${t.exitNoticeDays} days' written notice; work in progress and earned amounts are settled as set out in the annexes.`,
+      `7. Confidentiality. Information shared in the Venture Room is confidential and used only for this venture.`,
+      ...(review ? ['8. Legal and securities review. This participation involves equity or investment. It must be reviewed by qualified legal and securities advisers before signature; no investment-related referral fee is payable to COLLABIZ or anyone else.'] : []),
+      'DRAFT generated from the Venture Room terms — not binding. To be reviewed, approved by a second authorised person and signed by both parties. Legal templates pending review.',
+    ].join('\n\n');
+    const value = t.earningModel === 'fixed_fee' ? t.fixedFeePaise! : null;
+    const c = await this.db.transaction(async (tx) => {
+      const [c] = await tx.insert(contracts).values({ code: `CTR-${new Date().getUTCFullYear()}-${randomDigits(6)}`, kind: 'contract', title: `Participation MoU — ${v.name} — ${VAI_ROLES[m.role as VaiRole]}`, issuerOrgId: ownerRow.orgId, counterpartyOrgId: m.orgId, value, createdBy: ctx.userId }).returning();
+      await tx.insert(contractVersions).values({ contractId: c.id, versionNo: 1, body: text, terms: { value, deliverables: t.contribution.slice(0, 500), venture: v.code, ...t }, bodyHash: sha256(text), changeNote: `Generated from Venture Room ${v.code}`, authorUserId: ctx.userId });
+      await tx.update(vaiMembers).set({ terms: t, contractId: c.id }).where(eq(vaiMembers.id, m.id));
+      await tx.insert(vaiApprovals).values({ ventureId: v.id, kind: 'binding_agreement', title: `Sign participation MoU with ${name(m.orgId)} (${c.code})`, detail: review ? 'Equity or investment — legal and securities review required before signature.' : 'Review and sign in Contracts.', requestedBy: ctx.userId });
+      return c;
+    });
+    await this.notifyOrg(m.orgId, `${v.name}: participation terms proposed`, 'The venture owner proposed your terms. You will see the agreement in Contracts once it has been reviewed.', `/venture-ai/rooms/${v.id}`);
+    await this.audit.record(ctx, { action: 'venture_ai.agreement_drafted', objectType: 'vai_member', objectId: m.id, after: { contract: c.code, earningModel: t.earningModel, review } });
+    return { contract: { id: c.id, code: c.code, status: c.status }, shareTotalPct: total, securitiesReview: review };
+  }
+  private async isOwnerOrg(ventureId: string, orgId?: string | null) {
+    if (!orgId) return false;
+    const [o] = await this.db.select({ id: vaiMembers.id }).from(vaiMembers).where(and(eq(vaiMembers.ventureId, ventureId), eq(vaiMembers.orgId, orgId), eq(vaiMembers.status, 'owner'))).limit(1);
+    return !!o;
   }
 
   // ------------------------------------------------------------------ AI agents

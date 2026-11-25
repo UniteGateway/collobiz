@@ -86,6 +86,8 @@ export const vaiMembers = pgTable('vai_members', {
   message: text('message'), investmentPaise: bigint('investment_paise', { mode: 'number' }), earningsNote: text('earnings_note'), risksNote: text('risks_note'),
   matchPercent: integer('match_percent'), matchReasons: jsonb('match_reasons').notNull().default(sql`'[]'::jsonb`),
   invitedBy: uuid('invited_by').references(() => users.id), respondedBy: uuid('responded_by').references(() => users.id), respondedAt: timestamp('responded_at', { withTimezone: true }),
+  /** Participation terms proposed by the venture owner (VaiTermsSchema) and the draft contract they generated in Contracts. */
+  terms: jsonb('terms'), contractId: uuid('contract_id'),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex('vai_members_role_uq').on(t.ventureId, t.orgId, t.role), index('vai_members_org_idx').on(t.orgId)]);
 
