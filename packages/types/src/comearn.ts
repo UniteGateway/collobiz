@@ -63,6 +63,7 @@ export const CeOpportunitySchema = z.object({
   paymentDays: z.number().int().min(0).max(180).default(30),
   maxEarners: z.number().int().min(1).max(1000).optional(),
   licenceNote: opt(z.string().trim().max(300)),
+  source: z.object({ module: z.enum(['franchise', 'venture_ai', 'xchange', 'exim', 'leaddna', 'adbuz']), id: z.string().trim().min(1).max(80) }).optional(),
 }).superRefine((o, c) => {
   if ((o.model === 'percent' || o.model === 'recurring' || o.model === 'milestone') && o.rateBps == null) c.addIssue({ code: 'custom', path: ['rateBps'], message: 'Enter the commission percentage' });
   if (o.model === 'fixed' && o.fixedPaise == null) c.addIssue({ code: 'custom', path: ['fixedPaise'], message: 'Enter the commission amount' });
@@ -91,6 +92,7 @@ export const CeStageSchema = z.object({
   reference: opt(z.string().trim().max(120)), // invoice, payment or bank transfer reference
   tdsPaise: z.number().int().min(0).optional(),
   milestoneIndex: z.number().int().min(0).max(9).optional(),
+  tdsCertificateRef: opt(z.string().trim().max(120)),
 });
 
 /** Commission on a verified amount (or for one milestone). Never negative; fixed ignores the amount. */
@@ -118,3 +120,59 @@ export function ceLeadFingerprint(l: { customerName: string; phone?: string; ema
 }
 /** The next stage after `s`, or null at the end. */
 export const ceNextStage = (s: CeStage): CeStage | null => CE_STAGE_ORDER[CE_STAGE_ORDER.indexOf(s) + 1] ?? null;
+
+// ---------------------------------------------------------------- reverse marketplace (member requirements + commission bids)
+export const CeRequirementSchema = z.object({
+  title: z.string().trim().min(5).max(140),
+  category: z.enum(Object.keys(CE_CATEGORIES) as [CeCategory, ...CeCategory[]]),
+  description: z.string().trim().min(20).max(2000),
+  city: z.string().trim().min(2).max(100),
+  estimatedValuePaise: money.optional(),
+  closesOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  customerName: z.string().trim().min(2).max(160), customerCompany: opt(z.string().trim().max(160)),
+  contactName: z.string().trim().min(2).max(120), phone: opt(z.string().trim().regex(/^[+\d][\d\s-]{7,18}$/, 'Enter a valid phone number')), email: opt(z.string().trim().email()),
+  gstin: opt(z.string().trim().toUpperCase().regex(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/, 'Enter a valid GSTIN')),
+  consent: z.literal(true, { message: 'Confirm the customer agreed to receive offers from businesses' }),
+}).refine((l) => l.phone || l.email, { path: ['phone'], message: 'Enter a phone number or email' });
+
+export const CeBidSchema = z.object({
+  model: z.enum(['percent', 'fixed']), rateBps: z.number().int().min(1).max(5000).optional(), fixedPaise: money.optional(),
+  trigger: z.enum(Object.keys(CE_TRIGGERS) as [CeTrigger, ...CeTrigger[]]), paymentDays: z.number().int().min(0).max(180).default(30),
+  proposal: z.string().trim().min(20).max(1500),
+}).superRefine((b, c) => {
+  if (b.model === 'percent' && b.rateBps == null) c.addIssue({ code: 'custom', path: ['rateBps'], message: 'Enter the commission percentage' });
+  if (b.model === 'fixed' && b.fixedPaise == null) c.addIssue({ code: 'custom', path: ['fixedPaise'], message: 'Enter the commission amount' });
+});
+
+// ---------------------------------------------------------------- team formation and commission pool
+/** Team roles, the member capability role each maps to (for matching), and an illustrative starting split in % —
+ *  the lead member can change every share and every member must accept before the split applies. */
+export const CE_TEAM_ROLES = {
+  creator: { label: 'Opportunity creator', capability: null, suggestedPct: 25 },
+  introducer: { label: 'Customer introducer', capability: 'sales_agent', suggestedPct: 25 },
+  technical: { label: 'Technical consultant', capability: 'engineer', suggestedPct: 15 },
+  negotiator: { label: 'Sales negotiator', capability: 'sales_agent', suggestedPct: 15 },
+  coordinator: { label: 'Project coordinator', capability: 'service', suggestedPct: 10 },
+  other: { label: 'Other contributor', capability: null, suggestedPct: 10 },
+} as const;
+export type CeTeamRole = keyof typeof CE_TEAM_ROLES;
+export const CeTeamInviteSchema = z.object({ orgId: z.string().uuid(), role: z.enum(Object.keys(CE_TEAM_ROLES) as [CeTeamRole, ...CeTeamRole[]]), sharePct: z.number().min(1).max(90) });
+
+/** Shares are basis points of the pool. The lead keeps whatever the others do not take; others may take at most 90%. */
+export function ceLeadShareBp(othersBp: number[]) { return 10000 - othersBp.reduce((s, x) => s + x, 0); }
+/** Splits an amount across shares (basis points summing to 10000); rounding remainder goes to the first (lead) entry. */
+export function ceAllocate(amountPaise: number, sharesBp: number[]): number[] {
+  const parts = sharesBp.map((bp) => Math.floor((amountPaise * bp) / 10000));
+  const rest = amountPaise - parts.reduce((s, x) => s + x, 0);
+  if (parts.length) parts[0] += rest;
+  return parts;
+}
+
+// ---------------------------------------------------------------- reputation
+/** Performance from recorded COMEARN activity only. Null when there is too little history to say anything. */
+export function ceReputation(x: { engagements: number; converted: number; paid: number; onTime: number; disputesLost: number }) {
+  if (x.engagements < 1) return null;
+  const conversion = Math.round((x.converted / x.engagements) * 100);
+  const onTimePct = x.paid ? Math.round((x.onTime / x.paid) * 100) : null;
+  return { engagements: x.engagements, conversionPct: conversion, paid: x.paid, onTimePct, disputesLost: x.disputesLost };
+}

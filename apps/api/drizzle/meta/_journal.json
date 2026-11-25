@@ -519,6 +519,13 @@
       "when": 1795634675262,
       "tag": "0073_comearn",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1795635958400,
+      "tag": "0074_comearn_reverse_team",
+      "breakpoints": true
     }
   ]
 }

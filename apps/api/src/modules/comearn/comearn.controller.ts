@@ -8,16 +8,16 @@
  * The commission is paid by the posting company directly to the member; COLLABIZ records it. Platform fee and restricted
  * sectors are super-admin settings (fee off by default).
  */
-import { BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, HttpCode, Module, NotFoundException, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, HttpCode, NotFoundException, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { and, desc, eq, inArray, ne, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   CE_CATEGORIES, CE_STAGES, CE_STAGE_ORDER, CE_TRIGGERS, CE_TYPES, CeLeadSchema, CeOpportunitySchema, CeStageSchema,
-  ceCommission, ceLeadFingerprint, cePlatformFee, cePotential, type CeStage, type CeTerms,
+  ceAllocate, ceCommission, ceLeadFingerprint, cePlatformFee, cePotential, type CeStage, type CeTerms,
 } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
-import { ceCommissions, ceDisputes, ceEngagements, ceEvents, ceLeads, ceOpportunities, commissionEntries, memberships, notifications, organizations, siteSettings } from '../../db/schema';
+import { ceAllocations, ceCommissions, ceDisputes, ceEngagements, ceEvents, ceLeads, ceOpportunities, ceTeamMembers, commissionEntries, memberships, notifications, organizations, siteSettings } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
@@ -68,7 +68,8 @@ export class ComearnController {
     const [e] = await this.db.select().from(ceEngagements).where(eq(ceEngagements.id, id)).limit(1);
     if (!e) throw new NotFoundException('Not found');
     const o = await this.opp(e.opportunityId);
-    const side = e.earnerOrgId === ctx.orgId ? 'earner' : o.orgId === ctx.orgId ? 'company' : staff(ctx) ? 'staff' : null;
+    let side: 'earner' | 'company' | 'staff' | 'team' | null = e.earnerOrgId === ctx.orgId ? 'earner' : o.orgId === ctx.orgId ? 'company' : staff(ctx) ? 'staff' : null;
+    if (!side && ctx.orgId) { const [t] = await this.db.select({ id: ceTeamMembers.id }).from(ceTeamMembers).where(and(eq(ceTeamMembers.engagementId, e.id), eq(ceTeamMembers.orgId, ctx.orgId), eq(ceTeamMembers.status, 'accepted'))).limit(1); if (t) side = 'team'; }
     if (!side) throw new NotFoundException('Not found');
     return { e, o, side };
   }
@@ -78,7 +79,8 @@ export class ComearnController {
   private card(o: Opp, company: string, extra: Record<string, unknown> = {}) {
     const t = termsOf(o);
     return { id: o.id, code: o.code, title: o.title, type: o.type, typeLabel: CE_TYPES[o.type as keyof typeof CE_TYPES]?.label, category: o.category, territory: o.territory, model: o.model, rateBps: o.rateBps, fixedPaise: o.fixedPaise,
-      trigger: o.trigger, estimatedValuePaise: o.estimatedValuePaise, potentialPaise: cePotential(t, o.estimatedValuePaise), status: o.status, company, ...extra };
+      trigger: o.trigger, estimatedValuePaise: o.estimatedValuePaise, potentialPaise: cePotential(t, o.estimatedValuePaise), status: o.status, company,
+      featured: !!o.featuredUntil && o.featuredUntil >= new Date().toISOString().slice(0, 10), source: o.source ?? null, ...extra };
   }
 
   // ------------------------------------------------------------------ home
@@ -116,7 +118,7 @@ export class ComearnController {
       .from(ceOpportunities).innerJoin(organizations, eq(organizations.id, ceOpportunities.orgId))
       .where(and(eq(ceOpportunities.status, 'live'), category && category !== 'all' ? eq(ceOpportunities.category, category) : undefined, type ? eq(ceOpportunities.type, type) : undefined,
         q ? sql`(${ceOpportunities.title} ilike ${'%' + q + '%'} or ${ceOpportunities.description} ilike ${'%' + q + '%'})` : undefined))
-      .orderBy(desc(ceOpportunities.updatedAt)).limit(100);
+      .orderBy(sql`(${ceOpportunities.featuredUntil} >= current_date) desc nulls last`, desc(ceOpportunities.updatedAt)).limit(100);
     return { items: rows.map((r) => this.card(r.o, r.company, { earners: r.earners, mine: r.o.orgId === ctx.orgId })) };
   }
 
@@ -142,7 +144,7 @@ export class ComearnController {
     this.on(); this.admin(ctx);
     const [o] = await this.db.insert(ceOpportunities).values({ code: code('CE'), orgId: ctx.orgId!, title: b.title, type: b.type, category: b.category, description: b.description, idealEarner: b.idealEarner ?? null, territory: b.territory,
       estimatedValuePaise: b.estimatedValuePaise ?? null, model: b.model, rateBps: b.model === 'fixed' ? null : b.rateBps ?? null, fixedPaise: b.model === 'fixed' ? b.fixedPaise ?? null : null, milestones: b.model === 'milestone' ? b.milestones : [],
-      recurringMonths: b.model === 'recurring' ? b.recurringMonths ?? null : null, trigger: b.trigger, paymentDays: b.paymentDays, maxEarners: b.maxEarners ?? null, licenceNote: b.licenceNote ?? null, createdBy: ctx.userId }).returning();
+      recurringMonths: b.model === 'recurring' ? b.recurringMonths ?? null : null, trigger: b.trigger, paymentDays: b.paymentDays, maxEarners: b.maxEarners ?? null, licenceNote: b.licenceNote ?? null, source: b.source ?? null, createdBy: ctx.userId }).returning();
     await this.audit.record(ctx, { action: 'comearn.opportunity_created', objectType: 'ce_opportunity', objectId: o.id, after: { code: o.code } });
     return { id: o.id, code: o.code, status: o.status, potentialPaise: cePotential(termsOf(o), o.estimatedValuePaise) };
   }
@@ -259,10 +261,16 @@ export class ComearnController {
     const events = await this.db.select().from(ceEvents).where(eq(ceEvents.engagementId, e.id)).orderBy(ceEvents.createdAt);
     const comms = await this.db.select().from(ceCommissions).where(eq(ceCommissions.engagementId, e.id)).orderBy(ceCommissions.createdAt);
     const disputes = await this.db.select().from(ceDisputes).where(eq(ceDisputes.engagementId, e.id)).orderBy(desc(ceDisputes.createdAt));
+    const team = await this.db.select({ t: ceTeamMembers, org: organizations.displayName }).from(ceTeamMembers).innerJoin(organizations, eq(organizations.id, ceTeamMembers.orgId)).where(eq(ceTeamMembers.engagementId, e.id)).orderBy(ceTeamMembers.createdAt);
+    const allocations = comms.length ? await this.db.select().from(ceAllocations).where(inArray(ceAllocations.commissionId, comms.map((c) => c.id))) : [];
+    const visibleAlloc = side === 'team' ? allocations.filter((a) => a.orgId === ctx.orgId) : side === 'company' ? [] : allocations;
+    const safeLead = lead && side === 'team' ? { ...lead, phone: null, email: null, gstin: null, contactName: '—' } : lead;
     return { id: e.id, code: e.code, stage: e.stage, status: e.status, side, acceptedAt: e.acceptedAt, termsHash: e.termsHash, agreement: (e.terms as { text?: string } | null)?.text ?? null,
+      team: team.map((x) => ({ id: x.t.id, org: x.org, orgId: x.t.orgId, role: x.t.role, sharePct: x.t.sharePct / 100, status: x.t.status, matchPercent: x.t.matchPercent, matchReasons: x.t.matchReasons, mine: x.t.orgId === ctx.orgId })),
+      allocations: visibleAlloc,
       opportunity: { ...this.card(o, await this.orgName(o.orgId)), milestones: o.milestones, paymentDays: o.paymentDays }, earner: await this.orgName(e.earnerOrgId),
       stages: CE_STAGE_ORDER.map((s) => ({ key: s, label: CE_STAGES[s].label, by: CE_STAGES[s].by, done: rank(e.stage) >= rank(s), at: events.find((x) => x.stage === s)?.createdAt ?? null })),
-      lead: lead ?? null, events, commissions: comms, disputes };
+      lead: safeLead ?? null, events, commissions: side === 'team' ? [] : comms, disputes: side === 'team' ? [] : disputes };
   }
 
   /** Company records quotation, order, verified customer payment (creates the commission), approval and transfer. */
@@ -304,7 +312,16 @@ export class ComearnController {
       if (!b.reference) throw new BadRequestException({ message: 'Check the highlighted fields', fields: { reference: 'Enter the bank transfer reference' } });
       const tds = b.tdsPaise ?? 0;
       if (tds > c.grossPaise) throw new BadRequestException({ message: 'Check the highlighted fields', fields: { tdsPaise: 'Tax deducted cannot exceed the commission' } });
-      await this.db.update(ceCommissions).set({ status: 'paid', tdsPaise: tds, netPaise: c.grossPaise - tds - (c.platformFeePayer === 'earner' ? c.platformFeePaise : 0), paidAt: new Date(), paymentReference: b.reference, updatedAt: new Date() }).where(eq(ceCommissions.id, c.id));
+      const net = c.grossPaise - tds - (c.platformFeePayer === 'earner' ? c.platformFeePaise : 0);
+      await this.db.update(ceCommissions).set({ status: 'paid', tdsPaise: tds, netPaise: net, paidAt: new Date(), paymentReference: b.reference, tdsCertificateRef: b.tdsCertificateRef ?? null, updatedAt: new Date() }).where(eq(ceCommissions.id, c.id));
+      // Team pool: the lead member owes each accepted team member their agreed share of what was received.
+      const team = await this.db.select().from(ceTeamMembers).where(and(eq(ceTeamMembers.engagementId, e.id), eq(ceTeamMembers.status, 'accepted')));
+      if (team.length) {
+        const others = team.map((t) => t.sharePct);
+        const parts = ceAllocate(net, [10000 - others.reduce((a, x) => a + x, 0), ...others]);
+        await this.db.insert(ceAllocations).values(team.map((t, i) => ({ commissionId: c.id, teamMemberId: t.id, orgId: t.orgId, amountPaise: parts[i + 1] }))).onConflictDoNothing();
+        for (const t of team) await this.notifyOrg(t.orgId, `COMEARN: your team share is due — ${o.title}`, 'The lead member received the commission and owes your agreed share.', `/comearn/engagements/${e.id}`);
+      }
       commission = { ...c, status: 'paid' }; advance = cur < rank('commission_paid') ? 'commission_paid' : null;
     }
     if (advance) await this.db.update(ceEngagements).set({ stage: advance, updatedAt: new Date() }).where(eq(ceEngagements.id, e.id));
@@ -400,5 +417,3 @@ export class ComearnController {
   }
 }
 
-@Module({ controllers: [ComearnController] })
-export class ComearnModule {}

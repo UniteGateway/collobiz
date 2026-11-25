@@ -49,3 +49,25 @@ describe('COMEARN leads and stages', () => {
     expect(ceNextStage('commission_paid')).toBeNull();
   });
 });
+
+describe('COMEARN reverse marketplace, team pool and reputation', () => {
+  it('a requirement needs customer consent and contact; a bid needs its figure', async () => {
+    const { CeRequirementSchema, CeBidSchema } = await import('./comearn');
+    const r = { title: 'Factory needs a 1 MW solar plant', category: 'solar', description: 'Two sheds, 1 MW rooftop, wants a turnkey EPC partner.', city: 'Hyderabad', closesOn: '2026-12-31', customerName: 'Deccan Polymers', contactName: 'Plant head', phone: '9848012345' };
+    expect(CeRequirementSchema.safeParse(r).success).toBe(false);
+    expect(CeRequirementSchema.safeParse({ ...r, consent: true }).success).toBe(true);
+    expect(CeBidSchema.safeParse({ model: 'percent', trigger: 'customer_payment', proposal: 'Turnkey EPC with 25-year performance warranty.' }).success).toBe(false);
+  });
+  it('allocates a pool by shares with the remainder to the lead', async () => {
+    const { ceAllocate, ceLeadShareBp } = await import('./comearn');
+    expect(ceLeadShareBp([2500, 1500, 1500, 1000])).toBe(3500);
+    const parts = ceAllocate(30_00_000_01, [3500, 2500, 1500, 1500, 1000]);
+    expect(parts.reduce((s, x) => s + x, 0)).toBe(30_00_000_01);
+    expect(parts[1]).toBe(Math.floor(30_00_000_01 * 0.25));
+  });
+  it('reputation is null without history and never invented', async () => {
+    const { ceReputation } = await import('./comearn');
+    expect(ceReputation({ engagements: 0, converted: 0, paid: 0, onTime: 0, disputesLost: 0 })).toBeNull();
+    expect(ceReputation({ engagements: 4, converted: 2, paid: 2, onTime: 1, disputesLost: 0 })).toMatchObject({ conversionPct: 50, onTimePct: 50 });
+  });
+});

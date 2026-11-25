@@ -59,7 +59,7 @@ import { SiteModule } from './modules/site/site.controller';
 import { UniteClubModule } from './modules/unite-club/unite-club.controller';
 import { PowertradeModule } from './modules/powertrade/powertrade.controller';
 import { VentureAiModule } from './modules/venture-ai/venture-ai.controller';
-import { ComearnModule } from './modules/comearn/comearn.controller';
+import { ComearnModule } from './modules/comearn/comearn.module';
 import { ImportsModule } from './modules/imports/imports.controller';
 import { GstModule } from './modules/gst/gst.controller';
 import { ChannelsModule } from './modules/channels/channels.controller';
