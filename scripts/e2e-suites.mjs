@@ -3861,8 +3861,9 @@ suites.push({
     await tf.getByRole('button', { name: 'Create draft agreement' }).click();
     await row.locator('[data-terms]').getByText(/Share of venture revenue 20%/).waitFor();
     await row.getByRole('link', { name: 'Open in Contracts' }).click();
-    await page.waitForURL(/\/contracts\/[0-9a-f-]+$/);
+    await page.waitForURL(/\/vault\?contract=/);
     await page.getByText(/Participation MoU/).first().waitFor();
+    await page.getByText(/PARTICIPATION MEMORANDUM OF UNDERSTANDING/).first().waitFor();
     await shot('agreement');
   },
 });

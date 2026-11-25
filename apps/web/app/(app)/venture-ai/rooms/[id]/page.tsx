@@ -59,7 +59,7 @@ function Team({ r, reload }: { r: Room; reload: () => void }) {
             <li key={m.id} data-member={m.org}>
               <div><strong>{m.org}</strong>{m.mine && ' (you)'}<p>{m.roleLabel}{m.matchPercent != null ? ` · ${m.matchPercent}% match` : ''}</p>
                 {m.terms && <p className="vai-muted" data-terms>{VAI_EARNING_MODELS[m.terms.earningModel]}{m.terms.sharePct != null && m.terms.earningModel === 'revenue_share' ? ` ${m.terms.sharePct}%` : ''}{m.terms.marginPct != null && m.terms.earningModel === 'margin' ? ` ${m.terms.marginPct}%` : ''}{m.terms.fixedFeePaise != null && m.terms.earningModel === 'fixed_fee' ? ` ${rupees(m.terms.fixedFeePaise)}` : ''} · {m.terms.termMonths} months · {m.terms.territory}</p>}
-                {m.contract && <p className="vai-muted">Agreement {m.contract.code} · {m.contract.status.replace(/_/g, ' ')}{iOwn || m.contract.status !== 'draft' ? <> · <Link href={`/contracts/${m.contract.id}`}>Open in Contracts</Link></> : ' · visible to you once the owner submits it for review'}</p>}
+                {m.contract && <p className="vai-muted">Agreement {m.contract.code} · {m.contract.status.replace(/_/g, ' ')}{iOwn || m.contract.status !== 'draft' ? <> · <Link href={`/vault?contract=${m.contract.id}`}>Open in Contracts</Link></> : ' · visible to you once the owner submits it for review'}</p>}
               </div>
               <div className="cz-row" style={{ gap: 8 }}>
                 <span className="vai-pill" data-s={m.status}>{m.status === 'owner' ? 'Owner' : m.status === 'invited' ? 'Invited' : m.status === 'accepted' ? 'Joined' : m.status === 'declined' ? 'Declined' : m.status}</span>
