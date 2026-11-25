@@ -3,27 +3,39 @@
 A core COLLABIZ app (menu: Find & win business → COMEARN; Home tile "COMEARN"). Companies offer commissions; members earn them
 individually. Feature flag `FEATURE_COMEARN` (default on). Later it can run as comearn.app on the same backend with single sign-on.
 
-## Status
+## Status — against the 15-part module structure
 
-| Part (from the functional design) | Status |
+| Module | Status |
 |---|---|
-| Home — earnings, pending, potential (estimate), active opportunities, Earn / Offer entry, categories, tracker | Built — real figures only, ₹0 until earned |
-| Opportunity marketplace (Explore) — category, type and text filters | Built |
-| Post opportunity (Offer commissions) — 10 types, 8 categories, percent / fixed / milestone / recurring, payment trigger, pay-within days, live potential commission | Built |
-| Only verified businesses publish; regulated sectors need a licence number | Built |
-| Digital agreement — member accepts a generated commission agreement; terms frozen with a fingerprint; changed terms need re-acceptance | Built |
-| Lead protection — first registration of a customer (GSTIN / phone / email fingerprint) per opportunity owns the introduction; certificate code and record hash | Built |
-| 8-stage commission tracker | Built |
-| Commission ledger — computed by the server from the verified amount; approval; transfer with TDS and bank reference; member confirms receipt | Built |
-| Earnings — COMEARN commissions next to the existing Unite commission ledger | Built |
-| Dispute centre — either side raises; amounts on hold; COLLABIZ rules (continue / cancel) | Built |
-| Admin — monitoring, pause listings, disputes, platform fee and regulated sectors | Built |
-| AI earning assistant | Rules-based (categories you earn in, newest first), labelled; AI suggestions need the Claude key |
-| Post requirement + commission bidding (reverse marketplace) | Next increment |
-| AI team formation + commission pool split agreed by all | Next increment |
-| AI sales assistant, CRM hand-off, reputation scores, featured promotion, premium subscription | Later |
-| Links from Franchise, XCHANGE, Venture AI, UNITE EXIM, LeadDNA, ADBUZ | Later |
-| Mobile screens | Later |
+| Opportunity Marketplace | Built — category, type, search; featured first |
+| Post Opportunity | Built — 10 types, percent / fixed / milestone / recurring, trigger, pay-within days, live potential; verified businesses only; regulated sectors need a licence |
+| Post Requirement | Built — member posts a customer need; customer identity private; one open requirement per customer |
+| Commission Bidding | Built — verified companies submit sealed offers; member compares commission, proposal and track record and selects; creates a private opportunity + engagement with the lead protected |
+| AI Opportunity Finder | Rules-based (labelled) — categories you earn in, newest first. AI suggestions need the Claude key |
+| AI Sales Assistant | Templates from the record (introduction, proposal cover, follow-up), labelled, never sent automatically. AI-written drafts need the Claude key |
+| Team Builder | Built — suggested members per role from capability profiles with match reasons; shares (lead keeps ≥10%); every member accepts; team fixed once payment is verified; allocations owed by the lead, recorded and confirmed |
+| Lead Protection | Built — fingerprint (GSTIN / phone / email) per opportunity; certificate + record hash |
+| Digital Agreements | Built — generated commission agreement, frozen terms with hash, re-acceptance on change |
+| My CRM | Built — "Add to my CRM" creates the customer and a deal in the caller's existing CRM |
+| Commission Ledger | Built — server-computed from verified amount; approval; transfer with TDS, TDS certificate number and bank reference; receipt confirmed |
+| Payouts | Recorded payments (company → member, lead → team). No money moves through COLLABIZ; bank/payment-gateway payouts are not connected |
+| Reputation | Built — from recorded activity only (engagements, conversion, paid, on-time %, disputes); "New on COMEARN" when there is no history |
+| Dispute Centre | Built — either side; amounts held; COLLABIZ rules continue / cancel |
+| Admin Panel | Built — monitoring, pause, feature / unfeature, disputes, customer requirements, platform fee and regulated sectors |
+
+Also built: home with real figures and the supplied logo, 8-stage tracker, Earnings (COMEARN + team shares + Unite ledger), links from
+Venture AI, Franchise, XCHANGE and Trade/UNITE EXIM ("Offer commission in COMEARN", source kept on the opportunity), and native
+mobile screens for members (home, explore, opportunity + agreement, tracker, lead, receipt, team share, disputes, my leads,
+requirements, offers, earnings).
+
+### Not built — needs a decision, a provider or legal review
+- **Paid featured promotion, premium AI subscription, enterprise subscription**: need prices and a payment gateway; featuring is
+  currently granted by COLLABIZ admins only.
+- **10% platform fee**: an admin setting, off until legal and tax review is confirmed.
+- **AI-written suggestions and drafts**: need the Claude key (same as Venture AI).
+- **LeadDNA and ADBUZ links**: these are listed Unite businesses without their own COLLABIZ modules yet; the source field accepts them.
+- **Company-side posting on mobile**: companies post and record stages on the web.
+- **comearn.app as a separate site with single sign-on**: same backend, later.
 
 ## Money rules
 
@@ -55,14 +67,20 @@ individually. Feature flag `FEATURE_COMEARN` (default on). Later it can run as c
 `POST comearn/commissions/:id/received` · `POST comearn/engagements/:id/dispute` · `GET comearn/earnings` ·
 `GET admin/comearn/overview` · `PUT admin/comearn/settings` · `POST admin/comearn/opportunities/:id/pause` · `POST admin/comearn/disputes/:id/rule`
 
-Tables `ce_opportunities`, `ce_engagements`, `ce_leads`, `ce_events` (history), `ce_commissions`, `ce_disputes` — migration 0073.
+Part 2: `POST/GET comearn/requirements` · `GET comearn/requirements/mine` · `GET comearn/requirements/:id` · `POST comearn/requirements/:id/bids` · `POST comearn/bids/:id/withdraw` ·
+`POST comearn/requirements/:id/select` · `POST comearn/requirements/:id/close` · `GET comearn/engagements/:id/team-suggestions` · `POST comearn/engagements/:id/team` ·
+`GET comearn/team-invitations` · `POST comearn/team/:id/respond` · `POST comearn/allocations/:id/paid|confirm` · `GET comearn/team-earnings` · `GET comearn/reputation/:orgId` ·
+`POST comearn/engagements/:id/crm` · `POST comearn/engagements/:id/assist` · `PUT admin/comearn/opportunities/:id/feature` · `GET admin/comearn/requirements`
+
+Tables `ce_opportunities`, `ce_engagements`, `ce_leads`, `ce_events` (history), `ce_commissions`, `ce_disputes` (migration 0073); `ce_requirements`, `ce_bids`, `ce_team_members`, `ce_allocations` (migration 0074).
 
 ## Tests
 
 - Unit: `packages/types/src/comearn.test.ts` (terms validation, commission maths, fingerprints, stages).
+- API: `apps/api/test/comearn-plus.e2e.ts` (7 tests: requirements, sealed bids, selection, team pool and allocations, reputation, CRM, drafts, featured, source).
 - API: `apps/api/test/comearn.e2e.ts` (7 tests: posting/verification, regulated sector, join/accept/lead protection, stage order and
   commission, dispute hold and ruling, platform fee settings, changed terms).
-- Browser: suite "COMEARN" in `scripts/e2e-suites.mjs`.
+- Browser: suites "COMEARN · company offers…" and "COMEARN · reverse marketplace…" in `scripts/e2e-suites.mjs`.
 
 ## Needs a person
 

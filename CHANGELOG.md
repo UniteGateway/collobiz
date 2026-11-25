@@ -5,6 +5,7 @@ All notable changes to COLLABIZ. Format: [Keep a Changelog](https://keepachangel
 ## [Unreleased]
 
 ### COLLABIZ COMEARN — Opportunities to Earn
+- Part 2: reverse commission marketplace (customer requirements + sealed bids + selection), team formation with suggested members and an agreed commission pool with allocations, reputation from recorded activity, CRM hand-off, labelled sales-assistant drafts, admin featuring, TDS certificate number, links from Venture AI / Franchise / XCHANGE / Trade, native mobile screens for members. Migration 0074.
 - New core app: verified companies offer commissions (10 opportunity types; percent, fixed, milestone or recurring); members join by accepting a generated, fingerprinted commission agreement, register protected leads and follow an 8-stage tracker; companies verify payment, approve and record transfer with TDS; server-computed commission ledger, disputes with COLLABIZ rulings, earnings alongside the Unite ledger, admin console (platform fee off by default and gated on legal review; regulated sectors need a licence). Menu entry, Home tile. Migration 0073. See docs/comearn.
 
 ### COLLABIZ VENTURE AI — Global Business Creation Engine (Phase 1–2 foundation)

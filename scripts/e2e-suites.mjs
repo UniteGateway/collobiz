@@ -3947,3 +3947,78 @@ suites.push({
     expect(await page.getByRole('link', { name: /COMEARN/ }).count() > 0, 'COMEARN is reachable from the member home');
   },
 });
+
+suites.push({
+  name: 'COMEARN · reverse marketplace: member posts a customer requirement, companies bid sealed commissions, member selects; team invite and accept; CRM and drafts',
+  only: 'desktop',
+  run: async ({ page, WEB, shot }) => {
+    // A conveyor-maker capability so the team suggestion has a real candidate.
+    await webLogin(page, WEB, 'vikram@greenbuild.example');
+    await page.goto(WEB + '/venture-ai/capabilities');
+    await page.getByRole('button', { name: 'Engineer', exact: true }).click();
+    await page.getByLabel('Product categories').fill('Solar');
+    await page.getByRole('button', { name: 'Save capabilities' }).click();
+    await page.getByText('Saved. You will be suggested for matching roles.').waitFor();
+    // Sunrise posts a genuine customer requirement.
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/comearn/post');
+    await page.getByRole('link', { name: /Post a customer requirement/ }).click();
+    const f = page.locator('[data-form="ce-requirement"]');
+    await f.getByLabel('Requirement').fill('Factory requires a 1 MW solar power plant');
+    await f.getByLabel('Location').fill('Hyderabad');
+    await f.getByLabel('Estimated value (₹)').fill('30000000');
+    await f.getByLabel('Details').fill('Two sheds in Patancheru; wants a turnkey EPC partner with financing options.');
+    await f.getByLabel('Customer name').fill('Kakatiya Polymers');
+    await f.getByLabel('Contact person').fill('Plant head');
+    await f.getByLabel('Phone').fill('9000011111');
+    await f.getByLabel('The customer agreed to receive offers from businesses through me').check();
+    await shot('requirement');
+    await f.getByRole('button', { name: 'Post requirement' }).click();
+    await page.waitForURL(/\/comearn\/requirements\/[0-9a-f-]+$/);
+    const reqUrl = page.url();
+    // Two verified companies bid; neither sees the customer.
+    for (const [email, pct] of [['asha@voltepc.example', '2'], ['deepak@deccan.example', '3']]) {
+      await webLogin(page, WEB, email);
+      await page.goto(WEB + '/comearn/explore?view=requirements');
+      await page.locator('[data-ce-req="Factory requires a 1 MW solar power plant"]').click();
+      if (await page.getByText('Kakatiya Polymers').count()) throw new Error('customer leaked to a bidder');
+      const b = page.locator('[data-form="ce-bid"]');
+      await b.getByLabel('Commission %').fill(pct);
+      await b.getByLabel('Your proposal for the customer').fill('Turnkey EPC: design, supply, installation, net-metering and 5-year O&M.');
+      await b.getByRole('button', { name: 'Submit offer' }).click();
+      await page.getByText(/Your offer \(submitted\)/).waitFor();
+    }
+    // The member compares and selects.
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(reqUrl);
+    await page.locator('[data-ce-bid="Deccan Distributors"]').getByText('₹9.00 L').waitFor();
+    await page.getByText(/not always the right choice/).waitFor();
+    await shot('compare-offers');
+    await page.locator('[data-ce-bid="Volt EPC"]').click();
+    await page.getByLabel(/I accept this company’s commission terms/).check();
+    await page.getByRole('button', { name: 'Select this offer' }).click();
+    await page.waitForURL(/\/comearn\/engagements\/[0-9a-f-]+$/);
+    const engUrl = page.url();
+    await page.locator('[data-ce-lead]').getByText('Kakatiya Polymers').waitFor();
+    // Team: invite the suggested engineer.
+    const sug = page.locator('[data-ce-suggest="GreenBuild Infra"]').first();
+    await sug.waitFor();
+    await sug.getByRole('button', { name: 'Invite' }).click();
+    await page.locator('[data-ce-teammate="GreenBuild Infra"]').getByText('invited').waitFor();
+    await shot('team');
+    // Drafts and CRM.
+    await page.getByRole('button', { name: 'Draft introduction' }).click();
+    await page.locator('[data-ce-draft]').getByText(/Plant head/).waitFor();
+    await page.getByRole('button', { name: 'Add to my CRM' }).click();
+    await page.getByText(/Added to your CRM as a deal/).waitFor();
+    // The engineer accepts the team invitation.
+    await webLogin(page, WEB, 'vikram@greenbuild.example');
+    await page.goto(WEB + '/comearn/my');
+    await page.locator('[data-ce-invite="Factory requires a 1 MW solar power plant"]').getByRole('button', { name: 'Accept' }).click();
+    await page.locator('[data-ce-invite="Factory requires a 1 MW solar power plant"]').getByRole('link', { name: 'Open' }).waitFor();
+    await page.goto(engUrl);
+    await page.locator('[data-ce-team]').getByText('accepted').waitFor();
+    if (await page.getByText('9000011111').count()) throw new Error('customer phone shown to a team member');
+    await shot('team-member-view');
+  },
+});
