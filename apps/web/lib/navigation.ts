@@ -32,6 +32,8 @@ export const MODULES: Module[] = [
   { key: 'capacity', label: 'Capacity', icon: 'calendar', home: '/capacity', match: ['/capacity'], tabs: [['/capacity', 'Find capacity'], ['/capacity/calendar', 'Calendar'], ['/capacity/mine', 'My capacity & bookings']] },
   { key: 'pools', label: 'Demand pools', icon: 'users', home: '/pools', match: ['/pools'], tabs: [['/pools', 'Open pools'], ['/pools/new', 'Start a pool'], ['/pools/mine', 'My pools & quotes']] },
   { key: 'commit', label: 'Commit', icon: 'contracts', home: '/commit', match: ['/commit'], tabs: [['/commit', 'My commitments'], ['/commit/new', 'New commitment']] },
+  { key: 'comearn', label: 'COMEARN', icon: 'coins', home: '/comearn', match: ['/comearn'], ownTabs: true,
+    tabs: [['/comearn', 'Home'], ['/comearn/explore', 'Earn commissions'], ['/comearn/offer', 'Offer commissions'], ['/comearn/my', 'My leads'], ['/comearn/earnings', 'Earnings']] },
   { key: 'venture-ai', label: 'Venture AI', icon: 'rocket', home: '/venture-ai', match: ['/venture-ai'], ownTabs: true,
     tabs: [['/venture-ai', 'Command centre'], ['/venture-ai/opportunities', 'Opportunities'], ['/venture-ai/new', 'Propose a product'], ['/venture-ai/capabilities', 'My capabilities']] },
   { key: 'powertrade', label: 'POWERTRADE', icon: 'zap', home: '/powertrade', match: ['/powertrade'], ownTabs: true,
@@ -100,7 +102,7 @@ export function partnerNav(me: Me | null, counts: { alerts?: number } = {}, eb5?
   const item = (k: string) => { const m = byKey[k]; return { href: m.home, label: m.label, icon: m.icon, children: m.tabs?.filter(([h]) => h !== m.home).map(([href, label]) => ({ href, label })) }; };
   // Everyday things first; the long tail of tools sits in folded groups so the menu stays short.
   const GROUPS: [string, string[], boolean][] = [
-    ['Find & win business', ['opportunities', 'venture-ai', 'powertrade', 'leads', 'business-offers', 'tenders'], false],
+    ['Find & win business', ['opportunities', 'comearn', 'venture-ai', 'powertrade', 'leads', 'business-offers', 'tenders'], false],
     ['Unite', ['ventures', 'dealer', 'board', 'unite-solar', 'energy', 'powertek'], false],
     ['Money', ['earnings', 'books', 'proof'], false],
     ['Work together', ['collab', 'collaboration', 'projects', 'micro', 'capacity', 'trading', 'pools', 'commit', 'launch', 'invest'], true],

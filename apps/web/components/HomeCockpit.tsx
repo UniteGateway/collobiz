@@ -17,8 +17,9 @@ const inr = (minor = 0) => {
   return `₹${Math.round(r).toLocaleString('en-IN')}`;
 };
 
-const GOALS: [string, string][] = [['Sell your products', '/partner-with-unite'], ['Get discounted power', '/powertrade/power'], ['Exchange & barter', '/xchange'], ['Find partners & investors', '/collab'], ['Launch a new business', '/launch']];
+const GOALS: [string, string][] = [['Earn commissions', '/comearn'], ['Sell your products', '/partner-with-unite'], ['Get discounted power', '/powertrade/power'], ['Exchange & barter', '/xchange'], ['Find partners & investors', '/collab'], ['Launch a new business', '/launch']];
 const TILES: { label: string; sub: string; href: string; icon: IconName; tone: string }[] = [
+  { label: 'COMEARN', sub: 'Earn · Offer commissions', href: '/comearn', icon: 'coins', tone: 'green' },
   { label: 'Energy & Solar', sub: 'PPA · EPC · Captive', href: '/energy', icon: 'sun', tone: 'blue' },
   { label: 'ROOFZ', sub: 'Rooftop business & leasing', href: '/businesses/roofz', icon: 'roof', tone: 'red' },
   { label: 'Business Offers', sub: 'Buy · Sell · Source', href: '/business-offers', icon: 'briefcase', tone: 'indigo' },

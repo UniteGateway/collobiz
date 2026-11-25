@@ -3867,3 +3867,81 @@ suites.push({
     await shot('agreement');
   },
 });
+
+suites.push({
+  name: 'COMEARN · company offers a commission, member joins, accepts terms, registers a protected lead; company verifies payment and pays; earnings update',
+  run: async ({ page, WEB, expect, shot, label }) => {
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/comearn');
+    await page.getByRole('heading', { level: 1, name: 'Opportunities to Earn' }).waitFor();
+    await page.getByRole('link', { name: /Earn Commissions/ }).waitFor();
+    await page.locator('[data-ce-earned]').getByText('₹0').waitFor(); // real figure — nothing earned yet
+    await shot('home-empty');
+    if (label !== 'desktop') return;
+    // Volt EPC (verified) posts and publishes.
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/comearn/post');
+    const f = page.locator('[data-form="ce-post"]');
+    await f.getByLabel('Opportunity title').fill('1 MW rooftop solar for factories in Telangana');
+    await f.getByLabel('Territory').fill('Telangana');
+    await f.getByLabel('Estimated business value (₹)').fill('30000000');
+    await f.getByLabel('Describe the opportunity').fill('Introduce factories that want rooftop solar. We design, supply, install and maintain the plant.');
+    await f.getByLabel('Commission percentage').fill('2');
+    await page.locator('[data-ce-potential]').getByText('₹6.00 L').waitFor();
+    await shot('post');
+    await f.getByRole('button', { name: /Generate opportunity/ }).click();
+    await page.waitForURL(/\/comearn\/opportunities\/[0-9a-f-]+$/);
+    // Sunrise finds it, accepts the agreement and registers its customer.
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(WEB + '/comearn/explore?category=solar');
+    await page.locator('[data-ce-opp="1 MW rooftop solar for factories in Telangana"]').click();
+    await page.locator('[data-ce-commission]').getByText('2%').waitFor();
+    await page.getByRole('button', { name: 'Start earning' }).click();
+    await page.locator('[data-ce-agreement]').getByText(/Lead protection/).waitFor();
+    await shot('agreement');
+    await page.getByLabel('I have read and accept this commission agreement for my business').check();
+    await page.getByRole('button', { name: 'Accept and continue' }).click();
+    await page.waitForURL(/\/comearn\/engagements\/[0-9a-f-]+$/);
+    const engUrl = page.url();
+    const l = page.locator('[data-form="ce-lead"]');
+    await l.getByLabel('Customer name').fill('Deccan Polymers');
+    await l.getByLabel('City').fill('Hyderabad');
+    await l.getByLabel('Contact person').fill('Plant head');
+    await l.getByLabel('Phone').fill('9848012345');
+    await l.getByLabel('Estimated value (₹)').fill('30000000');
+    await l.getByLabel('What the customer needs').fill('Needs a 1 MW rooftop solar plant on two sheds');
+    await l.getByLabel('The customer agreed that this company may contact them').check();
+    await l.getByRole('button', { name: 'Register and protect lead' }).click();
+    await page.locator('[data-ce-lead]').getByText('Deccan Polymers').waitFor();
+    await shot('tracker-lead');
+    // Volt records quotation, order, verified payment, approval and transfer.
+    await webLogin(page, WEB, 'asha@voltepc.example');
+    await page.goto(WEB + '/comearn/offer');
+    await page.locator('[data-ce-engagement="Sunrise Traders"]').getByRole('link', { name: 'Record next step' }).click();
+    const st = page.locator('[data-form="ce-stage"]');
+    await st.getByRole('button', { name: 'Meeting and quotation completed' }).click();
+    await st.getByLabel('Order value (₹)').fill('30000000');
+    await st.getByRole('button', { name: 'Order confirmed' }).click();
+    await st.getByLabel('Verified amount received (₹)').fill('30000000');
+    await st.getByLabel('Invoice or payment reference').fill('UTR-55120');
+    await st.getByRole('button', { name: 'Customer payment verified' }).click();
+    await page.locator('[data-ce-ledger]').getByText('₹6.00 L').first().waitFor();
+    await st.getByRole('button', { name: 'Approve commission' }).click();
+    await st.getByLabel('Tax deducted at source (₹)').fill('30000');
+    await st.getByLabel('Bank transfer reference').fill('NEFT-90211');
+    await shot('company-pay');
+    await st.getByRole('button', { name: 'Record commission transfer' }).click();
+    await page.locator('[data-ce-ledger]').getByText(/Transferred · NEFT-90211/).waitFor();
+    // The member confirms receipt and sees the real earnings.
+    await webLogin(page, WEB, 'ravi@sunrise.example');
+    await page.goto(engUrl);
+    await page.getByRole('button', { name: 'Confirm received' }).click();
+    await page.getByText('Receipt confirmed').waitFor();
+    await shot('tracker-paid');
+    await page.goto(WEB + '/comearn');
+    await page.locator('[data-ce-earned]').getByText('₹5.70 L').waitFor();
+    await shot('home');
+    await page.goto(WEB + '/dashboard');
+    expect(await page.getByRole('link', { name: /COMEARN/ }).count() > 0, 'COMEARN is reachable from the member home');
+  },
+});

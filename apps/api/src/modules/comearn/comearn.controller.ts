@@ -205,6 +205,17 @@ export class ComearnController {
     return { id: e.id, stage: e.stage, agreement: agreementText(o, await this.orgName(o.orgId)), termsHash: sha256(canonicalJson({ ...termsOf(o), version: o.version, id: o.id })) };
   }
 
+  @Get('comearn/my')
+  @RequireOrg()
+  async my(@Ctx() ctx: RequestContext) {
+    this.on();
+    const rows = await this.db.select({ e: ceEngagements, o: ceOpportunities, company: organizations.displayName, customer: ceLeads.customerName, leadValue: ceLeads.estimatedValuePaise }).from(ceEngagements)
+      .innerJoin(ceOpportunities, eq(ceOpportunities.id, ceEngagements.opportunityId)).innerJoin(organizations, eq(organizations.id, ceOpportunities.orgId)).leftJoin(ceLeads, eq(ceLeads.engagementId, ceEngagements.id))
+      .where(eq(ceEngagements.earnerOrgId, ctx.orgId!)).orderBy(desc(ceEngagements.updatedAt));
+    return { items: rows.map((r) => ({ id: r.e.id, code: r.e.code, stage: r.e.stage, stageLabel: CE_STAGES[r.e.stage as CeStage]?.label, step: rank(r.e.stage) + 1, status: r.e.status, customer: r.customer,
+      opportunity: this.card(r.o, r.company), potentialPaise: cePotential((r.e.terms ?? termsOf(r.o)) as CeTerms, r.leadValue ?? r.o.estimatedValuePaise) })) };
+  }
+
   @Post('comearn/engagements/:id/accept')
   @RequireOrg()
   @HttpCode(200)

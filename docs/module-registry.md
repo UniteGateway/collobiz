@@ -28,6 +28,9 @@ One line per module: where it lives and where it is documented. Earlier modules 
 BIZO (www.bizo.one) is listed as Unite business #48 with its brochure features, indicative plans and a link-out. Single
 sign-on and data sync need BIZO's API details and credentials.
 
+## COMEARN
+Commission marketplace — `/comearn`, API `modules/comearn`, tables `ce_*`, docs `docs/comearn/`. Feature flag `FEATURE_COMEARN`. Companies pay members directly; platform fee is a super-admin setting (off by default).
+
 ## VENTURE AI
 Global business creation engine — `/venture-ai`, API `modules/venture-ai`, tables `vai_*`, docs `docs/venture-ai/`. Feature flag `FEATURE_VENTURE_AI`. AI agents use rules templates until `ANTHROPIC_API_KEY`, token prices and a budget are set.
 
