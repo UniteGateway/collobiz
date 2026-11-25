@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CE_CATEGORIES } from '@collabiz/types';
 import { Alert, Button, Card, Checkbox, ChipSelect, EmptyState, LoadingState, Segmented, Select, StatusBadge, TextArea, TextInput } from '@collabiz/ui';
 import { BannerHeader } from '@/components/Banner';
@@ -76,8 +76,8 @@ function DisputeCard({ x, act }: { x: O['disputes'][number]; act: (fn: () => Pro
 
 function SettingsCard({ s, save }: { s: Settings; save: (b: Settings) => void }) {
   const init = () => ({ pct: String(s.platformFeeBps / 100), feePayer: s.feePayer, restricted: s.restrictedCategories, legal: s.legalReviewed, gTerms: s.guaranteeTerms ?? '', gLegal: s.guaranteeLegalReviewed });
+  // Initialised once: later data refreshes (for example after loading samples) never overwrite what the admin is typing.
   const [f, setF] = useState(init);
-  useEffect(() => setF(init()), [s]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <Card title="Fees and regulated sectors" subtitle="Only a super admin can change these. The platform fee stays off until legal and tax review (GST on the fee, TDS on commissions) is confirmed; it applies only to commissions verified after the change.">
       <form className="cz-stack" style={{ gap: 12 }} onSubmit={(e) => { e.preventDefault(); save({ platformFeeBps: Math.round(Number(f.pct || 0) * 100), feePayer: f.feePayer, restrictedCategories: f.restricted, legalReviewed: f.legal, guaranteeTerms: f.gTerms.trim() || null, guaranteeLegalReviewed: f.gLegal }); }}>

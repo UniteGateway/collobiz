@@ -3964,7 +3964,9 @@ suites.push({
     // Unite Guaranteed (needs written, legally reviewed terms) and sample listings.
     await adminLogin(page, ADMIN, 'superadmin@collabiz.local');
     await page.goto(ADMIN + '/comearn');
+    const loaded = page.waitForResponse((r) => r.url().includes('/admin/comearn/samples'));
     await page.getByRole('button', { name: 'Load sample listings' }).click();
+    expect((await loaded).status() === 201, 'sample listings loaded');
     await page.getByRole('button', { name: 'Fees & sectors' }).click();
     await page.getByLabel('Unite Guarantee terms (shown on every Unite Guaranteed listing)').fill('If the paying company does not pay an approved commission within 30 days of its due date, Unite pays the member and recovers it from the company. Draft for demonstration — to be confirmed by Unite legal.');
     await page.getByLabel('Legal review of the Unite Guarantee terms is complete').check();
