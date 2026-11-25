@@ -23,6 +23,7 @@ import { AuditService } from '../../common/audit.service';
 import { canonicalJson, randomDigits, sha256 } from '../../common/crypto';
 import { config } from '../../config';
 import { agreementText } from './comearn.controller';
+import { ratingsFor } from './ratings';
 
 const staff = (ctx: RequestContext) => ctx.platformRoles.some((r) => r === 'super_admin' || r === 'unite_admin');
 const code = (p: string) => `${p}-${new Date().getUTCFullYear()}-${randomDigits(6)}`;
@@ -58,6 +59,7 @@ export class ComearnPlusController {
       asEarner: ceReputation({ engagements: e.n, converted: e.conv, paid: e.paid, onTime: e.paid, disputesLost: e.disputes }),
       asCompany: ceReputation({ engagements: c.n, converted: c.conv, paid: c.paid, onTime: c.ontime, disputesLost: c.disputes }),
       verified: await this.verified(orgId),
+      rating: (await ratingsFor(this.db, [orgId], 'company')).get(orgId) ?? null, ratingAsEarner: (await ratingsFor(this.db, [orgId], 'earner')).get(orgId) ?? null,
     };
   }
 

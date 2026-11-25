@@ -19,6 +19,8 @@ describe('COMEARN part 2', () => {
   const get = (p: string, tok: string) => api(app).get(`/v1${p}`).set(auth(tok));
   const post = (p: string, b: object, tok: string) => api(app).post(`/v1${p}`).set(auth(tok)).send(b);
   const put = (p: string, b: object, tok: string) => api(app).put(`/v1${p}`).set(auth(tok)).send(b);
+  /** Companies submit; Unite releases (margin 0 here — margin is tested in comearn-review.e2e.ts). */
+  const publish = async (id: string) => { await post(`/comearn/opportunities/${id}/status`, { status: 'submit' }, t.asha).expect(200); await post(`/admin/comearn/opportunities/${id}/release`, {}, t.uniteAdmin).expect(200); };
   let reqId = ''; let engId = ''; let ashaBid = '';
 
   it('a member posts a customer requirement; the customer stays private; the same customer cannot be posted twice', async () => {
@@ -119,7 +121,7 @@ describe('COMEARN part 2', () => {
     const base = { type: 'dealer_development', category: 'industrial', description: 'Appoint dealers for our transformers in Andhra Pradesh and Telangana.', territory: 'AP & Telangana', model: 'fixed', fixedPaise: 25_000_00, trigger: 'agreement_signed', paymentDays: 30 };
     const a = (await post('/comearn/opportunities', { ...base, title: 'Transformer dealers — first listing' }, t.asha).expect(201)).body;
     const b = (await post('/comearn/opportunities', { ...base, title: 'Distributors for Venture AI product', source: { module: 'venture_ai', id: 'VR-2026-000001' } }, t.asha).expect(201)).body;
-    for (const x of [a, b]) await post(`/comearn/opportunities/${x.id}/status`, { status: 'live' }, t.asha).expect(200);
+    for (const x of [a, b]) await publish(x.id);
     await put(`/admin/comearn/opportunities/${a.id}/feature`, { until: future }, t.asha).expect(403);
     await put(`/admin/comearn/opportunities/${a.id}/feature`, { until: future }, t.uniteAdmin).expect(200);
     const list = (await get('/comearn/opportunities?category=industrial', t.ravi).expect(200)).body.items;

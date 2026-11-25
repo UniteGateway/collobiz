@@ -18,6 +18,8 @@ describe('COLLABIZ COMEARN', () => {
   const get = (p: string, tok: string) => api(app).get(`/v1${p}`).set(auth(tok));
   const post = (p: string, b: object, tok: string) => api(app).post(`/v1${p}`).set(auth(tok)).send(b);
   const put = (p: string, b: object, tok: string) => api(app).put(`/v1${p}`).set(auth(tok)).send(b);
+  /** Companies submit; Unite releases (margin 0 here — margin is tested in comearn-review.e2e.ts). */
+  const publish = async (id: string) => { await post(`/comearn/opportunities/${id}/status`, { status: 'submit' }, t.asha).expect(200); await post(`/admin/comearn/opportunities/${id}/release`, {}, t.uniteAdmin).expect(200); };
   let oppId = ''; let engId = ''; let terms = '';
 
   it('offer commissions: owners/admins post drafts; only verified businesses publish; potential is an estimate', async () => {
@@ -27,16 +29,16 @@ describe('COLLABIZ COMEARN', () => {
     oppId = o.id; expect(o).toMatchObject({ status: 'draft', potentialPaise: 6 * L });
     await get(`/comearn/opportunities/${oppId}`, t.ravi).expect(404); // drafts are private
     const g = (await post('/comearn/opportunities', { ...opp, title: 'Steel structures for solar parks' }, t.vikram).expect(201)).body;
-    const refused = await post(`/comearn/opportunities/${g.id}/status`, { status: 'live' }, t.vikram).expect(403);
+    const refused = await post(`/comearn/opportunities/${g.id}/status`, { status: 'submit' }, t.vikram).expect(403);
     expect(refused.body.message).toMatch(/verified businesses/);
-    await post(`/comearn/opportunities/${oppId}/status`, { status: 'live' }, t.asha).expect(200);
+    await publish(oppId);
     const list = (await get('/comearn/opportunities?category=solar', t.ravi).expect(200)).body.items;
     expect(list.map((x: { id: string }) => x.id)).toEqual([oppId]);
   });
 
   it('restricted sectors need a licence number before publishing', async () => {
     const r = (await post('/comearn/opportunities', { ...opp, title: 'Sell plots in our Shadnagar layout', category: 'real_estate', type: 'lead_generation' }, t.asha).expect(201)).body;
-    const no = await post(`/comearn/opportunities/${r.id}/status`, { status: 'live' }, t.asha).expect(400);
+    const no = await post(`/comearn/opportunities/${r.id}/status`, { status: 'submit' }, t.asha).expect(400);
     expect(no.body.fields.licenceNote).toMatch(/RERA/);
   });
 
@@ -85,7 +87,7 @@ describe('COLLABIZ COMEARN', () => {
 
   it('a dispute holds the commission until COLLABIZ rules', async () => {
     const o = (await post('/comearn/opportunities', { ...opp, title: 'Transformer orders from EPC contractors', model: 'fixed', rateBps: undefined, fixedPaise: 50_000_00, trigger: 'order_confirmed' }, t.asha).expect(201)).body;
-    await post(`/comearn/opportunities/${o.id}/status`, { status: 'live' }, t.asha).expect(200);
+    await publish(o.id);
     const j = (await post(`/comearn/opportunities/${o.id}/join`, {}, t.ravi).expect(201)).body;
     await post(`/comearn/engagements/${j.id}/accept`, { termsHash: j.termsHash, confirm: true }, t.ravi).expect(200);
     await post(`/comearn/engagements/${j.id}/lead`, { ...lead, customerName: 'Kakatiya Infra', phone: '9000000001' }, t.ravi).expect(201);
@@ -109,7 +111,7 @@ describe('COLLABIZ COMEARN', () => {
     await put('/admin/comearn/settings', { platformFeeBps: 1000, feePayer: 'company', restrictedCategories: ['real_estate'], legalReviewed: false }, t.superadmin).expect(400);
     await put('/admin/comearn/settings', { platformFeeBps: 1000, feePayer: 'company', restrictedCategories: ['real_estate'], legalReviewed: true }, t.superadmin).expect(200);
     const x = (await post('/comearn/opportunities', { ...opp, title: 'Inverters for rooftop installers', model: 'fixed', rateBps: undefined, fixedPaise: 10_000_00 }, t.asha).expect(201)).body;
-    await post(`/comearn/opportunities/${x.id}/status`, { status: 'live' }, t.asha).expect(200);
+    await publish(x.id);
     const j = (await post(`/comearn/opportunities/${x.id}/join`, {}, t.deepak).expect(201)).body;
     await post(`/comearn/engagements/${j.id}/accept`, { termsHash: j.termsHash, confirm: true }, t.deepak).expect(200);
     await post(`/comearn/engagements/${j.id}/lead`, { ...lead, customerName: 'Sri Sai Solar', phone: '9000000002' }, t.deepak).expect(201);
@@ -122,7 +124,7 @@ describe('COLLABIZ COMEARN', () => {
 
   it('terms changed after joining: members must re-read before accepting; accepted terms stay frozen', async () => {
     const o = (await post('/comearn/opportunities', { ...opp, title: 'Solar pumps for farmer groups' }, t.asha).expect(201)).body;
-    await post(`/comearn/opportunities/${o.id}/status`, { status: 'live' }, t.asha).expect(200);
+    await publish(o.id);
     const j = (await post(`/comearn/opportunities/${o.id}/join`, {}, t.ravi).expect(201)).body;
     await put(`/comearn/opportunities/${o.id}`, { ...opp, title: 'Solar pumps for farmer groups', rateBps: 150 }, t.asha).expect(200);
     const stale = await post(`/comearn/engagements/${j.id}/accept`, { termsHash: j.termsHash, confirm: true }, t.ravi).expect(409);

@@ -17,17 +17,18 @@ import {
   ceAllocate, ceCommission, ceLeadFingerprint, cePlatformFee, cePotential, type CeStage, type CeTerms,
 } from '@collabiz/types';
 import { InjectDb, type Db } from '../../db/client';
-import { ceAllocations, ceCommissions, ceDisputes, ceEngagements, ceEvents, ceLeads, ceOpportunities, ceTeamMembers, commissionEntries, memberships, notifications, organizations, siteSettings } from '../../db/schema';
+import { ceAllocations, ceNegotiations, ceCommissions, ceDisputes, ceEngagements, ceEvents, ceLeads, ceOpportunities, ceTeamMembers, commissionEntries, memberships, notifications, organizations, siteSettings } from '../../db/schema';
 import { body } from '../../common/http';
 import { Ctx, RequireOrg, type RequestContext } from '../../common/context';
 import { AuditService } from '../../common/audit.service';
 import { canonicalJson, randomDigits, sha256 } from '../../common/crypto';
 import { config } from '../../config';
+import { ratingsFor } from './ratings';
 
 type Opp = typeof ceOpportunities.$inferSelect;
 type Eng = typeof ceEngagements.$inferSelect;
-interface Settings { platformFeeBps: number; feePayer: 'company' | 'earner'; restrictedCategories: string[]; legalReviewed: boolean }
-const DEFAULTS: Settings = { platformFeeBps: 0, feePayer: 'company', restrictedCategories: ['real_estate'], legalReviewed: false };
+interface Settings { platformFeeBps: number; feePayer: 'company' | 'earner'; restrictedCategories: string[]; legalReviewed: boolean; guaranteeTerms: string | null; guaranteeLegalReviewed: boolean }
+const DEFAULTS: Settings = { platformFeeBps: 0, feePayer: 'company', restrictedCategories: ['real_estate'], legalReviewed: false, guaranteeTerms: null, guaranteeLegalReviewed: false };
 const staff = (ctx: RequestContext) => ctx.platformRoles.some((r) => r === 'super_admin' || r === 'unite_admin');
 const code = (p: string) => `${p}-${new Date().getUTCFullYear()}-${randomDigits(6)}`;
 const termsOf = (o: Opp): CeTerms => ({ model: o.model as CeTerms['model'], rateBps: o.rateBps ?? undefined, fixedPaise: o.fixedPaise ?? undefined, milestones: (o.milestones as CeTerms['milestones']) ?? [], recurringMonths: o.recurringMonths ?? undefined, trigger: o.trigger as CeTerms['trigger'], paymentDays: o.paymentDays });
@@ -80,7 +81,7 @@ export class ComearnController {
     const t = termsOf(o);
     return { id: o.id, code: o.code, title: o.title, type: o.type, typeLabel: CE_TYPES[o.type as keyof typeof CE_TYPES]?.label, category: o.category, territory: o.territory, model: o.model, rateBps: o.rateBps, fixedPaise: o.fixedPaise,
       trigger: o.trigger, estimatedValuePaise: o.estimatedValuePaise, potentialPaise: cePotential(t, o.estimatedValuePaise), status: o.status, company,
-      featured: !!o.featuredUntil && o.featuredUntil >= new Date().toISOString().slice(0, 10), source: o.source ?? null, ...extra };
+      featured: !!o.featuredUntil && o.featuredUntil >= new Date().toISOString().slice(0, 10), source: o.source ?? null, uniteGuaranteed: o.uniteGuaranteed, sample: o.sample, companyOrgId: o.orgId, ...extra };
   }
 
   // ------------------------------------------------------------------ home
@@ -97,7 +98,9 @@ export class ComearnController {
     const joined = new Set(mine.map((x) => x.o.id));
     // Rules-based recommendations (no AI): categories I already earn in first, then newest. Labelled as such on screen.
     const myCats = new Set(mine.map((x) => x.o.category));
-    const recommended = live.filter((x) => !joined.has(x.o.id)).sort((a, b) => Number(myCats.has(b.o.category)) - Number(myCats.has(a.o.category))).slice(0, 4).map((x) => this.card(x.o, x.company, { why: myCats.has(x.o.category) ? `You already earn in ${CE_CATEGORIES[x.o.category as keyof typeof CE_CATEGORIES]}` : 'New opportunity' }));
+    const recPick = live.filter((x) => !joined.has(x.o.id)).sort((a, b) => Number(b.o.uniteGuaranteed) - Number(a.o.uniteGuaranteed) || Number(myCats.has(b.o.category)) - Number(myCats.has(a.o.category))).slice(0, 6);
+    const recRt = await ratingsFor(this.db, recPick.map((x) => x.o.orgId), 'company');
+    const recommended = recPick.map((x) => this.card(x.o, x.company, { rating: recRt.get(x.o.orgId) ?? null, why: myCats.has(x.o.category) ? `You already earn in ${CE_CATEGORIES[x.o.category as keyof typeof CE_CATEGORIES]}` : x.o.uniteGuaranteed ? 'Unite Guaranteed' : 'New opportunity' }));
     const categories = Object.fromEntries(Object.keys(CE_CATEGORIES).map((k) => [k, live.filter((x) => x.o.category === k).length]));
     const [posted] = (await this.db.execute(sql`select count(*) filter (where status = 'live')::int live, count(*)::int total from ce_opportunities where org_id = ${org}`) as unknown as { rows: { live: number; total: number }[] }).rows;
     const [toAct] = (await this.db.execute(sql`select count(*)::int n from ce_engagements e join ce_opportunities o on o.id = e.opportunity_id where o.org_id = ${org} and e.status = 'active' and e.stage in ('lead_registered','quoted','order_confirmed','payment_verified','commission_approved')`) as unknown as { rows: { n: number }[] }).rows;
@@ -112,14 +115,15 @@ export class ComearnController {
   // ------------------------------------------------------------------ marketplace
   @Get('comearn/opportunities')
   @RequireOrg()
-  async list(@Ctx() ctx: RequestContext, @Query('category') category?: string, @Query('type') type?: string, @Query('q') q?: string) {
+  async list(@Ctx() ctx: RequestContext, @Query('category') category?: string, @Query('type') type?: string, @Query('q') q?: string, @Query('guaranteed') guaranteed?: string) {
     this.on();
     const rows = await this.db.select({ o: ceOpportunities, company: organizations.displayName, earners: sql<number>`(select count(*) from ce_engagements e where e.opportunity_id = ${ceOpportunities.id})::int` })
       .from(ceOpportunities).innerJoin(organizations, eq(organizations.id, ceOpportunities.orgId))
       .where(and(eq(ceOpportunities.status, 'live'), category && category !== 'all' ? eq(ceOpportunities.category, category) : undefined, type ? eq(ceOpportunities.type, type) : undefined,
-        q ? sql`(${ceOpportunities.title} ilike ${'%' + q + '%'} or ${ceOpportunities.description} ilike ${'%' + q + '%'})` : undefined))
+        q ? sql`(${ceOpportunities.title} ilike ${'%' + q + '%'} or ${ceOpportunities.description} ilike ${'%' + q + '%'})` : undefined, guaranteed === '1' ? eq(ceOpportunities.uniteGuaranteed, true) : undefined))
       .orderBy(sql`(${ceOpportunities.featuredUntil} >= current_date) desc nulls last`, desc(ceOpportunities.updatedAt)).limit(100);
-    return { items: rows.map((r) => this.card(r.o, r.company, { earners: r.earners, mine: r.o.orgId === ctx.orgId })) };
+    const rt = await ratingsFor(this.db, rows.map((r) => r.o.orgId), 'company');
+    return { items: rows.map((r) => this.card(r.o, r.company, { earners: r.earners, mine: r.o.orgId === ctx.orgId, rating: rt.get(r.o.orgId) ?? null })) };
   }
 
   @Get('comearn/opportunities/:id')
@@ -132,7 +136,10 @@ export class ComearnController {
     const [me] = await this.db.select().from(ceEngagements).where(and(eq(ceEngagements.opportunityId, o.id), eq(ceEngagements.earnerOrgId, ctx.orgId!))).limit(1);
     const [n] = (await this.db.execute(sql`select count(*)::int n from ce_engagements where opportunity_id = ${o.id}`) as unknown as { rows: { n: number }[] }).rows;
     const s = await this.settings();
-    return { ...this.card(o, company, { earners: n.n, mine }), description: o.description, idealEarner: o.idealEarner, milestones: o.milestones, recurringMonths: o.recurringMonths, paymentDays: o.paymentDays, maxEarners: o.maxEarners, licenceNote: o.licenceNote, version: o.version,
+    const rt = await ratingsFor(this.db, [o.orgId], 'company');
+    const negotiations = mine || staff(ctx) ? await this.db.select().from(ceNegotiations).where(eq(ceNegotiations.opportunityId, o.id)).orderBy(ceNegotiations.createdAt) : [];
+    const companyView = mine || staff(ctx) ? { companyRateBps: o.companyRateBps, companyFixedPaise: o.companyFixedPaise, uniteMarginBps: o.uniteMarginBps, uniteMarginPaise: o.uniteMarginPaise, approvedVersion: o.approvedVersion, reviewNote: o.reviewNote, negotiations } : {};
+    return { ...this.card(o, company, { earners: n.n, mine, rating: rt.get(o.orgId) ?? null }), ...companyView, guaranteeTerms: o.uniteGuaranteed ? s.guaranteeTerms : null, description: o.description, idealEarner: o.idealEarner, milestones: o.milestones, recurringMonths: o.recurringMonths, paymentDays: o.paymentDays, maxEarners: o.maxEarners, licenceNote: o.licenceNote, version: o.version,
       companyOrgId: o.orgId, restricted: s.restrictedCategories.includes(o.category), agreement: agreementText(o, company), engagement: me ? { id: me.id, stage: me.stage, status: me.status } : null };
   }
 
@@ -144,7 +151,8 @@ export class ComearnController {
     this.on(); this.admin(ctx);
     const [o] = await this.db.insert(ceOpportunities).values({ code: code('CE'), orgId: ctx.orgId!, title: b.title, type: b.type, category: b.category, description: b.description, idealEarner: b.idealEarner ?? null, territory: b.territory,
       estimatedValuePaise: b.estimatedValuePaise ?? null, model: b.model, rateBps: b.model === 'fixed' ? null : b.rateBps ?? null, fixedPaise: b.model === 'fixed' ? b.fixedPaise ?? null : null, milestones: b.model === 'milestone' ? b.milestones : [],
-      recurringMonths: b.model === 'recurring' ? b.recurringMonths ?? null : null, trigger: b.trigger, paymentDays: b.paymentDays, maxEarners: b.maxEarners ?? null, licenceNote: b.licenceNote ?? null, source: b.source ?? null, createdBy: ctx.userId }).returning();
+      recurringMonths: b.model === 'recurring' ? b.recurringMonths ?? null : null, trigger: b.trigger, paymentDays: b.paymentDays, maxEarners: b.maxEarners ?? null, licenceNote: b.licenceNote ?? null, source: b.source ?? null, createdBy: ctx.userId,
+      companyRateBps: b.model === 'fixed' ? null : b.rateBps ?? null, companyFixedPaise: b.model === 'fixed' ? b.fixedPaise ?? null : null }).returning();
     await this.audit.record(ctx, { action: 'comearn.opportunity_created', objectType: 'ce_opportunity', objectId: o.id, after: { code: o.code } });
     return { id: o.id, code: o.code, status: o.status, potentialPaise: cePotential(termsOf(o), o.estimatedValuePaise) };
   }
@@ -158,26 +166,38 @@ export class ComearnController {
     if (o.status === 'closed') throw new ConflictException('Closed opportunities cannot be changed');
     const [u] = await this.db.update(ceOpportunities).set({ title: b.title, type: b.type, category: b.category, description: b.description, idealEarner: b.idealEarner ?? null, territory: b.territory, estimatedValuePaise: b.estimatedValuePaise ?? null,
       model: b.model, rateBps: b.model === 'fixed' ? null : b.rateBps ?? null, fixedPaise: b.model === 'fixed' ? b.fixedPaise ?? null : null, milestones: b.model === 'milestone' ? b.milestones : [], recurringMonths: b.model === 'recurring' ? b.recurringMonths ?? null : null,
-      trigger: b.trigger, paymentDays: b.paymentDays, maxEarners: b.maxEarners ?? null, licenceNote: b.licenceNote ?? null, version: o.version + 1, updatedAt: new Date() }).where(eq(ceOpportunities.id, o.id)).returning();
-    return { id: u.id, version: u.version };
+      trigger: b.trigger, paymentDays: b.paymentDays, maxEarners: b.maxEarners ?? null, licenceNote: b.licenceNote ?? null, version: o.version + 1, updatedAt: new Date(),
+      companyRateBps: b.model === 'fixed' ? null : b.rateBps ?? null, companyFixedPaise: b.model === 'fixed' ? b.fixedPaise ?? null : null, status: o.status === 'draft' ? 'draft' : 'in_review' }).where(eq(ceOpportunities.id, o.id)).returning();
+    return { id: u.id, version: u.version, status: u.status, note: u.status === 'in_review' ? 'Changed terms go back to Unite for review before members see them. Members who already accepted keep their terms.' : undefined };
   }
 
   @Post('comearn/opportunities/:id/status')
   @RequireOrg()
   @HttpCode(200)
-  async setStatus(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Body(body(z.object({ status: z.enum(['live', 'paused', 'closed']) }))) b: { status: 'live' | 'paused' | 'closed' }) {
+  async setStatus(@Ctx() ctx: RequestContext, @Param('id', ParseUUIDPipe) id: string, @Body(body(z.object({ status: z.enum(['submit', 'live', 'paused', 'closed']) }))) b: { status: 'submit' | 'live' | 'paused' | 'closed' }) {
     this.on(); this.admin(ctx); const o = await this.opp(id);
     if (o.orgId !== ctx.orgId) throw new ForbiddenException();
     if (o.status === 'closed') throw new ConflictException('This opportunity is closed');
-    if (b.status === 'live') {
+    let to: string = b.status;
+    if (b.status === 'submit') {
+      if (o.status !== 'draft') throw new ConflictException('Already submitted to Unite');
       const [org] = await this.db.select({ v: organizations.verificationStatus }).from(organizations).where(eq(organizations.id, ctx.orgId!)).limit(1);
-      if (org?.v !== 'verified') throw new ForbiddenException('Only verified businesses can publish earning opportunities. Complete your business verification first.');
+      if (org?.v !== 'verified') throw new ForbiddenException('Only verified businesses can offer earning opportunities. Complete your business verification first.');
       const s = await this.settings();
       if (s.restrictedCategories.includes(o.category) && !o.licenceNote) throw new BadRequestException({ message: 'Check the highlighted fields', fields: { licenceNote: `${CE_CATEGORIES[o.category as keyof typeof CE_CATEGORIES]} is a regulated sector. Add your licence or registration number (for example RERA) before publishing.` } });
-    }
-    await this.db.update(ceOpportunities).set({ status: b.status, updatedAt: new Date() }).where(eq(ceOpportunities.id, o.id));
-    await this.audit.record(ctx, { action: `comearn.opportunity_${b.status}`, objectType: 'ce_opportunity', objectId: o.id });
-    return { status: b.status };
+      to = 'in_review';
+      await this.notifyStaff(`COMEARN: ${o.title} submitted for review`, `/comearn`);
+    } else if (b.status === 'live') {
+      // Members see a listing only after Unite releases it; a paused listing can be resumed if its terms are unchanged since release.
+      if (o.status !== 'paused' || o.approvedVersion !== o.version) throw new ConflictException('Unite releases listings after review. Submit it to Unite.');
+    } else if (b.status === 'paused' && o.status !== 'live') throw new ConflictException('Only live listings can be paused');
+    await this.db.update(ceOpportunities).set({ status: to, updatedAt: new Date() }).where(eq(ceOpportunities.id, o.id));
+    await this.audit.record(ctx, { action: `comearn.opportunity_${to}`, objectType: 'ce_opportunity', objectId: o.id });
+    return { status: to };
+  }
+  private async notifyStaff(title: string, link: string) {
+    const ids = (await this.db.selectDistinct({ u: memberships.userId }).from(memberships).where(and(eq(memberships.status, 'active'), inArray(memberships.role, ['unite_admin', 'super_admin'])))).map((r) => r.u);
+    if (ids.length) await this.db.insert(notifications).values(ids.map((u) => ({ userId: u, kind: 'comearn', title, body: 'Review the terms, negotiate if needed, set the Unite margin and release.', link })));
   }
 
   @Get('comearn/offer')
@@ -187,9 +207,11 @@ export class ComearnController {
     const opps = await this.db.select().from(ceOpportunities).where(eq(ceOpportunities.orgId, ctx.orgId!)).orderBy(desc(ceOpportunities.updatedAt));
     const engs = opps.length ? await this.db.select({ e: ceEngagements, earner: organizations.displayName, lead: ceLeads.customerName }).from(ceEngagements).innerJoin(organizations, eq(organizations.id, ceEngagements.earnerOrgId)).leftJoin(ceLeads, eq(ceLeads.engagementId, ceEngagements.id))
       .where(inArray(ceEngagements.opportunityId, opps.map((o) => o.id))).orderBy(desc(ceEngagements.updatedAt)) : [];
+    const negs = opps.length ? await this.db.select().from(ceNegotiations).where(inArray(ceNegotiations.opportunityId, opps.map((o) => o.id))) : [];
     const owed = (await this.db.execute(sql`select coalesce(sum(gross_paise) filter (where status in ('pending_approval','approved')),0)::bigint owed, coalesce(sum(gross_paise) filter (where status = 'paid'),0)::bigint paid from ce_commissions where payer_org_id = ${ctx.orgId}`) as unknown as { rows: { owed: number; paid: number }[] }).rows[0];
     return { owedPaise: Number(owed.owed), paidPaise: Number(owed.paid),
-      opportunities: opps.map((o) => ({ ...this.card(o, ''), version: o.version, engagements: engs.filter((x) => x.e.opportunityId === o.id).map((x) => ({ id: x.e.id, code: x.e.code, earner: x.earner, stage: x.e.stage, stageLabel: CE_STAGES[x.e.stage as CeStage]?.label, status: x.e.status, customer: x.lead })) })) };
+      opportunities: opps.map((o) => ({ ...this.card(o, ''), version: o.version, companyRateBps: o.companyRateBps, companyFixedPaise: o.companyFixedPaise, uniteMarginBps: o.uniteMarginBps, uniteMarginPaise: o.uniteMarginPaise, reviewNote: o.reviewNote, approvedVersion: o.approvedVersion,
+        openCounter: negs.find((n) => n.opportunityId === o.id && n.status === 'open' && n.fromSide === 'unite') ?? null, engagements: engs.filter((x) => x.e.opportunityId === o.id).map((x) => ({ id: x.e.id, code: x.e.code, earner: x.earner, stage: x.e.stage, stageLabel: CE_STAGES[x.e.stage as CeStage]?.label, status: x.e.status, customer: x.lead })) })) };
   }
 
   // ------------------------------------------------------------------ earn commissions (member side)
@@ -295,11 +317,13 @@ export class ComearnController {
       if (t.model !== 'recurring' && t.model !== 'milestone') { const [x] = await this.db.select({ id: ceCommissions.id }).from(ceCommissions).where(and(eq(ceCommissions.engagementId, e.id), ne(ceCommissions.status, 'cancelled'))).limit(1); if (x) throw new ConflictException('Commission for this engagement is already recorded'); }
       if (t.model === 'milestone') { const [x] = await this.db.select({ id: ceCommissions.id }).from(ceCommissions).where(and(eq(ceCommissions.engagementId, e.id), eq(ceCommissions.milestoneIndex, b.milestoneIndex!), ne(ceCommissions.status, 'cancelled'))).limit(1); if (x) throw new ConflictException('Commission for this milestone is already recorded'); }
       const gross = ceCommission(t, b.amountPaise, b.milestoneIndex);
+      const companyTerms: CeTerms = { ...t, rateBps: o.companyRateBps ?? t.rateBps, fixedPaise: o.companyFixedPaise ?? t.fixedPaise };
+      const uniteMargin = Math.max(0, ceCommission(companyTerms, b.amountPaise, b.milestoneIndex) - gross);
       const s = await this.settings();
       const due = new Date(Date.now() + t.paymentDays * 86400000).toISOString().slice(0, 10);
       const m = t.model === 'milestone' ? t.milestones?.[b.milestoneIndex!] : null;
       const [c] = await this.db.insert(ceCommissions).values({ engagementId: e.id, payerOrgId: o.orgId, earnerOrgId: e.earnerOrgId, description: `${o.title}${m ? ` — ${m.label}` : ''} (${CE_TRIGGERS[t.trigger]}, ref ${b.reference})`, milestoneIndex: b.milestoneIndex ?? null,
-        basePaise: b.amountPaise, grossPaise: gross, netPaise: gross, platformFeeBps: s.platformFeeBps, platformFeePaise: cePlatformFee(gross, s.platformFeeBps), platformFeePayer: s.platformFeeBps ? s.feePayer : null, dueOn: due, verifiedBy: ctx.userId }).returning();
+        basePaise: b.amountPaise, grossPaise: gross, netPaise: gross, uniteMarginPaise: uniteMargin, platformFeeBps: s.platformFeeBps, platformFeePaise: cePlatformFee(gross, s.platformFeeBps), platformFeePayer: s.platformFeeBps ? s.feePayer : null, dueOn: due, verifiedBy: ctx.userId }).returning();
       commission = c; advance = cur < rank('payment_verified') ? 'payment_verified' : null;
     } else if (b.stage === 'commission_approved') {
       const [c] = await this.db.select().from(ceCommissions).where(and(eq(ceCommissions.engagementId, e.id), eq(ceCommissions.status, 'pending_approval'))).orderBy(ceCommissions.createdAt).limit(1);
@@ -373,17 +397,21 @@ export class ComearnController {
   @Get('admin/comearn/overview')
   async adminOverview(@Ctx() ctx: RequestContext) {
     this.on(); if (!staff(ctx)) throw new ForbiddenException();
-    const counts = (await this.db.execute(sql`select (select count(*) from ce_opportunities where status = 'live')::int live, (select count(*) from ce_opportunities)::int opportunities, (select count(*) from ce_engagements)::int engagements, (select count(*) from ce_leads)::int leads,
+    const counts = (await this.db.execute(sql`select (select count(*) from ce_opportunities where status = 'live' and not sample)::int live, (select count(*) from ce_opportunities where not sample)::int opportunities, (select count(*) from ce_opportunities where sample)::int samples, (select coalesce(sum(unite_margin_paise),0) from ce_commissions where status = 'paid')::bigint margins, (select count(*) from ce_engagements)::int engagements, (select count(*) from ce_leads)::int leads,
       (select coalesce(sum(gross_paise),0) from ce_commissions where status = 'paid')::bigint paid, (select coalesce(sum(gross_paise),0) from ce_commissions where status in ('pending_approval','approved'))::bigint pending, (select coalesce(sum(platform_fee_paise),0) from ce_commissions where status = 'paid')::bigint fees`) as unknown as { rows: Record<string, number>[] }).rows[0];
     const disputes = await this.db.select({ d: ceDisputes, e: ceEngagements, title: ceOpportunities.title, raisedBy: organizations.displayName }).from(ceDisputes).innerJoin(ceEngagements, eq(ceEngagements.id, ceDisputes.engagementId)).innerJoin(ceOpportunities, eq(ceOpportunities.id, ceEngagements.opportunityId))
       .innerJoin(organizations, eq(organizations.id, ceDisputes.raisedByOrgId)).orderBy(desc(ceDisputes.createdAt)).limit(50);
-    const opps = await this.db.select({ o: ceOpportunities, company: organizations.displayName }).from(ceOpportunities).innerJoin(organizations, eq(organizations.id, ceOpportunities.orgId)).orderBy(desc(ceOpportunities.updatedAt)).limit(50);
+    const opps = await this.db.select({ o: ceOpportunities, company: organizations.displayName }).from(ceOpportunities).innerJoin(organizations, eq(organizations.id, ceOpportunities.orgId)).orderBy(desc(ceOpportunities.updatedAt)).limit(200);
+    const review = opps.filter((x) => ['in_review', 'negotiating'].includes(x.o.status));
     return { counts: Object.fromEntries(Object.entries(counts).map(([k, v]) => [k, Number(v)])), settings: await this.settings(),
-      disputes: disputes.map((x) => ({ ...x.d, engagementCode: x.e.code, opportunity: x.title, raisedByOrg: x.raisedBy })), opportunities: opps.map((x) => this.card(x.o, x.company)) };
+      disputes: disputes.map((x) => ({ ...x.d, engagementCode: x.e.code, opportunity: x.title, raisedByOrg: x.raisedBy })), opportunities: opps.map((x) => this.card(x.o, x.company)),
+      review: review.map((x) => ({ ...this.card(x.o, x.company), description: x.o.description, companyRateBps: x.o.companyRateBps, companyFixedPaise: x.o.companyFixedPaise, version: x.o.version, licenceNote: x.o.licenceNote })) };
   }
 
   @Put('admin/comearn/settings')
-  async saveSettings(@Ctx() ctx: RequestContext, @Body(body(z.object({ platformFeeBps: z.number().int().min(0).max(3000), feePayer: z.enum(['company', 'earner']), restrictedCategories: z.array(z.enum(Object.keys(CE_CATEGORIES) as [string, ...string[]])).max(8), legalReviewed: z.boolean() }))) b: Settings) {
+  async saveSettings(@Ctx() ctx: RequestContext, @Body(body(z.object({ platformFeeBps: z.number().int().min(0).max(3000), feePayer: z.enum(['company', 'earner']), restrictedCategories: z.array(z.enum(Object.keys(CE_CATEGORIES) as [string, ...string[]])).max(8), legalReviewed: z.boolean(),
+    guaranteeTerms: z.string().trim().max(4000).nullable().optional(), guaranteeLegalReviewed: z.boolean().optional() }))) b0: Partial<Settings> & Pick<Settings, 'platformFeeBps' | 'feePayer' | 'restrictedCategories' | 'legalReviewed'>) {
+    const b: Settings = { ...(await this.settings()), ...b0, guaranteeTerms: b0.guaranteeTerms === undefined ? (await this.settings()).guaranteeTerms : b0.guaranteeTerms || null };
     this.on(); if (!ctx.platformRoles.includes('super_admin')) throw new ForbiddenException('Only a super admin changes COMEARN fees and restricted sectors');
     if (b.platformFeeBps > 0 && !b.legalReviewed) throw new BadRequestException({ message: 'Check the highlighted fields', fields: { legalReviewed: 'Confirm legal and tax review before switching on a platform fee' } });
     await this.db.insert(siteSettings).values({ key: 'comearn', value: b, updatedBy: ctx.userId }).onConflictDoUpdate({ target: siteSettings.key, set: { value: b, updatedBy: ctx.userId, updatedAt: new Date() } });

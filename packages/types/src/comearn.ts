@@ -176,3 +176,20 @@ export function ceReputation(x: { engagements: number; converted: number; paid: 
   const onTimePct = x.paid ? Math.round((x.onTime / x.paid) * 100) : null;
   return { engagements: x.engagements, conversionPct: conversion, paid: x.paid, onTimePct, disputesLost: x.disputesLost };
 }
+
+// ---------------------------------------------------------------- Unite review, margin, ratings
+/** What members see after Unite keeps its margin. The member must still receive something (≥ 0.01% or ₹1). */
+export function ceMemberTerms(company: { model: CeModel; rateBps?: number | null; fixedPaise?: number | null }, margin: { bps?: number | null; paise?: number | null }) {
+  if (company.model === 'fixed') {
+    const m = Math.max(0, margin.paise ?? 0); const member = (company.fixedPaise ?? 0) - m;
+    return member >= 100 ? { fixedPaise: member, rateBps: null, marginPaise: m, marginBps: null } : null;
+  }
+  const m = Math.max(0, margin.bps ?? 0); const member = (company.rateBps ?? 0) - m;
+  return member >= 1 ? { rateBps: member, fixedPaise: null, marginBps: m, marginPaise: null } : null;
+}
+export const CeReleaseSchema = z.object({ marginBps: z.number().int().min(0).max(5000).optional(), marginPaise: z.number().int().min(0).optional(), note: opt(z.string().trim().max(600)) });
+export const CeCounterSchema = z.object({ rateBps: z.number().int().min(1).max(5000).optional(), fixedPaise: money.optional(), note: z.string().trim().min(5).max(1000) })
+  .refine((c) => c.rateBps != null || c.fixedPaise != null, { path: ['rateBps'], message: 'Propose a rate or an amount' });
+export const CeRatingSchema = z.object({ stars: z.number().int().min(1).max(5), comment: opt(z.string().trim().max(600)) });
+/** Average of real ratings; null when there are none (never a default score). */
+export function ceRatingSummary(stars: number[]) { return stars.length ? { avg: Math.round((stars.reduce((a, b) => a + b, 0) / stars.length) * 10) / 10, count: stars.length } : null; }

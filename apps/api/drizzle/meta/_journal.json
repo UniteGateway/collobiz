@@ -526,6 +526,13 @@
       "when": 1795635958400,
       "tag": "0074_comearn_reverse_team",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1795637820245,
+      "tag": "0075_comearn_review_ratings",
+      "breakpoints": true
     }
   ]
 }

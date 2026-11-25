@@ -3,7 +3,7 @@
  * register protected leads and move through eight tracked stages to a commission that the paying company verifies, approves
  * and transfers. Reuses organizations, users, notifications and audit events.
  */
-import { pgTable, uuid, text, timestamp, integer, bigint, jsonb, index, uniqueIndex, date } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer, bigint, jsonb, index, uniqueIndex, date, boolean } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { id, createdAt, updatedAt, organizations, users } from './core';
 
@@ -21,6 +21,12 @@ export const ceOpportunities = pgTable('ce_opportunities', {
   /** Where the opportunity came from: { module: 'franchise' | 'venture_ai' | 'xchange' | 'exim' | 'requirement', id } */
   source: jsonb('source'),
   featuredUntil: date('featured_until'),
+  /** Unite review: the company's own offer; rate_bps / fixed_paise become the member-facing rate once Unite releases it with its margin. */
+  companyRateBps: integer('company_rate_bps'), companyFixedPaise: bigint('company_fixed_paise', { mode: 'number' }),
+  uniteMarginBps: integer('unite_margin_bps'), uniteMarginPaise: bigint('unite_margin_paise', { mode: 'number' }),
+  approvedVersion: integer('approved_version'), releasedBy: uuid('released_by').references(() => users.id), releasedAt: timestamp('released_at', { withTimezone: true }), reviewNote: text('review_note'),
+  uniteGuaranteed: boolean('unite_guaranteed').notNull().default(false),
+  sample: boolean('sample').notNull().default(false),
   status: text('status').notNull().default('draft'), // draft | live | paused | closed | private (created from a selected bid)
   version: integer('version').notNull().default(1),
   createdBy: uuid('created_by').notNull().references(() => users.id),
@@ -70,6 +76,7 @@ export const ceCommissions = pgTable('ce_commissions', {
   description: text('description').notNull(), milestoneIndex: integer('milestone_index'),
   basePaise: bigint('base_paise', { mode: 'number' }).notNull(), grossPaise: bigint('gross_paise', { mode: 'number' }).notNull(),
   tdsPaise: bigint('tds_paise', { mode: 'number' }).notNull().default(0), netPaise: bigint('net_paise', { mode: 'number' }).notNull(),
+  uniteMarginPaise: bigint('unite_margin_paise', { mode: 'number' }).notNull().default(0), // owed by the company to Unite, on top of the member's commission
   platformFeeBps: integer('platform_fee_bps').notNull().default(0), platformFeePaise: bigint('platform_fee_paise', { mode: 'number' }).notNull().default(0), platformFeePayer: text('platform_fee_payer'),
   status: text('status').notNull().default('pending_approval'), // pending_approval | approved | paid | disputed | cancelled
   dueOn: date('due_on'), verifiedBy: uuid('verified_by').references(() => users.id), approvedBy: uuid('approved_by').references(() => users.id), approvedAt: timestamp('approved_at', { withTimezone: true }),
@@ -136,3 +143,25 @@ export const ceAllocations = pgTable('ce_allocations', {
   reference: text('reference'), paidAt: timestamp('paid_at', { withTimezone: true }), confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
   createdAt: createdAt(),
 }, (t) => [uniqueIndex('ce_alloc_comm_member_uq').on(t.commissionId, t.teamMemberId)]);
+
+/** Negotiation between Unite and the offering company before a listing is released. */
+export const ceNegotiations = pgTable('ce_negotiations', {
+  id: id(),
+  opportunityId: uuid('opportunity_id').notNull().references(() => ceOpportunities.id),
+  fromSide: text('from_side').notNull(), // unite | company
+  proposedRateBps: integer('proposed_rate_bps'), proposedFixedPaise: bigint('proposed_fixed_paise', { mode: 'number' }),
+  note: text('note').notNull(),
+  status: text('status').notNull().default('open'), // open | accepted | declined | info
+  createdBy: uuid('created_by').notNull().references(() => users.id), respondedBy: uuid('responded_by').references(() => users.id), respondedAt: timestamp('responded_at', { withTimezone: true }),
+  createdAt: createdAt(),
+}, (t) => [index('ce_neg_opp_idx').on(t.opportunityId)]);
+
+/** Ratings after a paid commission: the member rates the company, the company rates the member. One per side per engagement. */
+export const ceRatings = pgTable('ce_ratings', {
+  id: id(),
+  engagementId: uuid('engagement_id').notNull().references(() => ceEngagements.id),
+  fromOrgId: uuid('from_org_id').notNull().references(() => organizations.id), toOrgId: uuid('to_org_id').notNull().references(() => organizations.id),
+  asRole: text('as_role').notNull(), // company (rating of a paying company) | earner (rating of a member)
+  stars: integer('stars').notNull(), comment: text('comment'),
+  createdBy: uuid('created_by').notNull().references(() => users.id), createdAt: createdAt(),
+}, (t) => [uniqueIndex('ce_ratings_eng_from_uq').on(t.engagementId, t.fromOrgId), index('ce_ratings_to_idx').on(t.toOrgId, t.asRole)]);

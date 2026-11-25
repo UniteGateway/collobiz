@@ -71,3 +71,17 @@ describe('COMEARN reverse marketplace, team pool and reputation', () => {
     expect(ceReputation({ engagements: 4, converted: 2, paid: 2, onTime: 1, disputesLost: 0 })).toMatchObject({ conversionPct: 50, onTimePct: 50 });
   });
 });
+
+describe('COMEARN Unite margin and ratings', () => {
+  it('members see the company rate minus the Unite margin; the member must still earn something', async () => {
+    const { ceMemberTerms } = await import('./comearn');
+    expect(ceMemberTerms({ model: 'percent', rateBps: 500 }, { bps: 100 })).toMatchObject({ rateBps: 400, marginBps: 100 });
+    expect(ceMemberTerms({ model: 'fixed', fixedPaise: 50_000_00 }, { paise: 10_000_00 })).toMatchObject({ fixedPaise: 40_000_00 });
+    expect(ceMemberTerms({ model: 'percent', rateBps: 200 }, { bps: 200 })).toBeNull();
+  });
+  it('rating summary is null without ratings', async () => {
+    const { ceRatingSummary } = await import('./comearn');
+    expect(ceRatingSummary([])).toBeNull();
+    expect(ceRatingSummary([5, 4, 4])).toEqual({ avg: 4.3, count: 3 });
+  });
+});
