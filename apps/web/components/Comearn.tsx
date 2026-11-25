@@ -27,13 +27,13 @@ export function CeNav() {
   return <nav className="ce-nav" aria-label="COMEARN">{TABS.map(([h, l, i]) => <Link key={h} href={h} aria-current={active(h) ? 'page' : undefined}><Icon name={i} size={18} /><span>{l}</span></Link>)}</nav>;
 }
 
-export interface CeCard { id: string; code: string; title: string; type: string; typeLabel: string; category: keyof typeof CE_CATEGORIES; territory: string; model: keyof typeof CE_MODELS; rateBps: number | null; fixedPaise: number | null; trigger: string; estimatedValuePaise: number | null; potentialPaise: number | null; status: string; company: string; earners?: number; mine?: boolean; why?: string }
+export interface CeCard { featured?: boolean; source?: { module: string; id: string } | null; id: string; code: string; title: string; type: string; typeLabel: string; category: keyof typeof CE_CATEGORIES; territory: string; model: keyof typeof CE_MODELS; rateBps: number | null; fixedPaise: number | null; trigger: string; estimatedValuePaise: number | null; potentialPaise: number | null; status: string; company: string; earners?: number; mine?: boolean; why?: string }
 export const commissionLabel = (c: Pick<CeCard, 'model' | 'rateBps' | 'fixedPaise'>) => (c.model === 'fixed' ? rupees(c.fixedPaise) : `${(c.rateBps ?? 0) / 100}%${c.model === 'recurring' ? ' recurring' : c.model === 'milestone' ? ' in milestones' : ''}`);
 
 export function OppCard({ o }: { o: CeCard }) {
   return (
     <Link href={`/comearn/opportunities/${o.id}`} className="ce-card" data-ce-opp={o.title}>
-      <span className="ce-card-top"><span className="ce-chip">{CE_CATEGORIES[o.category]}</span><span className="ce-type">{o.typeLabel}</span></span>
+      <span className="ce-card-top"><span className="ce-chip">{CE_CATEGORIES[o.category]}</span>{o.featured && <span className="ce-featured">Featured</span>}<span className="ce-type">{o.typeLabel}</span></span>
       <strong>{o.title}</strong>
       <span className="ce-muted">{o.company} · {o.territory}</span>
       <span className="ce-card-foot"><span className="ce-rate">{commissionLabel(o)}</span>{o.potentialPaise != null && <span className="ce-muted">up to {rupees(o.potentialPaise)} <small>(estimate)</small></span>}</span>
@@ -53,3 +53,12 @@ export function Tracker({ stage, stages }: { stage: CeStage; stages?: { key: str
   );
 }
 export const CATEGORY_ICON: Record<string, IconName> = { solar: 'sun', real_estate: 'building', industrial: 'factory', franchise: 'teams', exports: 'globe', software: 'zap', logistics: 'package', other: 'target' };
+
+export interface CeRep { conversionPct: number; engagements: number; paid: number; onTimePct: number | null; disputesLost: number }
+/** Track record from recorded COMEARN activity — "New on COMEARN" when there is no history (nothing is estimated). */
+export function RepLine({ rep, as }: { rep: { asEarner: CeRep | null; asCompany: CeRep | null; verified: boolean } | null | undefined; as: 'company' | 'earner' }) {
+  if (!rep) return null;
+  const r = as === 'company' ? rep.asCompany : rep.asEarner;
+  return <span className="ce-rep" data-ce-rep>{rep.verified && <span className="ce-verified">Verified</span>}{r ? <>{r.engagements} engagements · {r.conversionPct}% converted · {r.paid} paid{as === 'company' && r.onTimePct != null ? ` · ${r.onTimePct}% on time` : ''}{r.disputesLost ? ` · ${r.disputesLost} disputes` : ''}</> : 'New on COMEARN — no track record yet'}</span>;
+}
+export const SOURCE_LABEL: Record<string, string> = { franchise: 'From Franchise', venture_ai: 'From Venture AI', xchange: 'From XCHANGE', exim: 'From UNITE EXIM', leaddna: 'From LeadDNA', adbuz: 'From ADBUZ', requirement: 'From a customer requirement' };

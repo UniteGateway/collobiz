@@ -1,18 +1,22 @@
 'use client';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useState } from 'react';
 import { CE_CATEGORIES, CE_MODELS, CE_TRIGGERS, CE_TYPES, cePotential, type CeCategory, type CeModel, type CeTrigger, type CeType } from '@collabiz/types';
 import { Alert, Button, Card, Select, TextArea, TextInput } from '@collabiz/ui';
 import { Screen } from '@/components/Screen';
-import { CeHeader, CeNav, rupees, toPaise } from '@/components/Comearn';
+import { CeHeader, CeNav, SOURCE_LABEL, rupees, toPaise } from '@/components/Comearn';
 import { api } from '@/lib/api';
 import { useMutation } from '@/lib/hooks';
 
 /** Offer commissions — create an earning opportunity. Saved as a draft; publishing needs a verified business. */
-export default function ComearnPost() {
+export default function ComearnPost() { return <Suspense><Inner /></Suspense>; }
+
+function Inner() {
   const router = useRouter();
-  const [f, setF] = useState({ title: '', type: 'sales_conversion' as CeType, category: 'solar' as CeCategory, description: '', idealEarner: '', territory: '', value: '', model: 'percent' as CeModel, pct: '', fixed: '', recurringMonths: '', trigger: 'customer_payment' as CeTrigger, paymentDays: '30', maxEarners: '', licenceNote: '' });
+  const sp = useSearchParams();
+  const source = sp.get('source') && sp.get('sourceId') ? { module: sp.get('source')!, id: sp.get('sourceId')! } : undefined;
+  const [f, setF] = useState({ title: sp.get('title') ?? '', type: (sp.get('type') as CeType) ?? 'sales_conversion', category: (sp.get('category') as CeCategory) ?? 'solar', description: sp.get('description') ?? '', idealEarner: '', territory: '', value: '', model: 'percent' as CeModel, pct: '', fixed: '', recurringMonths: '', trigger: 'customer_payment' as CeTrigger, paymentDays: '30', maxEarners: '', licenceNote: '' });
   const [ms, setMs] = useState([{ label: 'Order confirmed', pct: '40' }, { label: 'Project completed', pct: '60' }]);
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value });
   const rateBps = f.pct ? Math.round(Number(f.pct) * 100) : undefined;
@@ -21,7 +25,7 @@ export default function ComearnPost() {
     const r = await api.post<{ id: string }>('/comearn/opportunities', { title: f.title, type: f.type, category: f.category, description: f.description, idealEarner: f.idealEarner || undefined, territory: f.territory,
       estimatedValuePaise: f.value ? toPaise(f.value) : undefined, model: f.model, rateBps: f.model === 'fixed' ? undefined : rateBps, fixedPaise: f.model === 'fixed' && f.fixed ? toPaise(f.fixed) : undefined,
       milestones: f.model === 'milestone' ? ms.map((m) => ({ label: m.label, pct: Number(m.pct) })) : [], recurringMonths: f.model === 'recurring' && f.recurringMonths ? Number(f.recurringMonths) : undefined,
-      trigger: f.trigger, paymentDays: Number(f.paymentDays || 30), maxEarners: f.maxEarners ? Number(f.maxEarners) : undefined, licenceNote: f.licenceNote || undefined });
+      trigger: f.trigger, paymentDays: Number(f.paymentDays || 30), maxEarners: f.maxEarners ? Number(f.maxEarners) : undefined, licenceNote: f.licenceNote || undefined, source });
     if (publish) {
       try { await api.post(`/comearn/opportunities/${r.id}/status`, { status: 'live' }); }
       catch (e) { router.push(`/comearn/offer?unpublished=${encodeURIComponent((e as Error).message)}`); return true; }
@@ -33,6 +37,11 @@ export default function ComearnPost() {
     <Screen page={{ key: 'comearn-post', title: 'Create earning opportunity', access: 'partner' }} header={false}>
       <CeHeader title="Offer commissions" lead="Post what you will pay for — an introduction, an order, a dealer, an export deal. Members across COLLABIZ work to earn it." />
       <CeNav />
+      <section className="ce-split" aria-label="What do you want to post?">
+        <div className="ce-choice" data-active><strong>Offer a commission</strong><span>Your business pays members for introductions, orders, dealers or export deals.</span></div>
+        <Link href="/comearn/requirements/new" className="ce-choice"><strong>Post a customer requirement</strong><span>You have a customer with a need — businesses compete with commission offers.</span></Link>
+      </section>
+      {source && <Alert tone="info">{SOURCE_LABEL[source.module] ?? source.module} · {source.id} — this opportunity will stay linked to it.</Alert>}
       <p className="ce-muted"><Link href="/comearn/offer">My posted opportunities →</Link></p>
       <form className="cz-stack" style={{ gap: 16 }} data-form="ce-post" onSubmit={(e) => { e.preventDefault(); save.run(true); }}>
         {save.error && <Alert tone="danger">{save.error}</Alert>}

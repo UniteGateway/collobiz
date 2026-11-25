@@ -133,7 +133,7 @@ export class ComearnController {
     const [n] = (await this.db.execute(sql`select count(*)::int n from ce_engagements where opportunity_id = ${o.id}`) as unknown as { rows: { n: number }[] }).rows;
     const s = await this.settings();
     return { ...this.card(o, company, { earners: n.n, mine }), description: o.description, idealEarner: o.idealEarner, milestones: o.milestones, recurringMonths: o.recurringMonths, paymentDays: o.paymentDays, maxEarners: o.maxEarners, licenceNote: o.licenceNote, version: o.version,
-      restricted: s.restrictedCategories.includes(o.category), agreement: agreementText(o, company), engagement: me ? { id: me.id, stage: me.stage, status: me.status } : null };
+      companyOrgId: o.orgId, restricted: s.restrictedCategories.includes(o.category), agreement: agreementText(o, company), engagement: me ? { id: me.id, stage: me.stage, status: me.status } : null };
   }
 
   // ------------------------------------------------------------------ offer commissions (company side)

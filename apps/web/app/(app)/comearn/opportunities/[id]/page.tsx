@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { CE_CATEGORIES, CE_MODELS, CE_TRIGGERS, CE_TYPES, type CeType } from '@collabiz/types';
 import { Alert, Button, ButtonLink, Card, Checkbox, Skeleton } from '@collabiz/ui';
 import { Screen, ApiErrorView } from '@/components/Screen';
-import { CeHeader, CeNav, commissionLabel, rupees, type CeCard } from '@/components/Comearn';
+import { CeHeader, CeNav, RepLine, SOURCE_LABEL, commissionLabel, rupees, type CeCard, type CeRep } from '@/components/Comearn';
 import { api } from '@/lib/api';
 import { useMutation, useQuery } from '@/lib/hooks';
 
-interface Detail extends CeCard { description: string; idealEarner: string | null; milestones: { label: string; pct: number }[]; recurringMonths: number | null; paymentDays: number; maxEarners: number | null; licenceNote: string | null; version: number; restricted: boolean; agreement: string; engagement: { id: string; stage: string; status: string } | null }
+interface Detail extends CeCard { companyOrgId: string; description: string; idealEarner: string | null; milestones: { label: string; pct: number }[]; recurringMonths: number | null; paymentDays: number; maxEarners: number | null; licenceNote: string | null; version: number; restricted: boolean; agreement: string; engagement: { id: string; stage: string; status: string } | null }
 
 /** Opportunity: terms, what earns the commission, and joining by accepting the commission agreement. */
 export default function ComearnOpportunity() {
@@ -20,6 +20,7 @@ export default function ComearnOpportunity() {
   const join = useMutation(async () => { const r = await api.post<{ id: string; agreement: string; termsHash: string }>(`/comearn/opportunities/${id}/join`, {}); setJoined(r); return true; });
   const accept = useMutation(async () => { await api.post(`/comearn/engagements/${joined!.id}/accept`, { termsHash: joined!.termsHash, confirm: ok }); router.push(`/comearn/engagements/${joined!.id}`); return true; });
   const o = q.data;
+  const rep = useQuery<{ asEarner: CeRep | null; asCompany: CeRep | null; verified: boolean }>(o ? `/comearn/reputation/${o.companyOrgId}` : null);
   return (
     <Screen page={{ key: 'comearn-opportunity', title: 'Earning opportunity', access: 'partner' }} header={false}>
       {q.error ? <ApiErrorView error={q.error} onRetry={q.reload} /> : !o ? <Skeleton height={320} /> : (
@@ -29,6 +30,8 @@ export default function ComearnOpportunity() {
           {o.restricted && <Alert tone="warning">Regulated sector. The company has recorded its licence{o.licenceNote ? `: ${o.licenceNote}` : ''}. Check whether your own work here needs a licence or registration before you start.</Alert>}
           <div className="ce-two">
             <Card title="The opportunity">
+              <p className="ce-muted"><strong>{o.company}</strong> <RepLine rep={rep.data} as="company" /></p>
+              {o.source && <p className="ce-muted">{SOURCE_LABEL[o.source.module] ?? o.source.module} · {o.source.id}</p>}
               <p className="ce-pre">{o.description}</p>
               {o.idealEarner && <p className="ce-muted"><strong>Who does well here:</strong> {o.idealEarner}</p>}
             </Card>
