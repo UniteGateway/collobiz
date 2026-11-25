@@ -3969,7 +3969,7 @@ suites.push({
     await page.getByLabel('Unite Guarantee terms (shown on every Unite Guaranteed listing)').fill('If the paying company does not pay an approved commission within 30 days of its due date, Unite pays the member and recovers it from the company. Draft for demonstration — to be confirmed by Unite legal.');
     await page.getByLabel('Legal review of the Unite Guarantee terms is complete').check();
     await page.getByRole('button', { name: 'Save' }).click();
-    await page.getByRole('button', { name: /^Opportunities/ }).click();
+    await page.getByRole('group', { name: 'Show' }).getByRole('button', { name: /^Opportunities/ }).click();
     await page.getByRole('row').filter({ hasText: '1 MW rooftop solar for factories in Telangana' }).getByRole('button', { name: 'Unite Guaranteed' }).click();
     await page.getByRole('row').filter({ hasText: '1 MW rooftop solar for factories in Telangana' }).getByText(/Guaranteed/).first().waitFor();
     await webLogin(page, WEB, 'deepak@deccan.example');
