@@ -3968,10 +3968,14 @@ suites.push({
     await page.getByRole('button', { name: 'Fees & sectors' }).click();
     await page.getByLabel('Unite Guarantee terms (shown on every Unite Guaranteed listing)').fill('If the paying company does not pay an approved commission within 30 days of its due date, Unite pays the member and recovers it from the company. Draft for demonstration — to be confirmed by Unite legal.');
     await page.getByLabel('Legal review of the Unite Guarantee terms is complete').check();
+    const saved = page.waitForResponse((r) => r.url().includes('/admin/comearn/settings') && r.request().method() === 'PUT');
     await page.getByRole('button', { name: 'Save' }).click();
+    expect((await saved).status() === 200, 'guarantee terms saved');
     await page.getByRole('group', { name: 'Show' }).getByRole('button', { name: /^Opportunities/ }).click();
+    const g = page.waitForResponse((r) => r.url().includes('/guarantee') && r.request().method() === 'PUT');
     await page.getByRole('row').filter({ hasText: '1 MW rooftop solar for factories in Telangana' }).getByRole('button', { name: 'Unite Guaranteed' }).click();
-    await page.getByRole('row').filter({ hasText: '1 MW rooftop solar for factories in Telangana' }).getByText(/Guaranteed/).first().waitFor();
+    const gr = await g; if (gr.status() !== 200) throw new Error(`guarantee failed: ${gr.status()} ${await gr.text()}`);
+    await page.getByRole('row').filter({ hasText: '1 MW rooftop solar for factories in Telangana' }).getByRole('button', { name: 'Remove guarantee' }).waitFor();
     await webLogin(page, WEB, 'deepak@deccan.example');
     await page.goto(WEB + '/comearn/explore');
     await page.locator('[data-ce-count]').getByText(/listings marked Sample/).waitFor();
