@@ -59,11 +59,12 @@ import { SiteModule } from './modules/site/site.controller';
 import { UniteClubModule } from './modules/unite-club/unite-club.controller';
 import { PowertradeModule } from './modules/powertrade/powertrade.controller';
 import { VentureAiModule } from './modules/venture-ai/venture-ai.controller';
+import { ComearnModule } from './modules/comearn/comearn.controller';
 import { ImportsModule } from './modules/imports/imports.controller';
 import { GstModule } from './modules/gst/gst.controller';
 import { ChannelsModule } from './modules/channels/channels.controller';
 import { BillingModule } from './modules/billing/billing.controller';
-export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule, GrowthDeskModule, WorkspaceModule, ErpModule, FranchiseModule, UniteNetworkModule, ProductSalesModule, ModuleDocumentsModule, DashboardContentModule, CommunityModule, LiveModule, ActionOsModule, EnergyModule, CollabOpsModule, TrustFinanceModule, Eb5Module, PropertyModule, SolarModule, SolbidModule, PromotionsModule, V2Module, XchangeModule, ImportsModule, GstModule, ChannelsModule, BillingModule, CollabModule, JoinModule, BizoModule, BrandChannelsModule, SiteModule, UniteClubModule, PowertradeModule, VentureAiModule];
+export const FEATURE_MODULES = [SystemModule, IdentityModule, OnboardingModule, CatalogModule, OpportunitiesModule, LeadsModule, CrmModule, TeamsModule, TendersModule, ContractsModule, ProjectsModule, TradingModule, CommissionsModule, CommsModule, HomeModule, GrowthModule, GlobalModule, OffersModule, VenturesModule, PilotModule, GrowthDeskModule, WorkspaceModule, ErpModule, FranchiseModule, UniteNetworkModule, ProductSalesModule, ModuleDocumentsModule, DashboardContentModule, CommunityModule, LiveModule, ActionOsModule, EnergyModule, CollabOpsModule, TrustFinanceModule, Eb5Module, PropertyModule, SolarModule, SolbidModule, PromotionsModule, V2Module, XchangeModule, ImportsModule, GstModule, ChannelsModule, BillingModule, CollabModule, JoinModule, BizoModule, BrandChannelsModule, SiteModule, UniteClubModule, PowertradeModule, VentureAiModule, ComearnModule];
 
 @Module({
   imports: [

@@ -85,6 +85,7 @@ export class SystemController {
       financeIntroductions: config().FEATURE_FINANCE_INTRODUCTIONS,
       powertrade: config().FEATURE_POWERTRADE,
       ventureAi: config().FEATURE_VENTURE_AI,
+      comearn: config().FEATURE_COMEARN,
       aiProvider: config().AI_PROVIDER,
       identityProvider: config().IDENTITY_PROVIDER,
     };

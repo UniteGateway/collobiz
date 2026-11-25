@@ -63,6 +63,7 @@ const Env = z.object({
   FEATURE_FINANCE_INTRODUCTIONS: bool.default(false),
   FEATURE_POWERTRADE: bool.default(true),
   FEATURE_VENTURE_AI: bool.default(true),
+  FEATURE_COMEARN: bool.default(true),
   ACCESS_TOKEN_TTL_SEC: z.coerce.number().default(900),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().default(14),
   /** Two-person approval threshold for payouts and awards (minor units, default ₹5 lakh). §7.1 */
